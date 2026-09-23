@@ -16,11 +16,11 @@ Follow studyfactory-frontend's organization:
 - `src/main.tsx`: mount React, providers, global styles.
 - `src/app/App.tsx`: render the router.
 - `src/app/core`: API transport, public environment configuration, providers,
-  routing. Add `session` when implementing real authentication.
+  routing and administrator session lifecycle.
 - `src/app/features/<domain>`: domain API calls, DTO contracts, reusable business
-  logic. Currently only health exists; add domains when they are implemented.
+  logic. Health and admin-auth exist; add domains when they are implemented.
 - `src/app/screens/<area>/<screen>`: pages, screen components/hooks/model/styles
-  when needed. Future areas are admin, guest, staff. Entry and dev currently exist.
+  when needed. Admin login/home, entry and dev exist; guest/staff follow later.
 - `src/app/shared/ui` and `shared/layout`: business-neutral reusable components.
 - `src/app/styles`: reset, shared tokens, base styles and their single entrypoint.
 
@@ -58,12 +58,30 @@ Retreat: those are different contracts.
 
 Preserve backend-issued browser paths `/guest`, `/staff`, `/guest/stay`, `/draft`
 and their `#token=...` fragments. Use BrowserRouter, not HashRouter. The foundation
-does not parse these credentials or create sessions. Real session storage and
-route protection belong to the login/link-flow slices, not placeholder guards.
+does not parse guest/staff/private/draft credentials. Administrator sessions mount
+only inside the admin route group, preserving isolation from those link flows.
+
+## Administrator login
+
+`features/admin-auth` owns POST /users/login, GET /users/me and validated DTOs.
+`core/session` owns the admin store, storage adapter, context and lifecycle.
+`RequireAdmin` protects /admin; /admin/login redirects verified sessions there.
+The login form never trims or persists passwords. Keep-signed-in defaults off.
+Unchecked uses sessionStorage, checked uses localStorage; backend JWT lifetime is
+7/30 days. Storage contains only token/expiry and is namespaced by API origin.
+These are JavaScript-readable credentials under the agreed header-based flow.
+Blocked storage falls back to memory with a user-visible notice. Clear both stores
+when changing persistence or logging out. Server logout/revocation does not exist.
+Verify current identity on restore and focus; auth rejection/expiry clears it,
+temporary failures block protected content with retry while retaining credentials.
+Cancel and version pending operations so logout/newer sessions win over late
+responses. Synchronize persistent credentials across tabs. Never create a global
+token injector or redirect handler in the shared API client.
 
 ## Completion boundary
 
-This slice provides a styled foundation and a real development health check.
-Business flows, login, link validation, protected administrator screens, caches,
-PWA/offline support, content setup and deployment are not implemented here.
+This slice provides the foundation, development health check, real admin login,
+session restoration and a protected profile landing with logout. Business data
+screens, guest/staff link validation, caches, PWA/offline support, content setup
+and deployment are not implemented here.
 Report typecheck/lint/build separately from actual browser/backend/mobile checks.

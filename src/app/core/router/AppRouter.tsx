@@ -6,6 +6,10 @@ import { NotFoundScreen } from '../../screens/entry/NotFoundScreen'
 import { AppShell } from '../../shared/layout/AppShell/AppShell'
 import { PageState } from '../../shared/ui/PageState/PageState'
 import { appRoutes } from './routes'
+import { AdminSessionLayout } from './AdminSessionLayout'
+import { RequireAdmin } from './RequireAdmin'
+import { AdminLoginScreen } from '../../screens/admin/login/AdminLoginScreen'
+import { AdminHomeScreen } from '../../screens/admin/home/AdminHomeScreen'
 
 const ConnectionScreen = import.meta.env.DEV
   ? lazy(() => import('../../screens/dev/ConnectionScreen'))
@@ -16,15 +20,12 @@ export function AppRouter() {
     <Routes>
       <Route element={<AppShell />}>
         <Route path={appRoutes.home} element={<EntryScreen />} />
-        <Route
-          path={appRoutes.adminLogin}
-          element={
-            <AccessPendingScreen
-              title="관리자 로그인"
-              description="휴양소 운영을 위한 관리자 로그인 화면을 준비하고 있습니다."
-            />
-          }
-        />
+        <Route element={<AdminSessionLayout />}>
+          <Route path={appRoutes.adminLogin} element={<AdminLoginScreen />} />
+          <Route element={<RequireAdmin />}>
+            <Route path={appRoutes.admin} element={<AdminHomeScreen />} />
+          </Route>
+        </Route>
         <Route
           path={appRoutes.guest}
           element={

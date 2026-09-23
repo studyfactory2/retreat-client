@@ -8,6 +8,7 @@ const entries = [
     english: 'MANAGER',
     to: '/admin/login',
     description: '휴양소 운영과 이용 기록을 관리하는 공간입니다.',
+    status: '관리자 로그인',
   },
   {
     number: '02',
@@ -15,6 +16,7 @@ const entries = [
     english: 'GUEST',
     to: '/guest',
     description: '휴양소 이용 안내와 입실·퇴실 체크리스트를 확인합니다.',
+    status: '화면 준비 중',
   },
   {
     number: '03',
@@ -22,6 +24,7 @@ const entries = [
     english: 'STAFF',
     to: '/staff',
     description: '휴양소 정비 항목을 확인하고 작업 내용을 기록합니다.',
+    status: '화면 준비 중',
   },
 ]
 
@@ -50,7 +53,7 @@ export function EntryScreen() {
       >
         <div className="entry-screen__section-heading">
           <h2 id="entry-heading">어떤 공간을 찾으시나요?</h2>
-          <span>서비스 화면을 준비하고 있습니다.</span>
+          <span>이용 목적에 맞는 메뉴를 선택해 주세요.</span>
         </div>
         <div className="entry-screen__grid">
           {entries.map((entry) => (
@@ -65,7 +68,7 @@ export function EntryScreen() {
               </div>
               <h3>{entry.title}</h3>
               <p>{entry.description}</p>
-              <span className="entry-card__status">화면 준비 중</span>
+              <span className="entry-card__status">{entry.status}</span>
             </Link>
           ))}
         </div>

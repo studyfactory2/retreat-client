@@ -32,11 +32,32 @@ when its API origin changes.
   cancellation/timeout, JSON/FormData support, and binary downloads.
 - Development-only `/dev/connection`: manually checks the actual GET `/health`.
   This proves API liveness only, not database or S3 readiness.
+- Administrator login at `/admin/login`, a protected `/admin` landing, session
+  restoration through `GET /users/me`, expiry handling, and browser-local logout.
 
-`/admin/login`, `/guest`, `/guest/stay`, `/staff`, and `/draft` currently show
-explicit preparation screens. They do not authenticate, validate link tokens,
-submit forms, or expose operational data. Existing link fragments are preserved
-and never read/logged/stored by this slice. Login is the next implementation slice.
+`/guest`, `/guest/stay`, `/staff`, and `/draft` still show preparation screens.
+They do not validate link tokens or submit forms. Their link fragments are
+preserved and never read/logged/stored by the administrator session.
+
+## Administrator access
+
+Use an administrator account already provisioned in the backend. There is no
+public signup. Login uses `POST /users/login` with login ID and password; passwords
+are never persisted. Unchecked `로그인 유지` stores the credential in sessionStorage
+for the tab; checked stores it in localStorage. The backend issues 7-day/30-day
+tokens respectively. Browser restore features may restore tab storage; expiry is
+still enforced. Only the token and expiry are saved, scoped to the API origin.
+Browser storage is readable by same-origin JavaScript and is not an HttpOnly
+cookie. If storage is blocked, login stays in memory with an explanatory notice.
+
+Only admin routes mount the session provider. Reload and returning to the tab
+verify `/users/me` before showing protected content. Rejected/expired credentials
+return to login; network/server failures retain the credential and show retry.
+Persistent sessions follow localStorage changes across tabs. Logout clears the
+browser credential and cancels pending requests; it does not revoke the issued
+JWT on the server. There is no refresh or revocation endpoint in the backend.
+The admin landing shows the verified profile; operational dashboards are a later
+slice. Frontend route protection never substitutes for backend authorization.
 
 Production hosting must send frontend page requests to `index.html` so a direct
 QR/private-link visit works. This frontend does not replace backend authorization.
