@@ -1,31 +1,26 @@
-import { lazy, Suspense } from 'react'
-import { Route, Routes } from 'react-router-dom'
-import { AccessPendingScreen } from '../../screens/entry/AccessPendingScreen'
-import { EntryScreen } from '../../screens/entry/EntryScreen'
-import { NotFoundScreen } from '../../screens/entry/NotFoundScreen'
-import { AppShell } from '../../shared/layout/AppShell/AppShell'
-import { PageState } from '../../shared/ui/PageState/PageState'
-import { appRoutes } from './routes'
-import { AdminSessionLayout } from './AdminSessionLayout'
-import { RequireAdmin } from './RequireAdmin'
-import { AdminLoginScreen } from '../../screens/admin/login/AdminLoginScreen'
-import { AdminHomeScreen } from '../../screens/admin/home/AdminHomeScreen'
+import { lazy, Suspense } from 'react';
+import { Route, Routes } from 'react-router-dom';
+import { AccessPendingScreen } from '../../screens/entry/AccessPendingScreen';
+import { EntryScreen } from '../../screens/entry/EntryScreen';
+import { NotFoundScreen } from '../../screens/entry/NotFoundScreen';
+import { AppShell } from '../../shared/layout/AppShell/AppShell';
+import { PageState } from '../../shared/ui/PageState/PageState';
+import { appRoutes } from './routes';
+import { AdminSessionLayout } from './AdminSessionLayout';
+import { RequireAdmin } from './RequireAdmin';
+import { AdminLoginScreen } from '../../screens/admin/login/AdminLoginScreen';
+import { AdminLayout } from '../../screens/admin/layout/AdminLayout';
+import { AdminDashboardScreen } from '../../screens/admin/dashboard/AdminDashboardScreen';
 
 const ConnectionScreen = import.meta.env.DEV
   ? lazy(() => import('../../screens/dev/ConnectionScreen'))
-  : null
+  : null;
 
 export function AppRouter() {
   return (
     <Routes>
       <Route element={<AppShell />}>
         <Route path={appRoutes.home} element={<EntryScreen />} />
-        <Route element={<AdminSessionLayout />}>
-          <Route path={appRoutes.adminLogin} element={<AdminLoginScreen />} />
-          <Route element={<RequireAdmin />}>
-            <Route path={appRoutes.admin} element={<AdminHomeScreen />} />
-          </Route>
-        </Route>
         <Route
           path={appRoutes.guest}
           element={
@@ -81,6 +76,16 @@ export function AppRouter() {
         )}
         <Route path="*" element={<NotFoundScreen />} />
       </Route>
+      <Route element={<AdminSessionLayout />}>
+        <Route element={<AppShell />}>
+          <Route path={appRoutes.adminLogin} element={<AdminLoginScreen />} />
+        </Route>
+        <Route element={<RequireAdmin />}>
+          <Route element={<AdminLayout />}>
+            <Route path={appRoutes.admin} element={<AdminDashboardScreen />} />
+          </Route>
+        </Route>
+      </Route>
     </Routes>
-  )
+  );
 }

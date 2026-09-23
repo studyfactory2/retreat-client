@@ -20,7 +20,8 @@ Follow studyfactory-frontend's organization:
 - `src/app/features/<domain>`: domain API calls, DTO contracts, reusable business
   logic. Health and admin-auth exist; add domains when they are implemented.
 - `src/app/screens/<area>/<screen>`: pages, screen components/hooks/model/styles
-  when needed. Admin login/home, entry and dev exist; guest/staff follow later.
+  when needed. Admin login/layout/dashboard, entry and dev exist; guest/staff
+  follow later.
 - `src/app/shared/ui` and `shared/layout`: business-neutral reusable components.
 - `src/app/styles`: reset, shared tokens, base styles and their single entrypoint.
 
@@ -78,10 +79,28 @@ Cancel and version pending operations so logout/newer sessions win over late
 responses. Synchronize persistent credentials across tabs. Never create a global
 token injector or redirect handler in the shared API client.
 
+## Administrator dashboard
+
+`features/admin-dashboard` validates GET /admin/dashboard, and
+`features/admin-properties` loads every page of GET /admin/properties for the
+selector, including inactive properties. The screen owns filters, cancellation,
+loading/retry and empty states. Filters stay in the URL to survive refresh/back
+navigation and session verification. Never put credentials in URL parameters.
+Feature 401/403 responses reject only the session token that made the request;
+a late response must not clear a newer login.
+
+Arrival/departure counts are planned active stays on the selected Seoul date,
+not physical occupancy. Checklist counts use current evidence for those stays.
+Maintenance starts and completions belong to the selected date, but unfinished
+maintenance and open issues are current work across all dates. Show those groups
+separately. Past dates are not historical database snapshots. Missing or failed
+responses must not become zero counts. Refresh is manual; no polling is enabled.
+
 ## Completion boundary
 
-This slice provides the foundation, development health check, real admin login,
-session restoration and a protected profile landing with logout. Business data
-screens, guest/staff link validation, caches, PWA/offline support, content setup
-and deployment are not implemented here.
+The frontend provides the foundation, development health check, real admin login,
+session restoration, a responsive admin layout and a connected operations
+dashboard. Calendar and detail/management screens, guest/staff link validation,
+caches, PWA/offline support, content setup and deployment remain outside this
+slice.
 Report typecheck/lint/build separately from actual browser/backend/mobile checks.
