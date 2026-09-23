@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { AdminPropertyOption } from '../../../features/admin-properties/admin-properties.types';
 import { Button } from '../../../shared/ui/Button/Button';
-import { getSeoulToday } from './dashboard-filters';
+import { getSeoulToday } from '../../../core/dates/seoul-date';
 
 type DashboardFiltersProps = {
   date: string;

@@ -5,8 +5,6 @@ import type {
   AdminDashboardDto,
   AdminDashboardInput,
 } from '../../../features/admin-dashboard/admin-dashboard.types';
-import { getAdminPropertyOptions } from '../../../features/admin-properties/admin-properties-api';
-import type { AdminPropertyOption } from '../../../features/admin-properties/admin-properties.types';
 
 type Resource<T> =
   | { status: 'loading' }
@@ -63,41 +61,5 @@ export function useAdminDashboard(
 
   const resource: Resource<AdminDashboardDto> =
     result?.key === key ? result.resource : { status: 'loading' };
-  return { resource, refresh: () => setRevision((value) => value + 1) };
-}
-
-export function useDashboardProperties(
-  token: string,
-  rejectSession: (token: string) => void,
-) {
-  const [revision, setRevision] = useState(0);
-  const [result, setResult] = useState<{
-    revision: number;
-    resource: Resource<AdminPropertyOption[]>;
-  }>();
-
-  useEffect(() => {
-    const controller = new AbortController();
-    void getAdminPropertyOptions(token, controller.signal).then(
-      (data) => {
-        if (!controller.signal.aborted)
-          setResult({ revision, resource: { status: 'ready', data } });
-      },
-      (error: unknown) => {
-        if (!controller.signal.aborted)
-          setResult({
-            revision,
-            resource: {
-              status: 'error',
-              message: handleError(error, token, rejectSession),
-            },
-          });
-      },
-    );
-    return () => controller.abort();
-  }, [revision, token, rejectSession]);
-
-  const resource: Resource<AdminPropertyOption[]> =
-    result?.revision === revision ? result.resource : { status: 'loading' };
   return { resource, refresh: () => setRevision((value) => value + 1) };
 }

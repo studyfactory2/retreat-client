@@ -1,18 +1,16 @@
 import { useSearchParams } from 'react-router-dom';
 import { useAdminSession } from '../../../core/session/use-admin-session';
+import {
+  formatSeoulUpdatedAt,
+  getSeoulToday,
+} from '../../../core/dates/seoul-date';
+import { useAdminPropertyOptions } from '../../../features/admin-properties/use-admin-property-options';
 import { Button } from '../../../shared/ui/Button/Button';
 import { PageState } from '../../../shared/ui/PageState/PageState';
 import { DashboardFilters } from './DashboardFilters';
 import { DashboardOverview } from './DashboardOverview';
-import {
-  formatDashboardTime,
-  getSeoulToday,
-  readDashboardFilters,
-} from './dashboard-filters';
-import {
-  useAdminDashboard,
-  useDashboardProperties,
-} from './use-admin-dashboard';
+import { readDashboardFilters } from './dashboard-filters';
+import { useAdminDashboard } from './use-admin-dashboard';
 import './dashboard.css';
 
 export function AdminDashboardScreen() {
@@ -38,7 +36,7 @@ function DashboardWorkspace({
     token,
     rejectSession,
   );
-  const properties = useDashboardProperties(token, rejectSession);
+  const properties = useAdminPropertyOptions(token, rejectSession);
   const data =
     dashboard.resource.status === 'ready' ? dashboard.resource.data : undefined;
   const selectedDate = input.date ?? data?.date ?? getSeoulToday();
@@ -143,7 +141,7 @@ function DashboardWorkspace({
               <p>
                 최근 조회{' '}
                 <time dateTime={data.asOf}>
-                  {formatDashboardTime(data.asOf)}
+                  {formatSeoulUpdatedAt(data.asOf)}
                 </time>
               </p>
             )}

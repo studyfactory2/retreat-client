@@ -11,6 +11,7 @@ import { RequireAdmin } from './RequireAdmin';
 import { AdminLoginScreen } from '../../screens/admin/login/AdminLoginScreen';
 import { AdminLayout } from '../../screens/admin/layout/AdminLayout';
 import { AdminDashboardScreen } from '../../screens/admin/dashboard/AdminDashboardScreen';
+import { AdminCalendarScreen } from '../../screens/admin/calendar/AdminCalendarScreen';
 
 const ConnectionScreen = import.meta.env.DEV
   ? lazy(() => import('../../screens/dev/ConnectionScreen'))
@@ -83,6 +84,10 @@ export function AppRouter() {
         <Route element={<RequireAdmin />}>
           <Route element={<AdminLayout />}>
             <Route path={appRoutes.admin} element={<AdminDashboardScreen />} />
+            <Route
+              path={appRoutes.adminCalendar}
+              element={<AdminCalendarScreen />}
+            />
           </Route>
         </Route>
       </Route>

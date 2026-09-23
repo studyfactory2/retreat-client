@@ -20,7 +20,7 @@ Follow studyfactory-frontend's organization:
 - `src/app/features/<domain>`: domain API calls, DTO contracts, reusable business
   logic. Health and admin-auth exist; add domains when they are implemented.
 - `src/app/screens/<area>/<screen>`: pages, screen components/hooks/model/styles
-  when needed. Admin login/layout/dashboard, entry and dev exist; guest/staff
+  when needed. Admin login/layout/dashboard/calendar, entry and dev exist; guest/staff
   follow later.
 - `src/app/shared/ui` and `shared/layout`: business-neutral reusable components.
 - `src/app/styles`: reset, shared tokens, base styles and their single entrypoint.
@@ -99,8 +99,35 @@ responses must not become zero counts. Refresh is manual; no polling is enabled.
 ## Completion boundary
 
 The frontend provides the foundation, development health check, real admin login,
-session restoration, a responsive admin layout and a connected operations
-dashboard. Calendar and detail/management screens, guest/staff link validation,
+session restoration, a responsive admin layout, a connected operations
+dashboard and a read-only calendar with selected-day stay lists. Stay editing,
+Excel import UI, detail/management screens, guest/staff link validation,
 caches, PWA/offline support, content setup and deployment remain outside this
 slice.
 Report typecheck/lint/build separately from actual browser/backend/mobile checks.
+
+## Administrator calendar
+
+`features/admin-calendar` owns the validated GET /admin/calendar contract. Fetch
+every page for the visible month (limit 100), include inactive properties, and
+fail visibly if pagination is inconsistent or incomplete. The backend excludes
+cancelled stays. Each page is a separate server snapshot; this is a current view,
+not a historical report. Reload when the list changes during pagination.
+
+`screens/admin/calendar` separates the screen, fetch hook, calendar model,
+month grid and selected-day list. Date/property filters live in URL search
+parameters. Changing the selected day within the loaded month needs no new
+calendar request. Month/property changes cancel pending requests and hide stale
+data. Failed data is never displayed as an empty calendar.
+
+Classify date cells using the API's Seoul expected dates. A stay appears from
+its arrival through its checkout day inclusive; a midnight checkout still has a
+departure event. Same-day arrival/departure counts as one stay with two events.
+Middle days show a continuing planned schedule, not observed occupancy. Render
+checklist statuses and review reasons supplied by the API without inferring
+physical presence, late submissions or completed cleaning.
+
+Dashboard and calendar reuse the property-options hook and Seoul date helpers.
+Calendar loading, empty, failed/retry and expired-session states remain distinct.
+There is no calendar library, drag/drop, mutation, polling or new dependency in
+this slice.
