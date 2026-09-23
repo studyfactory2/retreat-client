@@ -1,0 +1,36 @@
+.page-state {
+  max-width: 640px;
+  margin: 24px auto;
+  padding: clamp(28px, 5vw, 60px);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+
+.page-state__accent {
+  display: block;
+  width: 36px;
+  height: 3px;
+  margin-bottom: 28px;
+  border-radius: 2px;
+  background: var(--color-primary);
+}
+
+.page-state h1 {
+  color: var(--color-heading);
+  font-size: clamp(25px, 4vw, 34px);
+  font-weight: 650;
+  line-height: 1.35;
+  letter-spacing: -0.8px;
+}
+.page-state p {
+  margin-top: 18px;
+  color: var(--color-muted);
+}
+.page-state__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 32px;
+}

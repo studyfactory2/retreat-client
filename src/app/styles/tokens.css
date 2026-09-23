@@ -1,0 +1,24 @@
+:root {
+  color-scheme: light;
+  --color-primary: #1755d1;
+  --color-primary-hover: #1144ad;
+  --color-background: #f5f7fb;
+  --color-heading: #132448;
+  --color-surface: #ffffff;
+  --color-on-primary: #ffffff;
+  --color-text: #263650;
+  --color-muted: #536178;
+  --color-border: #dfe5ef;
+  --color-soft: #eaf1ff;
+  --color-danger: #b53643;
+  --shadow-card: 0 2px 4px rgb(19 36 72 / 2%), 0 12px 32px rgb(19 36 72 / 3%);
+  --shadow-card-hover:
+    0 6px 12px rgb(19 36 72 / 3%), 0 18px 40px rgb(19 36 72 / 6%);
+  --font-body:
+    -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic',
+    'Segoe UI', sans-serif;
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 20px;
+  --content-width: 1160px;
+}
