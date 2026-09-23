@@ -1,12 +1,12 @@
-import { useAdminSession } from "../../core/session/use-admin-session";
-import { Button } from "../../shared/ui/Button/Button";
-import { PageState } from "../../shared/ui/PageState/PageState";
-import "./admin.css";
+import { useAdminSession } from '../../core/session/use-admin-session';
+import { Button } from '../../shared/ui/Button/Button';
+import { PageState } from '../../shared/ui/PageState/PageState';
+import './admin.css';
 
 export function AdminSessionState() {
   const { state, retry, logout } = useAdminSession();
 
-  if (state.status === "checking") {
+  if (state.status === 'checking') {
     return (
       <div className="admin-session" role="status" aria-live="polite">
         <PageState
@@ -17,7 +17,7 @@ export function AdminSessionState() {
     );
   }
 
-  if (state.status === "unavailable") {
+  if (state.status === 'unavailable') {
     return (
       <div className="admin-session">
         <PageState

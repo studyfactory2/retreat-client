@@ -1,15 +1,15 @@
-import { Navigate } from 'react-router-dom'
-import { useAdminSession } from '../../../core/session/use-admin-session'
-import { Button } from '../../../shared/ui/Button/Button'
-import { AdminSessionState } from '../AdminSessionState'
-import '../admin.css'
+import { Navigate } from 'react-router-dom';
+import { useAdminSession } from '../../../core/session/use-admin-session';
+import { Button } from '../../../shared/ui/Button/Button';
+import { AdminSessionState } from '../AdminSessionState';
+import '../admin.css';
 
 export function AdminHomeScreen() {
-  const { state, logout } = useAdminSession()
+  const { state, logout } = useAdminSession();
 
   if (state.status === 'anonymous')
-    return <Navigate to="/admin/login" replace />
-  if (state.status !== 'authenticated') return <AdminSessionState />
+    return <Navigate to="/admin/login" replace />;
+  if (state.status !== 'authenticated') return <AdminSessionState />;
 
   return (
     <div className="admin-home">
@@ -66,5 +66,5 @@ export function AdminHomeScreen() {
         </p>
       </section>
     </div>
-  )
+  );
 }

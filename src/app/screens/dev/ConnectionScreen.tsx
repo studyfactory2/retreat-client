@@ -1,49 +1,49 @@
-import { useEffect, useRef, useState } from 'react'
-import { appConfig } from '../../core/config/environment'
-import { fetchHealth } from '../../features/health/health-api'
-import { Button } from '../../shared/ui/Button/Button'
-import { PageState } from '../../shared/ui/PageState/PageState'
+import { useEffect, useRef, useState } from "react";
+import { appConfig } from "../../core/config/environment";
+import { fetchHealth } from "../../features/health/health-api";
+import { Button } from "../../shared/ui/Button/Button";
+import { PageState } from "../../shared/ui/PageState/PageState";
 
 type ConnectionState = {
-  status: 'idle' | 'checking' | 'success' | 'error'
-  message: string
-}
+  status: "idle" | "checking" | "success" | "error";
+  message: string;
+};
 
 export default function ConnectionScreen() {
-  const active = useRef<AbortController | null>(null)
+  const active = useRef<AbortController | null>(null);
   const [state, setState] = useState<ConnectionState>({
-    status: 'idle',
-    message: '버튼을 눌러 서버 연결을 확인하세요.',
-  })
+    status: "idle",
+    message: "버튼을 눌러 서버 연결을 확인하세요.",
+  });
 
   useEffect(
     () => () => {
-      active.current?.abort()
+      active.current?.abort();
     },
     [],
-  )
+  );
 
   async function checkConnection() {
-    active.current?.abort()
-    const controller = new AbortController()
-    active.current = controller
-    setState({ status: 'checking', message: '서버 응답을 기다리고 있습니다.' })
+    active.current?.abort();
+    const controller = new AbortController();
+    active.current = controller;
+    setState({ status: "checking", message: "서버 응답을 기다리고 있습니다." });
     try {
-      await fetchHealth(controller.signal)
+      await fetchHealth(controller.signal);
       if (!controller.signal.aborted)
         setState({
-          status: 'success',
-          message: 'retreat-api 연결을 확인했습니다.',
-        })
+          status: "success",
+          message: "retreat-api 연결을 확인했습니다.",
+        });
     } catch (error) {
       if (!controller.signal.aborted)
         setState({
-          status: 'error',
+          status: "error",
           message:
             error instanceof Error
               ? error.message
-              : '연결을 확인하지 못했습니다.',
-        })
+              : "연결을 확인하지 못했습니다.",
+        });
     }
   }
 
@@ -59,13 +59,13 @@ export default function ConnectionScreen() {
         {state.message}
       </p>
       <Button
-        loading={state.status === 'checking'}
+        loading={state.status === "checking"}
         onClick={() => {
-          void checkConnection()
+          void checkConnection();
         }}
       >
         연결 확인
       </Button>
     </PageState>
-  )
+  );
 }
