@@ -20,7 +20,7 @@ Follow studyfactory-frontend's organization:
 - `src/app/features/<domain>`: domain API calls, DTO contracts, reusable business
   logic. Health and admin-auth exist; add domains when they are implemented.
 - `src/app/screens/<area>/<screen>`: pages, screen components/hooks/model/styles
-  when needed. Admin login/layout/dashboard/calendar, entry and dev exist; guest/staff
+  when needed. Admin login/layout/dashboard/calendar/stays, entry and dev exist; guest/staff
   follow later.
 - `src/app/shared/ui` and `shared/layout`: business-neutral reusable components.
 - `src/app/styles`: reset, shared tokens, base styles and their single entrypoint.
@@ -73,7 +73,9 @@ Unchecked uses sessionStorage, checked uses localStorage; backend JWT lifetime i
 These are JavaScript-readable credentials under the agreed header-based flow.
 Blocked storage falls back to memory with a user-visible notice. Clear both stores
 when changing persistence or logging out. Server logout/revocation does not exist.
-Verify current identity on restore and focus; auth rejection/expiry clears it,
+Verify current identity on restore and focus. A pending focus check for the same
+already-verified credential keeps the screen mounted to preserve form inputs;
+initial/replacement credentials remain blocked until verified. Auth rejection/expiry clears it,
 temporary failures block protected content with retry while retaining credentials.
 Cancel and version pending operations so logout/newer sessions win over late
 responses. Synchronize persistent credentials across tabs. Never create a global
@@ -100,8 +102,9 @@ responses must not become zero counts. Refresh is manual; no polling is enabled.
 
 The frontend provides the foundation, development health check, real admin login,
 session restoration, a responsive admin layout, a connected operations
-dashboard and a read-only calendar with selected-day stay lists. Stay editing,
-Excel import UI, detail/management screens, guest/staff link validation,
+dashboard, a calendar with selected-day stay lists, and manual stay registration,
+details and editing. Stay cancellation/restoration/history UI, Excel import UI,
+other management screens, guest/staff link validation,
 caches, PWA/offline support, content setup and deployment remain outside this
 slice.
 Report typecheck/lint/build separately from actual browser/backend/mobile checks.
@@ -129,5 +132,35 @@ physical presence, late submissions or completed cleaning.
 
 Dashboard and calendar reuse the property-options hook and Seoul date helpers.
 Calendar loading, empty, failed/retry and expired-session states remain distinct.
-There is no calendar library, drag/drop, mutation, polling or new dependency in
-this slice.
+There is no calendar library, drag/drop, polling or new dependency.
+
+## Administrator stays
+
+`features/admin-stays` owns validated GET /admin/stays/:id, POST /admin/stays and
+POST /admin/stays/:id/update. Screen-specific form values, validation, conversion,
+fetch/save hooks and components live in `screens/admin/stays`.
+Calendar links open `/admin/stays/new` or `/admin/stays/:id`; date/property query
+parameters preserve the return context. Successful saves return to the refreshed
+calendar scoped to the saved property and an applicable date. Legacy dates outside
+the calendar range fall back to the stay detail screen.
+
+The form uses Seoul local date/time values. Suggested new-stay times (15:00 and
+next-day 11:00) are clearly labeled editable examples, not property policy.
+New or changed dates must fit the calendar's 1900–2100 range. Unchanged legacy
+timestamps retain their original precision and are omitted from update bodies.
+Only changed fields are sent; blank optional text becomes null. No-op updates do
+not create revisions. The property is fixed after creation. Inactive properties
+allow guest/notes corrections, but no creation or date changes. Cancelled stays
+show details without an edit action.
+
+Updates send the loaded currentRevision as expectedRevision. Stale conflicts
+require explicit reload/review; never automatically rebase or resend. Backend
+overlap/validation errors retain input. Duplicate submit clicks are blocked.
+Network/timeout/5xx/malformed-success responses can follow a committed mutation:
+block resubmission and direct the administrator to check the saved record first.
+Requests are aborted/fenced on unmount or credential change; no mutation retries,
+no guest account creation and no notifications are added.
+
+Dirty forms warn on explicit Cancel/reload and browser unload. They are not
+persisted in browser storage; SPA back/sidebar navigation is not globally blocked.
+Temporary verification outages still block access and can unmount unsaved forms.

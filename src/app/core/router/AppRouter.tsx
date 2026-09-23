@@ -12,6 +12,8 @@ import { AdminLoginScreen } from '../../screens/admin/login/AdminLoginScreen';
 import { AdminLayout } from '../../screens/admin/layout/AdminLayout';
 import { AdminDashboardScreen } from '../../screens/admin/dashboard/AdminDashboardScreen';
 import { AdminCalendarScreen } from '../../screens/admin/calendar/AdminCalendarScreen';
+import { AdminStayCreateScreen } from '../../screens/admin/stays/AdminStayCreateScreen';
+import { AdminStayDetailScreen } from '../../screens/admin/stays/AdminStayDetailScreen';
 
 const ConnectionScreen = import.meta.env.DEV
   ? lazy(() => import('../../screens/dev/ConnectionScreen'))
@@ -87,6 +89,14 @@ export function AppRouter() {
             <Route
               path={appRoutes.adminCalendar}
               element={<AdminCalendarScreen />}
+            />
+            <Route
+              path={appRoutes.adminStayCreate}
+              element={<AdminStayCreateScreen />}
+            />
+            <Route
+              path={appRoutes.adminStayDetail}
+              element={<AdminStayDetailScreen />}
             />
           </Route>
         </Route>

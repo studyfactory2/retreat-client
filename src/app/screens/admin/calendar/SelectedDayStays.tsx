@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import type {
   AdminCalendarStayDto,
   CalendarChecklistDto,
@@ -9,6 +10,7 @@ import './calendar-panels.css';
 type SelectedDayStaysProps = {
   date: string;
   stays: AdminCalendarStayDto[];
+  returnSearch: string;
 };
 
 const checklistLabels: Record<CalendarChecklistStatus, string> = {
@@ -71,7 +73,11 @@ function ChecklistStatus({
   );
 }
 
-export function SelectedDayStays({ date, stays }: SelectedDayStaysProps) {
+export function SelectedDayStays({
+  date,
+  stays,
+  returnSearch,
+}: SelectedDayStaysProps) {
   const selectedDate = selectedDateFormatter.format(
     new Date(`${date}T00:00:00Z`),
   );
@@ -159,6 +165,13 @@ export function SelectedDayStays({ date, stays }: SelectedDayStaysProps) {
                           checklist={stay.checkOut}
                         />
                       </div>
+                      <Link
+                        className="calendar-stay__detail"
+                        to={`/admin/stays/${stay.id}${returnSearch}`}
+                        aria-label={`${stay.property.name}, ${stay.guestName} 이용 일정 상세 보기`}
+                      >
+                        상세 보기 <span aria-hidden="true">→</span>
+                      </Link>
                     </article>
                   </li>
                 );

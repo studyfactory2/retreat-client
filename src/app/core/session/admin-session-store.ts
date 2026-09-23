@@ -80,7 +80,11 @@ export function createAdminSessionStore(dependencies: SessionDependencies) {
     }
     const current = credential;
     const operation = beginRequest();
-    publish({ status: 'checking' });
+    // Keep a verified same-credential screen mounted while checking on focus.
+    // Initial/restored replacement credentials still block behind verification.
+    // Expiry, rejection and verification failures retain their blocking paths.
+    if (state.status !== 'authenticated' || state.token !== current.token)
+      publish({ status: 'checking' });
     try {
       const user = await dependencies.me(current.token, operation.signal);
       if (operation.version !== generation) return;

@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useLocation, useSearchParams } from 'react-router-dom';
+import { appRoutes } from '../../../core/router/routes';
 import { useAdminSession } from '../../../core/session/use-admin-session';
 import {
   formatSeoulUpdatedAt,
@@ -36,6 +37,7 @@ function CalendarWorkspace({
 }) {
   const [initialDate] = useState(getSeoulToday);
   const [search, setSearch] = useSearchParams();
+  const location = useLocation();
   const { date, propertyId, error } = readCalendarFilters(search, initialDate);
   const month = date.slice(0, 7);
   const range = getMonthRange(month);
@@ -57,6 +59,13 @@ function CalendarWorkspace({
   );
   const previous = shiftCalendarMonth(date, -1);
   const next = shiftCalendarMonth(date, 1);
+  const returnQuery = new URLSearchParams({ date });
+  if (propertyId) returnQuery.set('propertyId', propertyId);
+  const notice: unknown = location.state;
+  const saved =
+    typeof notice === 'object' && notice !== null && 'stayNotice' in notice
+      ? notice.stayNotice
+      : undefined;
 
   function select(date: string, id = propertyId) {
     const query = new URLSearchParams({ date });
@@ -80,14 +89,30 @@ function CalendarWorkspace({
           <h1>이용 일정</h1>
           <p>휴양소별 이용 일정과 입·퇴실 체크리스트 제출 현황을 확인하세요.</p>
         </div>
-        <Button
-          className="admin-button-secondary"
-          onClick={calendar.refresh}
-          disabled={!!error || calendar.resource.status === 'loading'}
-        >
-          새로고침
-        </Button>
+        <div className="calendar-heading__actions">
+          <Link
+            className="ui-button"
+            to={`${appRoutes.adminStayCreate}?${returnQuery}`}
+          >
+            일정 등록
+          </Link>
+          <Button
+            className="admin-button-secondary"
+            onClick={calendar.refresh}
+            disabled={!!error || calendar.resource.status === 'loading'}
+          >
+            새로고침
+          </Button>
+        </div>
       </header>
+
+      {(saved === 'created' || saved === 'updated') && (
+        <p className="calendar-success" role="status">
+          {saved === 'created'
+            ? '새 이용 일정이 등록되었습니다.'
+            : '이용 일정이 수정되었습니다.'}
+        </p>
+      )}
 
       <section className="calendar-filters" aria-label="이용 일정 조회 조건">
         <div className="calendar-filters__row">
@@ -213,7 +238,11 @@ function CalendarWorkspace({
               canNext={next !== null}
             />
             {data && (
-              <SelectedDayStays date={date} stays={selectedDay?.stays ?? []} />
+              <SelectedDayStays
+                date={date}
+                stays={selectedDay?.stays ?? []}
+                returnSearch={`?${returnQuery}`}
+              />
             )}
           </div>
           <p className="calendar-footnote">
