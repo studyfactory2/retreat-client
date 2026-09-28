@@ -101,7 +101,7 @@ responses must not become zero counts. Refresh is manual; no polling is enabled.
 ## Completion boundary
 
 The frontend provides the foundation, development health check, real admin login,
-session restoration, a responsive admin layout, a connected operations
+session restoration, a responsive admin layout with mobile bottom navigation, a connected operations
 dashboard, a calendar with selected-day stay lists, and manual stay registration,
 details and editing, plus property registration and settings. Stay cancellation/restoration/history UI, Excel import UI,
 other management screens, guest/staff link validation,
@@ -187,6 +187,22 @@ and checklist management follow separately. Same-name errors preserve the form;
 unknown save results block resubmission and direct the user back to the list to
 check the result. Token changes/unmount abort and fence pending responses.
 Dirty forms warn on explicit Cancel and full-page unload; sidebar/back navigation
-is not globally blocked. Guest/staff screens and mobile bottom navigation/PWA are
-not added by this property slice. Keep the current OH BOK branding until the
+is not globally blocked. Guest/staff screens and PWA support remain separate slices. Keep the current OH BOK branding until the
 client/operator branding choice is confirmed.
+
+## Administrator navigation
+
+`AdminNavigation` owns the three existing menu entries and their route groups.
+One navigation tree appears as a sidebar above 760px and a fixed bottom bar at
+760px and below. Mobile links use equal columns, icons above labels, a blue active
+state and a minimum 56px touch target. The page reserves space for the bar and
+its bottom safe-area inset; the phone padding override preserves that clearance.
+The current viewport stays contained; `viewport-fit=cover` is deferred to the PWA
+slice, which must handle safe areas across public as well as admin screens.
+
+Stay creation/details remain in the calendar navigation group; property creation
+and settings remain in the properties group. Links expose the current page or
+section to assistive technology. Path changes reset scroll and focus the main
+content; filter/query changes do not reset the layout's scroll position. Login,
+guest and staff routes do not mount administrator navigation. PWA installation,
+service workers and offline support are not part of this layout slice.

@@ -1,10 +1,18 @@
-import { NavLink, Outlet } from 'react-router-dom';
+import { useEffect } from 'react';
+import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { appRoutes } from '../../../core/router/routes';
 import { useAdminSession } from '../../../core/session/use-admin-session';
+import { AdminNavigation } from './AdminNavigation';
 import './admin-layout.css';
 
 export function AdminLayout() {
   const { state, logout } = useAdminSession();
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    document.getElementById('main-content')?.focus({ preventScroll: true });
+    window.scrollTo({ top: 0, left: 0 });
+  }, [pathname]);
 
   if (state.status !== 'authenticated') return null;
 
@@ -56,41 +64,7 @@ export function AdminLayout() {
       <aside className="admin-layout__sidebar">
         <div className="admin-layout__navigation">
           <p className="admin-layout__nav-label">WORKSPACE</p>
-          <nav aria-label="관리자 메뉴">
-            <NavLink
-              className="admin-layout__nav-link"
-              to={appRoutes.admin}
-              end
-            >
-              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <rect x="3" y="3" width="7" height="7" rx="1.5" />
-                <rect x="14" y="3" width="7" height="7" rx="1.5" />
-                <rect x="3" y="14" width="7" height="7" rx="1.5" />
-                <rect x="14" y="14" width="7" height="7" rx="1.5" />
-              </svg>
-              운영 현황
-            </NavLink>
-            <NavLink
-              className="admin-layout__nav-link"
-              to={appRoutes.adminCalendar}
-              end
-            >
-              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <rect x="3" y="5" width="18" height="16" rx="2" />
-                <path d="M7 3v4m10-4v4M3 11h18M7 15h2m6 0h2m-10 3h2" />
-              </svg>
-              이용 일정
-            </NavLink>
-            <NavLink
-              className="admin-layout__nav-link"
-              to={appRoutes.adminProperties}
-            >
-              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path d="M4 21V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v17M16 9h4v12M2 21h20M8 7h4M8 11h4M8 15h4M8 21v-3h4v3" />
-              </svg>
-              휴양소 관리
-            </NavLink>
-          </nav>
+          <AdminNavigation />
         </div>
         <div className="admin-layout__signature">
           <span aria-hidden="true" />
