@@ -1,0 +1,24 @@
+.stay-status-action > p {
+  margin-bottom: 22px;
+}
+
+.ui-button.stay-button-danger {
+  background: var(--color-danger);
+  color: var(--color-on-primary);
+}
+
+.ui-button.stay-button-danger:hover:not(:disabled) {
+  background: #952c38;
+}
+
+.stay-status-action .stay-actions .ui-button {
+  min-height: 46px;
+  font-size: 14px;
+}
+
+@media (max-width: 650px) {
+  .stay-status-action .stay-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

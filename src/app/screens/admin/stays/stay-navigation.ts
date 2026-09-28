@@ -1,3 +1,4 @@
+import { readStayListFilters, stayListSearch } from './stay-list-model';
 import { appRoutes } from '../../../core/router/routes';
 import { getSeoulToday } from '../../../core/dates/seoul-date';
 import { readCalendarFilters } from '../calendar/calendar-model';
@@ -8,7 +9,16 @@ export function getStayNavigation(search: URLSearchParams) {
   const { date, propertyId } = readCalendarFilters(search, getSeoulToday());
   const query = new URLSearchParams({ date });
   if (propertyId) query.set('propertyId', propertyId);
+  const isList = search.get('view') === 'list';
+  const listFilters = readStayListFilters(search);
+  const list = appRoutes.adminStays + stayListSearch(listFilters);
+  const listContext = new URLSearchParams(stayListSearch(listFilters));
+  listContext.set('view', 'list');
   return {
+    isList,
+    returnTo: isList ? list : `${appRoutes.adminCalendar}?${query}`,
+    returnLabel: isList ? '목록으로 돌아가기' : '일정으로 돌아가기',
+    detailSearch: isList ? `?${listContext}` : `?${query}`,
     date,
     propertyId,
     search: `?${query}`,

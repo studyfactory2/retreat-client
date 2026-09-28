@@ -18,6 +18,7 @@ import {
   shiftCalendarMonth,
 } from './calendar-model';
 import { useAdminCalendar } from './use-admin-calendar';
+import { StayViewNavigation } from '../stays/StayViewNavigation';
 import './calendar.css';
 
 export function AdminCalendarScreen() {
@@ -105,6 +106,15 @@ function CalendarWorkspace({
           </Button>
         </div>
       </header>
+
+      <StayViewNavigation
+        view="calendar"
+        calendarHref={`${appRoutes.adminCalendar}?${returnQuery}`}
+        listHref={
+          appRoutes.adminStays +
+          (propertyId ? `?${new URLSearchParams({ propertyId })}` : '')
+        }
+      />
 
       {(saved === 'created' || saved === 'updated') && (
         <p className="calendar-success" role="status">

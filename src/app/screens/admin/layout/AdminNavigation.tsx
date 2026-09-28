@@ -37,7 +37,10 @@ const navigationItems = [
 
 export function AdminNavigation() {
   const { pathname } = useLocation();
-  const stayRoute = matchPath('/admin/stays/*', pathname);
+  const stayRoute = matchPath(
+    { path: appRoutes.adminStays, end: false },
+    pathname,
+  );
 
   return (
     <nav aria-label="관리자 메뉴">

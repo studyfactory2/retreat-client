@@ -80,10 +80,15 @@ function CreateWorkspace({
     void mutation.save(
       (signal) => createAdminStay(input, token, signal),
       (stay) => {
-        navigate(getSavedStayCalendar(stay, navigation.date), {
-          replace: true,
-          state: { stayNotice: 'created' },
-        });
+        navigate(
+          navigation.isList
+            ? `/admin/stays/${stay.id}${navigation.detailSearch}`
+            : getSavedStayCalendar(stay, navigation.date),
+          {
+            replace: true,
+            state: { stayNotice: 'created' },
+          },
+        );
       },
     );
   }
@@ -116,8 +121,8 @@ function CreateWorkspace({
           title="등록 가능한 휴양소가 없습니다"
           description="운영 중인 휴양소를 먼저 등록하거나 활성화해 주세요."
         >
-          <Button onClick={() => navigate(navigation.calendar)}>
-            일정으로 돌아가기
+          <Button onClick={() => navigate(navigation.returnTo)}>
+            {navigation.returnLabel}
           </Button>
         </PageState>
       ) : (
@@ -162,7 +167,7 @@ function CreateWorkspace({
             }}
             onSubmit={submit}
             onCancel={() => {
-              leave.askToLeave(() => navigate(navigation.calendar));
+              leave.askToLeave(() => navigate(navigation.returnTo));
             }}
             properties={options}
             errors={{ ...mutation.state.errors, ...errors }}

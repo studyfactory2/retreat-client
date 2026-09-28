@@ -103,7 +103,8 @@ responses must not become zero counts. Refresh is manual; no polling is enabled.
 The frontend provides the foundation, development health check, real admin login,
 session restoration, a responsive admin layout with mobile bottom navigation, a connected operations
 dashboard, a calendar with selected-day stay lists, and manual stay registration,
-details and editing, plus property registration and settings. Stay cancellation/restoration/history UI, Excel import UI,
+details and editing, plus property registration and settings. The stay list now includes
+search/status/property filters, cancellation/restoration and revision history. Excel import UI,
 other management screens, guest/staff link validation,
 caches, PWA/offline support, content setup and deployment remain outside this
 slice.
@@ -136,8 +137,8 @@ There is no calendar library, drag/drop, polling or new dependency.
 
 ## Administrator stays
 
-`features/admin-stays` owns validated GET /admin/stays/:id, POST /admin/stays and
-POST /admin/stays/:id/update. Screen-specific form values, validation, conversion,
+`features/admin-stays` owns validated list/detail/history reads and POST create,
+update, cancel and restore operations. Screen-specific form values, validation, conversion,
 fetch/save hooks and components live in `screens/admin/stays`.
 Calendar links open `/admin/stays/new` or `/admin/stays/:id`; date/property query
 parameters preserve the return context. Successful saves return to the refreshed
@@ -200,9 +201,43 @@ its bottom safe-area inset; the phone padding override preserves that clearance.
 The current viewport stays contained; `viewport-fit=cover` is deferred to the PWA
 slice, which must handle safe areas across public as well as admin screens.
 
-Stay creation/details remain in the calendar navigation group; property creation
+Stay list/creation/details remain in the calendar navigation group; property creation
 and settings remain in the properties group. Links expose the current page or
 section to assistive technology. Path changes reset scroll and focus the main
 content; filter/query changes do not reset the layout's scroll position. Login,
 guest and staff routes do not mount administrator navigation. PWA installation,
 service workers and offline support are not part of this layout slice.
+
+## Administrator stay list and history
+
+The calendar and `/admin/stays` share a calendar/list view switch under 이용 일정.
+The list fetches 12 stays per page with URL-backed search, property and status
+filters; inactive properties are available for historical lookups. Valid empty,
+loading and error states stay distinct. Invalid/out-of-range pages are normalized
+or clamped. List entry into create/detail preserves whitelisted filter context;
+new stays open their detail after creation, while corrections refresh the detail.
+Calendar entry retains its existing date/property return behavior. An uncertain
+creation result still directs the administrator to the date/property calendar to
+locate a possibly-created record.
+
+Detail actions cancel or restore through POST /admin/stays/:id/cancel and
+POST /admin/stays/:id/restore with expectedRevision and a required reason.
+Restoration is disabled for a currently inactive property; the backend checks
+current property activity and overlapping active stays. Cancellation preserves
+records and history. Revision/state conflicts and uncertain responses block
+resubmission until explicit reload/review. Reasons remain after rejected writes;
+explicit Back/reload asks before discarding them. No automatic retries.
+
+GET /admin/stays/:id/history returns five revisions per page. The UI shows the
+actor, action, Seoul timestamp, reason and before/after stay fields. Expand a
+revision to inspect its saved snapshot. The next older page supplies the previous
+snapshot for the last comparison on a page. Totals and version boundaries must
+agree; concurrent pagination changes require refresh rather than mixed history.
+Property label changes are shown in snapshots but not attributed to a stay edit.
+Successful status changes reload detail/history; a manual detail refresh also
+allows the administrator to reconcile newer history.
+
+This slice was checked with temporary synthetic API/browser fixtures, including
+filters/paging, cancel/restore, conflicts, unknown save outcomes and 320px/390px
+layouts. These checks do not establish real authenticated backend or device proof.
+No new dependencies, repository test files, PWA, Excel import or guest/staff UI.

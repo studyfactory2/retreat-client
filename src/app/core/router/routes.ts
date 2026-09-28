@@ -3,6 +3,7 @@ export const appRoutes = {
   adminLogin: '/admin/login',
   admin: '/admin',
   adminCalendar: '/admin/calendar',
+  adminStays: '/admin/stays',
   adminStayCreate: '/admin/stays/new',
   adminStayDetail: '/admin/stays/:id',
   adminProperties: '/admin/properties',
