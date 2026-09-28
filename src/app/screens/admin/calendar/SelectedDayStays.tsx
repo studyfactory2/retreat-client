@@ -48,9 +48,11 @@ const stayDateFormatter = new Intl.DateTimeFormat('ko-KR', {
 function ChecklistStatus({
   label,
   checklist,
+  stayId,
 }: {
   label: string;
   checklist: CalendarChecklistDto;
+  stayId: string;
 }) {
   return (
     <div className="calendar-stay__checklist">
@@ -62,6 +64,14 @@ function ChecklistStatus({
           {checklistLabels[checklist.status]}
         </span>
       </div>
+      {checklist.submissionCount > 0 && (
+        <Link
+          className="calendar-stay__records"
+          to={`/admin/submissions?stayId=${stayId}&type=${checklist.type}&status=SUBMITTED`}
+        >
+          {label} 기록 {checklist.submissionCount}건 보기
+        </Link>
+      )}
       {checklist.reviewReasons.length > 0 && (
         <ul className="calendar-stay__review-reasons">
           {checklist.reviewReasons.map((reason) => (
@@ -159,10 +169,12 @@ export function SelectedDayStays({
                         <ChecklistStatus
                           label="입실 체크"
                           checklist={stay.checkIn}
+                          stayId={stay.id}
                         />
                         <ChecklistStatus
                           label="퇴실 체크"
                           checklist={stay.checkOut}
+                          stayId={stay.id}
                         />
                       </div>
                       <Link

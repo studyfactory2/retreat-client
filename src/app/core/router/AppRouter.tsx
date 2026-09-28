@@ -20,6 +20,9 @@ import { AdminStayDetailScreen } from '../../screens/admin/stays/AdminStayDetail
 import { AdminPropertiesScreen } from '../../screens/admin/properties/AdminPropertiesScreen';
 import { AdminPropertyEditorScreen } from '../../screens/admin/properties/AdminPropertyEditorScreen';
 
+import { AdminSubmissionsScreen } from '../../screens/admin/submissions/AdminSubmissionsScreen';
+import { AdminSubmissionDetailScreen } from '../../screens/admin/submissions/AdminSubmissionDetailScreen';
+
 const ConnectionScreen = import.meta.env.DEV
   ? lazy(() => import('../../screens/dev/ConnectionScreen'))
   : null;
@@ -94,6 +97,14 @@ export function AppRouter() {
             <Route
               path={appRoutes.adminCalendar}
               element={<AdminCalendarScreen />}
+            />
+            <Route
+              path={appRoutes.adminSubmissions}
+              element={<AdminSubmissionsScreen />}
+            />
+            <Route
+              path={appRoutes.adminSubmissionDetail}
+              element={<AdminSubmissionDetailScreen />}
             />
             <Route
               path={appRoutes.adminStays}

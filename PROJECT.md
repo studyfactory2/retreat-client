@@ -20,7 +20,7 @@ Follow studyfactory-frontend's organization:
 - `src/app/features/<domain>`: domain API calls, DTO contracts, reusable business
   logic. Health and admin-auth exist; add domains when they are implemented.
 - `src/app/screens/<area>/<screen>`: pages, screen components/hooks/model/styles
-  when needed. Admin login/layout/dashboard/calendar/stays/properties, entry and dev exist; guest/staff
+  when needed. Admin login/layout/dashboard/calendar/stays/properties/submissions, entry and dev exist; guest/staff
   follow later.
 - `src/app/shared/ui` and `shared/layout`: business-neutral reusable components.
 - `src/app/styles`: reset, shared tokens, base styles and their single entrypoint.
@@ -106,6 +106,7 @@ dashboard, a calendar with selected-day stay lists, and manual stay registration
 details and editing, plus property registration and settings. The stay list now includes
 search/status/property filters, cancellation/restoration and revision history. Excel import
 now provides upload, saved preview, row review/exclusion and final confirmation.
+Read-only checklist records include filters, saved details, revision history and private photos.
 Other management screens, guest/staff link validation,
 caches, PWA/offline support, content setup and deployment remain outside this
 slice.
@@ -194,7 +195,7 @@ client/operator branding choice is confirmed.
 
 ## Administrator navigation
 
-`AdminNavigation` owns the three existing menu entries and their route groups.
+`AdminNavigation` owns the four menu entries and their route groups.
 One navigation tree appears as a sidebar above 760px and a fixed bottom bar at
 760px and below. Mobile links use equal columns, icons above labels, a blue active
 state and a minimum 56px touch target. The page reserves space for the bar and
@@ -203,7 +204,8 @@ The current viewport stays contained; `viewport-fit=cover` is deferred to the PW
 slice, which must handle safe areas across public as well as admin screens.
 
 Stay list/creation/details remain in the calendar navigation group; property creation
-and settings remain in the properties group. Links expose the current page or
+and settings remain in the properties group. Submission list/details have their own
+제출 기록 entry. Links expose the current page or
 section to assistive technology. Path changes reset scroll and focus the main
 content; filter/query changes do not reset the layout's scroll position. Login,
 guest and staff routes do not mount administrator navigation. PWA installation,
@@ -289,3 +291,43 @@ in-memory API/browser fixtures, plus a genuine `.xls` workbook with fictional gu
 This proves the fixture workflow, not live authentication, S3 `imports/` permissions,
 or database integration. The user performs the real upload. No backend changes, new
 app dependencies, repository test files or PWA support were added.
+
+
+## Administrator checklist records
+
+`features/admin-submissions` owns validated GET list/detail/history/photo-view
+contracts. `screens/admin/submissions` separates filters, responsive rows, saved
+record rendering, history, photo viewing and request hooks. Routes are
+`/admin/submissions` and `/admin/submissions/:id`. List/detail return links preserve
+only approved filter parameters. Stay detail links filter by `stayId`; calendar
+checklist links also select type and SUBMITTED status, without a date filter that
+would hide records submitted for an unexpected visit date.
+
+List pages contain 20 records, filtered by property (including inactive), type,
+status and inclusive visit dates. Date filtering uses `visitDate`, not the submission
+timestamp. A stay drilldown remains until explicitly cleared. Invalid date filters
+show an error and do not fetch a broader list; out-of-range pages clamp after a
+valid response. Loading, failed and valid empty responses remain distinct. Abnormal
+answer counts are separate from current issue status or physical occupancy.
+
+Details render the current saved revision, with captured property/author/template
+text and answers. Optional unanswered items remain visibly unanswered. Contact
+fields may be null and guest QR names are self-reported; staff QR records attribute
+the assigned staff captured by the backend. History pages contain five revisions
+with actor, action, reason and expandable full snapshots. Historical labels never
+come from current property options. Append-only revision totals and boundaries
+must agree with the loaded detail; concurrent changes require explicit refresh.
+There is no correction/cancel/restore or stay-link mutation in this slice.
+
+Photos load only after an explicit click, bound to a submission, revision and photo.
+The signed URL remains in volatile component state, is removed on expiry/close,
+and is never persisted or displayed as text. Images use no-referrer and receive no
+API Authorization header. Signing and image failures expose an explicit retry;
+there is no automatic retry. Refresh/unmount/credential changes abort or fence late
+responses, and 401/403 rejects only the credential that made the request.
+
+Verification uses disposable snapshots validated by the real backend parser and a
+synthetic local API/browser fixture, plus typecheck, lint and build. It does not
+establish live database/S3 authorization or physical-device proof. No backend edits,
+new dependencies or repository test files. Unfinished maintenance, stay linking,
+issues, guest/staff workflows and PWA remain separate slices.

@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import type { AdminStayDto } from '../../../features/admin-stays/admin-stays.types';
 
 const dateFormatter = new Intl.DateTimeFormat('ko-KR', {
@@ -83,6 +84,12 @@ export function StayDetails({ stay }: { stay: AdminStayDto }) {
         모든 시간은 한국 시간 기준입니다. 등록된 일정은 실제 입·퇴실 여부를
         의미하지 않습니다.
       </p>
+      <Link
+        className="ui-button admin-button-secondary"
+        to={`/admin/submissions?stayId=${stay.id}`}
+      >
+        연결된 체크리스트 보기
+      </Link>
     </section>
   );
 }

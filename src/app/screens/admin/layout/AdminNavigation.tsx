@@ -25,6 +25,16 @@ const navigationItems = [
     ),
   },
   {
+    to: appRoutes.adminSubmissions,
+    label: '제출 기록',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M8 4H6a2 2 0 0 0-2 2v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V6a2 2 0 0 0-2-2h-2M8 10h8M8 14h8M8 18h5" />
+        <rect x="8" y="2" width="8" height="4" rx="1" />
+      </svg>
+    ),
+  },
+  {
     to: appRoutes.adminProperties,
     label: '휴양소 관리',
     icon: (
