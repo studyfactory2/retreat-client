@@ -81,6 +81,15 @@ export function AdminLayout() {
               </svg>
               이용 일정
             </NavLink>
+            <NavLink
+              className="admin-layout__nav-link"
+              to={appRoutes.adminProperties}
+            >
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M4 21V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v17M16 9h4v12M2 21h20M8 7h4M8 11h4M8 15h4M8 21v-3h4v3" />
+              </svg>
+              휴양소 관리
+            </NavLink>
           </nav>
         </div>
         <div className="admin-layout__signature">

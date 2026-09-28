@@ -20,7 +20,7 @@ Follow studyfactory-frontend's organization:
 - `src/app/features/<domain>`: domain API calls, DTO contracts, reusable business
   logic. Health and admin-auth exist; add domains when they are implemented.
 - `src/app/screens/<area>/<screen>`: pages, screen components/hooks/model/styles
-  when needed. Admin login/layout/dashboard/calendar/stays, entry and dev exist; guest/staff
+  when needed. Admin login/layout/dashboard/calendar/stays/properties, entry and dev exist; guest/staff
   follow later.
 - `src/app/shared/ui` and `shared/layout`: business-neutral reusable components.
 - `src/app/styles`: reset, shared tokens, base styles and their single entrypoint.
@@ -103,7 +103,7 @@ responses must not become zero counts. Refresh is manual; no polling is enabled.
 The frontend provides the foundation, development health check, real admin login,
 session restoration, a responsive admin layout, a connected operations
 dashboard, a calendar with selected-day stay lists, and manual stay registration,
-details and editing. Stay cancellation/restoration/history UI, Excel import UI,
+details and editing, plus property registration and settings. Stay cancellation/restoration/history UI, Excel import UI,
 other management screens, guest/staff link validation,
 caches, PWA/offline support, content setup and deployment remain outside this
 slice.
@@ -164,3 +164,29 @@ no guest account creation and no notifications are added.
 Dirty forms warn on explicit Cancel/reload and browser unload. They are not
 persisted in browser storage; SPA back/sidebar navigation is not globally blocked.
 Temporary verification outages still block access and can unmount unsaved forms.
+
+## Administrator properties
+
+`features/admin-properties/admin-property-management-*` owns full validated
+property DTOs and GET list/detail plus POST create/update. Existing dropdown APIs
+remain separate so dashboard/calendar/stay selectors keep their narrow contract.
+`screens/admin/properties` separates screens, cards, form/model, fetch and save
+hooks. Routes are `/admin/properties`, `/admin/properties/new`, and
+`/admin/properties/:id`; the last route opens settings for the selected property.
+
+List search/status/page filters live in the URL; the server paginates 12 records
+per page. Out-of-range pages are clamped after a valid response. Failed requests
+never appear as empty lists. New records start active. Editing sends only changed
+fields, including explicit false values and null for a cleared region. There is
+no optimistic concurrency/revision field in this backend contract; concurrent
+changes to the same field are last-write-wins. No automatic mutation retries.
+
+Activation and vehicle-registration settings are saved through the edit form.
+Assigned staff is read-only in this slice; staff assignment, QR controls, guides,
+and checklist management follow separately. Same-name errors preserve the form;
+unknown save results block resubmission and direct the user back to the list to
+check the result. Token changes/unmount abort and fence pending responses.
+Dirty forms warn on explicit Cancel and full-page unload; sidebar/back navigation
+is not globally blocked. Guest/staff screens and mobile bottom navigation/PWA are
+not added by this property slice. Keep the current OH BOK branding until the
+client/operator branding choice is confirmed.
