@@ -4,6 +4,8 @@ export const appRoutes = {
   admin: '/admin',
   adminCalendar: '/admin/calendar',
   adminStays: '/admin/stays',
+  adminStayImportCreate: '/admin/stays/imports/new',
+  adminStayImportDetail: '/admin/stays/imports/:id',
   adminStayCreate: '/admin/stays/new',
   adminStayDetail: '/admin/stays/:id',
   adminProperties: '/admin/properties',

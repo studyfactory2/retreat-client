@@ -92,6 +92,12 @@ function CalendarWorkspace({
         </div>
         <div className="calendar-heading__actions">
           <Link
+            className="ui-button admin-button-secondary"
+            to={appRoutes.adminStayImportCreate}
+          >
+            엑셀 가져오기
+          </Link>
+          <Link
             className="ui-button"
             to={`${appRoutes.adminStayCreate}?${returnQuery}`}
           >

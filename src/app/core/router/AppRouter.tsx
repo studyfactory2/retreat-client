@@ -12,6 +12,8 @@ import { AdminLoginScreen } from '../../screens/admin/login/AdminLoginScreen';
 import { AdminLayout } from '../../screens/admin/layout/AdminLayout';
 import { AdminDashboardScreen } from '../../screens/admin/dashboard/AdminDashboardScreen';
 import { AdminCalendarScreen } from '../../screens/admin/calendar/AdminCalendarScreen';
+import { AdminStayImportUploadScreen } from '../../screens/admin/stay-imports/AdminStayImportUploadScreen';
+import { AdminStayImportReviewScreen } from '../../screens/admin/stay-imports/AdminStayImportReviewScreen';
 import { AdminStayListScreen } from '../../screens/admin/stays/AdminStayListScreen';
 import { AdminStayCreateScreen } from '../../screens/admin/stays/AdminStayCreateScreen';
 import { AdminStayDetailScreen } from '../../screens/admin/stays/AdminStayDetailScreen';
@@ -96,6 +98,14 @@ export function AppRouter() {
             <Route
               path={appRoutes.adminStays}
               element={<AdminStayListScreen />}
+            />
+            <Route
+              path={appRoutes.adminStayImportCreate}
+              element={<AdminStayImportUploadScreen />}
+            />
+            <Route
+              path={appRoutes.adminStayImportDetail}
+              element={<AdminStayImportReviewScreen />}
             />
             <Route
               path={appRoutes.adminStayCreate}

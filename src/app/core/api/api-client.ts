@@ -6,6 +6,7 @@ type JsonValue =
 type RequestOptions = {
   token?: string
   signal?: AbortSignal
+  timeoutMs?: number
 } & (
   | { method?: 'GET'; body?: never }
   | { method: 'POST'; body?: JsonValue | FormData }
@@ -53,7 +54,7 @@ async function request<T>(
   const timeout = setTimeout(() => {
     timedOut = true
     controller.abort()
-  }, 30_000)
+  }, options.timeoutMs ?? 30_000)
   try {
     const response = await fetch(url, {
       method: options.method ?? 'GET',

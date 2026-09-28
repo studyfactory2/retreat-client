@@ -74,6 +74,12 @@ function StayListWorkspace({
           <p>이용객과 휴양소별 일정을 확인하고 취소된 기록도 찾아보세요.</p>
         </div>
         <div className="stay-list-heading__actions">
+          <Link
+            className="ui-button admin-button-secondary"
+            to={appRoutes.adminStayImportCreate}
+          >
+            엑셀 가져오기
+          </Link>
           <Link className="ui-button" to={createHref}>
             이용 일정 등록
           </Link>

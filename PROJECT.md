@@ -104,8 +104,9 @@ The frontend provides the foundation, development health check, real admin login
 session restoration, a responsive admin layout with mobile bottom navigation, a connected operations
 dashboard, a calendar with selected-day stay lists, and manual stay registration,
 details and editing, plus property registration and settings. The stay list now includes
-search/status/property filters, cancellation/restoration and revision history. Excel import UI,
-other management screens, guest/staff link validation,
+search/status/property filters, cancellation/restoration and revision history. Excel import
+now provides upload, saved preview, row review/exclusion and final confirmation.
+Other management screens, guest/staff link validation,
 caches, PWA/offline support, content setup and deployment remain outside this
 slice.
 Report typecheck/lint/build separately from actual browser/backend/mobile checks.
@@ -240,4 +241,51 @@ allows the administrator to reconcile newer history.
 This slice was checked with temporary synthetic API/browser fixtures, including
 filters/paging, cancel/restore, conflicts, unknown save outcomes and 320px/390px
 layouts. These checks do not establish real authenticated backend or device proof.
-No new dependencies, repository test files, PWA, Excel import or guest/staff UI.
+That stay-list slice added no dependencies, repository test files, PWA, Excel import
+or guest/staff UI.
+
+## Administrator Excel stay import
+
+`features/admin-stay-imports` owns the validated preview, saved-preview, review and
+confirmation contracts. `screens/admin/stay-imports` separates upload/mappings,
+review forms, original cells, result rows, filters/summary/confirmation, state and
+styles. Calendar and list link to `/admin/stays/imports/new`; a saved preview uses
+`/admin/stays/imports/:id`. There is no batch-list endpoint: keep the preview URL
+to resume it. Mobile rows become cards within the existing bottom-navigation shell.
+
+Upload one genuine binary `.xls` file, at most 5 MiB, using the fixed backend
+roster template. Optional exact sheet-name mappings select active properties.
+Client filename/size checks provide early feedback; the backend verifies format,
+contents and mappings. Never parse or execute workbook formulas in the browser.
+Uploading creates a preview, not stays. An unknown upload outcome retains the
+file/mappings and requires an explicit new-preview retry with a duplicate-preview
+notice. Browser storage never persists the workbook or review form.
+
+Saved preview reads use page 20 with URL-backed validation/action filters. The
+summary always covers the whole batch, independently of the displayed page.
+Source A:L values remain read-only beside the proposed normalized values. Date-only
+rows have empty timestamp controls and must receive explicit Seoul times; no
+arrival/departure policy is inferred. Review sends the complete proposed row with
+`expectedVersion`; blank optional text becomes null. Saving acknowledges source
+warnings and revalidates the entire batch. Excluded candidate rows may be reviewed
+and included again; informational rows without a candidate stay remain read-only.
+
+Review responses are not the current filtered page, so reload that page after
+success. Other administrators may have changed the batch after a write. Conflicts
+and uncertain write outcomes block further mutations until explicit reload; retain
+unsaved input and ask before discarding it on explicit Back/reload or browser unload.
+SPA sidebar/back navigation is not globally blocked. Token change/unmount cancels
+and fences requests, and feature 401/403 rejects only the requesting credential.
+
+Final confirmation applies to the entire batch, requires every included row ready,
+and asks explicitly before registration. A fresh backend conflict requires row
+review/exclusion before another attempt. Confirmed previews show the receipt and
+links to imported stays without write controls. Upload/review/confirm use a 90-second
+request timeout to accommodate parsing and the backend transaction limit; shared
+API requests retain their 30-second default. Never retry mutations automatically.
+
+Verification used the real compiled backend XLS parser/row validator with disposable
+in-memory API/browser fixtures, plus a genuine `.xls` workbook with fictional guests.
+This proves the fixture workflow, not live authentication, S3 `imports/` permissions,
+or database integration. The user performs the real upload. No backend changes, new
+app dependencies, repository test files or PWA support were added.
