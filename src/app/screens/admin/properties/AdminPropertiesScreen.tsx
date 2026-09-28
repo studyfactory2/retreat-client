@@ -6,10 +6,10 @@ import { isPropertyId } from '../../../features/admin-properties/admin-property-
 import type { GetAdminPropertiesInput } from '../../../features/admin-properties/admin-property-management.types';
 import { Button } from '../../../shared/ui/Button/Button';
 import { PageState } from '../../../shared/ui/PageState/PageState';
-import { PropertyCard } from './PropertyCard';
-import { propertyListSearch, readPropertyFilters } from './property-list-model';
-import { useAdminProperties } from './use-admin-properties';
-import './properties.css';
+import { PropertyCard } from './components/PropertyCard';
+import { propertyListSearch, readPropertyFilters } from './model/property-list-model';
+import { useAdminProperties } from './hooks/use-admin-properties';
+import './styles/properties.css';
 
 export function AdminPropertiesScreen() {
   const { state, rejectSession } = useAdminSession();

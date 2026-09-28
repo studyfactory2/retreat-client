@@ -9,17 +9,17 @@ import {
 import { useAdminPropertyOptions } from '../../../features/admin-properties/use-admin-property-options';
 import { Button } from '../../../shared/ui/Button/Button';
 import { PageState } from '../../../shared/ui/PageState/PageState';
-import { CalendarMonth } from './CalendarMonth';
-import { SelectedDayStays } from './SelectedDayStays';
+import { CalendarMonth } from './components/CalendarMonth';
+import { SelectedDayStays } from './components/SelectedDayStays';
 import {
   getMonthDays,
   getMonthRange,
   readCalendarFilters,
   shiftCalendarMonth,
-} from './calendar-model';
-import { useAdminCalendar } from './use-admin-calendar';
-import { StayViewNavigation } from '../stays/StayViewNavigation';
-import './calendar.css';
+} from './model/calendar-model';
+import { useAdminCalendar } from './hooks/use-admin-calendar';
+import { StayViewNavigation } from '../stays/components/StayViewNavigation';
+import './styles/calendar.css';
 
 export function AdminCalendarScreen() {
   const { state, rejectSession } = useAdminSession();

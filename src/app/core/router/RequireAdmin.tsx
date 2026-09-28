@@ -1,5 +1,5 @@
 import { Navigate, Outlet } from 'react-router-dom';
-import { AdminSessionState } from '../../screens/admin/AdminSessionState';
+import { AdminSessionState } from '../../screens/admin/components/AdminSessionState';
 import { useAdminSession } from '../session/use-admin-session';
 import { appRoutes } from './routes';
 

@@ -13,10 +13,10 @@ import {
   validateImportMappings,
   type ImportMappingDraft,
   type ImportMappingErrors,
-} from './import-upload-model';
-import { ImportPropertyMappings } from './ImportPropertyMappings';
-import { UploadFileField } from './UploadFileField';
-import './import-upload.css';
+} from './model/import-upload-model';
+import { ImportPropertyMappings } from './components/ImportPropertyMappings';
+import { UploadFileField } from './components/UploadFileField';
+import './styles/import-upload.css';
 
 type UploadState = {
   busy: boolean;

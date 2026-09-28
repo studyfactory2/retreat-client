@@ -13,15 +13,15 @@ import type {
 import { isStayRevision } from '../../../features/admin-stays/admin-stays-validation';
 import { Button } from '../../../shared/ui/Button/Button';
 import { PageState } from '../../../shared/ui/PageState/PageState';
-import { ImportRowEditor } from './ImportRowEditor';
-import { ImportRows } from './ImportRows';
-import { ImportMutationNotice } from './ImportMutationNotice';
-import { readImportFilters, importFilterSearch } from './import-review-model';
-import { useStayImport, useImportMutation } from './use-stay-import';
-import { ImportBatchSummary } from './ImportBatchSummary';
-import { ImportRowFilters } from './ImportRowFilters';
-import { ImportConfirmation } from './ImportConfirmation';
-import './stay-import.css';
+import { ImportRowEditor } from './components/ImportRowEditor';
+import { ImportRows } from './components/ImportRows';
+import { ImportMutationNotice } from './components/ImportMutationNotice';
+import { readImportFilters, importFilterSearch } from './model/import-review-model';
+import { useStayImport, useImportMutation } from './hooks/use-stay-import';
+import { ImportBatchSummary } from './components/ImportBatchSummary';
+import { ImportRowFilters } from './components/ImportRowFilters';
+import { ImportConfirmation } from './components/ImportConfirmation';
+import './styles/stay-import.css';
 
 export function AdminStayImportReviewScreen() {
   const { state, rejectSession } = useAdminSession();

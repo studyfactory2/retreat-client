@@ -10,24 +10,24 @@ import { updateAdminStay } from '../../../features/admin-stays/admin-stays-api';
 import type { AdminStayDto } from '../../../features/admin-stays/admin-stays.types';
 import { Button } from '../../../shared/ui/Button/Button';
 import { PageState } from '../../../shared/ui/PageState/PageState';
-import { StayStatusAction } from './StayStatusAction';
-import { StayHistory } from './StayHistory';
+import { StayStatusAction } from './components/StayStatusAction';
+import { StayHistory } from './components/StayHistory';
 import { isStayRevision } from '../../../features/admin-stays/admin-stays-validation';
-import { StayDetails } from './StayDetails';
-import { StayForm } from './StayForm';
+import { StayDetails } from './components/StayDetails';
+import { StayForm } from './components/StayForm';
 import {
   buildUpdateStayInput,
   stayToFormValues,
   validateStayForm,
   type StayFormValues,
-} from './stay-form-model';
-import { getSavedStayCalendar, getStayNavigation } from './stay-navigation';
-import { useAdminStay } from './use-admin-stay';
-import { useStaySave } from './use-stay-save';
-import { useUnsavedStay } from './use-unsaved-stay';
-import { UnsavedStayNotice } from './UnsavedStayNotice';
-import { useStayScreenFocus } from './use-stay-screen-focus';
-import './stays.css';
+} from './model/stay-form-model';
+import { getSavedStayCalendar, getStayNavigation } from './model/stay-navigation';
+import { useAdminStay } from './hooks/use-admin-stay';
+import { useStaySave } from './hooks/use-stay-save';
+import { useUnsavedStay } from './hooks/use-unsaved-stay';
+import { UnsavedStayNotice } from './components/UnsavedStayNotice';
+import { useStayScreenFocus } from './hooks/use-stay-screen-focus';
+import './styles/stays.css';
 
 export function AdminStayDetailScreen() {
   const { state, rejectSession } = useAdminSession();

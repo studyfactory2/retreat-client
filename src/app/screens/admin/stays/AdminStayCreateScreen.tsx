@@ -5,19 +5,19 @@ import { useAdminPropertyOptions } from '../../../features/admin-properties/use-
 import { createAdminStay } from '../../../features/admin-stays/admin-stays-api';
 import { Button } from '../../../shared/ui/Button/Button';
 import { PageState } from '../../../shared/ui/PageState/PageState';
-import { StayForm } from './StayForm';
+import { StayForm } from './components/StayForm';
 import {
   buildCreateStayInput,
   createStayFormValues,
   validateStayForm,
   type StayFormValues,
-} from './stay-form-model';
-import { getSavedStayCalendar, getStayNavigation } from './stay-navigation';
-import { useStaySave } from './use-stay-save';
-import { useUnsavedStay } from './use-unsaved-stay';
-import { UnsavedStayNotice } from './UnsavedStayNotice';
-import { useStayScreenFocus } from './use-stay-screen-focus';
-import './stays.css';
+} from './model/stay-form-model';
+import { getSavedStayCalendar, getStayNavigation } from './model/stay-navigation';
+import { useStaySave } from './hooks/use-stay-save';
+import { useUnsavedStay } from './hooks/use-unsaved-stay';
+import { UnsavedStayNotice } from './components/UnsavedStayNotice';
+import { useStayScreenFocus } from './hooks/use-stay-screen-focus';
+import './styles/stays.css';
 
 export function AdminStayCreateScreen() {
   const { state, rejectSession } = useAdminSession();

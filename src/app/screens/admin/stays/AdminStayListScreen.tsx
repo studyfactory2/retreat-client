@@ -6,12 +6,12 @@ import { useAdminPropertyOptions } from '../../../features/admin-properties/use-
 import type { GetAdminStaysInput } from '../../../features/admin-stays/admin-stay-management.types';
 import { Button } from '../../../shared/ui/Button/Button';
 import { PageState } from '../../../shared/ui/PageState/PageState';
-import { StayListCard } from './StayListCard';
-import { StayListFilters } from './StayListFilters';
-import { StayViewNavigation } from './StayViewNavigation';
-import { readStayListFilters, stayListSearch } from './stay-list-model';
-import { useAdminStays } from './use-admin-stays';
-import './stay-list.css';
+import { StayListCard } from './components/StayListCard';
+import { StayListFilters } from './components/StayListFilters';
+import { StayViewNavigation } from './components/StayViewNavigation';
+import { readStayListFilters, stayListSearch } from './model/stay-list-model';
+import { useAdminStays } from './hooks/use-admin-stays';
+import './styles/stay-list.css';
 
 export function AdminStayListScreen() {
   const { state, rejectSession } = useAdminSession();

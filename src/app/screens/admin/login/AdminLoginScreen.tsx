@@ -1,9 +1,9 @@
 import { Navigate } from 'react-router-dom'
 import { useAdminSession } from '../../../core/session/use-admin-session'
 import { Button } from '../../../shared/ui/Button/Button'
-import { AdminSessionState } from '../AdminSessionState'
-import { useAdminLogin } from './use-admin-login'
-import '../admin.css'
+import { AdminSessionState } from '../components/AdminSessionState'
+import { useAdminLogin } from './hooks/use-admin-login'
+import '../styles/admin.css'
 
 export function AdminLoginScreen() {
   const { state } = useAdminSession()

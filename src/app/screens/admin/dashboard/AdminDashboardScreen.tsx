@@ -7,11 +7,11 @@ import {
 import { useAdminPropertyOptions } from '../../../features/admin-properties/use-admin-property-options';
 import { Button } from '../../../shared/ui/Button/Button';
 import { PageState } from '../../../shared/ui/PageState/PageState';
-import { DashboardFilters } from './DashboardFilters';
-import { DashboardOverview } from './DashboardOverview';
-import { readDashboardFilters } from './dashboard-filters';
-import { useAdminDashboard } from './use-admin-dashboard';
-import './dashboard.css';
+import { DashboardFilters } from './components/DashboardFilters';
+import { DashboardOverview } from './components/DashboardOverview';
+import { readDashboardFilters } from './model/dashboard-filters';
+import { useAdminDashboard } from './hooks/use-admin-dashboard';
+import './styles/dashboard.css';
 
 export function AdminDashboardScreen() {
   const { state, rejectSession } = useAdminSession();

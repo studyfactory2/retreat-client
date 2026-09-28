@@ -8,20 +8,30 @@ import { PageState } from '../../shared/ui/PageState/PageState';
 import { appRoutes } from './routes';
 import { AdminSessionLayout } from './AdminSessionLayout';
 import { RequireAdmin } from './RequireAdmin';
-import { AdminLoginScreen } from '../../screens/admin/login/AdminLoginScreen';
-import { AdminLayout } from '../../screens/admin/layout/AdminLayout';
-import { AdminDashboardScreen } from '../../screens/admin/dashboard/AdminDashboardScreen';
-import { AdminCalendarScreen } from '../../screens/admin/calendar/AdminCalendarScreen';
-import { AdminStayImportUploadScreen } from '../../screens/admin/stay-imports/AdminStayImportUploadScreen';
-import { AdminStayImportReviewScreen } from '../../screens/admin/stay-imports/AdminStayImportReviewScreen';
-import { AdminStayListScreen } from '../../screens/admin/stays/AdminStayListScreen';
-import { AdminStayCreateScreen } from '../../screens/admin/stays/AdminStayCreateScreen';
-import { AdminStayDetailScreen } from '../../screens/admin/stays/AdminStayDetailScreen';
-import { AdminPropertiesScreen } from '../../screens/admin/properties/AdminPropertiesScreen';
-import { AdminPropertyEditorScreen } from '../../screens/admin/properties/AdminPropertyEditorScreen';
+import { AdminLoginScreen } from '../../screens/admin/login';
+import { AdminLayout } from '../../screens/admin/layout';
+import { AdminDashboardScreen } from '../../screens/admin/dashboard';
+import { AdminCalendarScreen } from '../../screens/admin/calendar';
+import {
+  AdminStayImportUploadScreen,
+  AdminStayImportReviewScreen,
+} from '../../screens/admin/stay-imports';
 
-import { AdminSubmissionsScreen } from '../../screens/admin/submissions/AdminSubmissionsScreen';
-import { AdminSubmissionDetailScreen } from '../../screens/admin/submissions/AdminSubmissionDetailScreen';
+import {
+  AdminStayListScreen,
+  AdminStayCreateScreen,
+  AdminStayDetailScreen,
+} from '../../screens/admin/stays';
+
+import {
+  AdminPropertiesScreen,
+  AdminPropertyEditorScreen,
+} from '../../screens/admin/properties';
+
+import {
+  AdminSubmissionsScreen,
+  AdminSubmissionDetailScreen,
+} from '../../screens/admin/submissions';
 
 const ConnectionScreen = import.meta.env.DEV
   ? lazy(() => import('../../screens/dev/ConnectionScreen'))

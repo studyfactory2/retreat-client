@@ -4,15 +4,15 @@ import { useAdminSession } from '../../../core/session/use-admin-session';
 import { useAdminPropertyOptions } from '../../../features/admin-properties/use-admin-property-options';
 import { Button } from '../../../shared/ui/Button/Button';
 import { PageState } from '../../../shared/ui/PageState/PageState';
-import { SubmissionListFilters } from './SubmissionListFilters';
-import { SubmissionRows } from './SubmissionRows';
+import { SubmissionListFilters } from './components/SubmissionListFilters';
+import { SubmissionRows } from './components/SubmissionRows';
 import {
   readSubmissionListFilters,
   submissionDateErrors,
   submissionListSearch,
-} from './submission-list-model';
-import { useAdminSubmissions } from './use-admin-submissions';
-import './submission-list.css';
+} from './model/submission-list-model';
+import { useAdminSubmissions } from './hooks/use-admin-submissions';
+import './styles/submission-list.css';
 
 export function AdminSubmissionsScreen() {
   const { state, rejectSession } = useAdminSession();

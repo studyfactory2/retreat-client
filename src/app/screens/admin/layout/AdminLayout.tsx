@@ -2,8 +2,8 @@ import { useEffect } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { appRoutes } from '../../../core/router/routes';
 import { useAdminSession } from '../../../core/session/use-admin-session';
-import { AdminNavigation } from './AdminNavigation';
-import './admin-layout.css';
+import { AdminNavigation } from './components/AdminNavigation';
+import './styles/admin-layout.css';
 
 export function AdminLayout() {
   const { state, logout } = useAdminSession();

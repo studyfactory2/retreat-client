@@ -3,22 +3,22 @@ import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { useAdminSession } from '../../../core/session/use-admin-session';
 import { Button } from '../../../shared/ui/Button/Button';
 import { PageState } from '../../../shared/ui/PageState/PageState';
-import { SubmissionRecord } from './SubmissionRecord';
-import { SubmissionPhotos } from './SubmissionPhotos';
-import { SubmissionHistory } from './SubmissionHistory';
+import { SubmissionRecord } from './components/SubmissionRecord';
+import { SubmissionPhotos } from './components/SubmissionPhotos';
+import { SubmissionHistory } from './components/SubmissionHistory';
 import {
   submissionActionLabel,
   submissionRoleLabel,
   submissionSourceLabel,
   submissionTime,
   submissionTypeLabel,
-} from './submission-detail-model';
+} from './model/submission-detail-model';
 import {
   readSubmissionListFilters,
   submissionListSearch,
-} from './submission-list-model';
-import { useSubmissionDetail } from './use-submission-detail';
-import './submission-detail.css';
+} from './model/submission-list-model';
+import { useSubmissionDetail } from './hooks/use-submission-detail';
+import './styles/submission-detail.css';
 
 export function AdminSubmissionDetailScreen() {
   const { state, rejectSession } = useAdminSession();

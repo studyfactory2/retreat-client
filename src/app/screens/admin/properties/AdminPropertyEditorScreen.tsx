@@ -3,10 +3,10 @@ import { appRoutes } from '../../../core/router/routes';
 import { useAdminSession } from '../../../core/session/use-admin-session';
 import { Button } from '../../../shared/ui/Button/Button';
 import { PageState } from '../../../shared/ui/PageState/PageState';
-import { PropertyEditor } from './PropertyEditor';
-import { propertyListSearch, readPropertyFilters } from './property-list-model';
-import { useAdminProperty } from './use-admin-properties';
-import './properties.css';
+import { PropertyEditor } from './components/PropertyEditor';
+import { propertyListSearch, readPropertyFilters } from './model/property-list-model';
+import { useAdminProperty } from './hooks/use-admin-properties';
+import './styles/properties.css';
 
 export function AdminPropertyEditorScreen({
   creating = false,

@@ -19,11 +19,22 @@ Follow studyfactory-frontend's organization:
   routing and administrator session lifecycle.
 - `src/app/features/<domain>`: domain API calls, DTO contracts, reusable business
   logic. Health and admin-auth exist; add domains when they are implemented.
-- `src/app/screens/<area>/<screen>`: pages, screen components/hooks/model/styles
-  when needed. Admin login/layout/dashboard/calendar/stays/properties/submissions, entry and dev exist; guest/staff
-  follow later.
+- `src/app/screens/<area>/<screen>`: route screens at the domain root, with
+  supporting `components/`, `hooks/`, `model/`, and `styles/` folders as needed.
+  Admin login/layout/dashboard/calendar/stays/properties/stay-imports/submissions,
+  entry and dev exist; guest/staff follow later.
 - `src/app/shared/ui` and `shared/layout`: business-neutral reusable components.
 - `src/app/styles`: reset, shared tokens, base styles and their single entrypoint.
+
+For admin domains, keep `*Screen.tsx` (or the layout entry) and a small `index.ts`
+at the domain root. `index.ts` exports only the route screens/layout for the router.
+Supporting forms/cards/rows belong in `components/`; screen state and request hooks
+in `hooks/`; pure validation, formatting and navigation helpers in `model/`; and
+screen CSS in `styles/`. Create only folders with actual files. Internal modules
+import their collaborators directly rather than through the screen entrypoint.
+Shared administrator session UI and styles live in `screens/admin/components/`
+and `screens/admin/styles/`. API contracts remain in `features/`; business-neutral
+UI remains in `shared/`. Preserve this structure as later slices are added.
 
 Use named exports, small focused components, scoped class-based CSS and shared
 tokens. Screen-local code remains with its screen. Avoid empty scaffolding and
