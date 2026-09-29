@@ -1,4 +1,5 @@
 import { useSearchParams } from 'react-router-dom';
+import { appRoutes } from '../../../core/router/routes';
 import { useAdminSession } from '../../../core/session/use-admin-session';
 import {
   formatSeoulUpdatedAt,
@@ -7,6 +8,7 @@ import {
 import { useAdminPropertyOptions } from '../../../features/admin-properties/use-admin-property-options';
 import { Button } from '../../../shared/ui/Button/Button';
 import { PageState } from '../../../shared/ui/PageState/PageState';
+import { maintenanceSearch } from '../maintenance/model/maintenance-filters';
 import { DashboardFilters } from './components/DashboardFilters';
 import { DashboardOverview } from './components/DashboardOverview';
 import { readDashboardFilters } from './model/dashboard-filters';
@@ -40,6 +42,30 @@ function DashboardWorkspace({
   const data =
     dashboard.resource.status === 'ready' ? dashboard.resource.data : undefined;
   const selectedDate = input.date ?? data?.date ?? getSeoulToday();
+  const maintenanceScope = {
+    page: 1,
+    propertyId: input.propertyId,
+    dateField: 'STARTED',
+    view: 'ALL',
+  } as const;
+  const maintenanceLinks = {
+    started: `${appRoutes.adminMaintenance}${maintenanceSearch({
+      ...maintenanceScope,
+      from: selectedDate,
+      to: selectedDate,
+    })}`,
+    completed: `${appRoutes.adminMaintenance}${maintenanceSearch({
+      ...maintenanceScope,
+      dateField: 'SUBMITTED',
+      view: 'COMPLETED',
+      from: selectedDate,
+      to: selectedDate,
+    })}`,
+    unfinished: `${appRoutes.adminMaintenance}${maintenanceSearch({
+      ...maintenanceScope,
+      view: 'UNFINISHED',
+    })}`,
+  };
   const propertyOptions =
     properties.resource.status === 'ready' ? properties.resource.data : [];
   const propertyName = input.propertyId
@@ -166,7 +192,12 @@ function DashboardWorkspace({
               </PageState>
             </div>
           )}
-          {data && <DashboardOverview data={data} />}
+          {data && (
+            <DashboardOverview
+              data={data}
+              maintenanceLinks={maintenanceLinks}
+            />
+          )}
         </section>
       )}
     </div>

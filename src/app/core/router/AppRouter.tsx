@@ -11,6 +11,7 @@ import { RequireAdmin } from './RequireAdmin';
 import { AdminLoginScreen } from '../../screens/admin/login';
 import { AdminLayout } from '../../screens/admin/layout';
 import { AdminDashboardScreen } from '../../screens/admin/dashboard';
+import { AdminMaintenanceScreen } from '../../screens/admin/maintenance';
 import { AdminCalendarScreen } from '../../screens/admin/calendar';
 import {
   AdminStayImportUploadScreen,
@@ -107,6 +108,10 @@ export function AppRouter() {
             <Route
               path={appRoutes.adminCalendar}
               element={<AdminCalendarScreen />}
+            />
+            <Route
+              path={appRoutes.adminMaintenance}
+              element={<AdminMaintenanceScreen />}
             />
             <Route
               path={appRoutes.adminSubmissions}

@@ -342,8 +342,8 @@ responses, and 401/403 rejects only the credential that made the request.
 Verification uses disposable snapshots validated by the real backend parser and a
 synthetic local API/browser fixture, plus typecheck, lint and build. It does not
 establish live database/S3 authorization or physical-device proof. No backend edits,
-new dependencies or repository test files. Unfinished maintenance, issues,
-guest/staff workflows and PWA remain separate slices.
+new dependencies or repository test files. Maintenance monitoring is documented below. Issues, guest/staff workflows and
+PWA remain separate slices.
 
 
 ## Administrator checklist-to-stay linking
@@ -387,3 +387,45 @@ disposable local API/browser checks for link/replacement/unlink, candidate pagin
 required reasons, conflicts, unknown-result reconciliation, dirty prompts and
 320px/390px layouts. These checks do not prove real database/authenticated guest
 workflow integration. No backend, database, dependency or repository test edits.
+
+
+## Administrator cleaning and maintenance monitoring
+
+`/admin/maintenance` is read-only and consumes `GET /admin/maintenance`.
+Feature DTOs/readers/API live in `features/admin-maintenance`; the screen domain
+keeps components, hooks, models and styles in separate folders. The desktop table
+becomes cards on small screens; the existing mobile navigation now has five items.
+
+URL filters support active/inactive property, ALL/UNFINISHED/COMPLETED views,
+STARTED/SUBMITTED date basis, paired optional Seoul dates (maximum 62 inclusive
+days) and 20-record pagination. Dates omitted means all dates. Invalid filter
+values remain visible and prevent fetching; SUBMITTED plus UNFINISHED is invalid.
+Results preserve server date-descending, nulls-last, ID-descending order. Out-of-range
+pages return to the last available page. Reset also clears unsaved local inputs.
+
+UNFINISHED includes expired, blocked and review-needed drafts; COMPLETED view
+means submitted records and may include NEEDS_REVIEW. UI labels it 제출된 기록
+and counts matching records, never deduplicated jobs or certified completions.
+Badges and reason text preserve all five classifier states. Damaged diagnostic
+records can have missing staff/timestamps and inconsistent revision values.
+StartedAt is opening a checklist, updatedAt is a saved change, and neither is
+physical work or live-presence evidence. Status is evaluated at response asOf.
+Captured staff/property labels remain historical; property active state is current.
+
+Only classified COMPLETED records open existing saved checklist/photo/history
+details. Return links retain maintenance filters/page and mobile navigation context.
+The irrelevant stay-association editor is hidden for MAINTENANCE details.
+Dashboard start and submission links use the selected Seoul date and property;
+current unfinished links preserve property and omit dates. No derived-status-only
+filters, admin resume/complete/cancel actions, automatic retries or polling.
+
+Reads validate envelopes, identities, classifier fields, filter scope, paging and
+ordering. Filter/unmount/credential changes abort and fence late responses;
+401/403 rejects only the requesting credential. Loading, empty, server failure,
+malformed response, property-option failure and explicit retry remain distinct.
+
+Validation uses typecheck/lint/build and disposable API/classifier/filter probes
+outside the repository. Browser checks use synthetic local data for statuses,
+filters, paging, reset, errors, detail/photo/history, dashboard links and mobile
+layouts. This does not establish real database/S3 integration or physical-device
+PWA behavior. No backend, database, dependency or repository test files changed.

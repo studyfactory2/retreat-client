@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import type {
   AdminDashboardDto,
   DashboardChecklistCounts,
@@ -6,6 +7,11 @@ import '../styles/dashboard-overview.css';
 
 type DashboardOverviewProps = {
   data: AdminDashboardDto;
+  maintenanceLinks: {
+    started: string;
+    completed: string;
+    unfinished: string;
+  };
 };
 
 type MetricIconName = 'arrival' | 'departure' | 'maintenance' | 'complete';
@@ -87,7 +93,10 @@ function ChecklistSummary({
   );
 }
 
-export function DashboardOverview({ data }: DashboardOverviewProps) {
+export function DashboardOverview({
+  data,
+  maintenanceLinks,
+}: DashboardOverviewProps) {
   const metrics = [
     {
       label: '입실 예정',
@@ -106,12 +115,22 @@ export function DashboardOverview({ data }: DashboardOverviewProps) {
       count: data.maintenance.started,
       description: '선택일에 작성을 시작한 기록',
       icon: 'maintenance' as const,
+      link: {
+        to: maintenanceLinks.started,
+        label: '시작한 기록 보기',
+        accessibleLabel: `${data.date} 정비: 시작한 기록 보기`,
+      },
     },
     {
       label: '정비 완료',
       count: data.maintenance.completed,
       description: `확인 필요 ${formatCount(data.maintenance.completionNeedsReview)}건 별도`,
       icon: 'complete' as const,
+      link: {
+        to: maintenanceLinks.completed,
+        label: '제출 기록 보기 · 확인 필요 포함',
+        accessibleLabel: `${data.date} 정비: 제출 기록 보기 · 확인 필요 포함`,
+      },
     },
   ];
   const unfinished = data.maintenance.unfinished;
@@ -144,6 +163,16 @@ export function DashboardOverview({ data }: DashboardOverviewProps) {
               <p className="dashboard-metric__description">
                 {metric.description}
               </p>
+              {metric.link && (
+                <Link
+                  className="dashboard-record-link"
+                  to={metric.link.to}
+                  aria-label={metric.link.accessibleLabel}
+                >
+                  <span>{metric.link.label}</span>
+                  <span aria-hidden="true">→</span>
+                </Link>
+              )}
             </article>
           ))}
         </div>
@@ -235,6 +264,14 @@ export function DashboardOverview({ data }: DashboardOverviewProps) {
                 남아 있는 미완료 정비 기록이 없습니다.
               </p>
             )}
+            <Link
+              className="dashboard-record-link"
+              to={maintenanceLinks.unfinished}
+              aria-label="정비: 현재 미완료 기록 보기 · 날짜 제한 없음"
+            >
+              <span>현재 미완료 기록 보기</span>
+              <span aria-hidden="true">→</span>
+            </Link>
           </article>
 
           <article className="dashboard-current__card">

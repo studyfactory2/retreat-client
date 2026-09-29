@@ -35,6 +35,15 @@ const navigationItems = [
     ),
   },
   {
+    to: appRoutes.adminMaintenance,
+    label: '청소·정비',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M14 6a5 5 0 0 0-6 6L3 17a2.8 2.8 0 0 0 4 4l5-5a5 5 0 0 0 6-6l-3 3-4-4 3-3Z" />
+      </svg>
+    ),
+  },
+  {
     to: appRoutes.adminProperties,
     label: '휴양소 관리',
     icon: (
@@ -46,7 +55,10 @@ const navigationItems = [
 ];
 
 export function AdminNavigation() {
-  const { pathname } = useLocation();
+  const { pathname, search } = useLocation();
+  const maintenanceDetail =
+    matchPath(appRoutes.adminSubmissionDetail, pathname) &&
+    new URLSearchParams(search).get('source') === 'maintenance';
   const stayRoute = matchPath(
     { path: appRoutes.adminStays, end: false },
     pathname,
@@ -57,8 +69,12 @@ export function AdminNavigation() {
       {navigationItems.map(({ to, label, icon }) => {
         const exact = matchPath({ path: to, end: true }, pathname);
         const active =
-          matchPath({ path: to, end: to === appRoutes.admin }, pathname) ||
-          (to === appRoutes.adminCalendar && stayRoute);
+          maintenanceDetail &&
+          (to === appRoutes.adminMaintenance ||
+            to === appRoutes.adminSubmissions)
+            ? to === appRoutes.adminMaintenance
+            : matchPath({ path: to, end: to === appRoutes.admin }, pathname) ||
+              (to === appRoutes.adminCalendar && stayRoute);
 
         return (
           <Link

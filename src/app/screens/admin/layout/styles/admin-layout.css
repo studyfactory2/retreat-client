@@ -288,7 +288,7 @@
 
   .admin-layout__navigation nav {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: 6px;
   }
 
@@ -363,5 +363,11 @@
 
   .admin-layout__main {
     padding: 26px 20px calc(28px + var(--admin-bottom-clearance));
+  }
+}
+
+@media (max-width: 380px) {
+  .admin-layout__nav-link {
+    font-size: 10px;
   }
 }

@@ -28,6 +28,7 @@ import {
   submissionListSearch,
 } from './model/submission-list-model';
 import { useSubmissionDetail } from './hooks/use-submission-detail';
+import { maintenanceReturnPath } from '../maintenance/model/maintenance-navigation';
 import './styles/submission-detail.css';
 
 export function AdminSubmissionDetailScreen() {
@@ -81,7 +82,11 @@ function SubmissionWorkspace({
       refresh();
     });
   const [search] = useSearchParams();
-  const returnTo = `/admin/submissions${submissionListSearch(readSubmissionListFilters(search))}`;
+  const maintenanceReturn = maintenanceReturnPath(search);
+  const returnTo =
+    maintenanceReturn ??
+    `/admin/submissions${submissionListSearch(readSubmissionListFilters(search))}`;
+  const returnLabel = maintenanceReturn ? '정비 목록으로' : '제출 목록으로';
   useEffect(() => {
     if (resource.status !== 'loading')
       document.getElementById('main-content')?.focus({ preventScroll: true });
@@ -108,7 +113,7 @@ function SubmissionWorkspace({
             <Button onClick={refresh}>다시 불러오기</Button>
           )}
           <Link className="ui-button admin-button-secondary" to={returnTo}>
-            제출 목록으로
+            {returnLabel}
           </Link>
         </PageState>
       </div>
@@ -136,7 +141,7 @@ function SubmissionWorkspace({
               navigation.request(() => navigate(returnTo));
             }}
           >
-            제출 목록으로
+            {returnLabel}
           </Link>
           <Button
             className="admin-button-secondary"
@@ -206,29 +211,31 @@ function SubmissionWorkspace({
           </p>
         )}
       </section>
-      <SubmissionStayLink
-        key={`stay-link:${revision.id}`}
-        detail={detail}
-        token={token}
-        rejectSession={rejectSession}
-        onEditStateChange={setEditState}
-        onRefresh={refreshRecord}
-        onOpenStay={() =>
-          navigation.request(() =>
-            navigate(`/admin/stays/${revision.record.stayId}?from=list`),
-          )
-        }
-        onSaved={(receipt) => {
-          navigation.keep();
-          setEditState({ dirty: false, busy: false });
-          setNotice(
-            receipt.changed
-              ? '이용 일정 연결 변경이 저장되었습니다. 아래는 최신 제출 기록입니다.'
-              : '연결 내용을 확인했습니다. 저장된 연결과 같아 새 이력은 추가되지 않았습니다.',
-          );
-          refresh();
-        }}
-      />
+      {revision.record.type !== 'MAINTENANCE' && (
+        <SubmissionStayLink
+          key={`stay-link:${revision.id}`}
+          detail={detail}
+          token={token}
+          rejectSession={rejectSession}
+          onEditStateChange={setEditState}
+          onRefresh={refreshRecord}
+          onOpenStay={() =>
+            navigation.request(() =>
+              navigate(`/admin/stays/${revision.record.stayId}?from=list`),
+            )
+          }
+          onSaved={(receipt) => {
+            navigation.keep();
+            setEditState({ dirty: false, busy: false });
+            setNotice(
+              receipt.changed
+                ? '이용 일정 연결 변경이 저장되었습니다. 아래는 최신 제출 기록입니다.'
+                : '연결 내용을 확인했습니다. 저장된 연결과 같아 새 이력은 추가되지 않았습니다.',
+            );
+            refresh();
+          }}
+        />
+      )}
       <SubmissionRecord record={revision.record} />
       <SubmissionPhotos
         key={revision.id}
