@@ -6,6 +6,8 @@ import type {
   AdminIssueHistoryDto,
   AdminIssueListDto,
   AdminIssuePhotoViewDto,
+  AddAdminIssueNoteInput,
+  ChangeAdminIssueStatusInput,
 } from './admin-issues.types';
 import { readIssueSummary } from './admin-issue-record-readers';
 import {
@@ -21,6 +23,15 @@ import {
   requireIssuePage,
   validateIssueFilters,
 } from './admin-issues-validation';
+
+import {
+  prepareIssueNote,
+  prepareIssueStatus,
+} from './admin-issue-action-validation';
+import {
+  readIssueNoteResult,
+  readIssueStatusResult,
+} from './admin-issue-action-readers';
 
 export const ISSUE_LIST_PAGE_SIZE = 20;
 export const ISSUE_HISTORY_PAGE_SIZE = 5;
@@ -152,4 +163,47 @@ export async function getAdminIssuePhotoView(
       { token, signal },
     ),
   );
+}
+
+export async function addAdminIssueNote(
+  id: string,
+  input: AddAdminIssueNoteInput,
+  token: string,
+  signal?: AbortSignal,
+): Promise<AdminIssueDetailDto> {
+  const issueId = requireIssueId(id);
+  const body = prepareIssueNote(input);
+
+  const response = await apiRequest<unknown>(`/admin/issues/${issueId}/notes`, {
+    method: 'POST',
+    token,
+    signal,
+    body: { expectedVersion: body.expectedVersion, note: body.note },
+  });
+
+  return readIssueNoteResult(response, issueId, body);
+}
+
+export async function changeAdminIssueStatus(
+  id: string,
+  input: ChangeAdminIssueStatusInput,
+  token: string,
+  signal?: AbortSignal,
+): Promise<AdminIssueDetailDto> {
+  const issueId = requireIssueId(id);
+  const body = prepareIssueStatus(input);
+  const response = await apiRequest<unknown>(
+    `/admin/issues/${issueId}/status`,
+    {
+      method: 'POST',
+      token,
+      signal,
+      body: {
+        expectedVersion: body.expectedVersion,
+        status: body.status,
+        ...(body.note === undefined ? {} : { note: body.note }),
+      },
+    },
+  );
+  return readIssueStatusResult(response, issueId, body);
 }

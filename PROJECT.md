@@ -120,7 +120,7 @@ now provides upload, saved preview, row review/exclusion and final confirmation.
 Checklist records include filters, saved details, revision history and private photos,
 plus administrator linking of eligible guest QR records to stays. Cleaning and
 maintenance monitoring and read-only issue lists/details/history/photos are available.
-Issue notes and status changes remain a separate slice. Other management screens, guest/staff link validation,
+Issue notes, resolution and reopening are available. Other management screens, guest/staff link validation,
 caches, PWA/offline support, content setup and deployment remain outside this
 slice.
 Report typecheck/lint/build separately from actual browser/backend/mobile checks.
@@ -435,12 +435,12 @@ layouts. This does not establish real database/S3 integration or physical-device
 PWA behavior. No backend, database, dependency or repository test files changed.
 
 
-## Administrator issues: read-only slice
+## Administrator issues: list, details and actions
 
 `features/admin-issues` owns validated GET list/detail/history and exact-event
 photo-view contracts. `/admin/issues` and `/admin/issues/:id` keep screens at the
-domain root and components/hooks/models/styles in their own folders. No issue
-mutation controls are added; notes and status transitions follow separately.
+domain root and components/hooks/models/styles in their own folders. Action APIs
+use POST notes/status, with request validation and action-specific receipt readers.
 
 The list has URL-backed property (including inactive), NEW/IN_PROGRESS/RESOLVED
 status, true/false urgency and reportedAt Seoul date filters with 20-record pages.
@@ -478,3 +478,43 @@ and a synthetic local API/browser session. Browser checks cover paging, filters,
 original report/history, private photo expiry, stale history and 320px/390px
 layouts. These do not establish real database/S3 integration or physical-device
 PWA behavior. No backend, database, dependency or repository test files changed.
+
+
+### Administrator issue action workflow
+
+The detail action panel supports notes on NEW/IN_PROGRESS/RESOLVED records,
+NEW to IN_PROGRESS with an optional note, NEW or IN_PROGRESS to RESOLVED with
+a required note, and RESOLVED to IN_PROGRESS with a required reopening reason.
+Cancelled issues have no controls. The maximum writable version is 2147483646.
+Notes are trimmed and limited to 2000 Unicode code points. Blank optional status
+notes are omitted. There is no transition back to NEW, cancellation action, admin
+photo upload or notification in this slice.
+
+Status changes show an explicit confirmation with the issue, target status and
+exact memo before POST. Separate note saves submit directly. Reset confirms before
+clearing edited inputs; page-local return and detail reload confirm before
+discarding a draft. Unload warns while dirty or saving. Shared sidebar/mobile
+navigation, source links and browser back remain outside this local guard, matching
+the existing forms; there is no global SPA navigation blocker or browser draft
+storage. Aborting a request cannot undo a server-side commit.
+
+Every request uses the loaded currentVersion. A synchronous in-flight lock prevents
+duplicate submissions. Validation errors retain editable inputs; 404/409 and
+exhausted versions require a fresh read. Network/timeouts/5xx and malformed success
+responses may follow a commit, so writes remain blocked until an explicit reread
+and review. Never automatically retry or silently rebase a note onto a new version.
+Only the initiating credential is rejected on 401/403; unmount/version/credential
+changes abort and fence late results.
+
+Success receipts validate the next version, exact event/transition/note, current
+administrator, resolution fields, preserved original report and immutable issue
+content/source. Newly captured property/category names may change. The verified
+detail replaces only the matching loaded version; forms and paginated history reset
+for the new version. A successful save and a subsequent history-read failure stay
+distinct. Original report/photos remain visible and unchanged.
+
+Verification uses disposable frontend API/model/receipt probes and the actual
+compiled backend DTOs/service/reader over in-memory transactions. Browser checks
+exercise notes, status transitions, confirmations, required fields, stale versions,
+uncertain committed results and responsive layouts. No real database/S3 mutation,
+backend/schema/dependency changes, Git staging or repository test files.

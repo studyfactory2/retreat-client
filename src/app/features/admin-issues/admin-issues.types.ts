@@ -58,3 +58,14 @@ export interface AdminIssuePhotoViewDto {
   url: string;
   expiresAt: string;
 }
+
+export interface AddAdminIssueNoteInput {
+  expectedVersion: number;
+  note: string;
+}
+
+export interface ChangeAdminIssueStatusInput {
+  expectedVersion: number;
+  status: 'IN_PROGRESS' | 'RESOLVED';
+  note?: string;
+}

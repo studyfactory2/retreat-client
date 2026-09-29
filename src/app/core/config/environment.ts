@@ -3,16 +3,16 @@ export function resolveApiBaseUrl(
   development: boolean,
 ): string {
   const configured =
-    value?.trim() || (development ? 'http://localhost:3100' : '')
-  if (!configured) throw new Error('VITE_API_BASE_URL must be configured.')
+    value?.trim() || (development ? 'http://localhost:3100' : '');
+  if (!configured) throw new Error('VITE_API_BASE_URL must be configured.');
 
-  let url: URL
+  let url: URL;
   try {
-    url = new URL(configured)
+    url = new URL(configured);
   } catch {
-    throw new Error('VITE_API_BASE_URL must be an HTTP(S) origin.')
+    throw new Error('VITE_API_BASE_URL must be an HTTP(S) origin.');
   }
-  const local = ['localhost', '127.0.0.1', '[::1]'].includes(url.hostname)
+  const local = ['localhost', '127.0.0.1', '[::1]'].includes(url.hostname);
   if (
     !['http:', 'https:'].includes(url.protocol) ||
     url.username ||
@@ -24,9 +24,9 @@ export function resolveApiBaseUrl(
   ) {
     throw new Error(
       'VITE_API_BASE_URL must be an origin without a path or credentials; production requires HTTPS.',
-    )
+    );
   }
-  return url.origin
+  return url.origin;
 }
 
 export const appConfig = {
@@ -34,4 +34,4 @@ export const appConfig = {
     import.meta.env.VITE_API_BASE_URL,
     import.meta.env.DEV,
   ),
-} as const
+} as const;

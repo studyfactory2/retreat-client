@@ -55,5 +55,21 @@ export function useIssueDetail(
     result?.key === key && result.owner === token
       ? result.resource
       : { status: 'loading' };
-  return { resource, refresh: () => setGeneration((value) => value + 1) };
+  function acceptSaved(data: AdminIssueDetailDto, expectedVersion: number) {
+    setResult((current) =>
+      current?.owner === token &&
+      current.key === key &&
+      current.resource.status === 'ready' &&
+      current.resource.data.issue.currentVersion === expectedVersion &&
+      data.issue.id === id &&
+      data.issue.currentVersion === expectedVersion + 1
+        ? { key, owner: token, resource: { status: 'ready', data } }
+        : current,
+    );
+  }
+  return {
+    resource,
+    refresh: () => setGeneration((value) => value + 1),
+    acceptSaved,
+  };
 }

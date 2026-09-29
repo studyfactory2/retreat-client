@@ -344,3 +344,28 @@
     font-size: 12px;
   }
 }
+
+.issue-detail-action-boundary {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+.issue-detail-success,
+.issue-detail-discard {
+  padding: 20px;
+  border: 1px solid #b9dcd1;
+  border-radius: var(--radius-md);
+  background: #edf8f3;
+  color: #17695a;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+}
+.issue-detail-discard {
+  border-color: #e8cd96;
+  background: #fff8eb;
+  color: #765017;
+}
+.issue-detail-discard p {
+  margin: 12px 0 18px;
+}

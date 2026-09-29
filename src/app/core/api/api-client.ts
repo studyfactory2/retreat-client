@@ -1,16 +1,21 @@
-import { appConfig } from '../config/environment'
-import { ApiRequestError, readApiError } from './api-error'
+import { appConfig } from '../config/environment';
+import { ApiRequestError, readApiError } from './api-error';
 
 type JsonValue =
-  string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue }
+  | string
+  | number
+  | boolean
+  | null
+  | JsonValue[]
+  | { [key: string]: JsonValue };
 type RequestOptions = {
-  token?: string
-  signal?: AbortSignal
-  timeoutMs?: number
+  token?: string;
+  signal?: AbortSignal;
+  timeoutMs?: number;
 } & (
   | { method?: 'GET'; body?: never }
   | { method: 'POST'; body?: JsonValue | FormData }
-)
+);
 
 async function request<T>(
   path: string,
@@ -28,33 +33,33 @@ async function request<T>(
       '요청 주소를 확인해 주세요.',
       null,
       'INVALID_API_PATH',
-    )
+    );
   }
-  const url = new URL(path, appConfig.apiBaseUrl)
+  const url = new URL(path, appConfig.apiBaseUrl);
   if (url.origin !== appConfig.apiBaseUrl) {
     throw new ApiRequestError(
       '요청 주소를 확인해 주세요.',
       null,
       'INVALID_API_PATH',
-    )
+    );
   }
 
-  const headers = new Headers({ Accept: 'application/json' })
+  const headers = new Headers({ Accept: 'application/json' });
   if (options.token !== undefined)
-    headers.set('Authorization', `Bearer ${options.token}`)
-  const multipart = options.body instanceof FormData
+    headers.set('Authorization', `Bearer ${options.token}`);
+  const multipart = options.body instanceof FormData;
   if (options.body !== undefined && !multipart)
-    headers.set('Content-Type', 'application/json')
+    headers.set('Content-Type', 'application/json');
 
-  const controller = new AbortController()
-  const abort = () => controller.abort()
-  options.signal?.addEventListener('abort', abort, { once: true })
-  if (options.signal?.aborted) abort()
-  let timedOut = false
+  const controller = new AbortController();
+  const abort = () => controller.abort();
+  options.signal?.addEventListener('abort', abort, { once: true });
+  if (options.signal?.aborted) abort();
+  let timedOut = false;
   const timeout = setTimeout(() => {
-    timedOut = true
-    controller.abort()
-  }, options.timeoutMs ?? 30_000)
+    timedOut = true;
+    controller.abort();
+  }, options.timeoutMs ?? 30_000);
   try {
     const response = await fetch(url, {
       method: options.method ?? 'GET',
@@ -70,52 +75,51 @@ async function request<T>(
       referrerPolicy: 'no-referrer',
       redirect: 'error',
       signal: controller.signal,
-    })
-    if (!response.ok) throw await readApiError(response)
-    return await read(response)
+    });
+    if (!response.ok) throw await readApiError(response);
+    return await read(response);
   } catch (error) {
     if (options.signal?.aborted)
-      throw new DOMException('Request cancelled', 'AbortError')
+      throw new DOMException('Request cancelled', 'AbortError');
     if (timedOut)
       throw new ApiRequestError(
         '응답이 지연되고 있습니다. 잠시 후 다시 시도해 주세요.',
         null,
         'REQUEST_TIMEOUT',
-      )
-    if (error instanceof ApiRequestError) throw error
+      );
+    if (error instanceof ApiRequestError) throw error;
     throw new ApiRequestError(
       '서버에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.',
       null,
       'NETWORK_ERROR',
-    )
+    );
   } finally {
-    clearTimeout(timeout)
-    options.signal?.removeEventListener('abort', abort)
+    clearTimeout(timeout);
+    options.signal?.removeEventListener('abort', abort);
   }
 }
 
-// The caller validates important response fields. The generic is a TypeScript contract.
 export function apiRequest<T>(
   path: string,
   options: RequestOptions = {},
 ): Promise<T> {
   return request(path, options, async (response) => {
-    if (response.status === 204) return undefined as T
+    if (response.status === 204) return undefined as T;
     try {
-      return (await response.json()) as T
+      return (await response.json()) as T;
     } catch {
       throw new ApiRequestError(
         '서버 응답을 확인할 수 없습니다.',
         response.status,
         'INVALID_RESPONSE',
-      )
+      );
     }
-  })
+  });
 }
 
 export function apiDownload(
   path: string,
   options: RequestOptions = {},
 ): Promise<Blob> {
-  return request(path, options, (response) => response.blob())
+  return request(path, options, (response) => response.blob());
 }
