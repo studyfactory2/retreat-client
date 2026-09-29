@@ -7,6 +7,7 @@ import '../styles/dashboard-overview.css';
 
 type DashboardOverviewProps = {
   data: AdminDashboardDto;
+  issueLinks: { new: string; inProgress: string };
   maintenanceLinks: {
     started: string;
     completed: string;
@@ -96,6 +97,7 @@ function ChecklistSummary({
 export function DashboardOverview({
   data,
   maintenanceLinks,
+  issueLinks,
 }: DashboardOverviewProps) {
   const metrics = [
     {
@@ -307,6 +309,24 @@ export function DashboardOverview({
                 </dd>
               </div>
             </dl>
+            <div className="dashboard-issue-links">
+              <Link
+                className="dashboard-record-link"
+                to={issueLinks.new}
+                aria-label="이상사항: 신규 접수 보기 · 날짜 제한 없음"
+              >
+                <span>신규 접수 보기</span>
+                <span aria-hidden="true">→</span>
+              </Link>
+              <Link
+                className="dashboard-record-link"
+                to={issueLinks.inProgress}
+                aria-label="이상사항: 조치 중 보기 · 날짜 제한 없음"
+              >
+                <span>조치 중 보기</span>
+                <span aria-hidden="true">→</span>
+              </Link>
+            </div>
             {data.issues.total === 0 && (
               <p className="dashboard-current__empty">
                 현재 미처리 이상사항이 없습니다.

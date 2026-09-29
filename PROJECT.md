@@ -22,7 +22,7 @@ Follow studyfactory-frontend's organization:
 - `src/app/screens/<area>/<screen>`: route screens at the domain root, with
   supporting `components/`, `hooks/`, `model/`, and `styles/` folders as needed.
   Admin login/layout/dashboard/calendar/stays/properties/stay-imports/submissions,
-  entry and dev exist; guest/staff follow later.
+  maintenance/issues/more, entry and dev exist; guest/staff follow later.
 - `src/app/shared/ui` and `shared/layout`: business-neutral reusable components.
 - `src/app/styles`: reset, shared tokens, base styles and their single entrypoint.
 
@@ -118,8 +118,9 @@ details and editing, plus property registration and settings. The stay list now 
 search/status/property filters, cancellation/restoration and revision history. Excel import
 now provides upload, saved preview, row review/exclusion and final confirmation.
 Checklist records include filters, saved details, revision history and private photos,
-plus administrator linking of eligible guest QR records to stays.
-Other management screens, guest/staff link validation,
+plus administrator linking of eligible guest QR records to stays. Cleaning and
+maintenance monitoring and read-only issue lists/details/history/photos are available.
+Issue notes and status changes remain a separate slice. Other management screens, guest/staff link validation,
 caches, PWA/offline support, content setup and deployment remain outside this
 slice.
 Report typecheck/lint/build separately from actual browser/backend/mobile checks.
@@ -207,7 +208,10 @@ client/operator branding choice is confirmed.
 
 ## Administrator navigation
 
-`AdminNavigation` owns the four menu entries and their route groups.
+`layout/model/admin-menu` defines the primary and secondary menu entries;
+`AdminNavigation` handles their route groups. Desktop shows six entries. Mobile
+shows 운영, 일정, 정비, 이상사항 and 더보기. The `/admin/more` screen links to
+제출 기록 and 휴양소 관리; their nested routes keep 더보기 active on mobile.
 One navigation tree appears as a sidebar above 760px and a fixed bottom bar at
 760px and below. Mobile links use equal columns, icons above labels, a blue active
 state and a minimum 56px touch target. The page reserves space for the bar and
@@ -216,8 +220,8 @@ The current viewport stays contained; `viewport-fit=cover` is deferred to the PW
 slice, which must handle safe areas across public as well as admin screens.
 
 Stay list/creation/details remain in the calendar navigation group; property creation
-and settings remain in the properties group. Submission list/details have their own
-제출 기록 entry. Links expose the current page or
+and settings remain in the properties group. Submission list/details belong to
+제출 기록, except maintenance drilldowns, which retain the 정비 context. Links expose the current page or
 section to assistive technology. Path changes reset scroll and focus the main
 content; filter/query changes do not reset the layout's scroll position. Login,
 guest and staff routes do not mount administrator navigation. PWA installation,
@@ -428,4 +432,49 @@ Validation uses typecheck/lint/build and disposable API/classifier/filter probes
 outside the repository. Browser checks use synthetic local data for statuses,
 filters, paging, reset, errors, detail/photo/history, dashboard links and mobile
 layouts. This does not establish real database/S3 integration or physical-device
+PWA behavior. No backend, database, dependency or repository test files changed.
+
+
+## Administrator issues: read-only slice
+
+`features/admin-issues` owns validated GET list/detail/history and exact-event
+photo-view contracts. `/admin/issues` and `/admin/issues/:id` keep screens at the
+domain root and components/hooks/models/styles in their own folders. No issue
+mutation controls are added; notes and status transitions follow separately.
+
+The list has URL-backed property (including inactive), NEW/IN_PROGRESS/RESOLVED
+status, true/false urgency and reportedAt Seoul date filters with 20-record pages.
+Date inputs use native calendar pickers. Either date can be omitted; this API has
+no 62-day cap. Invalid URL values remain invalid and block fetching until corrected
+or reset. Clearing filters also clears local unsaved inputs. Valid empty, loading,
+malformed/server-error and property-option failure states remain distinct.
+Cancelled issues are excluded by the list API but can be opened directly.
+
+Detail preserves current content, original report/reporter/photos and the latest
+event. Historical property/category/template/actor labels come from saved
+snapshots. Standalone guest reports have no checklist source; show a source link
+only when one exists. Guest reporter information is self-entered; staff identity
+was captured from the property assignment. A staff repair report is not itself an
+administrator resolution. Cancelled records retain their report/history display.
+
+History fetches five events per page and expands each saved snapshot on demand.
+The loaded current version anchors history consistency; a changed or inconsistent
+history asks for a full detail refresh. List filters/page survive the detail return
+link. Reads abort and fence stale responses on filter/unmount/credential changes;
+401/403 rejects only the credential that initiated the request. No polling/retries.
+
+Private photos are requested lazily by issue, event and photo IDs. Do not assume
+contiguous photo ordering or a photo-purpose field. Signed addresses stay only in
+the mounted viewer, expire within 120 seconds and are discarded on close/unmount.
+Images receive no API authorization header and use no-referrer. Failures and
+expired views require explicit retry; signed addresses/error bodies are not printed.
+
+Dashboard current-issue links separately open NEW and IN_PROGRESS lists, keeping
+the selected property and omitting the dashboard date. Native mobile navigation
+keeps five items through the More screen rather than adding extra bottom tabs.
+
+Verification uses typecheck/lint/build, disposable contract/backend-reader probes
+and a synthetic local API/browser session. Browser checks cover paging, filters,
+original report/history, private photo expiry, stale history and 320px/390px
+layouts. These do not establish real database/S3 integration or physical-device
 PWA behavior. No backend, database, dependency or repository test files changed.

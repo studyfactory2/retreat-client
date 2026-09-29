@@ -371,3 +371,20 @@
     font-size: 10px;
   }
 }
+
+.admin-layout__link-short,
+.admin-layout__nav-link--more {
+  display: none;
+}
+@media (max-width: 760px) {
+  .admin-layout__link-label,
+  .admin-layout__nav-link--secondary {
+    display: none;
+  }
+  .admin-layout__link-short {
+    display: inline;
+  }
+  .admin-layout__nav-link--more {
+    display: flex;
+  }
+}

@@ -12,6 +12,11 @@ import { AdminLoginScreen } from '../../screens/admin/login';
 import { AdminLayout } from '../../screens/admin/layout';
 import { AdminDashboardScreen } from '../../screens/admin/dashboard';
 import { AdminMaintenanceScreen } from '../../screens/admin/maintenance';
+import {
+  AdminIssuesScreen,
+  AdminIssueDetailScreen,
+} from '../../screens/admin/issues';
+import { AdminMoreScreen } from '../../screens/admin/more';
 import { AdminCalendarScreen } from '../../screens/admin/calendar';
 import {
   AdminStayImportUploadScreen,
@@ -113,6 +118,15 @@ export function AppRouter() {
               path={appRoutes.adminMaintenance}
               element={<AdminMaintenanceScreen />}
             />
+            <Route
+              path={appRoutes.adminIssues}
+              element={<AdminIssuesScreen />}
+            />
+            <Route
+              path={appRoutes.adminIssueDetail}
+              element={<AdminIssueDetailScreen />}
+            />
+            <Route path={appRoutes.adminMore} element={<AdminMoreScreen />} />
             <Route
               path={appRoutes.adminSubmissions}
               element={<AdminSubmissionsScreen />}

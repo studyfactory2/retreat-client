@@ -8,6 +8,7 @@ import {
 import { useAdminPropertyOptions } from '../../../features/admin-properties/use-admin-property-options';
 import { Button } from '../../../shared/ui/Button/Button';
 import { PageState } from '../../../shared/ui/PageState/PageState';
+import { issueSearch } from '../issues/model/issue-filters';
 import { maintenanceSearch } from '../maintenance/model/maintenance-filters';
 import { DashboardFilters } from './components/DashboardFilters';
 import { DashboardOverview } from './components/DashboardOverview';
@@ -65,6 +66,10 @@ function DashboardWorkspace({
       ...maintenanceScope,
       view: 'UNFINISHED',
     })}`,
+  };
+  const issueLinks = {
+    new: `${appRoutes.adminIssues}${issueSearch({ page: 1, propertyId: input.propertyId, status: 'NEW' })}`,
+    inProgress: `${appRoutes.adminIssues}${issueSearch({ page: 1, propertyId: input.propertyId, status: 'IN_PROGRESS' })}`,
   };
   const propertyOptions =
     properties.resource.status === 'ready' ? properties.resource.data : [];
@@ -196,6 +201,7 @@ function DashboardWorkspace({
             <DashboardOverview
               data={data}
               maintenanceLinks={maintenanceLinks}
+              issueLinks={issueLinks}
             />
           )}
         </section>
