@@ -117,7 +117,8 @@ dashboard, a calendar with selected-day stay lists, and manual stay registration
 details and editing, plus property registration and settings. The stay list now includes
 search/status/property filters, cancellation/restoration and revision history. Excel import
 now provides upload, saved preview, row review/exclusion and final confirmation.
-Read-only checklist records include filters, saved details, revision history and private photos.
+Checklist records include filters, saved details, revision history and private photos,
+plus administrator linking of eligible guest QR records to stays.
 Other management screens, guest/staff link validation,
 caches, PWA/offline support, content setup and deployment remain outside this
 slice.
@@ -328,7 +329,8 @@ the assigned staff captured by the backend. History pages contain five revisions
 with actor, action, reason and expandable full snapshots. Historical labels never
 come from current property options. Append-only revision totals and boundaries
 must agree with the loaded detail; concurrent changes require explicit refresh.
-There is no correction/cancel/restore or stay-link mutation in this slice.
+The initial records slice was read-only. Administrator stay association is now
+available as documented below; answer correction/cancel/restore remain outside it.
 
 Photos load only after an explicit click, bound to a submission, revision and photo.
 The signed URL remains in volatile component state, is removed on expiry/close,
@@ -340,5 +342,48 @@ responses, and 401/403 rejects only the credential that made the request.
 Verification uses disposable snapshots validated by the real backend parser and a
 synthetic local API/browser fixture, plus typecheck, lint and build. It does not
 establish live database/S3 authorization or physical-device proof. No backend edits,
-new dependencies or repository test files. Unfinished maintenance, stay linking,
-issues, guest/staff workflows and PWA remain separate slices.
+new dependencies or repository test files. Unfinished maintenance, issues,
+guest/staff workflows and PWA remain separate slices.
+
+
+## Administrator checklist-to-stay linking
+
+`features/admin-submissions/admin-submission-stays-*` owns validated candidate
+reads and POST association changes. The submission screen keeps the panel,
+candidate cards, editor/review, request hooks, model and CSS in their respective
+components/hooks/model/styles folders. No new route or dependency is required.
+
+The list supports URL-backed LINKED/UNLINKED filters, preserved in detail return
+links. UNLINKED means eligible submitted guest QR arrival/departure records only.
+Unknown filters or combinations with maintenance, cancelled records or a stayId
+show errors without sending a broader request. LINKED includes private-link and
+cancelled records where existing filters permit; it does not imply edit eligibility.
+
+The detail panel offers linking, replacement, current-stay reconfirmation and
+unlinking for SUBMITTED GUEST_QR CHECK_IN/CHECK_OUT records. The backend remains
+authoritative for eligibility, including private-link context absent from the
+reader DTO. Candidate pages contain 20 stays; guest details and planned Seoul
+dates are shown beside captured guest information. Names/phones never auto-match.
+Other same-type associations disable selection. Inactive properties can have no
+candidates while an existing association can still be removed.
+
+Writes require a trimmed 1-1000-character reason, the loaded submission revision
+and selected stay revision. Unlinking sends explicit stayId:null and omits the stay
+revision. Responses validate identities/target/version and always trigger a fresh
+detail/history read; retry receipts are never applied as the latest state. Answers,
+photos and earlier revisions remain intact. Association is not physical arrival
+or departure evidence.
+
+Duplicate clicks are fenced. 404/409 conflicts and unknown network/5xx/malformed
+success outcomes block further saves until explicit reload/review. Reasons remain
+after rejection. Closing, refreshing and explicit panel/header navigation warn
+before discarding input; page unload also warns. Global SPA sidebar/back navigation
+is not blocked, matching the existing form convention. Confirmation panels receive
+keyboard focus. Requests abort and ignore late results on unmount/token changes;
+401/403 rejects only the requesting credential. No automatic mutation retries.
+
+Verification: typecheck/lint/build, 58 temporary API/filter contract probes and
+disposable local API/browser checks for link/replacement/unlink, candidate paging,
+required reasons, conflicts, unknown-result reconciliation, dirty prompts and
+320px/390px layouts. These checks do not prove real database/authenticated guest
+workflow integration. No backend, database, dependency or repository test edits.

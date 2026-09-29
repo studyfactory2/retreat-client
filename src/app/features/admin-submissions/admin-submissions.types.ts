@@ -16,6 +16,8 @@ export interface AdminSubmissionListInput {
   stayId?: string;
   type?: AdminSubmissionType;
   status?: AdminSubmissionStatus;
+  // Retain an invalid URL value so the filter can report it without broadening.
+  linkStatus?: string;
   from?: string;
   to?: string;
 }

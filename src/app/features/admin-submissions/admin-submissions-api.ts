@@ -33,6 +33,20 @@ export async function getAdminSubmissions(
 ): Promise<AdminSubmissionListDto> {
   requireSubmissionPage(input.page);
   if (
+    (input.linkStatus !== undefined &&
+      input.linkStatus !== 'LINKED' &&
+      input.linkStatus !== 'UNLINKED') ||
+    (input.linkStatus === 'UNLINKED' &&
+      (input.type === 'MAINTENANCE' ||
+        input.status === 'CANCELLED' ||
+        input.stayId !== undefined))
+  )
+    throw new ApiRequestError(
+      '미연결 기록은 특정 일정 조건 없이 제출된 입실·퇴실 기록에서 조회해 주세요.',
+      400,
+      'INVALID_SUBMISSION_LINK_FILTER',
+    );
+  if (
     (input.type !== undefined && !submissionTypes.includes(input.type)) ||
     (input.status !== undefined &&
       !submissionStatuses.includes(input.status)) ||
@@ -62,6 +76,7 @@ export async function getAdminSubmissions(
     stayId,
     type: input.type,
     status: input.status,
+    linkStatus: input.linkStatus,
     from: input.from,
     to: input.to,
   })) {
@@ -86,6 +101,12 @@ export async function getAdminSubmissions(
         (stayId !== undefined && item.stayId !== stayId) ||
         (input.type !== undefined && item.type !== input.type) ||
         (input.status !== undefined && item.status !== input.status) ||
+        (input.linkStatus === 'LINKED' && item.stayId === null) ||
+        (input.linkStatus === 'UNLINKED' &&
+          (item.stayId !== null ||
+            item.status !== 'SUBMITTED' ||
+            item.type === 'MAINTENANCE' ||
+            item.authorSource !== 'GUEST_QR')) ||
         (input.from !== undefined && item.visitDate < input.from) ||
         (input.to !== undefined && item.visitDate > input.to) ||
         (previous !== undefined &&

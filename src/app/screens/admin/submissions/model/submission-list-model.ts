@@ -2,6 +2,9 @@ import type { AdminSubmissionListInput } from '../../../../features/admin-submis
 import { isStayId } from '../../../../features/admin-stays/admin-stays-validation';
 
 export type SubmissionDateErrors = Partial<Record<'from' | 'to', string>>;
+export type SubmissionFilterErrors = SubmissionDateErrors & {
+  linkStatus?: string;
+};
 
 export function readSubmissionListFilters(
   search: URLSearchParams,
@@ -22,6 +25,7 @@ export function readSubmissionListFilters(
         : undefined,
     status:
       status === 'SUBMITTED' || status === 'CANCELLED' ? status : undefined,
+    linkStatus: search.get('linkStatus') || undefined,
     // Keep invalid dates visible so a malformed URL never broadens the query silently.
     from: search.get('from') || undefined,
     to: search.get('to') || undefined,
@@ -35,6 +39,7 @@ export function submissionListSearch(input: AdminSubmissionListInput): string {
     'stayId',
     'type',
     'status',
+    'linkStatus',
     'from',
     'to',
   ] as const)
@@ -46,6 +51,7 @@ export function submissionListSearch(input: AdminSubmissionListInput): string {
     'stayId',
     'type',
     'status',
+    'linkStatus',
     'from',
     'to',
   ] as const)
@@ -79,6 +85,27 @@ export function submissionDateErrors(
     input.from > input.to
   )
     errors.to = '종료 방문일은 시작 방문일과 같거나 이후여야 합니다.';
+  return errors;
+}
+
+export function submissionFilterErrors(
+  input: AdminSubmissionListInput,
+): SubmissionFilterErrors {
+  const errors: SubmissionFilterErrors = submissionDateErrors(input);
+  if (
+    input.linkStatus !== undefined &&
+    input.linkStatus !== 'UNLINKED' &&
+    input.linkStatus !== 'LINKED'
+  )
+    errors.linkStatus = '일정 연결 상태를 다시 선택해 주세요.';
+  else if (input.linkStatus === 'UNLINKED') {
+    if (input.stayId !== undefined)
+      errors.linkStatus =
+        '미연결 기록을 보려면 위의 연결된 일정 조건을 먼저 해제해 주세요.';
+    else if (input.type === 'MAINTENANCE' || input.status === 'CANCELLED')
+      errors.linkStatus =
+        '미연결은 제출된 입실·퇴실 기록만 조회합니다. 유형과 상태를 변경해 주세요.';
+  }
   return errors;
 }
 

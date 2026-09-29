@@ -18,7 +18,7 @@ export function useAdminSubmissions(
   rejectSession: (token: string) => void,
   enabled = true,
 ) {
-  const { page, propertyId, stayId, type, status, from, to } = input;
+  const { page, propertyId, stayId, type, status, linkStatus, from, to } = input;
   const [revision, setRevision] = useState(0);
   const key = `${submissionListSearch(input)}:${enabled}:${revision}`;
   const [result, setResult] = useState<{
@@ -30,7 +30,7 @@ export function useAdminSubmissions(
     if (!enabled) return;
     const controller = new AbortController();
     void getAdminSubmissions(
-      { page, propertyId, stayId, type, status, from, to },
+      { page, propertyId, stayId, type, status, linkStatus, from, to },
       token,
       controller.signal,
     ).then(
@@ -67,6 +67,7 @@ export function useAdminSubmissions(
     stayId,
     type,
     status,
+    linkStatus,
     from,
     to,
     key,

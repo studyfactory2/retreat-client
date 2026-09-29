@@ -1,11 +1,21 @@
-import { useEffect } from 'react';
-import { Link, useParams, useSearchParams } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+import {
+  Link,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from 'react-router-dom';
 import { useAdminSession } from '../../../core/session/use-admin-session';
 import { Button } from '../../../shared/ui/Button/Button';
 import { PageState } from '../../../shared/ui/PageState/PageState';
 import { SubmissionRecord } from './components/SubmissionRecord';
 import { SubmissionPhotos } from './components/SubmissionPhotos';
 import { SubmissionHistory } from './components/SubmissionHistory';
+import {
+  SubmissionStayLink,
+  type SubmissionLinkEditState,
+} from './components/SubmissionStayLink';
+import { useSubmissionLinkNavigation } from './hooks/use-submission-link-navigation';
 import {
   submissionActionLabel,
   submissionRoleLabel,
@@ -44,6 +54,32 @@ function SubmissionWorkspace({
   rejectSession: (token: string) => void;
 }) {
   const { resource, refresh } = useSubmissionDetail(id, token, rejectSession);
+  const navigate = useNavigate();
+  const [editState, setEditState] = useState<SubmissionLinkEditState>({
+    dirty: false,
+    busy: false,
+  });
+  const [notice, setNotice] = useState<string>();
+  const navigation = useSubmissionLinkNavigation(
+    editState.dirty,
+    editState.busy,
+  );
+  const discardPrompt = useRef<HTMLElement>(null);
+  const discardTrigger = useRef<HTMLElement | null>(null);
+  useEffect(() => {
+    if (navigation.pending) {
+      discardTrigger.current =
+        document.activeElement instanceof HTMLElement
+          ? document.activeElement
+          : null;
+      discardPrompt.current?.focus();
+    }
+  }, [navigation.pending]);
+  const refreshRecord = () =>
+    navigation.request(() => {
+      setNotice(undefined);
+      refresh();
+    });
   const [search] = useSearchParams();
   const returnTo = `/admin/submissions${submissionListSearch(readSubmissionListFilters(search))}`;
   useEffect(() => {
@@ -91,14 +127,57 @@ function SubmissionWorkspace({
           </p>
         </div>
         <div className="submission-detail-actions">
-          <Link className="ui-button admin-button-secondary" to={returnTo}>
+          <Link
+            className="ui-button admin-button-secondary"
+            to={returnTo}
+            aria-disabled={editState.busy || undefined}
+            onClick={(event) => {
+              event.preventDefault();
+              navigation.request(() => navigate(returnTo));
+            }}
+          >
             제출 목록으로
           </Link>
-          <Button className="admin-button-secondary" onClick={refresh}>
+          <Button
+            className="admin-button-secondary"
+            disabled={editState.busy}
+            onClick={refreshRecord}
+          >
             새로고침
           </Button>
         </div>
       </header>
+      {notice && (
+        <p className="submission-detail-notice" role="status">
+          {notice}
+        </p>
+      )}
+      {navigation.pending && (
+        <section
+          className="submission-detail-card"
+          role="alertdialog"
+          ref={discardPrompt}
+          tabIndex={-1}
+          aria-labelledby="submission-link-discard-title"
+        >
+          <h2 id="submission-link-discard-title">
+            입력한 연결 변경 내용을 버릴까요?
+          </h2>
+          <p>아직 저장하지 않은 선택과 사유는 사라집니다.</p>
+          <div className="submission-detail-actions">
+            <Button
+              className="admin-button-secondary"
+              onClick={() => {
+                navigation.keep();
+                discardTrigger.current?.focus();
+              }}
+            >
+              계속 작성
+            </Button>
+            <Button onClick={navigation.discard}>입력 버리고 계속</Button>
+          </div>
+        </section>
+      )}
       <section className="submission-detail-card submission-current-revision">
         <div className="submission-detail-section-heading">
           <h2>현재 저장된 내용 · 버전 {detail.currentRevision}</h2>
@@ -127,6 +206,29 @@ function SubmissionWorkspace({
           </p>
         )}
       </section>
+      <SubmissionStayLink
+        key={`stay-link:${revision.id}`}
+        detail={detail}
+        token={token}
+        rejectSession={rejectSession}
+        onEditStateChange={setEditState}
+        onRefresh={refreshRecord}
+        onOpenStay={() =>
+          navigation.request(() =>
+            navigate(`/admin/stays/${revision.record.stayId}?from=list`),
+          )
+        }
+        onSaved={(receipt) => {
+          navigation.keep();
+          setEditState({ dirty: false, busy: false });
+          setNotice(
+            receipt.changed
+              ? '이용 일정 연결 변경이 저장되었습니다. 아래는 최신 제출 기록입니다.'
+              : '연결 내용을 확인했습니다. 저장된 연결과 같아 새 이력은 추가되지 않았습니다.',
+          );
+          refresh();
+        }}
+      />
       <SubmissionRecord record={revision.record} />
       <SubmissionPhotos
         key={revision.id}
@@ -139,7 +241,7 @@ function SubmissionWorkspace({
         currentRevision={detail.currentRevision}
         token={token}
         rejectSession={rejectSession}
-        onRefreshDetail={refresh}
+        onRefreshDetail={refreshRecord}
       />
     </div>
   );

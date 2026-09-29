@@ -63,6 +63,16 @@ export function SubmissionRows({
                 >
                   {item.visitDate}
                 </time>
+                {item.type !== 'MAINTENANCE' && (
+                  <p className="submission-row-muted">
+                    {item.stayId !== null
+                      ? '일정 연결됨'
+                      : item.status === 'SUBMITTED' &&
+                          item.authorSource === 'GUEST_QR'
+                        ? '일정 미연결'
+                        : '연결된 일정 없음'}
+                  </p>
+                )}
               </td>
               <td role="cell">
                 <span className="submission-mobile-label" aria-hidden="true">

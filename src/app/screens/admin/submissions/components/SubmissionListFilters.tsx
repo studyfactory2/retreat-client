@@ -3,9 +3,9 @@ import type { AdminPropertyOption } from '../../../../features/admin-properties/
 import type { AdminSubmissionListInput } from '../../../../features/admin-submissions/admin-submissions.types';
 import { Button } from '../../../../shared/ui/Button/Button';
 import {
-  submissionDateErrors,
+  submissionFilterErrors,
   submissionTypeLabel,
-  type SubmissionDateErrors,
+  type SubmissionFilterErrors,
 } from '../model/submission-list-model';
 
 export function SubmissionListFilters({
@@ -20,15 +20,15 @@ export function SubmissionListFilters({
   onApply: (input: AdminSubmissionListInput) => void;
 }) {
   const [values, setValues] = useState(input);
-  const [errors, setErrors] = useState<SubmissionDateErrors>(() =>
-    submissionDateErrors(input),
+  const [errors, setErrors] = useState<SubmissionFilterErrors>(() =>
+    submissionFilterErrors(input),
   );
   const form = useRef<HTMLFormElement>(null);
   const missingProperty =
     values.propertyId &&
     !properties?.some((property) => property.id === values.propertyId);
   function apply() {
-    const nextErrors = submissionDateErrors(values);
+    const nextErrors = submissionFilterErrors(values);
     for (const field of ['from', 'to'] as const) {
       if (
         form.current?.querySelector<HTMLInputElement>(`#submission-${field}`)
@@ -136,6 +136,34 @@ export function SubmissionListFilters({
             <option value="CANCELLED">취소됨</option>
           </select>
         </div>
+        <div className="submission-filter-field">
+          <label htmlFor="submission-link-status">일정 연결</label>
+          <select
+            id="submission-link-status"
+            value={values.linkStatus ?? ''}
+            onChange={(event) =>
+              setValues((current) => ({
+                ...current,
+                linkStatus: event.target.value || undefined,
+              }))
+            }
+            aria-invalid={!!errors.linkStatus || undefined}
+            aria-describedby={`submission-link-hint${errors.linkStatus ? ' submission-link-status-error' : ''}`}
+          >
+            <option value="">전체 연결 상태</option>
+            <option value="UNLINKED">미연결 이용객 기록</option>
+            <option value="LINKED">연결됨</option>
+            {values.linkStatus &&
+              !['LINKED', 'UNLINKED'].includes(values.linkStatus) && (
+                <option value={values.linkStatus}>확인할 수 없는 연결 조건</option>
+              )}
+          </select>
+          {errors.linkStatus && (
+            <p className="submission-field-error" id="submission-link-status-error">
+              {errors.linkStatus}
+            </p>
+          )}
+        </div>
         {(['from', 'to'] as const).map((field) => (
           <div className="submission-filter-field" key={field}>
             <label htmlFor={`submission-${field}`}>
@@ -179,6 +207,9 @@ export function SubmissionListFilters({
       </div>
       <p id="submission-date-hint" className="submission-filters__hint">
         날짜는 기록의 방문일 기준입니다. 제출 일시와는 다를 수 있습니다.
+      </p>
+      <p id="submission-link-hint" className="submission-filters__hint">
+        미연결은 휴양소 QR로 제출된 입실·퇴실 기록 중 일정이 연결되지 않은 기록입니다.
       </p>
       {propertiesLoading && (
         <p className="submission-filters__hint" role="status">

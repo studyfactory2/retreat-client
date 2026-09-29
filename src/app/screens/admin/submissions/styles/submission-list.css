@@ -105,7 +105,7 @@
 .submission-filters__fields {
   display: grid;
   grid-template-columns:
-    minmax(150px, 1.3fr) minmax(110px, 0.8fr) repeat(2, minmax(150px, 1fr))
+    minmax(130px, 1.3fr) minmax(95px, 0.8fr) minmax(150px, 1fr) repeat(2, minmax(140px, 1fr))
     auto auto;
   align-items: start;
   gap: 16px;

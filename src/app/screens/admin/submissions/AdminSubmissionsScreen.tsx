@@ -8,7 +8,7 @@ import { SubmissionListFilters } from './components/SubmissionListFilters';
 import { SubmissionRows } from './components/SubmissionRows';
 import {
   readSubmissionListFilters,
-  submissionDateErrors,
+  submissionFilterErrors,
   submissionListSearch,
 } from './model/submission-list-model';
 import { useAdminSubmissions } from './hooks/use-admin-submissions';
@@ -36,13 +36,13 @@ function SubmissionListWorkspace({
   const [search, setSearch] = useSearchParams();
   const input = readSubmissionListFilters(search);
   const query = submissionListSearch(input);
-  const dateErrors = submissionDateErrors(input);
-  const invalidDates = Object.keys(dateErrors).length > 0;
+  const filterErrors = submissionFilterErrors(input);
+  const invalidFilters = Object.keys(filterErrors).length > 0;
   const { resource, refresh } = useAdminSubmissions(
     input,
     token,
     rejectSession,
-    !invalidDates,
+    !invalidFilters,
   );
   const properties = useAdminPropertyOptions(token, rejectSession);
   const correctedPage =
@@ -55,6 +55,7 @@ function SubmissionListWorkspace({
     input.stayId ||
     input.type ||
     input.status ||
+    input.linkStatus ||
     input.from ||
     input.to
   );
@@ -81,7 +82,7 @@ function SubmissionListWorkspace({
         </div>
         <Button
           className="admin-button-secondary"
-          disabled={!invalidDates && resource.status === 'loading'}
+          disabled={!invalidFilters && resource.status === 'loading'}
           onClick={() => {
             refresh();
             properties.refresh();
@@ -133,11 +134,11 @@ function SubmissionListWorkspace({
           </Button>
         </div>
       )}
-      {invalidDates ? (
+      {invalidFilters ? (
         <div className="submission-banner" role="alert">
-          <strong>방문일 조회 조건을 확인해 주세요.</strong>
-          <p>{Object.values(dateErrors).join(' ')}</p>
-          <p>날짜를 수정하고 조회하면 기록을 불러옵니다.</p>
+          <strong>기록 조회 조건을 확인해 주세요.</strong>
+          <p>{Object.values(filterErrors).join(' ')}</p>
+          <p>조건을 수정하고 조회하면 기록을 불러옵니다.</p>
         </div>
       ) : resource.status === 'loading' || correctedPage !== null ? (
         <div role="status">
@@ -176,7 +177,7 @@ function SubmissionListWorkspace({
               }
               description={
                 filtered
-                  ? '휴양소, 유형, 상태 또는 방문일 조건을 변경해 주세요.'
+                  ? '휴양소, 유형, 상태, 일정 연결 또는 방문일 조건을 변경해 주세요.'
                   : '제출된 입실·퇴실·정비 체크리스트가 이곳에 표시됩니다.'
               }
             >
