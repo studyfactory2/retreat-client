@@ -122,7 +122,8 @@ plus administrator linking of eligible guest QR records to stays. Cleaning and
 maintenance monitoring and read-only issue lists/details/history/photos are available.
 Issue notes, resolution and reopening are available. Staff profile management and
 property staff assignment are available. Property QR status, issuance/replacement,
-local QR images and link copying are available. Other management screens, guest/staff link validation,
+local QR images and link copying are available. Property checklist setup, fixed guest template previews,
+and maintenance template editing are available. Other management screens, guest/staff link validation,
 caches, PWA/offline support, content setup and deployment remain outside this
 slice.
 Report typecheck/lint/build separately from actual browser/backend/mobile checks.
@@ -202,7 +203,8 @@ changes to the same field are last-write-wins. No automatic mutation retries.
 Activation and vehicle-registration settings are saved through the edit form.
 Assigned staff is displayed with a separate management screen at
 `/admin/properties/:id/staff`; QR controls have a separate screen at
-`/admin/properties/:id/qr`. Guides and checklist management follow separately. Same-name errors preserve the form;
+`/admin/properties/:id/qr`. Checklist configuration lives at
+`/admin/properties/:id/checklists`. Guides follow separately. Same-name errors preserve the form;
 unknown save results block resubmission and direct the user back to the list to
 check the result. Token changes/unmount abort and fence pending responses.
 Dirty forms warn on explicit Cancel and full-page unload; sidebar/back navigation
@@ -630,3 +632,48 @@ responses, inactive properties, duplicate clicks, session expiry, and layouts at
 320px/390px. A downloaded PNG decoded to the complete issued URL; clipboard-denial
 manual-copy fallback was verified. These checks do not prove real JWT guards,
 PostgreSQL concurrency, deployment configuration or physical-device scanning.
+
+## Administrator property checklist configuration
+
+`features/admin-checklist-templates` owns validated template DTOs, definition
+readers, request preparation and API calls. `screens/admin/property-checklists`
+separates route screens, components, hooks, models and scoped styles. Property
+settings link to `/admin/properties/:id/checklists`; each type opens a separate
+`check-in`, `check-out` or `maintenance` editor under that route. Navigation stays
+in the properties / mobile More group. No dependencies or backend changes added.
+
+Each property has exactly one template slot per type, including inactive
+templates. The list fetch explicitly includes inactive templates and validates
+that its complete page contains at most the three unique types. Editors load a
+fresh detail and validate its property/type scope. Only active properties permit
+creation or updates. Existing guest CHECK_IN/CHECK_OUT templates are read-only,
+including activation, as enforced by the backend. Their initial creation always
+shows a complete preview and an explicit immutable-template confirmation.
+MAINTENANCE supports title, section/question ordering, content, required answers
+and activation. The only answer type is NORMAL_ABNORMAL.
+
+Limits match the backend: 1–20 sections, 1–50 questions per section, 500 total;
+title/section labels up to 150 Unicode characters, questions up to 300. New
+sections/questions send no IDs; existing IDs survive editing and reordering.
+Section payloads replace the entire definition; deleted IDs are omitted, and
+questions cannot be moved between sections with an existing ID. A preview and
+confirmation precede every save. Meaningful updates send the loaded
+expectedVersion and require a matching saved receipt with the next version.
+Existing drafts/submissions retain their captured template snapshots. There is
+no template history, rollback or delete endpoint.
+
+No-op edits do not write. Duplicate clicks share a synchronous request lock.
+401/403 rejects only the requesting admin credential. Scope changes/unmount abort
+and fence late responses. Conflicts, missing records and uncertain network/5xx/
+malformed-success responses preserve entered values and block resubmission until
+an explicit reload; no automatic mutation retry. Local Back/reload and browser
+unload warn about dirty or pending input. Sidebar and browser-back navigation
+remain outside the local guard; this slice adds no global navigation blocker.
+
+Verification used disposable contract/model/hook probes and actual backend
+DTO/service code over an in-memory Prisma fixture with synthetic authentication.
+Browser checks cover guest creation/fixed state, validation, maintenance reorder
+and add/remove, activation, no-op/duplicate writes, stale and lost-response
+recovery, inactive properties, session expiry and layouts at 320px/390px. These
+checks do not prove live JWT guards, PostgreSQL concurrency, deployment or physical
+devices. No repository test files, database migrations or Git mutations were added.

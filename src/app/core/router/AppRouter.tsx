@@ -17,6 +17,10 @@ import {
   AdminIssueDetailScreen,
 } from '../../screens/admin/issues';
 import { AdminPropertyQrScreen } from '../../screens/admin/property-qr';
+import {
+  AdminPropertyChecklistsScreen,
+  AdminChecklistEditorScreen,
+} from '../../screens/admin/property-checklists';
 import { AdminMoreScreen } from '../../screens/admin/more';
 import { AdminCalendarScreen } from '../../screens/admin/calendar';
 import {
@@ -145,6 +149,14 @@ export function AppRouter() {
             <Route
               path={appRoutes.adminPropertyQr}
               element={<AdminPropertyQrScreen />}
+            />
+            <Route
+              path={appRoutes.adminPropertyChecklists}
+              element={<AdminPropertyChecklistsScreen />}
+            />
+            <Route
+              path={appRoutes.adminChecklistEditor}
+              element={<AdminChecklistEditorScreen />}
             />
             <Route
               path={appRoutes.adminPropertyStaff}
