@@ -124,7 +124,8 @@ Issue notes, resolution and reopening are available. Staff profile management an
 property staff assignment are available. Property QR status, issuance/replacement,
 local QR images and link copying are available. Property checklist setup, fixed guest template previews,
 and maintenance template editing are available. Property usage guides support editing, mobile preview,
-and publication controls. Shared issue categories support search, registration,
+and publication controls. Personal stay links support status, issuance/replacement,
+copying and revocation in stay details. Shared issue categories support search, registration,
 renaming, display order and activation. Other management screens, guest/staff link validation,
 caches, PWA/offline support and deployment remain outside this
 slice.
@@ -767,3 +768,48 @@ services with synthetic authentication and in-memory storage. These checks do no
 establish live JWT guards, PostgreSQL collation/concurrency,
 deployment or physical-device behavior. No backend, dependencies, repository test
 files, database migrations or Git mutations are part of this slice.
+
+## Administrator personal stay links
+
+The stay detail screen includes an inline 개인 이용 링크 card between the stay
+information and history. `features/admin-stay-links` separates DTOs, validation,
+runtime response readers and API calls. The stay screen keeps the card,
+confirmation, one-time receipt, request/navigation hooks, model and scoped CSS
+in its existing components/hooks/model/styles folders. No navigation entry or
+dependency is added. Property QR controls remain a separate feature.
+
+GET `/admin/stays/:id/guest-link` returns safe status only. The card also reads
+fresh stay details; changed revision, cancellation/property activity or checkout
+context requires a full stay refresh before acting. POST `/issue` and `/revoke`
+under that path send the loaded `expectedRevision` and `expectedLinkVersion`.
+Confirmation shows the guest, property and planned Seoul dates. Issuance requires
+an active stay/property and a future checkout-plus-seven-days deadline; revocation
+remains available for issued links at inactive properties or cancelled stays.
+Any stay revision change, including notes, invalidates the existing invitation;
+restoring a stay does not revive it. Link writes do not create stay revisions.
+
+Only issuance returns a raw `/guest/stay#token=...` URL. Strict readers verify
+identity, next invitation version, unchanged stay revision, advancing timestamp,
+exact expiry and same-frontend-origin URL. The raw address remains only in mounted
+memory and explicit clipboard copies; it never enters browser storage or logs.
+Clipboard failure selects the read-only address for manual copying. Status refresh
+preserves it only for the exact same enabled invitation. A transient failed read
+hides the URL but retains it privately until a matching read succeeds. Expiry,
+scope/auth changes, replaced invitations and uncertain writes discard it.
+
+Duplicate writes are synchronously blocked. Conflicts and network/5xx/malformed
+success outcomes block further writes until explicit read/review; no automatic
+mutation retry or silent rebasing occurs. A lost issuance response cannot recover
+its raw URL; a deliberate replacement uses refreshed versions. Requests abort and
+fence late responses, and 401/403 rejects only the initiating admin credential.
+Local header Back/refresh/edit/status actions and browser unload warn before losing
+an issued URL; header actions are disabled during writes. Global sidebar, source
+links and browser-back navigation remain outside the local guard.
+
+Verification covers typecheck/lint/build, disposable API/hook and actual backend
+service/DTO probes, and synthetic browser flows for issuance, copying, revocation,
+lost responses, read recovery, changed stay context, duplicate clicks and narrow
+layouts. These checks do not establish live JWT/PostgreSQL concurrency or physical
+device proof. Guest/staff screens remain placeholders; vehicle review and report
+downloads remain separate admin slices. No backend/schema/migration/dependency
+or repository test files were changed. The user controls staging and rollout.

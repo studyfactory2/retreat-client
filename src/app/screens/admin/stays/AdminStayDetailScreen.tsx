@@ -14,6 +14,9 @@ import { StayStatusAction } from './components/StayStatusAction';
 import { StayHistory } from './components/StayHistory';
 import { isStayRevision } from '../../../features/admin-stays/admin-stays-validation';
 import { StayDetails } from './components/StayDetails';
+import { StayLinkCard } from './components/StayLinkCard';
+import { StayLinkNavigationNotice } from './components/StayLinkNavigationNotice';
+import { useStayLinkNavigation } from './hooks/use-stay-link-navigation';
 import { StayForm } from './components/StayForm';
 import {
   buildUpdateStayInput,
@@ -53,6 +56,7 @@ function DetailWorkspace({
   rejectSession: (token: string) => void;
 }) {
   const { resource, refresh } = useAdminStay(id, token, rejectSession);
+  const linkNavigation = useStayLinkNavigation();
   const [editing, setEditing] = useState(false);
   const [changingStatus, setChangingStatus] = useState(false);
   const location = useLocation();
@@ -134,33 +138,48 @@ function DetailWorkspace({
           <div className="stay-heading__actions">
             <Button
               className="admin-button-secondary"
-              onClick={() => navigate(navigation.returnTo)}
+              disabled={linkNavigation.busy || linkNavigation.pending}
+              onClick={() =>
+                linkNavigation.request(() => navigate(navigation.returnTo))
+              }
             >
               {navigation.returnLabel}
             </Button>
             <Button
               className="admin-button-secondary"
-              onClick={() => {
-                setNotice(null);
-                refresh();
-              }}
+              disabled={linkNavigation.busy || linkNavigation.pending}
+              onClick={() =>
+                linkNavigation.request(() => {
+                  setNotice(null);
+                  refresh();
+                })
+              }
             >
               새로고침
             </Button>
             {stay.status === 'ACTIVE' &&
               isStayRevision(stay.currentRevision) && (
-                <Button onClick={() => setEditing(true)}>수정</Button>
+                <Button
+                  disabled={linkNavigation.busy || linkNavigation.pending}
+                  onClick={() => linkNavigation.request(() => setEditing(true))}
+                >
+                  수정
+                </Button>
               )}
             {isStayRevision(stay.currentRevision) && (
               <Button
                 className="admin-button-secondary"
                 disabled={
-                  stay.status === 'CANCELLED' && !stay.property.isActive
+                  linkNavigation.busy ||
+                  linkNavigation.pending ||
+                  (stay.status === 'CANCELLED' && !stay.property.isActive)
                 }
-                onClick={() => {
-                  setNotice(null);
-                  setChangingStatus(true);
-                }}
+                onClick={() =>
+                  linkNavigation.request(() => {
+                    setNotice(null);
+                    setChangingStatus(true);
+                  })
+                }
               >
                 {stay.status === 'ACTIVE' ? '일정 취소' : '일정 복원'}
               </Button>
@@ -168,6 +187,12 @@ function DetailWorkspace({
           </div>
         )}
       </header>
+      {linkNavigation.pending && (
+        <StayLinkNavigationNotice
+          onKeep={linkNavigation.keep}
+          onProceed={linkNavigation.proceed}
+        />
+      )}
       {notice && (
         <p className="stay-banner stay-banner--success" role="status">
           {notice}
@@ -204,6 +229,21 @@ function DetailWorkspace({
         </p>
       )}
       <StayDetails stay={stay} />
+      {!changingStatus && (
+        <StayLinkCard
+          stay={stay}
+          token={token}
+          rejectSession={rejectSession}
+          registerGuard={linkNavigation.register}
+          navigationPending={linkNavigation.pending}
+          onReloadStay={() =>
+            linkNavigation.request(() => {
+              setNotice(null);
+              refresh();
+            })
+          }
+        />
+      )}
       <StayHistory
         stayId={stay.id}
         currentRevision={stay.currentRevision}

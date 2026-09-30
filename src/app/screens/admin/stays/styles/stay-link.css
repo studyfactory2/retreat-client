@@ -1,0 +1,22 @@
+.stay-link__heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+.stay-link__heading .ui-button, .stay-link__actions .ui-button { min-height: 44px; font-size: 13px; }
+.stay-link__details { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 24px; margin: 22px 0; }
+.stay-link__details > div { min-width: 0; }
+.stay-link__details dt { margin-bottom: 6px; color: var(--color-muted); font-size: 12px; }
+.stay-link__details dd { margin: 0; color: var(--color-heading); font-size: 14px; line-height: 1.8; overflow-wrap: anywhere; }
+.stay-link__actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+.stay-link__confirmation, .stay-link__receipt { margin-top: 20px; padding: 20px; border: 1px solid #ccdafa; border-radius: var(--radius-sm); background: #f5f8ff; }
+.stay-link__confirmation h3, .stay-link__receipt strong { color: var(--color-heading); font-size: 15px; }
+.stay-link__confirmation p, .stay-link__receipt p { margin-top: 10px; color: var(--color-muted); font-size: 13px; line-height: 1.8; overflow-wrap: anywhere; }
+.stay-link__receipt label { display: block; margin: 18px 0 7px; color: var(--color-heading); font-size: 13px; }
+.stay-link__receipt input { display: block; width: 100%; min-width: 0; padding: 12px; border: 1px solid var(--color-input-border); border-radius: 8px; background: var(--color-surface); color: var(--color-text); font: inherit; font-size: 14px; }
+.stay-link__receipt > .ui-button { margin-top: 12px; min-height: 44px; }
+.stay-link__receipt input:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+.stay-link .stay-banner { margin-top: 18px; }
+.stay-link > .stay-link__help { margin-top: 18px; line-height: 1.8; }
+@media (max-width: 650px) {
+  .stay-link__details { grid-template-columns: minmax(0, 1fr); }
+  .stay-link__confirmation, .stay-link__receipt { padding: 16px 12px; }
+  .stay-link__receipt input { font-size: 16px; }
+  .stay-link__actions .ui-button { max-width: 100%; white-space: normal; }
+}
