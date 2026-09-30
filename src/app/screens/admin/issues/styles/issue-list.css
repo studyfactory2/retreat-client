@@ -421,3 +421,8 @@
     padding: 22px;
   }
 }
+.issue-list-heading__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}

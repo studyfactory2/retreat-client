@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
+import { appRoutes } from '../../../core/router/routes';
 import { useAdminSession } from '../../../core/session/use-admin-session';
 import { useAdminPropertyOptions } from '../../../features/admin-properties/use-admin-property-options';
 import type { AdminIssueFilters } from '../../../features/admin-issues/admin-issues.types';
@@ -73,16 +74,24 @@ function IssuesWorkspace({
           <h1>이상사항</h1>
           <p>접수된 불편사항과 사진, 그동안의 처리 기록을 확인하세요.</p>
         </div>
-        <Button
-          className="admin-button-secondary"
-          disabled={!invalid && resource.status === 'loading'}
-          onClick={() => {
-            refresh();
-            properties.refresh();
-          }}
-        >
-          새로고침
-        </Button>
+        <div className="issue-list-heading__actions">
+          <Link
+            className="ui-button admin-button-secondary"
+            to={appRoutes.adminIssueCategories}
+          >
+            분류 관리
+          </Link>
+          <Button
+            className="admin-button-secondary"
+            disabled={!invalid && resource.status === 'loading'}
+            onClick={() => {
+              refresh();
+              properties.refresh();
+            }}
+          >
+            새로고침
+          </Button>
+        </div>
       </header>
       <IssueFilters
         key={query}

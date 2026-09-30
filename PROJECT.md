@@ -124,7 +124,8 @@ Issue notes, resolution and reopening are available. Staff profile management an
 property staff assignment are available. Property QR status, issuance/replacement,
 local QR images and link copying are available. Property checklist setup, fixed guest template previews,
 and maintenance template editing are available. Property usage guides support editing, mobile preview,
-and publication controls. Other management screens, guest/staff link validation,
+and publication controls. Shared issue categories support search, registration,
+renaming, display order and activation. Other management screens, guest/staff link validation,
 caches, PWA/offline support and deployment remain outside this
 slice.
 Report typecheck/lint/build separately from actual browser/backend/mobile checks.
@@ -716,3 +717,53 @@ Actual backend DTO/admin/guest-guide/QR services were exercised through an in-me
 fixture, including visibility rules. Real JWT/PostgreSQL, private-stay access and
 physical-device/deployment behavior remain unverified. No backend, dependencies,
 repository tests or database migrations changed.
+
+## Administrator issue category management
+
+`features/admin-issue-categories` owns validated category DTOs, request preparation
+and GET/POST `/admin/issue-categories` plus POST
+`/admin/issue-categories/:id/update`. The issue list links to
+`/admin/issues/categories`, implemented in `screens/admin/issue-categories` with
+separate components, hooks, model and scoped styles. Existing issues navigation
+stays active. Categories are shared by every property, not configured per property.
+The list opens inline create/edit workspaces; there is no category detail endpoint.
+
+Search, activity and page filters live in the URL, with 12 records per page and
+inactive categories included by default. Invalid or duplicate supported URL
+conditions block reads until corrected or reset. Valid out-of-range pages clamp
+after a response; loading, errors and valid empty lists remain distinct. The
+backend orders by sortOrder, name and ID. Equal display orders are allowed;
+the frontend checks numeric ordering without replacing database name collation.
+
+Names are trimmed and limited to 100 Unicode characters. Display order is an
+integer from 0 through 2,147,483,647. New categories are active. Deactivation removes
+a category from new guest-report choices while preserving existing issues and
+their captured category labels. The backend identifies `기타` as the fallback
+category: its name cannot change and it cannot be deactivated. Its display order
+can change, and a legacy inactive fallback can be reactivated. No category deletion,
+history, per-property assignment, notifications or guest UI is added.
+
+Edits send only changed fields with the exact loaded canonical UTC
+`expectedUpdatedAt`. No-op forms do not write. Every save has a confirmation;
+receipts verify identity, submitted fields, fallback status, preserved creation
+time and an advancing update timestamp for meaningful edits. Duplicate saves
+share a synchronous lock. Same-name and fallback-protection conflicts preserve
+editable input; stale/missing records, other conflicts and uncertain network/5xx/
+malformed-success outcomes block resubmission until explicit reload/review.
+There is no automatic retry or silent timestamp replacement.
+
+Closing, reconciling or successfully saving an editor reloads the filtered list
+before showing rows again. Filter/token changes and unmount abort or fence late
+responses; 401/403 rejects only the requesting credential. Local return/reload and
+browser unload warn about dirty or pending input. Sidebar/browser-back navigation
+remains outside the local guard, and drafts are not stored in the browser.
+
+Verification includes typecheck/lint/build, 109 disposable feature/API/backend DTO
+probes, 129 model/hook/page/editor probes, and 10 service/DTO plus 8 HTTP fixture
+groups. Browser checks cover create/edit/order/activity, protected fallback,
+duplicate names, filters/paging, stale edits, lost responses, duplicate clicks,
+read recovery, expiry and 320px/390px layouts. The fixture uses actual backend
+services with synthetic authentication and in-memory storage. These checks do not
+establish live JWT guards, PostgreSQL collation/concurrency,
+deployment or physical-device behavior. No backend, dependencies, repository test
+files, database migrations or Git mutations are part of this slice.

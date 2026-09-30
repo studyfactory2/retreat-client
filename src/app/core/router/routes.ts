@@ -7,6 +7,7 @@ export const appRoutes = {
   adminSubmissions: '/admin/submissions',
   adminMaintenance: '/admin/maintenance',
   adminIssues: '/admin/issues',
+  adminIssueCategories: '/admin/issues/categories',
   adminIssueDetail: '/admin/issues/:id',
   adminMore: '/admin/more',
   adminSubmissionDetail: '/admin/submissions/:id',
