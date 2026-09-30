@@ -32,7 +32,12 @@ import {
 import {
   AdminPropertiesScreen,
   AdminPropertyEditorScreen,
+  AdminPropertyStaffScreen,
 } from '../../screens/admin/properties';
+import {
+  AdminStaffScreen,
+  AdminStaffEditorScreen,
+} from '../../screens/admin/staff';
 
 import {
   AdminSubmissionsScreen,
@@ -127,6 +132,19 @@ export function AppRouter() {
               element={<AdminIssueDetailScreen />}
             />
             <Route path={appRoutes.adminMore} element={<AdminMoreScreen />} />
+            <Route path={appRoutes.adminStaff} element={<AdminStaffScreen />} />
+            <Route
+              path={appRoutes.adminStaffCreate}
+              element={<AdminStaffEditorScreen creating />}
+            />
+            <Route
+              path={appRoutes.adminStaffDetail}
+              element={<AdminStaffEditorScreen />}
+            />
+            <Route
+              path={appRoutes.adminPropertyStaff}
+              element={<AdminPropertyStaffScreen />}
+            />
             <Route
               path={appRoutes.adminSubmissions}
               element={<AdminSubmissionsScreen />}

@@ -40,6 +40,8 @@ export function PropertyEditor({
   const mutation = usePropertySave(token, rejectSession);
   const notice = useRef<HTMLDivElement>(null);
   const discard = useRef<HTMLDivElement>(null);
+  const destination = useRef(returnUrl);
+  const leaveOrigin = useRef<HTMLElement | null>(null);
   const dirty = JSON.stringify(values) !== JSON.stringify(initial);
 
   useEffect(() => {
@@ -77,6 +79,18 @@ export function PropertyEditor({
       return remaining;
     });
     setUnchanged(false);
+  }
+
+  function leave(url: string) {
+    if (mutation.state.busy) return;
+    destination.current = url;
+    if (dirty) {
+      leaveOrigin.current =
+        document.activeElement instanceof HTMLElement
+          ? document.activeElement
+          : null;
+      setDiscarding(true);
+    } else navigate(url);
   }
 
   function submit() {
@@ -144,6 +158,15 @@ export function PropertyEditor({
                 : '미배정'}
             </strong>
           </p>
+          <Button
+            className="admin-button-secondary"
+            disabled={mutation.state.busy || discarding}
+            onClick={() =>
+              leave(appRoutes.adminPropertyStaff.replace(':id', original.id))
+            }
+          >
+            담당 직원 관리
+          </Button>
         </div>
       )}
       {mutation.state.message && (
@@ -183,10 +206,20 @@ export function PropertyEditor({
             아직 저장하지 않은 변경 사항이 사라집니다.
           </p>
           <div className="properties-heading__actions">
-            <Button onClick={() => setDiscarding(false)}>계속 작성</Button>
+            <Button
+              onClick={() => {
+                setDiscarding(false);
+                requestAnimationFrame(() => {
+                  if (leaveOrigin.current?.isConnected)
+                    leaveOrigin.current.focus();
+                });
+              }}
+            >
+              계속 작성
+            </Button>
             <Button
               className="admin-button-secondary"
-              onClick={() => navigate(returnUrl)}
+              onClick={() => navigate(destination.current)}
             >
               입력 버리기
             </Button>
@@ -197,7 +230,7 @@ export function PropertyEditor({
         values={values}
         onChange={change}
         onSubmit={submit}
-        onCancel={() => (dirty ? setDiscarding(true) : navigate(returnUrl))}
+        onCancel={() => leave(returnUrl)}
         editing={!!original}
         errors={{ ...mutation.state.errors, ...errors }}
         busy={mutation.state.busy}

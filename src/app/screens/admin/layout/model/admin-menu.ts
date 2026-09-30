@@ -35,6 +35,13 @@ export const adminPrimaryMenu: AdminMenuEntry[] = [
 ];
 export const adminSecondaryMenu: AdminMenuEntry[] = [
   {
+    to: appRoutes.adminStaff,
+    label: '직원 관리',
+    mobileLabel: '직원 관리',
+    icon: 'staff',
+    description: '정비 직원 정보를 등록하고 담당 휴양소를 확인합니다.',
+  },
+  {
     to: appRoutes.adminSubmissions,
     label: '제출 기록',
     mobileLabel: '제출 기록',

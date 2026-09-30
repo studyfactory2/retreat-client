@@ -73,7 +73,10 @@ function readStaff(
   };
 }
 
-function readProperty(value: unknown, expectedId?: string): AdminPropertyDto {
+export function readAdminProperty(
+  value: unknown,
+  expectedId?: string,
+): AdminPropertyDto {
   if (
     !isRecord(value) ||
     !isPropertyId(value.id) ||
@@ -125,7 +128,7 @@ function readPage(
       )
   )
     throw invalidResponse();
-  const items = value.items.map((item) => readProperty(item));
+  const items = value.items.map((item) => readAdminProperty(item));
   if (
     new Set(items.map((item) => item.id)).size !== items.length ||
     (input.isActive !== undefined &&
@@ -200,7 +203,7 @@ export async function getAdminProperty(
     token,
     signal,
   });
-  return readProperty(value, propertyId);
+  return readAdminProperty(value, propertyId);
 }
 
 export async function createAdminProperty(
@@ -220,7 +223,7 @@ export async function createAdminProperty(
         : { vehicleRegistrationEnabled: input.vehicleRegistrationEnabled }),
     },
   });
-  const property = readProperty(value);
+  const property = readAdminProperty(value);
   if (
     !property.isActive ||
     property.staffUserId !== null ||
@@ -256,7 +259,7 @@ export async function updateAdminProperty(
       },
     },
   );
-  const property = readProperty(value, propertyId);
+  const property = readAdminProperty(value, propertyId);
   if (input.isActive !== undefined && property.isActive !== input.isActive)
     throw invalidResponse();
   requireSavedFields(property, input);

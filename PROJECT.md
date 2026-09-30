@@ -22,7 +22,7 @@ Follow studyfactory-frontend's organization:
 - `src/app/screens/<area>/<screen>`: route screens at the domain root, with
   supporting `components/`, `hooks/`, `model/`, and `styles/` folders as needed.
   Admin login/layout/dashboard/calendar/stays/properties/stay-imports/submissions,
-  maintenance/issues/more, entry and dev exist; guest/staff follow later.
+  maintenance/issues/staff/more, entry and dev exist; guest/staff access flows follow later.
 - `src/app/shared/ui` and `shared/layout`: business-neutral reusable components.
 - `src/app/styles`: reset, shared tokens, base styles and their single entrypoint.
 
@@ -120,7 +120,8 @@ now provides upload, saved preview, row review/exclusion and final confirmation.
 Checklist records include filters, saved details, revision history and private photos,
 plus administrator linking of eligible guest QR records to stays. Cleaning and
 maintenance monitoring and read-only issue lists/details/history/photos are available.
-Issue notes, resolution and reopening are available. Other management screens, guest/staff link validation,
+Issue notes, resolution and reopening are available. Staff profile management and
+property staff assignment are available. Other management screens, guest/staff link validation,
 caches, PWA/offline support, content setup and deployment remain outside this
 slice.
 Report typecheck/lint/build separately from actual browser/backend/mobile checks.
@@ -198,8 +199,9 @@ no optimistic concurrency/revision field in this backend contract; concurrent
 changes to the same field are last-write-wins. No automatic mutation retries.
 
 Activation and vehicle-registration settings are saved through the edit form.
-Assigned staff is read-only in this slice; staff assignment, QR controls, guides,
-and checklist management follow separately. Same-name errors preserve the form;
+Assigned staff is displayed with a separate management screen at
+`/admin/properties/:id/staff`; QR controls, guides, and checklist management follow
+separately. Same-name errors preserve the form;
 unknown save results block resubmission and direct the user back to the list to
 check the result. Token changes/unmount abort and fence pending responses.
 Dirty forms warn on explicit Cancel and full-page unload; sidebar/back navigation
@@ -209,9 +211,9 @@ client/operator branding choice is confirmed.
 ## Administrator navigation
 
 `layout/model/admin-menu` defines the primary and secondary menu entries;
-`AdminNavigation` handles their route groups. Desktop shows six entries. Mobile
+`AdminNavigation` handles their route groups. Desktop shows seven entries. Mobile
 shows 운영, 일정, 정비, 이상사항 and 더보기. The `/admin/more` screen links to
-제출 기록 and 휴양소 관리; their nested routes keep 더보기 active on mobile.
+직원 관리, 제출 기록 and 휴양소 관리; their nested routes keep 더보기 active on mobile.
 One navigation tree appears as a sidebar above 760px and a fixed bottom bar at
 760px and below. Mobile links use equal columns, icons above labels, a blue active
 state and a minimum 56px touch target. The page reserves space for the bar and
@@ -518,3 +520,56 @@ compiled backend DTOs/service/reader over in-memory transactions. Browser checks
 exercise notes, status transitions, confirmations, required fields, stale versions,
 uncertain committed results and responsive layouts. No real database/S3 mutation,
 backend/schema/dependency changes, Git staging or repository test files.
+
+## Administrator staff and property assignment
+
+`features/admin-staff` owns list/detail/create/update API calls, staff DTOs, request
+validation and response readers. `/admin/staff`, `/admin/staff/new` and
+`/admin/staff/:id` keep route screens at the domain root with separate components,
+hooks, models and styles. Staff management is a secondary navigation entry and
+keeps More active on mobile; the five mobile tabs remain unchanged.
+
+Staff are profiles for property assignments and captured maintenance records, not
+login accounts. Only name is required (100 Unicode code points); optional phone
+is limited to 32, company/department to 100. Blank optional fields become null.
+Create sends no role/password/activity fields; the backend creates active STAFF.
+Edits send only changed fields, preserving explicit false/null; no-op forms do
+not POST. Deactivation requires confirmation and zero assignments, including
+inactive properties. Existing assignments link to their property settings.
+
+Lists use 12-record server pages and URL-backed search/activity filters. Search
+covers name, phone, company and department using backend collation semantics.
+Valid empty, loading, failure and explicit retry remain distinct; valid emptied
+pages clamp back to the available range. DTO readers verify identities, STAFF
+roles, activity scope, pagination/order, normalized fields and mutation receipts.
+
+Property settings link to `/admin/properties/:id/staff`. This separate workspace
+avoids coupling assignment to unsaved basic property edits. The current assignee
+is shown independently of the active-staff picker, which supports search and
+pagination while retaining the selected worker. One worker may cover multiple
+properties; each property has one current assignee. Assignments require an active
+property and active staff. Null unassignment remains available on inactive
+properties. No-op selection cannot save. Confirmation shows old/new assignment
+and explains the effect on the previous worker's unfinished maintenance access.
+Saved submissions remain intact. Assignment receipts replace only the initiating
+workspace's displayed property and reset the picker/form.
+
+Both staff editing and assignment have server transaction protection but no
+expected-version field. Concurrent changes to the same field are last-write-wins;
+the frontend does not claim optimistic stale-write detection. The backend rechecks
+assignment/deactivation invariants. Double clicks share a synchronous in-flight
+lock. 404/409 and uncertain network/5xx/malformed-success results block writes until
+explicit reread/review; no automatic mutation retry. Requests abort and fence late
+responses on unmount/credential changes, and 401/403 rejects only the requesting
+credential. Local Back/Cancel/reload warns before discarding input and browser
+unload warns while dirty/saving. Sidebar/source links and browser back remain
+outside the local guard; no global navigation blocker or browser draft storage.
+
+Verification uses disposable frontend contract/model/SSR checks and the actual
+compiled backend DTOs/services over an in-memory Prisma adapter. Browser checks
+cover creation, editing, null clearing, deactivation/reactivation, assigned-staff
+blocking, search/paging, reassignment, inactive-property unassignment, conflict
+and uncertain-result recovery, duplicate clicks, session expiry and mobile
+navigation/layout at 320px/390px. These are fixture checks, not authenticated real
+PostgreSQL/S3 or physical-device proof. No backend/schema/dependency changes,
+repository test files or Git mutations belong to this slice.

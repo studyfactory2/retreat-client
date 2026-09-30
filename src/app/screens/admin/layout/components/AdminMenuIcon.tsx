@@ -5,6 +5,7 @@ export type AdminMenuIconName =
   | 'issues'
   | 'submissions'
   | 'properties'
+  | 'staff'
   | 'more';
 export function AdminMenuIcon({ name }: { name: AdminMenuIconName }) {
   return (
@@ -46,6 +47,12 @@ export function AdminMenuIcon({ name }: { name: AdminMenuIconName }) {
           <circle cx="5" cy="12" r="1.5" />
           <circle cx="12" cy="12" r="1.5" />
           <circle cx="19" cy="12" r="1.5" />
+        </>
+      )}
+      {name === 'staff' && (
+        <>
+          <circle cx="9" cy="7" r="3" />
+          <path d="M3 21v-3a6 6 0 0 1 12 0v3M16 4a3 3 0 0 1 0 6m2 4a5 5 0 0 1 3 4v3" />
         </>
       )}
     </svg>
