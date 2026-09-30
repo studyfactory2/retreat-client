@@ -187,6 +187,15 @@ export function PropertyEditor({
           >
             체크리스트 관리
           </Button>
+          <Button
+            className="admin-button-secondary"
+            disabled={mutation.state.busy || discarding}
+            onClick={() =>
+              leave(appRoutes.adminPropertyGuide.replace(':id', original.id))
+            }
+          >
+            이용 안내 관리
+          </Button>
         </div>
       )}
       {mutation.state.message && (

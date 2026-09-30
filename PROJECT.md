@@ -123,8 +123,9 @@ maintenance monitoring and read-only issue lists/details/history/photos are avai
 Issue notes, resolution and reopening are available. Staff profile management and
 property staff assignment are available. Property QR status, issuance/replacement,
 local QR images and link copying are available. Property checklist setup, fixed guest template previews,
-and maintenance template editing are available. Other management screens, guest/staff link validation,
-caches, PWA/offline support, content setup and deployment remain outside this
+and maintenance template editing are available. Property usage guides support editing, mobile preview,
+and publication controls. Other management screens, guest/staff link validation,
+caches, PWA/offline support and deployment remain outside this
 slice.
 Report typecheck/lint/build separately from actual browser/backend/mobile checks.
 
@@ -204,7 +205,8 @@ Activation and vehicle-registration settings are saved through the edit form.
 Assigned staff is displayed with a separate management screen at
 `/admin/properties/:id/staff`; QR controls have a separate screen at
 `/admin/properties/:id/qr`. Checklist configuration lives at
-`/admin/properties/:id/checklists`. Guides follow separately. Same-name errors preserve the form;
+`/admin/properties/:id/checklists`; usage guides live at `/admin/properties/:id/guide`.
+Same-name errors preserve the form;
 unknown save results block resubmission and direct the user back to the list to
 check the result. Token changes/unmount abort and fence pending responses.
 Dirty forms warn on explicit Cancel and full-page unload; sidebar/back navigation
@@ -677,3 +679,40 @@ and add/remove, activation, no-op/duplicate writes, stale and lost-response
 recovery, inactive properties, session expiry and layouts at 320px/390px. These
 checks do not prove live JWT guards, PostgreSQL concurrency, deployment or physical
 devices. No repository test files, database migrations or Git mutations were added.
+
+## Administrator property usage guides
+
+`features/admin-property-guides` owns validated GET/POST
+`/admin/properties/:id/guide` contracts. The property settings entry opens
+`screens/admin/property-guide`, with separate components, hooks, model and scoped
+styles. Existing properties / mobile More navigation stays active.
+
+One guide per property contains a title (100 Unicode characters), plain-text
+content (20,000), and isPublished. Both text fields are required even when
+unpublished; outer whitespace is trimmed and content line endings become LF.
+The live mobile-width preview renders text with preserved newlines, never HTML or
+Markdown. Inactive properties allow guide preparation but guest access is blocked.
+
+First save sends expectedVersion:0; updates send the loaded version and require
+a matching next-version receipt. The frontend suppresses unchanged saves. Every
+save has a publication confirmation: there are no separate draft/published copies,
+and editing a published guide immediately replaces the guest-visible content.
+Unpublishing hides it while retaining its saved content. No deletion, history,
+notifications or guest-screen implementation is added.
+
+Duplicate saves are fenced. Scope/token changes and unmount abort pending requests
+and ignore late results; 401/403 rejects only the requesting credential. Conflicts,
+404 and uncertain network/5xx/malformed-success results retain input and block
+resubmission until explicit reload/review. Save receipts verify content, publication,
+version, actor and existing timestamps. Local return/reload and browser unload
+warn about unsaved/pending input; global sidebar/browser-back navigation remains
+outside these local guards. No browser draft storage or automatic mutation retries.
+
+Verification: typecheck/lint/build and disposable feature/model/hook/editor probes;
+browser checks with synthetic authentication cover first save, publication changes,
+plain-text rendering, no-op/duplicate saves, dirty reload, version conflicts,
+lost-response recovery, inactive-property editing, expiry and 320px/390px layouts.
+Actual backend DTO/admin/guest-guide/QR services were exercised through an in-memory
+fixture, including visibility rules. Real JWT/PostgreSQL, private-stay access and
+physical-device/deployment behavior remain unverified. No backend, dependencies,
+repository tests or database migrations changed.

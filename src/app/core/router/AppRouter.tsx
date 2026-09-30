@@ -17,6 +17,7 @@ import {
   AdminIssueDetailScreen,
 } from '../../screens/admin/issues';
 import { AdminPropertyQrScreen } from '../../screens/admin/property-qr';
+import { AdminPropertyGuideScreen } from '../../screens/admin/property-guide';
 import {
   AdminPropertyChecklistsScreen,
   AdminChecklistEditorScreen,
@@ -149,6 +150,10 @@ export function AppRouter() {
             <Route
               path={appRoutes.adminPropertyQr}
               element={<AdminPropertyQrScreen />}
+            />
+            <Route
+              path={appRoutes.adminPropertyGuide}
+              element={<AdminPropertyGuideScreen />}
             />
             <Route
               path={appRoutes.adminPropertyChecklists}
