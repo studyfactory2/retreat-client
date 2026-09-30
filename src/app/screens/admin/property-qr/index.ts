@@ -1,0 +1,1 @@
+export { AdminPropertyQrScreen } from './AdminPropertyQrScreen';

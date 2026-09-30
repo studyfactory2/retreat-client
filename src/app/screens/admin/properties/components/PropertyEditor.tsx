@@ -167,6 +167,15 @@ export function PropertyEditor({
           >
             담당 직원 관리
           </Button>
+          <Button
+            className="admin-button-secondary"
+            disabled={mutation.state.busy || discarding}
+            onClick={() =>
+              leave(appRoutes.adminPropertyQr.replace(':id', original.id))
+            }
+          >
+            QR 관리
+          </Button>
         </div>
       )}
       {mutation.state.message && (

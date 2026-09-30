@@ -121,7 +121,8 @@ Checklist records include filters, saved details, revision history and private p
 plus administrator linking of eligible guest QR records to stays. Cleaning and
 maintenance monitoring and read-only issue lists/details/history/photos are available.
 Issue notes, resolution and reopening are available. Staff profile management and
-property staff assignment are available. Other management screens, guest/staff link validation,
+property staff assignment are available. Property QR status, issuance/replacement,
+local QR images and link copying are available. Other management screens, guest/staff link validation,
 caches, PWA/offline support, content setup and deployment remain outside this
 slice.
 Report typecheck/lint/build separately from actual browser/backend/mobile checks.
@@ -200,8 +201,8 @@ changes to the same field are last-write-wins. No automatic mutation retries.
 
 Activation and vehicle-registration settings are saved through the edit form.
 Assigned staff is displayed with a separate management screen at
-`/admin/properties/:id/staff`; QR controls, guides, and checklist management follow
-separately. Same-name errors preserve the form;
+`/admin/properties/:id/staff`; QR controls have a separate screen at
+`/admin/properties/:id/qr`. Guides and checklist management follow separately. Same-name errors preserve the form;
 unknown save results block resubmission and direct the user back to the list to
 check the result. Token changes/unmount abort and fence pending responses.
 Dirty forms warn on explicit Cancel and full-page unload; sidebar/back navigation
@@ -573,3 +574,59 @@ and uncertain-result recovery, duplicate clicks, session expiry and mobile
 navigation/layout at 320px/390px. These are fixture checks, not authenticated real
 PostgreSQL/S3 or physical-device proof. No backend/schema/dependency changes,
 repository test files or Git mutations belong to this slice.
+
+## Administrator property QR management
+
+`features/admin-property-qr` owns validated QR status and issuance contracts.
+`/admin/properties/:id/qr` has its own `screens/admin/property-qr` components,
+hooks, model and styles, reached through property settings and retaining the
+properties / mobile More navigation group. Property detail supplies its name;
+QR status supplies current activation and issuance. Guest and staff QR states
+are separate. Inactive properties cannot issue or replace either link.
+
+GET `/admin/properties/:id/qr` returns status only. The guest/staff POST
+`/admin/properties/:id/qr/{guest|staff}/rotate` sends the exact loaded
+`expectedRotatedAt`, including explicit null for first issuance. Confirmation
+explains that replacement invalidates existing copies for that flow only. There
+is no separate QR-disable endpoint; property deactivation suspends both links.
+Issued/enabled is not proof of complete checklist or staff setup. Guest/staff
+frontend forms are still separate work.
+
+Issuance receipts validate property, flow, a strictly advancing canonical UTC
+timestamp, and an exact same-frontend-origin `/guest` or `/staff` URL with only
+`#token=<43 base64url characters>`. Backend FRONTEND_URL must match the origin
+where the administrator opens this frontend (localhost:5175 locally). A wrong
+origin is treated as an invalid receipt, not rewritten or accepted silently.
+
+Raw links stay only in mounted screen memory and explicit user copies/downloads;
+they are never put in browser storage, request keys, logs or remote QR services.
+The server cannot retrieve prior raw links. Navigating away/reloading loses them;
+the screen warns on its Back action and full-page unload. This is not a global
+SPA navigation blocker. Manual status refresh preserves a receipt only if the
+same rotation is still enabled; changed/inactive credentials are discarded.
+Replacing a flow hides its old receipt while the request is pending. Other-flow
+receipts remain independent. Requests abort and fence late responses on unmount,
+property or credential changes. 401/403 rejects only the requesting credential.
+
+Duplicate writes share a synchronous lock. 404/409 and uncertain network,
+timeout, 5xx or malformed-success results block issuance until an explicit status
+reload and fresh confirmation. Never automatically retry rotation: it may have
+committed even when the raw URL response was lost. Reload can confirm state but
+cannot recover a lost URL; a deliberate replacement invalidates the lost link.
+
+The lazy-loaded `qrcode` dependency creates high-resolution PNGs entirely in the
+browser, with an unmodified link fragment, four-module quiet zone, property name
+and guest/staff label. `@types/qrcode` supplies compile-time types. Copy failure
+selects a read-only link for manual copying; image-generation failure permits
+local retry and link copying without another issuance. Downloaded PNGs can be
+opened and printed. No direct printing integration, backend/schema changes,
+notifications, guest/staff authentication, service worker or repository tests
+are added by this slice.
+
+Verification used disposable API/reader and hook/lifecycle probes, the actual
+backend QR DTOs/services with an in-memory Prisma adapter, and browser tests with
+synthetic authentication. Checks cover issuance/replacement, stale and uncertain
+responses, inactive properties, duplicate clicks, session expiry, and layouts at
+320px/390px. A downloaded PNG decoded to the complete issued URL; clipboard-denial
+manual-copy fallback was verified. These checks do not prove real JWT guards,
+PostgreSQL concurrency, deployment configuration or physical-device scanning.

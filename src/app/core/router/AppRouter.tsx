@@ -16,6 +16,7 @@ import {
   AdminIssuesScreen,
   AdminIssueDetailScreen,
 } from '../../screens/admin/issues';
+import { AdminPropertyQrScreen } from '../../screens/admin/property-qr';
 import { AdminMoreScreen } from '../../screens/admin/more';
 import { AdminCalendarScreen } from '../../screens/admin/calendar';
 import {
@@ -140,6 +141,10 @@ export function AppRouter() {
             <Route
               path={appRoutes.adminStaffDetail}
               element={<AdminStaffEditorScreen />}
+            />
+            <Route
+              path={appRoutes.adminPropertyQr}
+              element={<AdminPropertyQrScreen />}
             />
             <Route
               path={appRoutes.adminPropertyStaff}

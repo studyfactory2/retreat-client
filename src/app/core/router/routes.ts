@@ -18,6 +18,7 @@ export const appRoutes = {
   adminPropertyCreate: '/admin/properties/new',
   adminPropertyDetail: '/admin/properties/:id',
   adminPropertyStaff: '/admin/properties/:id/staff',
+  adminPropertyQr: '/admin/properties/:id/qr',
   adminStaff: '/admin/staff',
   adminStaffCreate: '/admin/staff/new',
   adminStaffDetail: '/admin/staff/:id',
