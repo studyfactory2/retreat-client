@@ -3,6 +3,7 @@ import { Route, Routes } from 'react-router-dom';
 import { AccessPendingScreen } from '../../screens/entry/AccessPendingScreen';
 import { EntryScreen } from '../../screens/entry/EntryScreen';
 import { NotFoundScreen } from '../../screens/entry/NotFoundScreen';
+import { GuestEntryScreen } from '../../screens/guest/entry';
 import { AppShell } from '../../shared/layout/AppShell/AppShell';
 import { PageState } from '../../shared/ui/PageState/PageState';
 import { appRoutes } from './routes';
@@ -59,26 +60,10 @@ const ConnectionScreen = import.meta.env.DEV
 export function AppRouter() {
   return (
     <Routes>
+      <Route path={appRoutes.guest} element={<GuestEntryScreen kind="qr" />} />
+      <Route path={appRoutes.guestStay} element={<GuestEntryScreen kind="stay" />} />
       <Route element={<AppShell />}>
         <Route path={appRoutes.home} element={<EntryScreen />} />
-        <Route
-          path={appRoutes.guest}
-          element={
-            <AccessPendingScreen
-              title="이용객 안내"
-              description="현장 QR로 이용하는 입실·퇴실 체크리스트 화면을 준비하고 있습니다."
-            />
-          }
-        />
-        <Route
-          path={appRoutes.guestStay}
-          element={
-            <AccessPendingScreen
-              title="나의 휴양소 이용"
-              description="전달받으신 개인 링크에서 이용 안내를 확인하는 화면을 준비하고 있습니다."
-            />
-          }
-        />
         <Route
           path={appRoutes.staff}
           element={

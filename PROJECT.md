@@ -22,7 +22,8 @@ Follow studyfactory-frontend's organization:
 - `src/app/screens/<area>/<screen>`: route screens at the domain root, with
   supporting `components/`, `hooks/`, `model/`, and `styles/` folders as needed.
   Admin login/layout/dashboard/calendar/stays/properties/stay-imports/submissions,
-  maintenance/issues/staff/reports/more, entry and dev exist; guest/staff access flows follow later.
+  maintenance/issues/staff/reports/more, guest/entry, entry and dev exist;
+  guest checklist workflows and staff access flows follow later.
 - `src/app/shared/ui` and `shared/layout`: business-neutral reusable components.
 - `src/app/styles`: reset, shared tokens, base styles and their single entrypoint.
 
@@ -76,8 +77,9 @@ Factory's refresh endpoint, /api paths, member signup or branch permissions into
 Retreat: those are different contracts.
 
 Preserve backend-issued browser paths `/guest`, `/staff`, `/guest/stay`, `/draft`
-and their `#token=...` fragments. Use BrowserRouter, not HashRouter. The foundation
-does not parse guest/staff/private/draft credentials. Administrator sessions mount
+and their `#token=...` fragments. Use BrowserRouter, not HashRouter. Guest entry
+parses only the property guest QR and private stay credential on their matching
+routes. Staff and draft intake remain unimplemented. Administrator sessions mount
 only inside the admin route group, preserving isolation from those link flows.
 
 ## Administrator login
@@ -137,7 +139,7 @@ information with collection status and revision-review warnings. Shared issue ca
 renaming, display order and activation. Excel report downloads provide date/property
 selection and the existing three-sheet workbook. All administrator capabilities
 listed in the 2026-09-30 handoff now have frontend implementations. Live admin
-acceptance, guest/staff link flows, caches, PWA/offline support and deployment
+acceptance, guest checklist/staff workflows, caches, PWA/offline support and deployment
 remain separate work; implemented features do not establish production readiness.
 Report typecheck/lint/build separately from actual browser/backend/mobile checks.
 
@@ -919,11 +921,84 @@ detail/history/photos/stay association, maintenance monitoring, issue
 detail/history/photos/actions/categories, staff profiles/property assignment,
 property settings/QR/checklists/guides, private stay links, vehicle review and
 Excel reports. These match the administrator features listed in the handoff;
-there is no remaining handoff-listed admin UI placeholder. The guest, private
-guest, staff and draft routes still use AccessPendingScreen and are not complete.
+there is no remaining handoff-listed admin UI placeholder. Guest entry and guides
+are implemented in the following slice; staff and draft routes still use
+AccessPendingScreen, and guest checklist workflows are not complete.
 
 Before release, exercise the existing admin UI with real credentials/data and
 verify downloads, browser navigation, narrow-screen layout and infrastructure
 flows. Actual content/configuration, PWA, guest/staff UI and deployment remain
 separate work. The pre-existing large-bundle warning is a separate performance
 slice. The user retains staging, commit, push, migration and deployment ownership.
+
+## Guest slice 1 — entry, mobile home and published guide
+
+`/guest#token=...` uses the property guest QR; `/guest/stay#token=...` uses the
+personal stay invitation. These route screens have their own OH BOK guest frame,
+mobile Home/Guide navigation and scoped styles, outside the admin session/provider
+and generic entry shell. QR home displays property name/region only; private home
+also displays the guest name and planned arrival/departure in Seoul time. These
+dates do not establish actual occupancy. No manager contact field exists, so no
+phone number or call action is invented. Checklist definitions are validated but
+there are no unimplemented checklist, photo, issue, vehicle or staff action buttons.
+
+`features/guest-entry` separates DTOs, canonical token/response validation,
+checklist-definition readers and API calls. GET `/qr/guest` and
+`/guest/stays/current` load only their matching context. Opening the guide reloads
+context first, then GET `/guest/property-guides/qr` or `/guest/property-guides/stay`.
+All use explicit Bearer credentials with `apiRequest<unknown>`, no request body,
+query parameters, cookies or admin token injection. Full guest checklist definitions
+are bounded and validated; empty/partial checklist configuration is valid.
+
+Guide identity must match the entry's property ID. Names/regions can legitimately
+change between these reads; guide view uses the guide response's current labels.
+Only the published title/content is displayed, as escaped text with preserved
+line breaks and wrapping. No HTML, Markdown, automatic links or remote previews
+are rendered. A successful `guide: null` means no guide is published and has a
+distinct empty state; it is never used as a fallback for failed reads.
+
+The fragment parser accepts the backend's exact canonical 32-byte base64url token
+format. Missing/malformed fragments cause no API calls. Guest credentials remain
+in the fragment and direct mounted request state only, never local/session storage,
+logs, analytics, query parameters or serialized/cache/React keys. Home and Guide
+use the same credential route, with only `?view=guide` changing; the full fragment
+is preserved for browser refresh/back. Links derive their canonical path from
+the explicit credential kind, including when React Router matches case/trailing
+slash variants. The skip-to-content button does not replace the token fragment.
+
+The request hook hides old data immediately on credential, flow or view change
+and on manual refresh. Requests abort and fence stale responses on those changes
+and unmount. Guide authorization failure clears the entire entry display; general
+network/malformed/rate errors remain retryable and do not enter the admin session.
+Personal 401 INVALID_STAY_ACCESS combines several invalidation causes; the UI does
+not distinguish expiry, cancellation, revocation or changed stay revision.
+
+Focus/visibility return and persisted pageshow revalidate context; BFCache restore
+also invalidates pending pre-freeze requests. There is no polling or automatic
+network-error retry. Personal data is hidden at the returned expiry via a local
+timer; this timer depends on the device clock, while every server read remains
+authoritative for access. Background mutations can remain unseen until the next
+read; no real-time invalidation channel is claimed. Guide navigation intentionally
+starts at the top, and fresh states move focus to main content.
+
+Verification covers typecheck/lint, a production build with explicit valid public
+HTTPS origins, disposable feature/parser/navigation/lifecycle/component/router
+probes, and actual backend service/DTO fixtures with in-memory data. Preserve the
+committed ff64022 canonical-origin and submission navigation fixes. No backend,
+schema, dependencies, repository test files, migrations, Git mutations or server
+start/stop operations belong to this slice. Live guest data, actual device scanning
+and complete authenticated visual acceptance remain separate verification.
+
+Browser inspection reused the already-running frontend without tokens: missing-link
+screens were checked at 320px/390px with no horizontal overflow. It exposed and
+verified a fix to the main-region programmatic-focus outline. Automatic approval
+review blocked token-bearing browser navigation as a possible live backend request;
+valid home/guide states were verified synthetically, not visually with live guest data.
+Build validation used example HTTPS origins; deployment must rebuild with real origins.
+
+Staff/draft screens, checklist creation/save/submit/corrections, photos, issue
+reports, vehicle registration, PWA and deployment remain future slices. Later
+deployment direction is one EC2 running Nginx/frontend, NestJS and private
+PostgreSQL through Docker Compose, with persistent database storage and off-server
+backups. No deployment work is included here. Production frontend builds still
+require VITE_FRONTEND_URL matching backend FRONTEND_URL and VITE_API_BASE_URL.
