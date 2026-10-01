@@ -1,4 +1,5 @@
 import { apiRequest } from '../../core/api/api-client';
+import { appConfig } from '../../core/config/environment';
 import {
   readAdminStayLinkIssue,
   readAdminStayLinkRevoke,
@@ -53,6 +54,7 @@ export async function issueAdminStayLink(
     stayId,
     prior,
     checkOutAt,
+    appConfig.frontendOrigin,
   );
 }
 

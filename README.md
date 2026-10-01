@@ -23,6 +23,18 @@ origin with no path; Retreat has no `/api` prefix. Loopback HTTP is permitted fo
 local production-bundle verification only. The built frontend must be rebuilt
 when its API origin changes.
 
+`VITE_FRONTEND_URL` is the canonical public frontend origin used to validate
+issued personal links and property QR links. It must match the backend's
+`FRONTEND_URL`, even when the administrator opens the app through another
+allowed origin. Development defaults to `http://localhost:5175`, matching the
+backend default; set it explicitly for a remote or differently configured backend.
+Production requires an explicit HTTPS origin before building, for example
+`VITE_FRONTEND_URL=https://app.example.com` alongside
+`VITE_API_BASE_URL=https://api.example.com`. Missing/invalid production configuration
+stops startup before requests can issue or replace links. A valid but mismatched
+frontend/backend setting still rejects the receipt after issuance, so keep both
+settings aligned. Rebuild the frontend after changing either public URL.
+
 ## Current slice
 
 - Study Factory-style `src/app/core`, `features`, `screens`, `shared`, and `styles`.

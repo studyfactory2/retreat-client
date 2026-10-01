@@ -1,4 +1,5 @@
 import { apiRequest } from '../../core/api/api-client';
+import { appConfig } from '../../core/config/environment';
 import { readPropertyQrStatus, readQrIssue } from './admin-property-qr-readers';
 import type {
   PropertyQrStatus,
@@ -42,5 +43,6 @@ export async function rotateAdminPropertyQr(
     propertyId,
     flow,
     expectedRotatedAt,
+    appConfig.frontendOrigin,
   );
 }

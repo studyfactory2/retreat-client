@@ -123,7 +123,7 @@ export function SubmissionStayLink({
       {record.stayId && (
         <p>
           <Link
-            to={`/admin/stays/${record.stayId}?from=list`}
+            to={`/admin/stays/${record.stayId}?view=list`}
             onClick={(event) => {
               if (
                 onOpenStay &&

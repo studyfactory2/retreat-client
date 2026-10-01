@@ -221,7 +221,7 @@ function SubmissionWorkspace({
           onRefresh={refreshRecord}
           onOpenStay={() =>
             navigation.request(() =>
-              navigate(`/admin/stays/${revision.record.stayId}?from=list`),
+              navigate(`/admin/stays/${revision.record.stayId}?view=list`),
             )
           }
           onSaved={(receipt) => {

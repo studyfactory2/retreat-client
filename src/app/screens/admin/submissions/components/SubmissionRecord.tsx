@@ -69,7 +69,7 @@ export function SubmissionRecord({
             <dt>{historical ? '당시 연결된 이용 일정' : '연결된 이용 일정'}</dt>
             <dd>
               {record.stayId ? (
-                <Link to={`/admin/stays/${record.stayId}?from=list`}>
+                <Link to={`/admin/stays/${record.stayId}?view=list`}>
                   이용 일정 보기{historical ? ' (현재 정보)' : ''} →
                 </Link>
               ) : (

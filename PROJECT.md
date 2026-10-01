@@ -54,6 +54,13 @@ needed for this foundation.
 
 Client: 5175, API: 3100 locally. GET/POST only, no `/api` prefix, no cookies.
 Use `.env` (ignored), never `.env.example`. `VITE_` variables are public.
+`VITE_FRONTEND_URL` defines the canonical public frontend origin and must match
+backend `FRONTEND_URL`; it is independent of the administrator tab's origin.
+Development defaults to `http://localhost:5175`; explicitly configure it for a
+different or remote backend. Production requires an explicit HTTPS origin at
+build time. Missing/invalid configuration fails at startup before any issuance;
+a syntactically valid mismatch with the backend still rejects issued receipts.
+Rebuild after changing `VITE_FRONTEND_URL` or `VITE_API_BASE_URL`.
 `apiRequest<T>` is a typed JSON helper, not runtime DTO validation; validate
 critical data at the feature boundary. Empty 204 responses yield undefined;
 call them as `apiRequest<void>`. `apiDownload` returns Blob.
@@ -602,10 +609,11 @@ Issued/enabled is not proof of complete checklist or staff setup. Guest/staff
 frontend forms are still separate work.
 
 Issuance receipts validate property, flow, a strictly advancing canonical UTC
-timestamp, and an exact same-frontend-origin `/guest` or `/staff` URL with only
-`#token=<43 base64url characters>`. Backend FRONTEND_URL must match the origin
-where the administrator opens this frontend (localhost:5175 locally). A wrong
-origin is treated as an invalid receipt, not rewritten or accepted silently.
+timestamp, and an exact configured-frontend-origin `/guest` or `/staff` URL with
+only `#token=<43 base64url characters>`. The API passes the validated
+`VITE_FRONTEND_URL` origin to the receipt reader, matching backend `FRONTEND_URL`
+regardless of the administrator tab's origin. A wrong origin is treated as an
+invalid receipt, not rewritten or accepted silently.
 
 Raw links stay only in mounted screen memory and explicit user copies/downloads;
 they are never put in browser storage, request keys, logs or remote QR services.
@@ -793,8 +801,9 @@ restoring a stay does not revive it. Link writes do not create stay revisions.
 
 Only issuance returns a raw `/guest/stay#token=...` URL. Strict readers verify
 identity, next invitation version, unchanged stay revision, advancing timestamp,
-exact expiry and same-frontend-origin URL. The raw address remains only in mounted
-memory and explicit clipboard copies; it never enters browser storage or logs.
+exact expiry and the configured canonical frontend origin passed by the API.
+The raw address remains only in mounted memory and explicit clipboard copies;
+it never enters browser storage or logs.
 Clipboard failure selects the read-only address for manual copying. Status refresh
 preserves it only for the exact same enabled invitation. A transient failed read
 hides the URL but retains it privately until a matching read succeeds. Expiry,

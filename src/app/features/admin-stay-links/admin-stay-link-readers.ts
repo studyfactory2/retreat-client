@@ -109,9 +109,7 @@ export function readAdminStayLinkIssue(
   expectedId: string,
   previous: AdminStayLinkStatus,
   checkOutAt: string,
-  expectedFrontendOrigin = typeof window === 'undefined'
-    ? ''
-    : window.location.origin,
+  expectedFrontendOrigin: string,
 ): AdminStayLinkIssue {
   const status = readChangedStatus(value, expectedId, previous);
   if (

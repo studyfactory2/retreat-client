@@ -85,9 +85,7 @@ export function readQrIssue(
   expectedId: string,
   expectedFlow: QrFlow,
   expectedRotatedAt: string | null,
-  expectedFrontendOrigin = typeof window === 'undefined'
-    ? ''
-    : window.location.origin,
+  expectedFrontendOrigin: string,
 ): QrIssue {
   if (
     !isRecord(value) ||
