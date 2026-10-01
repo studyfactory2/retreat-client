@@ -5,6 +5,7 @@ export const appRoutes = {
   adminCalendar: '/admin/calendar',
   adminStays: '/admin/stays',
   adminSubmissions: '/admin/submissions',
+  adminReports: '/admin/reports',
   adminMaintenance: '/admin/maintenance',
   adminIssues: '/admin/issues',
   adminIssueCategories: '/admin/issues/categories',

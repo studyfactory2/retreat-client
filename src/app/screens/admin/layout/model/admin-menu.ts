@@ -49,6 +49,13 @@ export const adminSecondaryMenu: AdminMenuEntry[] = [
     description: '입·퇴실과 정비 체크리스트, 사진, 저장 이력을 확인합니다.',
   },
   {
+    to: appRoutes.adminReports,
+    label: '운영 보고서',
+    mobileLabel: '운영 보고서',
+    icon: 'reports',
+    description: '기간과 휴양소를 선택해 제출·접수 기록을 엑셀로 내려받습니다.',
+  },
+  {
     to: appRoutes.adminProperties,
     label: '휴양소 관리',
     mobileLabel: '휴양소 관리',

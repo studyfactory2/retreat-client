@@ -4,6 +4,7 @@ export type AdminMenuIconName =
   | 'maintenance'
   | 'issues'
   | 'submissions'
+  | 'reports'
   | 'properties'
   | 'staff'
   | 'more';
@@ -37,6 +38,11 @@ export function AdminMenuIcon({ name }: { name: AdminMenuIconName }) {
         <>
           <path d="M8 4H6a2 2 0 0 0-2 2v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V6a2 2 0 0 0-2-2h-2M8 10h8M8 14h8M8 18h5" />
           <rect x="8" y="2" width="8" height="4" rx="1" />
+        </>
+      )}
+      {name === 'reports' && (
+        <>
+          <path d="M14 3H5a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9l-6-6Zm0 0v6h6M8 16v2m4-5v5m4-3v3" />
         </>
       )}
       {name === 'properties' && (

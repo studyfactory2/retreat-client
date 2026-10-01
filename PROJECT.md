@@ -22,7 +22,7 @@ Follow studyfactory-frontend's organization:
 - `src/app/screens/<area>/<screen>`: route screens at the domain root, with
   supporting `components/`, `hooks/`, `model/`, and `styles/` folders as needed.
   Admin login/layout/dashboard/calendar/stays/properties/stay-imports/submissions,
-  maintenance/issues/staff/more, entry and dev exist; guest/staff access flows follow later.
+  maintenance/issues/staff/reports/more, entry and dev exist; guest/staff access flows follow later.
 - `src/app/shared/ui` and `shared/layout`: business-neutral reusable components.
 - `src/app/styles`: reset, shared tokens, base styles and their single entrypoint.
 
@@ -127,9 +127,11 @@ and maintenance template editing are available. Property usage guides support ed
 and publication controls. Personal stay links support status, issuance/replacement,
 copying and revocation in stay details. Stay details also provide read-only vehicle
 information with collection status and revision-review warnings. Shared issue categories support search, registration,
-renaming, display order and activation. Other management screens, guest/staff link validation,
-caches, PWA/offline support and deployment remain outside this
-slice.
+renaming, display order and activation. Excel report downloads provide date/property
+selection and the existing three-sheet workbook. All administrator capabilities
+listed in the 2026-09-30 handoff now have frontend implementations. Live admin
+acceptance, guest/staff link flows, caches, PWA/offline support and deployment
+remain separate work; implemented features do not establish production readiness.
 Report typecheck/lint/build separately from actual browser/backend/mobile checks.
 
 ## Administrator calendar
@@ -219,9 +221,9 @@ client/operator branding choice is confirmed.
 ## Administrator navigation
 
 `layout/model/admin-menu` defines the primary and secondary menu entries;
-`AdminNavigation` handles their route groups. Desktop shows seven entries. Mobile
+`AdminNavigation` handles their route groups. Desktop shows eight entries. Mobile
 shows 운영, 일정, 정비, 이상사항 and 더보기. The `/admin/more` screen links to
-직원 관리, 제출 기록 and 휴양소 관리; their nested routes keep 더보기 active on mobile.
+직원 관리, 제출 기록, 운영 보고서 and 휴양소 관리; their nested routes keep 더보기 active on mobile.
 One navigation tree appears as a sidebar above 760px and a fixed bottom bar at
 760px and below. Mobile links use equal columns, icons above labels, a blue active
 state and a minimum 56px touch target. The page reserves space for the bar and
@@ -855,3 +857,64 @@ could not be opened because browser policy blocks file URLs; no preview server
 was started. Do not start/stop the user's local servers on 3100 or 5175 without
 their explicit request. No backend/schema/migration/dependency or repository test
 files were changed. The user controls staging, commits and rollout.
+
+## Administrator Excel downloads
+
+`/admin/reports` provides 운영 보고서 under the authenticated administrator layout.
+The shared secondary menu places it after 제출 기록 on desktop and in mobile
+더보기; the five-item mobile bottom bar is preserved. The form starts with the
+full current Seoul month and all properties, with 이번 달/지난달 shortcuts. Dates
+are inclusive calendar dates in 1900–2100, ordered and at most 62 days. Property
+options reuse the existing complete paginated reader, including inactive entries.
+Loading/error property lists cannot trigger an export. Form values are local,
+with no browser persistence or automatic generation on mount/change.
+
+`features/admin-reports` separates types, query validation, binary reading and
+GET `/admin/reports/excel?from=...&to=...&propertyId=...`. The optional property
+parameter is omitted for all properties. The existing authenticated `apiDownload`
+transport reads failures as normal API errors. This request uses a 60-second client
+timeout to allow generation and transfer; backend limits remain unchanged. The
+feature checks XLSX MIME, nonzero size up to 16 MiB and the ZIP local-file signature.
+This is bounded file validation, not a full workbook parser. The filename uses
+the validated request snapshot and matches the server's date-only filename.
+
+The screen separates components, request hook, date/file models and scoped CSS.
+The hook blocks duplicate requests synchronously, aborts and fences late results
+on scope/credential change or unmount, and rejects only the initiating token on
+401/403. Form changes synchronously reset old results. There is no automatic retry.
+Successful files use a temporary download anchor and object URL, removed/revoked
+after use (URL retained 60 seconds so download consumption can finish). The status
+says download was requested; it cannot establish that the browser saved the file.
+No workbook, token or report content is placed in browser storage or logs.
+
+Each workbook contains 입퇴실 제출 and 정비 제출 filtered by submittedAt, plus
+이상사항 filtered by reportedAt with current status at generation. Empty reports
+still contain all three sheets. This is activity reporting, not occupancy, missing
+submission detection or a historical period-end database snapshot. The page
+explains exclusions and the backend's 5,000-record/16-MiB combined limits. Failed,
+oversized, busy or inconsistent-evidence reports remain errors, never partial files.
+
+Verification includes typecheck/lint/build and disposable API/binary/date/request
+lifecycle/download-helper, server-rendered component/navigation and actual backend
+reader/workbook/service probes. Workbook bytes were generated and decoded with
+the existing backend XLSX dependency over synthetic records. No local servers
+were started or stopped. Live administrator JWT/PostgreSQL/S3, actual browser file
+saving, responsive rendering and physical-device checks remain unverified here.
+No backend, migration, dependency, repository test files or Git mutations were added.
+
+## Administrator implementation checkpoint — 2026-10-01
+
+The focused source/route review covers login/session/layout, dashboard/calendar,
+stay list/create/edit/cancel/restore/history and XLS import, submission
+detail/history/photos/stay association, maintenance monitoring, issue
+detail/history/photos/actions/categories, staff profiles/property assignment,
+property settings/QR/checklists/guides, private stay links, vehicle review and
+Excel reports. These match the administrator features listed in the handoff;
+there is no remaining handoff-listed admin UI placeholder. The guest, private
+guest, staff and draft routes still use AccessPendingScreen and are not complete.
+
+Before release, exercise the existing admin UI with real credentials/data and
+verify downloads, browser navigation, narrow-screen layout and infrastructure
+flows. Actual content/configuration, PWA, guest/staff UI and deployment remain
+separate work. The pre-existing large-bundle warning is a separate performance
+slice. The user retains staging, commit, push, migration and deployment ownership.
