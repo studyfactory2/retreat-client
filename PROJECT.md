@@ -125,7 +125,8 @@ property staff assignment are available. Property QR status, issuance/replacemen
 local QR images and link copying are available. Property checklist setup, fixed guest template previews,
 and maintenance template editing are available. Property usage guides support editing, mobile preview,
 and publication controls. Personal stay links support status, issuance/replacement,
-copying and revocation in stay details. Shared issue categories support search, registration,
+copying and revocation in stay details. Stay details also provide read-only vehicle
+information with collection status and revision-review warnings. Shared issue categories support search, registration,
 renaming, display order and activation. Other management screens, guest/staff link validation,
 caches, PWA/offline support and deployment remain outside this
 slice.
@@ -813,3 +814,44 @@ layouts. These checks do not establish live JWT/PostgreSQL concurrency or physic
 device proof. Guest/staff screens remain placeholders; vehicle review and report
 downloads remain separate admin slices. No backend/schema/migration/dependency
 or repository test files were changed. The user controls staging and rollout.
+
+## Administrator stay vehicle review
+
+The stay detail screen includes a read-only 차량 정보 card after 개인 이용 링크
+and before history. `features/admin-stay-vehicles` separates DTOs, validation,
+runtime readers and GET `/admin/stays/:id/vehicle`. The stay screen separates the
+request hook, context/timestamp model, loading/error card, saved-detail component
+and scoped responsive CSS. There are no admin vehicle mutations or review-acknowledgement
+controls. Report downloads and guest vehicle entry remain separate slices.
+
+The card distinguishes no vehicle row from a saved row whose plate is null.
+Neither means the guest confirmed they have no car. It shows collection status,
+the stored plate when present and the latest saved timestamp in Seoul time.
+`needsReview` is true only for a non-null plate saved against a different stay
+revision; the previous plate remains visible to the administrator with a warning.
+Cancelled stays, inactive properties and disabled collection do not hide saved
+admin data. Collection is controlled in the existing property settings.
+
+Response readers verify the requested stay, shape, canonical timestamps, bounded
+versions, normalized plate alphabet and the exact review predicate. The hook
+compares the response's stay and property context with the displayed detail before
+exposing the plate. Changed context or a missing stay requires an explicit full
+stay reload. That action uses the personal-link navigation guard, while refreshing
+only vehicle information leaves the mounted personal-link receipt intact.
+Vehicle actions are disabled while the link feature is busy or its navigation
+confirmation is pending. Both cards are hidden during stay editing/status actions.
+
+Reads abort and fence late results on refresh, scope/token changes and unmount;
+401/403 rejects only the requesting administrator token. Loading, malformed/error,
+empty and saved states remain distinct. There is no polling, automatic retry,
+browser persistence or plate logging. The existing backend owns admin permissions,
+consistent stay/vehicle reads and guest invitation/version safeguards.
+
+Verification uses typecheck/lint/build, disposable response/API and hook/model
+probes, server-rendered component assertions, and actual backend service/DTO probes
+with in-memory storage. These do not establish live JWT/PostgreSQL concurrency,
+browser layout, physical-device or deployment proof. The offline HTML preview
+could not be opened because browser policy blocks file URLs; no preview server
+was started. Do not start/stop the user's local servers on 3100 or 5175 without
+their explicit request. No backend/schema/migration/dependency or repository test
+files were changed. The user controls staging, commits and rollout.

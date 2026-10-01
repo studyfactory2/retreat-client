@@ -1,0 +1,87 @@
+.stay-vehicle__heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.stay-vehicle__heading .ui-button {
+  min-height: 44px;
+  max-width: 100%;
+  font-size: 13px;
+  white-space: normal;
+}
+
+.stay-vehicle__details {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px 24px;
+  margin-top: 24px;
+}
+
+.stay-vehicle__details > div {
+  min-width: 0;
+}
+
+.stay-vehicle__wide {
+  grid-column: 1 / -1;
+}
+
+.stay-vehicle__details dt {
+  margin-bottom: 7px;
+  color: var(--color-muted);
+  font-size: 12px;
+}
+
+.stay-vehicle__details dd {
+  margin: 0;
+  color: var(--color-heading);
+  font-size: 14px;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+}
+
+.stay-vehicle__details .stay-vehicle__plate {
+  font-size: 22px;
+  font-weight: 650;
+  letter-spacing: 0.5px;
+}
+
+.stay-vehicle__review {
+  margin-top: 22px;
+  padding: 16px 18px;
+  border: 1px solid #e9d39c;
+  border-radius: var(--radius-sm);
+  background: #fffaf0;
+  color: #795313;
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.stay-vehicle__review p {
+  margin-top: 7px;
+}
+
+.stay-vehicle .stay-vehicle__help,
+.stay-vehicle .stay-vehicle__message {
+  margin-top: 18px;
+  color: var(--color-muted);
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.stay-vehicle .stay-banner {
+  margin-top: 18px;
+  margin-bottom: 0;
+}
+
+@media (max-width: 650px) {
+  .stay-vehicle__details {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .stay-vehicle__review {
+    padding: 14px;
+  }
+}

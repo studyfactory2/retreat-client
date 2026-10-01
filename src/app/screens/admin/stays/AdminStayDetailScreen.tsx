@@ -15,6 +15,7 @@ import { StayHistory } from './components/StayHistory';
 import { isStayRevision } from '../../../features/admin-stays/admin-stays-validation';
 import { StayDetails } from './components/StayDetails';
 import { StayLinkCard } from './components/StayLinkCard';
+import { StayVehicleCard } from './components/StayVehicleCard';
 import { StayLinkNavigationNotice } from './components/StayLinkNavigationNotice';
 import { useStayLinkNavigation } from './hooks/use-stay-link-navigation';
 import { StayForm } from './components/StayForm';
@@ -24,7 +25,10 @@ import {
   validateStayForm,
   type StayFormValues,
 } from './model/stay-form-model';
-import { getSavedStayCalendar, getStayNavigation } from './model/stay-navigation';
+import {
+  getSavedStayCalendar,
+  getStayNavigation,
+} from './model/stay-navigation';
 import { useAdminStay } from './hooks/use-admin-stay';
 import { useStaySave } from './hooks/use-stay-save';
 import { useUnsavedStay } from './hooks/use-unsaved-stay';
@@ -236,6 +240,20 @@ function DetailWorkspace({
           rejectSession={rejectSession}
           registerGuard={linkNavigation.register}
           navigationPending={linkNavigation.pending}
+          onReloadStay={() =>
+            linkNavigation.request(() => {
+              setNotice(null);
+              refresh();
+            })
+          }
+        />
+      )}
+      {!changingStatus && (
+        <StayVehicleCard
+          stay={stay}
+          token={token}
+          rejectSession={rejectSession}
+          actionsDisabled={linkNavigation.busy || linkNavigation.pending}
           onReloadStay={() =>
             linkNavigation.request(() => {
               setNotice(null);
