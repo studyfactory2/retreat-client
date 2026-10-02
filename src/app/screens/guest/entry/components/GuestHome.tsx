@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { Link, type To } from 'react-router-dom';
 import type { GuestEntryContext } from '../../../../features/guest-entry/guest-entry.types';
 import { formatGuestStayTimestamp } from '../model/guest-entry-model';
@@ -9,12 +10,14 @@ export function GuestHome({
   checkIn,
   checkOut,
   report,
+  vehicleCard,
 }: {
   entry: GuestEntryContext;
   guide: To;
   checkIn: To;
   checkOut: To;
   report?: To;
+  vehicleCard?: ReactNode;
 }) {
   const property = entry.context.property;
   return (
@@ -146,6 +149,9 @@ export function GuestHome({
           </Link>
         </section>
       </div>
+      {entry.kind === 'stay' &&
+        entry.context.property.vehicleRegistrationEnabled &&
+        vehicleCard}
       <aside className="guest-context-note">
         <GuestIcon name="notice" />
         <p>

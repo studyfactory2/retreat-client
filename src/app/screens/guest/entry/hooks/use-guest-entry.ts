@@ -53,6 +53,9 @@ export function useGuestEntry(
   const scope = useRef<typeof owner | null>(owner);
   const request = useRef<AbortController | null>(null);
   const generation = useRef(0);
+  const rejection = useRef<{ owner: typeof owner; revision: number } | null>(
+    null,
+  );
   const [revision, setRevision] = useState(0);
   const [result, setResult] = useState<{
     owner: typeof owner;
@@ -76,8 +79,27 @@ export function useGuestEntry(
     setRevision(generation.current);
   }, [owner]);
 
+  const rejectAccess = useCallback(() => {
+    if (scope.current !== owner || owner.token === null) return;
+    request.current?.abort();
+    request.current = null;
+    generation.current += 1;
+    rejection.current = { owner, revision: generation.current };
+    setRevision(generation.current);
+    setResult({
+      owner,
+      revision: generation.current,
+      resource: unavailable(owner.kind),
+    });
+  }, [owner]);
+
   useEffect(() => {
-    if (owner.token === null) return;
+    if (
+      owner.token === null ||
+      (rejection.current?.owner === owner &&
+        rejection.current.revision === revision)
+    )
+      return;
     const credential = owner.token;
     const controller = new AbortController();
     request.current = controller;
@@ -221,5 +243,5 @@ export function useGuestEntry(
     return () => clearTimeout(timer);
   }, [expiresAt, owner, revision]);
 
-  return { resource, refresh };
+  return { resource, refresh, rejectAccess };
 }

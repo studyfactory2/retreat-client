@@ -140,7 +140,7 @@ information with collection status and revision-review warnings. Shared issue ca
 renaming, display order and activation. Excel report downloads provide date/property
 selection and the existing three-sheet workbook. All administrator capabilities
 listed in the 2026-09-30 handoff now have frontend implementations. Live admin
-acceptance, guest issue reports/vehicles, staff workflows, caches, PWA/offline support and deployment
+and guest acceptance, staff workflows, caches, PWA/offline support and deployment
 remain separate work; implemented features do not establish production readiness.
 Report typecheck/lint/build separately from actual browser/backend/mobile checks.
 
@@ -1264,3 +1264,67 @@ personal-link separation were checked; 320px/390px states had no horizontal
 overflow. These are synthetic checks, not live S3/database/admin readback or
 physical-device acceptance. The existing bundle-size warning remains (main chunk
 about 935 kB minified). Existing servers and Git were left under user control.
+
+## Guest slice 6 — personal-stay vehicle information
+
+Personal-stay home (`/guest/stay#token=...`) shows a Korean `차량 정보` card only
+when the property's `vehicleRegistrationEnabled` is true. Shared property QR,
+guide/start views and private draft screens do not load this feature. The card
+reads one current plate, saves/replaces it, and explicitly clears it after inline
+confirmation. This collects information for the manager; it neither verifies a
+legal registration nor registers parking access. A cleared plate does not assert
+that the guest has no vehicle.
+
+`features/guest-stay-vehicles` separates types, validation, response readers and
+GET/POST `/guest/stays/vehicle`. Both pass only the personal-stay Bearer credential;
+no stay/property ID, query parameter, admin JWT, QR or draft token is sent. The
+reader compares returned stay/property IDs with the verified entry context.
+Property names may change. POST sends exactly `{ expectedVersion, plateNumber }`;
+null explicitly clears. Non-null text uses backend normalization: NFC, surrounding
+trim, ordinary-space removal and uppercase, followed by 3–20 characters from
+digits, A–Z, Hangul syllables or hyphens, with at least one digit. Internal tabs,
+newlines, markup and unsupported punctuation fail validation. Save receipts must
+match the normalized intent, advance the expected version by exactly one, and
+have enabled collection, no confirmation requirement and a saved timestamp.
+
+Screen components, request/lifecycle hook, pure model and scoped mobile styles
+remain in `screens/guest/entry/`. The hook lives above the temporary home loading
+screen so same-link refresh/network failures retain input in memory. Writes use
+a synchronous lock and fence late responses after credential/scope changes,
+refresh and unmount. Foreground/BFCache checks reuse the entry lifecycle and
+interrupt an in-flight write as uncertain. Expiry timers remain active through
+temporary entry failures. Vehicle access rejection clears private form data and
+rejects the owning entry screen, without touching administrator sessions.
+
+Conflicts and lost/malformed/uncertain POST responses block further writes until
+a fresh GET and explicit review. There is no automatic POST retry or silent
+rebase. Matching text from a later GET does not prove that the earlier request
+committed. A successful GET supplies the version for the next deliberate save.
+The maximum readable version is 2147483647; it is visibly read-only. Disabled
+collection clears guest plate/input data and removes the editing card. The
+administrator vehicle display remains unchanged.
+
+When the backend returns `needsConfirmation`, the earlier plate/timestamp remain
+hidden and no cached plate is restored. The guest enters a fresh plate or
+explicitly clears the value to confirm the current stay. Newly typed input after
+this hidden state survives same-context refresh; new scope or newly hidden data
+clears old input. Token and private state remain fragment/in-memory only, never
+browser storage, logs, query parameters or cache keys.
+
+App-link navigation and document unload warn about unsaved/unresolved work.
+The existing BrowserRouter still does not globally intercept same-document
+Back/Forward. Closing/reloading/leaving can lose unsaved input; save before
+navigation. No backend/schema/dependency, environment, migration, server-lifecycle,
+Git or deployment work is included. Staff screens, PWA and deployment remain
+later slices.
+
+Verification: frontend TypeScript, Oxlint, changed-code Prettier using the exact
+repository configuration, and a production build with sample HTTPS public origins
+passed. Temporary probes cover 155 feature/API assertions, 58 vehicle lifecycle
+assertions, 61 component/entry-rejection assertions, 50 existing guest-start
+regression assertions, and 10 actual backend DTO/service checks with in-memory
+fixtures. No repository test files were added. The browser URL policy blocked an
+isolated static preview, so this slice has no new visual/browser acceptance.
+These checks do not prove live database/HTTP guard behavior, administrator
+readback or physical-device layout. The existing bundle warning remains (main
+chunk about 953 kB minified). Deployment must rebuild using real public origins.

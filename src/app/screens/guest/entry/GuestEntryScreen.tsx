@@ -7,6 +7,8 @@ import { GuestHome } from './components/GuestHome';
 import { GuestGuide } from './components/GuestGuide';
 import { GuestAccessState } from './components/GuestAccessState';
 import { GuestStartForm } from './components/GuestStartForm';
+import { GuestStayVehicleCard } from './components/GuestStayVehicleCard';
+import { useGuestStayVehicle } from './hooks/use-guest-stay-vehicle';
 import { useGuestStart } from './hooks/use-guest-start';
 import { getGuestStartType } from './model/guest-start-model';
 import { useGuestEntry } from './hooks/use-guest-entry';
@@ -17,6 +19,7 @@ import {
 } from './model/guest-entry-model';
 import './styles/guest-entry.css';
 import './styles/guest-start.css';
+import './styles/guest-stay-vehicle.css';
 
 export function GuestEntryScreen({ kind }: { kind: GuestAccessKind }) {
   const location = useLocation();
@@ -32,10 +35,26 @@ function GuestEntrySessionScreen({ kind }: { kind: GuestAccessKind }) {
   const access = readGuestAccess(location.hash);
   const requestedView = readGuestView(location.search);
   const view = requestedView === 'report' ? 'home' : requestedView;
-  const { resource, refresh } = useGuestEntry(
+  const { resource, refresh, rejectAccess } = useGuestEntry(
     kind,
     access.status === 'ready' ? access.token : null,
     view,
+  );
+  const vehicleForm = useGuestStayVehicle(
+    kind === 'stay' && view === 'home' && access.status === 'ready'
+      ? access.token
+      : null,
+    resource.status === 'ready' && resource.data.entry.kind === 'stay'
+      ? resource.data.entry.context
+      : null,
+    resource.status === 'ready'
+      ? 'ready'
+      : resource.status === 'loading'
+        ? 'checking'
+        : resource.kind === 'unavailable'
+          ? 'denied'
+          : 'error',
+    rejectAccess,
   );
   const startType = getGuestStartType(view);
   const startForm = useGuestStart(
@@ -85,7 +104,9 @@ function GuestEntrySessionScreen({ kind }: { kind: GuestAccessKind }) {
           ? refresh
           : undefined
       }
-      confirmNavigation={startForm.confirmLeave}
+      confirmNavigation={() =>
+        startForm.confirmLeave() && vehicleForm.confirmLeave()
+      }
     >
       {access.status !== 'ready' ? (
         <GuestAccessState kind={kind} state={access.status} />
@@ -132,6 +153,7 @@ function GuestEntrySessionScreen({ kind }: { kind: GuestAccessKind }) {
           }
           checkIn={buildGuestViewLocation(kind, location.hash, 'check-in')}
           checkOut={buildGuestViewLocation(kind, location.hash, 'check-out')}
+          vehicleCard={<GuestStayVehicleCard form={vehicleForm} />}
         />
       )}
     </GuestFrame>
