@@ -22,8 +22,8 @@ Follow studyfactory-frontend's organization:
 - `src/app/screens/<area>/<screen>`: route screens at the domain root, with
   supporting `components/`, `hooks/`, `model/`, and `styles/` folders as needed.
   Admin login/layout/dashboard/calendar/stays/properties/stay-imports/submissions,
-  maintenance/issues/staff/reports/more, guest/entry, entry and dev exist;
-  guest checklist workflows and staff access flows follow later.
+  maintenance/issues/staff/reports/more, guest/entry, guest/draft, entry and dev exist;
+  guest final submission and staff access flows follow later.
 - `src/app/shared/ui` and `shared/layout`: business-neutral reusable components.
 - `src/app/styles`: reset, shared tokens, base styles and their single entrypoint.
 
@@ -79,7 +79,8 @@ Retreat: those are different contracts.
 Preserve backend-issued browser paths `/guest`, `/staff`, `/guest/stay`, `/draft`
 and their `#token=...` fragments. Use BrowserRouter, not HashRouter. Guest entry
 parses only the property guest QR and private stay credential on their matching
-routes. Staff and draft intake remain unimplemented. Administrator sessions mount
+routes. Draft intake parses its separate private credential; staff intake remains
+unimplemented. Administrator sessions mount
 only inside the admin route group, preserving isolation from those link flows.
 
 ## Administrator login
@@ -1002,3 +1003,71 @@ deployment direction is one EC2 running Nginx/frontend, NestJS and private
 PostgreSQL through Docker Compose, with persistent database storage and off-server
 backups. No deployment work is included here. Production frontend builds still
 require VITE_FRONTEND_URL matching backend FRONTEND_URL and VITE_API_BASE_URL.
+
+
+## Guest slice 2 — checklist start, temporary save and resume
+
+Guest home now offers available CHECK_IN/CHECK_OUT checklists. Missing templates
+show an unavailable state. Start views retain the entry credential in the fragment
+while using `?view=check-in` or `?view=check-out`. Property QR starts collect a
+required name and native-picker visit date (1900–2100, Seoul today initially),
+plus optional company, department and phone. Personal stay starts show the known
+name and planned Seoul date; identity and date are chosen by the backend.
+
+`features/guest-drafts` owns typed inputs, bounded response readers and scoped
+requests. `POST /submission-drafts/guest/start` uses a property guest QR;
+`POST /guest/stays/drafts/start` uses a personal stay credential and sends only
+requestKey/type. Each explicit start uses a UUID request key. The returned receipt
+contains a separate private draft credential and canonical `/draft#token=...` link.
+The URL must match configured `VITE_FRONTEND_URL`, path, token and expiry before
+opening the local draft route. Tokens are never browser-storage/cache/query keys.
+
+`/draft` sits outside administrator session providers and renders only guest
+check-in/out drafts. `GET /submission-drafts/current` uses the private draft
+credential to load the captured author and template, saved answers, revision
+timestamp and expiry. Staff maintenance editing is not implemented here.
+
+The editor uses the captured template, preserving its wording/version even if an
+administrator changes the current checklist. Partial answers and an empty answer
+list can be saved. NORMAL clears abnormal description/urgency; ABNORMAL allows
+an optional description and urgency. A general note is optional. Explicit
+`POST /submission-drafts/save` sends all answers and expectedUpdatedAt, with no
+staff-only repair fields. A successful response must preserve draft identity and
+snapshots, advance updatedAt and match the submitted normalized answers.
+
+Concurrent changes require explicit reload/review; no automatic rebase or mutation
+retry is performed. A failed/ambiguous start may already have created a draft, and
+its one-time credential cannot be recovered by repeating requestKey. A deliberate
+new start can create a separate draft. An uncertain save blocks another write
+until the current server state is checked. Keep the private resume link to reopen
+the saved draft; the guest home has no draft discovery/recovery endpoint.
+
+Temporary save is not final submission and does not create completed checklist
+evidence or issues. Photos, final submit/receipt/correction, guest issue reports,
+vehicles, staff screens, PWA and deployment remain later slices. No backend,
+schema, migration or dependency change is needed for this frontend slice.
+
+Draft requests are fenced on credential replacement, unmount and expiry. Focus,
+visibility return and persisted pageshow revalidate access while preserving dirty
+answers. An interrupted write remains uncertain until deliberate reconciliation.
+Authorization rejection clears displayed guest data. Network revalidation failures
+retain local input but block saves. Local expiry timers depend on the device clock;
+the backend remains authoritative and there is no live invalidation channel.
+
+Explicit start-screen links and draft reload protect unsaved input, and browser
+unload warns while dirty/pending. Same-document browser Back/Forward is not
+globally blocked by the existing BrowserRouter. The UI tells guests to save before
+leaving; unsaved answers are not persisted or recovered after such navigation.
+
+Verification for this slice: frontend typecheck, Oxlint and a production build
+with explicit sample HTTPS origins passed. Temporary API/model/component probes
+covered 166 assertions; 20 additional start/editor lifecycle scenarios covered
+conflicts, uncertain outcomes, token replacement, stale responses, expiry and
+foreground/BFCache recovery. Browser checks used an isolated in-memory fixture
+with real components: QR check-in, personal stay check-out, partial save/readback
+and conflict UI at 320px/390px. No horizontal overflow was observed in the checked
+states. A native confirmation interrupted browser automation; discard acceptance
+was checked by lifecycle probes. No live guest credentials, database writes,
+physical-device or deployed acceptance was performed. The existing large-bundle
+warning remains (main chunk about 822 kB minified); production readiness is not
+implied. The user's existing frontend/API servers were not restarted.

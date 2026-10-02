@@ -1,7 +1,7 @@
 import { isGuestAccessToken } from '../../../../features/guest-entry/guest-entry-validation';
 import type { GuestAccessKind } from '../../../../features/guest-entry/guest-entry.types';
 
-export type GuestView = 'home' | 'guide';
+export type GuestView = 'home' | 'guide' | 'check-in' | 'check-out';
 export type GuestAccess =
   | { status: 'ready'; token: string }
   | { status: 'missing' }
@@ -16,7 +16,12 @@ export function readGuestAccess(hash: string): GuestAccess {
 
 export function readGuestView(search: string): GuestView {
   const values = new URLSearchParams(search).getAll('view');
-  return values.length === 1 && values[0] === 'guide' ? 'guide' : 'home';
+  return values.length === 1 &&
+    (values[0] === 'guide' ||
+      values[0] === 'check-in' ||
+      values[0] === 'check-out')
+    ? values[0]
+    : 'home';
 }
 
 export function buildGuestViewLocation(
@@ -26,7 +31,7 @@ export function buildGuestViewLocation(
 ): { pathname: string; search: string; hash: string } {
   return {
     pathname: kind === 'stay' ? '/guest/stay' : '/guest',
-    search: view === 'guide' ? '?view=guide' : '',
+    search: view === 'home' ? '' : `?view=${view}`,
     hash,
   };
 }
@@ -43,5 +48,7 @@ const seoulDateTime = new Intl.DateTimeFormat('ko-KR', {
 
 export function formatGuestStayTimestamp(value: string): string {
   const date = new Date(value);
-  return Number.isFinite(date.getTime()) ? seoulDateTime.format(date) : '확인 필요';
+  return Number.isFinite(date.getTime())
+    ? seoulDateTime.format(date)
+    : '확인 필요';
 }

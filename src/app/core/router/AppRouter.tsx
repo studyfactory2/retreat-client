@@ -4,6 +4,7 @@ import { AccessPendingScreen } from '../../screens/entry/AccessPendingScreen';
 import { EntryScreen } from '../../screens/entry/EntryScreen';
 import { NotFoundScreen } from '../../screens/entry/NotFoundScreen';
 import { GuestEntryScreen } from '../../screens/guest/entry';
+import { GuestDraftScreen } from '../../screens/guest/draft';
 import { AppShell } from '../../shared/layout/AppShell/AppShell';
 import { PageState } from '../../shared/ui/PageState/PageState';
 import { appRoutes } from './routes';
@@ -62,6 +63,7 @@ export function AppRouter() {
     <Routes>
       <Route path={appRoutes.guest} element={<GuestEntryScreen kind="qr" />} />
       <Route path={appRoutes.guestStay} element={<GuestEntryScreen kind="stay" />} />
+      <Route path={appRoutes.draft} element={<GuestDraftScreen />} />
       <Route element={<AppShell />}>
         <Route path={appRoutes.home} element={<EntryScreen />} />
         <Route
@@ -70,15 +72,6 @@ export function AppRouter() {
             <AccessPendingScreen
               title="정비 직원 안내"
               description="담당 휴양소의 정비 체크리스트와 사진 등록 화면을 준비하고 있습니다."
-            />
-          }
-        />
-        <Route
-          path={appRoutes.draft}
-          element={
-            <AccessPendingScreen
-              title="체크리스트 확인"
-              description="체크리스트 작성과 제출 내역 확인 화면을 준비하고 있습니다."
             />
           }
         />
