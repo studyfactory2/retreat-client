@@ -6,7 +6,9 @@
   background: var(--color-background);
 }
 .guest-entry--navigable {
-  padding-bottom: calc(var(--guest-navigation-height) + env(safe-area-inset-bottom, 0px));
+  padding-bottom: calc(
+    var(--guest-navigation-height) + env(safe-area-inset-bottom, 0px)
+  );
 }
 .guest-icon {
   width: 24px;
@@ -81,7 +83,9 @@
   outline: none;
 }
 .guest-main :where(a, button, [tabindex]) {
-  scroll-margin-bottom: calc(24px + var(--guest-navigation-height) + env(safe-area-inset-bottom, 0px));
+  scroll-margin-bottom: calc(
+    24px + var(--guest-navigation-height) + env(safe-area-inset-bottom, 0px)
+  );
 }
 .guest-eyebrow {
   color: var(--color-primary);
@@ -393,7 +397,9 @@
   transform: translateY(0);
 }
 @keyframes guest-loading {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 @media (max-width: 600px) {
   .guest-header__inner {

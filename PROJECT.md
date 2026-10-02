@@ -23,7 +23,7 @@ Follow studyfactory-frontend's organization:
   supporting `components/`, `hooks/`, `model/`, and `styles/` folders as needed.
   Admin login/layout/dashboard/calendar/stays/properties/stay-imports/submissions,
   maintenance/issues/staff/reports/more, guest/entry, guest/draft, entry and dev exist;
-  guest final submission and staff access flows follow later.
+  guest photo review, final submission and receipts are implemented; staff access follows later.
 - `src/app/shared/ui` and `shared/layout`: business-neutral reusable components.
 - `src/app/styles`: reset, shared tokens, base styles and their single entrypoint.
 
@@ -140,7 +140,7 @@ information with collection status and revision-review warnings. Shared issue ca
 renaming, display order and activation. Excel report downloads provide date/property
 selection and the existing three-sheet workbook. All administrator capabilities
 listed in the 2026-09-30 handoff now have frontend implementations. Live admin
-acceptance, guest checklist/staff workflows, caches, PWA/offline support and deployment
+acceptance, guest corrections/issue reports/vehicles, staff workflows, caches, PWA/offline support and deployment
 remain separate work; implemented features do not establish production readiness.
 Report typecheck/lint/build separately from actual browser/backend/mobile checks.
 
@@ -1071,3 +1071,63 @@ was checked by lifecycle probes. No live guest credentials, database writes,
 physical-device or deployed acceptance was performed. The existing large-bundle
 warning remains (main chunk about 822 kB minified); production readiness is not
 implied. The user's existing frontend/API servers were not restarted.
+
+
+## Guest slice 3 — photos, review, final submission and receipt
+
+The same private `/draft#token=...` route supports guest CHECK_IN/CHECK_OUT photo
+uploads, a review step and completion. It checks GET `/submissions/receipt` first:
+only 409 CHECKLIST_NOT_SUBMITTED permits opening the draft editor. A submitted
+link opens its original completion receipt. Maintenance credentials remain outside
+this guest screen. A draft access rejection is checked against the receipt to
+handle another tab submitting between reads.
+
+`features/guest-draft-photos` owns file validation, bounded READY-photo/list/view/
+remove receipts and explicit draft-token requests. Upload uses POST
+`/submission-drafts/photos` with a single `file` FormData field. The browser sets
+the multipart boundary. NestJS validates and normalizes the image before storing
+it privately in S3; the frontend never receives AWS keys or a direct-upload URL.
+JPEG, PNG and WebP input is limited to 10 MiB per file and 40 draft photos. HEIC,
+GIF, SVG and animated images are unsupported; server decoding remains authoritative.
+
+GET `/submission-drafts/photos` reconciles READY photos. Uploads run sequentially;
+uncertain writes stop the queue until deliberate reconciliation. Pending backend
+reservations do not appear in this list, so it cannot prove that all uploads have
+finished. POST `/submission-drafts/photos/:id/remove` uses an empty body. Signed
+GET `/submission-drafts/photos/:id/view` links are fetched on demand, rendered
+without API credentials/referrers and hidden at expiry. URLs live only in mounted
+state; no local storage, public bucket exposure or photo prefetch is introduced.
+
+Guests save their latest answers before review. Required checklist answers must
+be complete. Every remaining READY photo must be mapped exactly once to an
+ABNORMAL item, using the guest-only DEFECT purpose; photos are optional. Unwanted
+photos can be removed before review. The final payload contains only the saved
+expectedUpdatedAt and ordered photo mappings; saved answers stay authoritative.
+Editing and photo mutations are locked while reviewing or submitting. A fresh
+photo list check prevents silently dropping another tab's uploads.
+
+`features/guest-submissions` owns validated GET `/submissions/receipt` and POST
+`/submissions/submit`. The backend atomically saves revision one, photo references
+and one issue for each abnormal answer. Identical retries are idempotent. Lost,
+malformed or server-error submit responses retain an immutable in-memory payload
+and require receipt reconciliation; no automatic mutation retry is made.
+Completion shows the original submission counts, Seoul date/time and link expiry,
+not proof of physical occupancy or a promise of automatic stay matching.
+
+The completion receipt uses the draft's existing expiry. Reopening a submitted
+link shows the receipt, not editable answers. Final answer correction, standalone
+guest issue reports, vehicle registration, staff screens, PWA and deployment remain
+separate slices. No backend/schema/dependency change is required here.
+
+Verification: typecheck, Oxlint and a production build with sample HTTPS public
+origins passed. Disposable probes covered 77 new photo/submission API assertions,
+27 draft/finalization and 13 photo lifecycle scenarios, 17 photo component checks,
+and 148 existing draft/start contract/model checks. Isolated browser fixtures
+verified photo preview, file selection, uncertain-upload reconciliation, inline
+removal, photo-to-item mapping, successful receipt and recovery of a lost submit
+response without another POST. Checked 320px/390px states had no horizontal
+overflow. Required-answer rejection and saving were also observed in the browser.
+These are synthetic checks: no real guest credential, S3 upload, database mutation,
+admin readback, physical device or deployment acceptance was performed. The
+existing bundle-size warning remains (main chunk about 857 kB minified). Existing
+frontend/API servers were not restarted; Git remains user-owned.

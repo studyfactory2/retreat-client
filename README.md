@@ -47,9 +47,12 @@ settings aligned. Rebuild the frontend after changing either public URL.
 - Administrator login at `/admin/login`, a protected `/admin` landing, session
   restoration through `GET /users/me`, expiry handling, and browser-local logout.
 
-`/guest`, `/guest/stay`, `/staff`, and `/draft` still show preparation screens.
-They do not validate link tokens or submit forms. Their link fragments are
-preserved and never read/logged/stored by the administrator session.
+`/guest` and `/guest/stay` provide scoped mobile guest home/guide and check-in/out
+intake. `/draft` supports private resume, temporary save, photo upload, final
+review/submission and reopening the completion receipt. `/staff` remains a
+preparation screen. Guest credentials stay in their matching fragment/request
+state and never enter the administrator session or browser storage. See PROJECT.md
+for the full implemented admin/guest scope and remaining verification boundaries.
 
 ## Administrator access
 
@@ -68,8 +71,9 @@ return to login; network/server failures retain the credential and show retry.
 Persistent sessions follow localStorage changes across tabs. Logout clears the
 browser credential and cancels pending requests; it does not revoke the issued
 JWT on the server. There is no refresh or revocation endpoint in the backend.
-The admin landing shows the verified profile; operational dashboards are a later
-slice. Frontend route protection never substitutes for backend authorization.
+The admin area includes operations, stays/imports, properties, checklist records,
+maintenance, issues, staff and reports. Frontend route protection never substitutes
+for backend authorization.
 
 Production hosting must send frontend page requests to `index.html` so a direct
 QR/private-link visit works. This frontend does not replace backend authorization.
