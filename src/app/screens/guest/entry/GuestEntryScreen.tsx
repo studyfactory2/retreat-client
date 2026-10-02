@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import type { GuestAccessKind } from '../../../features/guest-entry/guest-entry.types';
+import { GuestIssueScreen } from '../issues';
 import { GuestFrame } from './components/GuestFrame';
 import { GuestHome } from './components/GuestHome';
 import { GuestGuide } from './components/GuestGuide';
@@ -19,8 +20,18 @@ import './styles/guest-start.css';
 
 export function GuestEntryScreen({ kind }: { kind: GuestAccessKind }) {
   const location = useLocation();
+  return kind === 'qr' && readGuestView(location.search) === 'report' ? (
+    <GuestIssueScreen />
+  ) : (
+    <GuestEntrySessionScreen kind={kind} />
+  );
+}
+
+function GuestEntrySessionScreen({ kind }: { kind: GuestAccessKind }) {
+  const location = useLocation();
   const access = readGuestAccess(location.hash);
-  const view = readGuestView(location.search);
+  const requestedView = readGuestView(location.search);
+  const view = requestedView === 'report' ? 'home' : requestedView;
   const { resource, refresh } = useGuestEntry(
     kind,
     access.status === 'ready' ? access.token : null,
@@ -58,6 +69,11 @@ export function GuestEntryScreen({ kind }: { kind: GuestAccessKind }) {
       view={view}
       home={home}
       guide={guide}
+      report={
+        kind === 'qr'
+          ? buildGuestViewLocation(kind, location.hash, 'report')
+          : undefined
+      }
       ready={ready}
       refreshing={
         !denied &&
@@ -109,6 +125,11 @@ export function GuestEntryScreen({ kind }: { kind: GuestAccessKind }) {
         <GuestHome
           entry={resource.data.entry}
           guide={guide}
+          report={
+            kind === 'qr'
+              ? buildGuestViewLocation(kind, location.hash, 'report')
+              : undefined
+          }
           checkIn={buildGuestViewLocation(kind, location.hash, 'check-in')}
           checkOut={buildGuestViewLocation(kind, location.hash, 'check-out')}
         />

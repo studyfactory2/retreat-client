@@ -1,7 +1,7 @@
 import { isGuestAccessToken } from '../../../../features/guest-entry/guest-entry-validation';
 import type { GuestAccessKind } from '../../../../features/guest-entry/guest-entry.types';
 
-export type GuestView = 'home' | 'guide' | 'check-in' | 'check-out';
+export type GuestView = 'home' | 'guide' | 'check-in' | 'check-out' | 'report';
 export type GuestAccess =
   | { status: 'ready'; token: string }
   | { status: 'missing' }
@@ -17,7 +17,8 @@ export function readGuestAccess(hash: string): GuestAccess {
 export function readGuestView(search: string): GuestView {
   const values = new URLSearchParams(search).getAll('view');
   return values.length === 1 &&
-    (values[0] === 'guide' ||
+    (values[0] === 'report' ||
+      values[0] === 'guide' ||
       values[0] === 'check-in' ||
       values[0] === 'check-out')
     ? values[0]

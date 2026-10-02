@@ -22,7 +22,7 @@ Follow studyfactory-frontend's organization:
 - `src/app/screens/<area>/<screen>`: route screens at the domain root, with
   supporting `components/`, `hooks/`, `model/`, and `styles/` folders as needed.
   Admin login/layout/dashboard/calendar/stays/properties/stay-imports/submissions,
-  maintenance/issues/staff/reports/more, guest/entry, guest/draft, guest/submission, entry and dev exist;
+  maintenance/issues/staff/reports/more, guest/entry, guest/draft, guest/submission, guest/issues, entry and dev exist;
   guest photos, final submission, receipts and answer corrections are implemented; staff access follows later.
 - `src/app/shared/ui` and `shared/layout`: business-neutral reusable components.
 - `src/app/styles`: reset, shared tokens, base styles and their single entrypoint.
@@ -1197,3 +1197,70 @@ physical-device acceptance. No backend/schema/dependency or Git changes are part
 of this slice. Typecheck, Oxlint, changed-code Prettier checks and a production build using
 explicit sample HTTPS origins passed. The existing bundle-size warning remains
 (main chunk about 890 kB minified). Existing servers were left running unchanged.
+
+
+## Guest slice 5 — property-QR problem reporting
+
+Property guest QR home and bottom navigation now expose `불편사항 신고` at
+`/guest?view=report#token=...`. This uses only the property guest QR credential.
+Personal-stay entry never mounts this screen, even with `?view=report`; it keeps
+its personal home and two-item navigation. Name is self-reported and this flow
+neither creates a guest account nor matches a stay/checklist submission.
+
+`features/guest-issues` owns strict runtime readers, bounded normalized payloads
+and the existing guest report/photo API contracts. Screen-local components,
+hooks, models and styles live under `screens/guest/issues/`. The core request
+helper accepts an explicit `photoToken` only for issue photo view/remove paths,
+with QR Bearer authorization; it never injects photo credentials globally.
+
+Flow and endpoints:
+
+- GET `/qr/guest` verifies the property QR before loading categories.
+- GET `/guest/issues/categories` returns active categories. Empty categories
+  block reporting and uploads with a message to contact the administrator.
+- POST `/guest/issues/photos` uploads one optional file with FormData. The client
+  queues files sequentially, permits up to ten JPEG/PNG/WebP files of 10MiB each,
+  and retains the one-time photo credential only in the open form.
+- GET `/guest/issues/photos/:id/view` requests a short-lived preview only when
+  selected. POST `/guest/issues/photos/:id/remove` removes an unclaimed photo.
+  Both carry `X-Photo-Token` in addition to the QR Bearer. Signed image URLs
+  receive no API credentials or referrer and hide on expiry/scope changes.
+- POST `/guest/issues/report` sends a fresh requestKey, categoryId, name (100),
+  title (300), optional description (2000), and ordered private photo claims.
+  Review freezes the normalized body and requires explicit acknowledgement.
+  The existing backend creates the issue/event and claims photos atomically.
+  Completion displays the original receipt, not the current repair status.
+
+A lost/malformed upload response cannot recover its one-time claim: the queue
+stops, and the guest must explicitly abandon that selection before continuing.
+An uncertain remove preserves the claim and permits the identical deletion retry.
+Uncertain report responses preserve the exact immutable body/requestKey and lock
+editing, photo changes and app-link navigation; only an explicit identical retry
+can recover the receipt. Backend replay compares the original ordered claims even
+after photo expiry or category deactivation. No automatic POST retry occurs.
+Confirmed receipt clears local photo credentials without deleting claimed photos.
+
+Foreground/BFCache checks preserve input while revalidating QR/category access.
+Category changes require fresh review, and QR rejection clears sensitive form and
+photo state. Property/token changes and late responses are fenced. Form/photo
+credentials and retry bodies are never persisted. Supported report entry links
+use full document navigation, so native Back can trigger the unload warning;
+app links use an inline discard confirmation and the active report link is inert.
+Browser warnings cannot guarantee preservation on mobile termination. Closing or
+reloading the tab loses its input, photo access and only retry body; no guest issue
+lookup, edit or reopen endpoint exists. Receipt copy states this limitation.
+
+This slice adds no backend/schema/dependency changes. Personal-stay reporting,
+urgency, guest issue tracking/editing, vehicles, staff screens, PWA and deployment
+remain outside this slice. Existing private `photos/*` storage permission is reused.
+
+Verification: TypeScript, Oxlint, changed-code Prettier and a production build with
+sample HTTPS origins passed. Disposable probes passed 533 new contract, transport,
+report/photo lifecycle and component assertions, plus 148 existing guest
+regression assertions. Isolated browser fixtures exercised QR entry, required-field
+validation, sample upload/private preview, leave confirmation, review, receipt,
+and lost-response identical retry (two POSTs, one issue). Empty categories and
+personal-link separation were checked; 320px/390px states had no horizontal
+overflow. These are synthetic checks, not live S3/database/admin readback or
+physical-device acceptance. The existing bundle-size warning remains (main chunk
+about 935 kB minified). Existing servers and Git were left under user control.

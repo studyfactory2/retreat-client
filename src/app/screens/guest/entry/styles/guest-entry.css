@@ -426,3 +426,11 @@
     font-size: 11px;
   }
 }
+
+.guest-check-action--report {
+  margin-bottom: 24px;
+}
+
+.guest-navigation--report > div {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}

@@ -8,11 +8,13 @@ export function GuestHome({
   guide,
   checkIn,
   checkOut,
+  report,
 }: {
   entry: GuestEntryContext;
   guide: To;
   checkIn: To;
   checkOut: To;
+  report?: To;
 }) {
   const property = entry.context.property;
   return (
@@ -82,6 +84,20 @@ export function GuestHome({
           );
         })}
       </section>
+      {entry.kind === 'qr' && report && (
+        <Link
+          className="guest-check-action guest-check-action--report"
+          to={report}
+          reloadDocument
+        >
+          <GuestIcon name="notice" />
+          <span>
+            <strong>불편사항 신고</strong>
+            <small>머무는 동안 발견한 문제를 알려주세요.</small>
+          </span>
+          <GuestIcon name="arrow" />
+        </Link>
+      )}
       <div className="guest-home-cards">
         {entry.kind === 'stay' && (
           <section

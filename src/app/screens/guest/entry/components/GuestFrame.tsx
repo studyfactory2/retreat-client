@@ -9,6 +9,7 @@ export function GuestFrame({
   view,
   home,
   guide,
+  report,
   ready,
   refreshing,
   onRefresh,
@@ -19,10 +20,11 @@ export function GuestFrame({
   view: GuestView;
   home: To;
   guide: To;
+  report?: To;
   ready: boolean;
   refreshing: boolean;
   onRefresh?: () => void;
-  confirmNavigation?: () => boolean;
+  confirmNavigation?: (href: string) => boolean;
 }) {
   return (
     <div
@@ -32,7 +34,9 @@ export function GuestFrame({
           event.target instanceof Element &&
           event.target.closest('a') &&
           confirmNavigation &&
-          !confirmNavigation()
+          !confirmNavigation(
+            event.target.closest('a')?.getAttribute('href') ?? '',
+          )
         ) {
           event.preventDefault();
           event.stopPropagation();
@@ -92,7 +96,10 @@ export function GuestFrame({
         머무는 모든 순간에, 오복이 함께합니다.
       </footer>
       {ready && (
-        <nav className="guest-navigation" aria-label="이용객 메뉴">
+        <nav
+          className={`guest-navigation${report ? ' guest-navigation--report' : ''}`}
+          aria-label="이용객 메뉴"
+        >
           <div>
             <Link to={home} aria-current={view === 'home' ? 'page' : undefined}>
               <GuestIcon name="home" />
@@ -105,6 +112,19 @@ export function GuestFrame({
               <GuestIcon name="guide" />
               <span>이용 안내</span>
             </Link>
+            {report && (
+              <Link
+                to={report}
+                reloadDocument={view !== 'report'}
+                onClick={(event) => {
+                  if (view === 'report') event.preventDefault();
+                }}
+                aria-current={view === 'report' ? 'page' : undefined}
+              >
+                <GuestIcon name="notice" />
+                <span>불편 신고</span>
+              </Link>
+            )}
           </div>
         </nav>
       )}

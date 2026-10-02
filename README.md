@@ -51,7 +51,9 @@ settings aligned. Rebuild the frontend after changing either public URL.
 intake. `/draft` supports private resume, temporary save, photo upload, final
 review/submission and reopening the original completion receipt. Its submitted
 detail view supports private photos and answer corrections with revision checks.
-`/staff` remains a
+`/guest?view=report#token=...` also supports standalone problem reports from a
+property QR, with optional private photos, review and the original receipt.
+Personal-stay links do not expose this property-QR report flow. `/staff` remains a
 preparation screen. Guest credentials stay in their matching fragment/request
 state and never enter the administrator session or browser storage. See PROJECT.md
 for the full implemented admin/guest scope and remaining verification boundaries.

@@ -2,14 +2,10 @@ import { appConfig } from '../config/environment';
 import { ApiRequestError, readApiError } from './api-error';
 
 type JsonValue =
-  | string
-  | number
-  | boolean
-  | null
-  | JsonValue[]
-  | { [key: string]: JsonValue };
+  string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };
 type RequestOptions = {
   token?: string;
+  photoToken?: string;
   signal?: AbortSignal;
   timeoutMs?: number;
 } & (
@@ -44,9 +40,24 @@ async function request<T>(
     );
   }
 
+  if (
+    options.photoToken !== undefined &&
+    (!options.token ||
+      !/^\/guest\/issues\/photos\/[0-9a-f-]{36}\/(view|remove)$/.test(path) ||
+      !/^[A-Za-z0-9_-]{43}$/.test(options.photoToken))
+  ) {
+    throw new ApiRequestError(
+      '사진 요청의 접근 정보를 확인해 주세요.',
+      null,
+      'INVALID_PHOTO_REQUEST',
+    );
+  }
+
   const headers = new Headers({ Accept: 'application/json' });
   if (options.token !== undefined)
     headers.set('Authorization', `Bearer ${options.token}`);
+  if (options.photoToken !== undefined)
+    headers.set('X-Photo-Token', options.photoToken);
   const multipart = options.body instanceof FormData;
   if (options.body !== undefined && !multipart)
     headers.set('Content-Type', 'application/json');
