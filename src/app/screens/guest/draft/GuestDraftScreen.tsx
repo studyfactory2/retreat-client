@@ -2,12 +2,23 @@ import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Button } from '../../../shared/ui/Button/Button';
 import { readGuestAccess } from '../entry/model/guest-entry-model';
+import { GuestSubmissionScreen } from '../submission';
 import { GuestDraftForm } from './components/GuestDraftForm';
 import { GuestSubmissionReceipt } from './components/GuestSubmissionReceipt';
 import { useGuestDraft } from './hooks/use-guest-draft';
 import './styles/guest-draft.css';
 
 export function GuestDraftScreen() {
+  const location = useLocation();
+  const views = new URLSearchParams(location.search).getAll('view');
+  return views.length === 1 && views[0] === 'submission' ? (
+    <GuestSubmissionScreen />
+  ) : (
+    <GuestDraftSessionScreen />
+  );
+}
+
+function GuestDraftSessionScreen() {
   const location = useLocation();
   const access = readGuestAccess(location.hash);
   const token = access.status === 'ready' ? access.token : null;

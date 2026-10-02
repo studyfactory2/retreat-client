@@ -1,3 +1,5 @@
+import { useNavigate } from 'react-router-dom';
+import { Button } from '../../../../shared/ui/Button/Button';
 import type { GuestSubmissionReceiptDto } from '../../../../features/guest-submissions/guest-submissions.types';
 import { formatGuestStayTimestamp } from '../../entry/model/guest-entry-model';
 import { DraftResumeLink } from './DraftResumeLink';
@@ -9,6 +11,7 @@ export function GuestSubmissionReceipt({
   receipt: GuestSubmissionReceiptDto;
   token: string;
 }) {
+  const navigate = useNavigate();
   const title = receipt.type === 'CHECK_IN' ? '입실 체크' : '퇴실 체크';
   return (
     <>
@@ -63,9 +66,20 @@ export function GuestSubmissionReceipt({
           필요하면 관리자에게 직접 연락해 주세요.
         </p>
         <p>
-          이 화면에서는 제출한 답변을 수정할 수 없습니다. 이 창을 닫아도 되며,
-          작성 링크를 다시 열면 유효 기간 내에 제출 확인을 볼 수 있습니다.
+          아래에서 최신 답변과 사진을 확인하고 답변을 수정할 수 있습니다. 이
+          최초 제출 내역은 수정 후에도 그대로 유지됩니다.
         </p>
+        <Button
+          onClick={() =>
+            navigate({
+              pathname: '/draft',
+              search: '?view=submission',
+              hash: `#token=${token}`,
+            })
+          }
+        >
+          제출 내용 보기
+        </Button>
       </section>
       <DraftResumeLink
         token={token}

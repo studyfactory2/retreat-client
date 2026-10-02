@@ -49,7 +49,9 @@ settings aligned. Rebuild the frontend after changing either public URL.
 
 `/guest` and `/guest/stay` provide scoped mobile guest home/guide and check-in/out
 intake. `/draft` supports private resume, temporary save, photo upload, final
-review/submission and reopening the completion receipt. `/staff` remains a
+review/submission and reopening the original completion receipt. Its submitted
+detail view supports private photos and answer corrections with revision checks.
+`/staff` remains a
 preparation screen. Guest credentials stay in their matching fragment/request
 state and never enter the administrator session or browser storage. See PROJECT.md
 for the full implemented admin/guest scope and remaining verification boundaries.

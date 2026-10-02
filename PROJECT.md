@@ -22,8 +22,8 @@ Follow studyfactory-frontend's organization:
 - `src/app/screens/<area>/<screen>`: route screens at the domain root, with
   supporting `components/`, `hooks/`, `model/`, and `styles/` folders as needed.
   Admin login/layout/dashboard/calendar/stays/properties/stay-imports/submissions,
-  maintenance/issues/staff/reports/more, guest/entry, guest/draft, entry and dev exist;
-  guest photo review, final submission and receipts are implemented; staff access follows later.
+  maintenance/issues/staff/reports/more, guest/entry, guest/draft, guest/submission, entry and dev exist;
+  guest photos, final submission, receipts and answer corrections are implemented; staff access follows later.
 - `src/app/shared/ui` and `shared/layout`: business-neutral reusable components.
 - `src/app/styles`: reset, shared tokens, base styles and their single entrypoint.
 
@@ -140,7 +140,7 @@ information with collection status and revision-review warnings. Shared issue ca
 renaming, display order and activation. Excel report downloads provide date/property
 selection and the existing three-sheet workbook. All administrator capabilities
 listed in the 2026-09-30 handoff now have frontend implementations. Live admin
-acceptance, guest corrections/issue reports/vehicles, staff workflows, caches, PWA/offline support and deployment
+acceptance, guest issue reports/vehicles, staff workflows, caches, PWA/offline support and deployment
 remain separate work; implemented features do not establish production readiness.
 Report typecheck/lint/build separately from actual browser/backend/mobile checks.
 
@@ -1131,3 +1131,69 @@ These are synthetic checks: no real guest credential, S3 upload, database mutati
 admin readback, physical device or deployment acceptance was performed. The
 existing bundle-size warning remains (main chunk about 857 kB minified). Existing
 frontend/API servers were not restarted; Git remains user-owned.
+
+
+## Guest slice 4 — submitted detail and answer corrections
+
+The original `/draft#token=...` completion receipt remains revision-one evidence.
+Its `제출 내용 보기` action opens `/draft?view=submission#token=...` using the same
+private draft credential. The separate screen reads the latest saved snapshot,
+including captured guest/property/template information, answers, notes, private
+photo associations and revision. It does not mount the old draft editor or its
+receipt lifecycle, so focus checks preserve in-progress correction inputs.
+
+`features/guest-submission-details` owns bounded runtime readers, normalized
+correction bodies and three existing backend APIs:
+
+- GET `/guest/submissions/current`: latest submitted CHECK_IN/CHECK_OUT snapshot.
+- GET `/guest/submissions/photos/:id/view`: short-lived view URL for a current
+  submitted photo, requested only when the guest selects `사진 보기`.
+- POST `/guest/submissions/correct`: full desired answer list, generalNote,
+  optional reason and expectedRevision. No identity, template, staff repair or
+  photo mutation fields are sent.
+
+The screen separates detail, editor, before/after review, notices and photo
+components from its lifecycle hook/model/styles. Guests explicitly enter edit
+mode, complete required answers, review normalized differences and acknowledge
+the photo/history notice before saving. Blank optional notes become null; blank
+reason is omitted. Reason alone does not create a correction. Revision overflow
+blocks further edits. Validation failures retain input.
+
+Photos cannot be uploaded, replaced or directly deleted after submission. When an
+ABNORMAL answer becomes NORMAL or is cleared, its current photo associations are
+removed. Earlier snapshots retain their evidence, and later ABNORMAL answers do
+not automatically reattach earlier photos. The review lists the number of photos
+that will leave the current snapshot. Existing administrator issue statuses,
+resolutions and cancellations remain controlled by the backend; guest corrections
+do not close/reopen/cancel those issues.
+
+A correction response is followed by a latest-detail read. Exact receipt revision
+readback must match normalized answers and expected retained photo metadata; a
+later revision is shown explicitly as newer than the saved request. Conflicts
+retain input and require an inline discard/reload confirmation. There is no
+silent rebase or automatic mutation retry. Uncertain responses retain an immutable
+in-memory request body. A GET showing matching answers alone cannot prove that
+this request and its reason were saved. Guests may explicitly retry the identical
+request for its receipt, or discard local input after a freshly verified advanced
+revision makes the old expectedRevision unable to mutate current state.
+
+Access expiry/rejection clears sensitive content. Token changes, unmounts and
+late responses are fenced; foreground/BFCache checks preserve input while blocking
+writes until access is verified. A submitted-photo 401/403 rejects the owning
+screen. Signed URLs never receive API credentials/referrers, are hidden at expiry
+or scope changes and are not persisted. Unload warns while dirty or unresolved;
+the existing BrowserRouter still does not globally block same-document Back/Forward.
+Losing the tab loses unsaved input and the in-memory retry body.
+
+Verification: 76 API boundary, 142 correction lifecycle, 34 private-photo lifecycle
+and 36 component assertions passed in disposable probes, plus 148 existing
+guest draft/start regression assertions. Isolated browser fixtures
+verified receipt-to-detail navigation, private photo display, ABNORMAL-to-NORMAL
+review/photo removal, saving/readback, an unchanged original receipt, lost-response
+reconciliation with an identical retry, conflict/discard/reload and photo-access
+rejection clearing guest details. Checked 320px/390px layouts had no horizontal
+overflow. These are synthetic checks, not real S3/database/admin-readback or
+physical-device acceptance. No backend/schema/dependency or Git changes are part
+of this slice. Typecheck, Oxlint, changed-code Prettier checks and a production build using
+explicit sample HTTPS origins passed. The existing bundle-size warning remains
+(main chunk about 890 kB minified). Existing servers were left running unchanged.
