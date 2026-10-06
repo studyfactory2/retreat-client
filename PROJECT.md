@@ -23,7 +23,9 @@ Follow studyfactory-frontend's organization:
   supporting `components/`, `hooks/`, `model/`, and `styles/` folders as needed.
   Admin login/layout/dashboard/calendar/stays/properties/stay-imports/submissions,
   maintenance/issues/staff/reports/more, guest/entry, guest/draft, guest/submission, guest/issues, entry and dev exist;
-  guest photos, final submission, receipts and answer corrections are implemented; staff access follows later.
+  guest photos, final submission, receipts and answer corrections are implemented.
+  Staff QR entry and read-only maintenance previews live in staff/entry; staff
+  checklist start, editing and submission follow in later slices.
 - `src/app/shared/ui` and `shared/layout`: business-neutral reusable components.
 - `src/app/styles`: reset, shared tokens, base styles and their single entrypoint.
 
@@ -79,8 +81,8 @@ Retreat: those are different contracts.
 Preserve backend-issued browser paths `/guest`, `/staff`, `/guest/stay`, `/draft`
 and their `#token=...` fragments. Use BrowserRouter, not HashRouter. Guest entry
 parses only the property guest QR and private stay credential on their matching
-routes. Draft intake parses its separate private credential; staff intake remains
-unimplemented. Administrator sessions mount
+routes. Draft intake parses its separate private credential; staff entry reads
+only its matching staff QR. Administrator sessions mount
 only inside the admin route group, preserving isolation from those link flows.
 
 ## Administrator login
@@ -140,7 +142,7 @@ information with collection status and revision-review warnings. Shared issue ca
 renaming, display order and activation. Excel report downloads provide date/property
 selection and the existing three-sheet workbook. All administrator capabilities
 listed in the 2026-09-30 handoff now have frontend implementations. Live admin
-and guest acceptance, staff workflows, caches, PWA/offline support and deployment
+and guest acceptance, staff checklist workflows, caches, PWA/offline support and deployment
 remain separate work; implemented features do not establish production readiness.
 Report typecheck/lint/build separately from actual browser/backend/mobile checks.
 
@@ -1328,3 +1330,60 @@ isolated static preview, so this slice has no new visual/browser acceptance.
 These checks do not prove live database/HTTP guard behavior, administrator
 readback or physical-device layout. The existing bundle warning remains (main
 chunk about 953 kB minified). Deployment must rebuild using real public origins.
+
+## Staff slice 1 — QR entry and read-only maintenance home
+
+`/staff#token=...` now renders an OH BOK mobile staff frame outside administrator
+session providers and the generic entry shell. It reads only the canonical
+32-byte base64url staff QR fragment. Missing/malformed fragments make no API
+requests. Credentials remain fragment/in-memory only, never rendered, persisted,
+logged, sent in query parameters, or serialized as cache/React keys.
+
+`features/staff-entry` separates types, token validation, context/checklist
+readers and GET `/qr/staff`. The shared transport receives an explicit staff
+Bearer token with no body/query parameters, cookies or automatic retry. Responses
+are read as unknown and require STAFF flow, safe property/assignee labels and
+zero or one MAINTENANCE template. Guest checklist acceptance remains unchanged.
+Nested definition readers enforce schemaVersion 1, UUID v4 identities unique
+across sections/items, 1–20 sections, 1–50 items per section, at most 500 items,
+bounded titles/labels, boolean required and NORMAL_ABNORMAL answer type. Unknown
+nested definition fields are rejected.
+
+The home displays property name/region, `담당 직원`, checklist title and a working
+native disclosure preview showing ordered sections/items. Required-item labels
+explain template requirements, not completion. Preview text is escaped plain text;
+there are no editable controls, completion counts, work-status claims or future
+action buttons. The configured assignee is not proof of who is holding the phone.
+`assignedStaff: null` and `checklists: []` are independent valid configuration
+states with Korean administrator-contact guidance; either available part remains
+visible. No staff login, roster choice, guide endpoint or extra navigation tabs
+are introduced.
+
+The screen separates frame, home, preview and access-state components from its
+hook, fragment model and scoped styles. Reads abort and fence late results on
+credential changes, refresh and unmount. Refresh/loading/errors hide previously
+read context. Foreground/visibility return and BFCache restoration revalidate
+access; stale pre-freeze responses cannot restore old content. Authorization
+rejection clears displayed information. 401 INVALID_QR is generic and does not
+name a guessed rotation/deactivation cause. Temporary failures and rate limits
+allow deliberate retry without retry loops. Printed property QR has no fixed
+expiry in this contract, so the screen has no expiry countdown or timer.
+
+This slice is read-only and does not call POST `/submission-drafts/staff/start`.
+Maintenance draft start/save, photos, repair claims, submission and receipts,
+history, notifications, PWA/offline support and deployment remain later work.
+No backend/schema/dependency, environment, migration, server-lifecycle or Git
+mutation is included. The next proposed slice is starting and saving a
+maintenance checklist, using the existing staff-start and private-draft APIs.
+
+Verification: TypeScript, Oxlint, changed-code Prettier with the exact repository
+configuration, production build and diff checks passed. The build used temporary
+sample HTTPS origins; deployment must rebuild using the actual public origins.
+The existing large-bundle warning remains (main chunk about 964 kB minified).
+Disposable probes passed 271 feature/transport assertions, 85 fragment/lifecycle
+assertions, 141 component/router/isolation assertions, and seven actual backend
+QrService/checklist-parser groups with in-memory fixtures. No repository test
+files were added. Automatic approval review blocked browser navigation to
+localhost:5175/staff because of the prior port restriction; mobile visual checks
+were not performed. Synthetic checks do not establish live QR/database/HTTP or
+physical-device acceptance. Existing servers were not started or restarted.

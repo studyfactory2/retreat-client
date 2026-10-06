@@ -1,10 +1,10 @@
 import { lazy, Suspense } from 'react';
 import { Route, Routes } from 'react-router-dom';
-import { AccessPendingScreen } from '../../screens/entry/AccessPendingScreen';
 import { EntryScreen } from '../../screens/entry/EntryScreen';
 import { NotFoundScreen } from '../../screens/entry/NotFoundScreen';
 import { GuestEntryScreen } from '../../screens/guest/entry';
 import { GuestDraftScreen } from '../../screens/guest/draft';
+import { StaffEntryScreen } from '../../screens/staff/entry';
 import { AppShell } from '../../shared/layout/AppShell/AppShell';
 import { PageState } from '../../shared/ui/PageState/PageState';
 import { appRoutes } from './routes';
@@ -62,19 +62,14 @@ export function AppRouter() {
   return (
     <Routes>
       <Route path={appRoutes.guest} element={<GuestEntryScreen kind="qr" />} />
-      <Route path={appRoutes.guestStay} element={<GuestEntryScreen kind="stay" />} />
+      <Route
+        path={appRoutes.guestStay}
+        element={<GuestEntryScreen kind="stay" />}
+      />
       <Route path={appRoutes.draft} element={<GuestDraftScreen />} />
+      <Route path={appRoutes.staff} element={<StaffEntryScreen />} />
       <Route element={<AppShell />}>
         <Route path={appRoutes.home} element={<EntryScreen />} />
-        <Route
-          path={appRoutes.staff}
-          element={
-            <AccessPendingScreen
-              title="정비 직원 안내"
-              description="담당 휴양소의 정비 체크리스트와 사진 등록 화면을 준비하고 있습니다."
-            />
-          }
-        />
         {ConnectionScreen && (
           <Route
             path={appRoutes.connection}
@@ -122,7 +117,10 @@ export function AppRouter() {
               element={<AdminIssueDetailScreen />}
             />
             <Route path={appRoutes.adminMore} element={<AdminMoreScreen />} />
-            <Route path={appRoutes.adminReports} element={<AdminReportsScreen />} />
+            <Route
+              path={appRoutes.adminReports}
+              element={<AdminReportsScreen />}
+            />
             <Route path={appRoutes.adminStaff} element={<AdminStaffScreen />} />
             <Route
               path={appRoutes.adminStaffCreate}
