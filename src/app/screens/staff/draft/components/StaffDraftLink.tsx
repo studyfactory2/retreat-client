@@ -17,26 +17,22 @@ export function StaffDraftLink({
       className="staff-draft-card staff-draft-link"
       aria-labelledby="staff-link-heading"
     >
-      <h2 id="staff-link-heading">이어서 작성하려면</h2>
+      <h2 id="staff-link-heading">나중에 이어서 하려면</h2>
       <p>
-        임시 저장 후 개인 작성 링크를 보관해 주세요. 현장 QR을 다시 스캔해도 이
-        작성 내용을 찾을 수 없습니다.
+        아래 링크를 복사해 보관해 주세요. 공용 QR로는 이 기록을 다시 열 수
+        없어요.
       </p>
-      <p>
-        이 링크를 가진 사람은 접근이 허용되는 동안 내용을 볼 수 있습니다. 다른
-        사람에게 공유하지 마세요.
-      </p>
+      <p>나만 사용하는 링크예요. 다른 사람에게 공유하지 마세요.</p>
       <Button
         disabled={disabled || busy}
         onClick={() => {
           void copy();
         }}
       >
-        개인 작성 링크 복사
+        이어쓰기 링크 복사
       </Button>
       <p className="staff-draft-hint">
-        사용 기한: {formatStaffDraftTime(expiresAt)} (한국 시간). 저장해도
-        기한이 연장되지 않습니다.
+        {formatStaffDraftTime(expiresAt)}까지 사용 가능 · 한국 시간
       </p>
       <p aria-live="polite">{message}</p>
     </section>

@@ -1,7 +1,8 @@
-import { useId } from 'react';
+import { useId, type ReactNode } from 'react';
 import { useNavigationGuard } from '../../../../core/router/navigation/use-navigation-guard';
 import { Button } from '../../../../shared/ui/Button/Button';
-import { useStaffDraftPhotos } from '../hooks/use-staff-draft-photos';
+import type { StaffDraftPhotosController } from '../hooks/use-staff-draft-photos';
+import type { StaffDraftPhotoDto } from '../../../../features/staff-draft-photos/staff-draft-photos.types';
 import {
   STAFF_PHOTO_QUEUE_LIMIT,
   formatStaffPhotoSize,
@@ -17,6 +18,8 @@ export function StaffDraftPhotos({
   locked,
   accessReady,
   onAccessRejected,
+  controller,
+  renderAssignment,
 }: {
   token: string;
   draftId: string;
@@ -24,15 +27,9 @@ export function StaffDraftPhotos({
   locked: boolean;
   accessReady: boolean;
   onAccessRejected: () => void;
+  controller: StaffDraftPhotosController;
+  renderAssignment: (photo: StaffDraftPhotoDto, index: number) => ReactNode;
 }) {
-  const controller = useStaffDraftPhotos({
-    token,
-    draftId,
-    expiresAt,
-    locked,
-    accessReady,
-    onAccessRejected,
-  });
   useNavigationGuard(controller.hasPendingWork);
   const inputId = useId();
   const { resource, items, limits, queue, busy, writing, removal } = controller;
@@ -48,9 +45,8 @@ export function StaffDraftPhotos({
     >
       <div className="staff-photos-heading">
         <div>
-          <span className="staff-draft-eyebrow">정비 사진</span>
           <h2 id={`${inputId}-title`}>
-            사진 첨부 <span>선택</span>
+            사진 남기기 <span>선택</span>
           </h2>
         </div>
         {resource.status === 'ready' && limits && (
@@ -60,12 +56,7 @@ export function StaffDraftPhotos({
         )}
       </div>
       <p className="staff-photos-intro">
-        정비 현장의 모습을 사진으로 남겨 주세요. 사진을 선택하면 체크리스트의
-        임시 저장과 별도로 업로드됩니다.
-      </p>
-      <p className="staff-photos-separate">
-        사진을 추가하거나 삭제해도 작성 중인 체크리스트는 바뀌지 않습니다.
-        체크리스트 변경 내용은 위의 임시 저장 버튼으로 저장해 주세요.
+        정비한 곳이나 발견한 문제를 사진으로 남겨 주세요.
       </p>
       {resource.status === 'loading' ? (
         <p className="staff-photos-status" role="status">
@@ -88,18 +79,20 @@ export function StaffDraftPhotos({
           {items.length ? (
             <div className="staff-photos-grid">
               {items.map((photo, index) => (
-                <StaffDraftPhotoCard
-                  key={photo.id}
-                  photo={photo}
-                  index={index}
-                  token={token}
-                  draftId={draftId}
-                  draftExpiresAt={expiresAt}
-                  previewEnabled={accessReady}
-                  removeDisabled={!controller.canWrite || queue.length > 0}
-                  onRemove={controller.remove}
-                  onAccessRejected={onAccessRejected}
-                />
+                <div className="staff-flow-photo" key={photo.id}>
+                  <StaffDraftPhotoCard
+                    photo={photo}
+                    index={index}
+                    token={token}
+                    draftId={draftId}
+                    draftExpiresAt={expiresAt}
+                    previewEnabled={accessReady}
+                    removeDisabled={!controller.canWrite || queue.length > 0}
+                    onRemove={controller.remove}
+                    onAccessRejected={onAccessRejected}
+                  />
+                  {renderAssignment(photo, index)}
+                </div>
               ))}
             </div>
           ) : (
@@ -121,7 +114,7 @@ export function StaffDraftPhotos({
         htmlFor={inputId}
         aria-disabled={!controller.canSelect}
       >
-        <span>＋ 사진 선택</span>
+        <span>＋ 사진 추가</span>
         <input
           id={inputId}
           type="file"
@@ -135,16 +128,23 @@ export function StaffDraftPhotos({
           }}
         />
       </label>
-      {limits && (
+      <details className="staff-photos-details">
+        <summary>사진 도움말</summary>
         <p className="staff-photos-help">
-          한 장당 최대 {formatStaffPhotoSize(limits.maxBytes)} · {limitNames} ·
-          최대 {limits.maxPhotos}장<br />한 번에 {STAFF_PHOTO_QUEUE_LIMIT}장까지
-          선택할 수 있습니다. 처리 중인 사진도 서버 제한에 포함됩니다.
+          선택한 사진은 바로 업로드됩니다. 사진의 종류와 위치는 최종 제출할 때
+          저장됩니다.
         </p>
-      )}
-      <p className="staff-photos-help">
-        HEIC·HEIF 사진은 JPEG로 변환한 뒤 선택해 주세요.
-      </p>
+        {limits && (
+          <p className="staff-photos-help">
+            한 장당 최대 {formatStaffPhotoSize(limits.maxBytes)} · {limitNames}{' '}
+            · 최대 {limits.maxPhotos}장<br />한 번에 {STAFF_PHOTO_QUEUE_LIMIT}
+            장까지 선택할 수 있습니다. 처리 중인 사진도 서버 제한에 포함됩니다.
+          </p>
+        )}
+        <p className="staff-photos-help">
+          HEIC·HEIF 사진은 JPEG로 변환한 뒤 선택해 주세요.
+        </p>
+      </details>
       {!accessReady && (
         <p className="staff-photos-status" role="status">
           작성 링크를 다시 확인하고 있습니다. 선택한 파일은 이 화면에

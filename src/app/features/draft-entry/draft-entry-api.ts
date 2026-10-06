@@ -2,6 +2,7 @@ import { apiRequest } from '../../core/api/api-client';
 import { ApiRequestError } from '../../core/api/api-error';
 import { readGuestDraft } from '../guest-drafts/guest-drafts-readers';
 import { getGuestSubmissionReceipt } from '../guest-submissions/guest-submissions-api';
+import { getStaffSubmissionReceipt } from '../staff-submissions/staff-submissions-api';
 import { readStaffDraft } from '../staff-drafts/staff-drafts-readers';
 import { requireStaffDraftToken } from '../staff-drafts/staff-drafts-validation';
 
@@ -25,6 +26,14 @@ export async function getPrivateDraftRole(
       const receipt = await getGuestSubmissionReceipt(token, signal);
       if (receipt && Date.parse(receipt.expiresAt) > Date.now()) return 'guest';
     } catch (receiptError) {
+      if (
+        receiptError instanceof ApiRequestError &&
+        receiptError.code === 'GUEST_SUBMISSION_TYPE_UNSUPPORTED'
+      ) {
+        const receipt = await getStaffSubmissionReceipt(token, signal);
+        if (receipt && Date.parse(receipt.expiresAt) > Date.now())
+          return 'staff';
+      }
       if (
         !(receiptError instanceof ApiRequestError) ||
         (receiptError.status !== 401 &&

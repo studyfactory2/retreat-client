@@ -17,6 +17,8 @@ import type {
   StaffDraftAnswers,
   StaffDraftDto,
 } from '../../../../features/staff-drafts/staff-drafts.types';
+import { getStaffSubmissionReceipt } from '../../../../features/staff-submissions/staff-submissions-api';
+import type { StaffSubmissionReceiptDto } from '../../../../features/staff-submissions/staff-submissions.types';
 import {
   changeStaffDraftAnswer,
   requiresStaffAnswerDiscardConfirmation,
@@ -27,6 +29,7 @@ import {
 
 export type StaffDraftResource =
   | { status: 'loading' }
+  | { status: 'submitted'; receipt: StaffSubmissionReceiptDto }
   | {
       status: 'error';
       kind: 'unavailable' | 'unsupported' | 'request';
@@ -88,6 +91,7 @@ export function useStaffDraft(token: string | null) {
   const scope = useRef<typeof owner | null>(owner);
   const readRequest = useRef<AbortController | null>(null);
   const writeRequest = useRef<AbortController | null>(null);
+  const submissionLocked = useRef(false);
   const current = useRef<{
     owner: typeof owner;
     resource: StaffDraftResource;
@@ -116,6 +120,7 @@ export function useStaffDraft(token: string | null) {
 
   useLayoutEffect(() => {
     scope.current = owner;
+    submissionLocked.current = false;
     return () => {
       scope.current = null;
       abortRequests();
@@ -124,7 +129,7 @@ export function useStaffDraft(token: string | null) {
   }, [abortRequests, owner]);
 
   const pause = useCallback(() => {
-    if (scope.current !== owner) return;
+    if (scope.current !== owner || submissionLocked.current) return;
     const before = readCurrent();
     const interrupted = writeRequest.current !== null;
     abortRequests();
@@ -139,7 +144,12 @@ export function useStaffDraft(token: string | null) {
 
   const load = useCallback(
     async (replace: boolean) => {
-      if (scope.current !== owner || owner.token === null) return;
+      if (
+        scope.current !== owner ||
+        owner.token === null ||
+        submissionLocked.current
+      )
+        return;
       pause();
       const before = readCurrent();
       if (before?.status === 'ready' && expired(before.draft)) {
@@ -154,7 +164,42 @@ export function useStaffDraft(token: string | null) {
         !controller.signal.aborted;
       if (before?.status !== 'ready') publish({ status: 'loading' });
       try {
-        const draft = await getStaffDraft(owner.token, controller.signal);
+        let draft: StaffDraftDto;
+        try {
+          if (before?.status === 'submitted') {
+            const receipt = await getStaffSubmissionReceipt(
+              owner.token,
+              controller.signal,
+            );
+            if (!active()) return;
+            publish(
+              receipt && Date.parse(receipt.expiresAt) > Date.now()
+                ? { status: 'submitted', receipt }
+                : unavailable(),
+            );
+            return;
+          }
+          draft = await getStaffDraft(owner.token, controller.signal);
+        } catch (error: unknown) {
+          if (!active()) return;
+          if (!rejected(error)) throw error;
+          const receipt = await getStaffSubmissionReceipt(
+            owner.token,
+            controller.signal,
+          );
+          if (!active()) return;
+          if (receipt && Date.parse(receipt.expiresAt) > Date.now()) {
+            if (
+              before?.status === 'ready' &&
+              (receipt.id !== before.draft.id ||
+                receipt.property.id !== before.draft.property.id)
+            )
+              throw error;
+            publish({ status: 'submitted', receipt });
+            return;
+          }
+          throw error;
+        }
         if (!active()) return;
         if (expired(draft)) {
           publish(unavailable());
@@ -240,6 +285,7 @@ export function useStaffDraft(token: string | null) {
       const local = readCurrent();
       if (
         scope.current !== owner ||
+        submissionLocked.current ||
         local?.status !== 'ready' ||
         local.access !== 'ready' ||
         readRequest.current ||
@@ -278,23 +324,25 @@ export function useStaffDraft(token: string | null) {
     [edit],
   );
 
-  const save = useCallback(async () => {
+  const save = useCallback(async (): Promise<StaffDraftDto | null> => {
     const local = readCurrent();
     if (
       scope.current !== owner ||
+      submissionLocked.current ||
       !owner.token ||
       writeRequest.current ||
       readRequest.current ||
       local?.status !== 'ready' ||
       local.access !== 'ready' ||
-      needsReview(local) ||
-      sameStaffDraftAnswers(local.answers, local.draft.answers)
+      needsReview(local)
     )
-      return;
+      return null;
     if (expired(local.draft)) {
       publish(unavailable());
-      return;
+      return null;
     }
+    if (sameStaffDraftAnswers(local.answers, local.draft.answers))
+      return local.draft;
     const controller = new AbortController();
     writeRequest.current = controller;
     publish({ ...local, mutation: 'saving', message: '' });
@@ -309,7 +357,7 @@ export function useStaffDraft(token: string | null) {
         owner.token,
         controller.signal,
       );
-      if (!active()) return;
+      if (!active()) return null;
       publish(
         expired(draft)
           ? unavailable()
@@ -319,11 +367,12 @@ export function useStaffDraft(token: string | null) {
               answers: draft.answers,
               access: 'ready',
               mutation: 'saved',
-              message: '임시 저장했습니다. 아직 최종 제출되지 않았습니다.',
+              message: '',
             },
       );
+      return expired(draft) ? null : draft;
     } catch (error: unknown) {
-      if (!active()) return;
+      if (!active()) return null;
       if (rejected(error)) publish(unavailable());
       else if (error instanceof ApiRequestError && error.status === 409)
         publish({
@@ -346,10 +395,29 @@ export function useStaffDraft(token: string | null) {
               ? error.message
               : '입력 내용을 확인한 뒤 다시 임시 저장해 주세요.',
         });
+      return null;
     } finally {
       if (writeRequest.current === controller) writeRequest.current = null;
     }
   }, [owner, publish, readCurrent]);
+
+  const setSubmissionLocked = useCallback(
+    (locked: boolean) => {
+      if (scope.current !== owner) return;
+      submissionLocked.current = locked;
+      if (locked) abortRequests();
+    },
+    [abortRequests, owner],
+  );
+  const complete = useCallback(
+    (receipt: StaffSubmissionReceiptDto) => {
+      if (scope.current !== owner) return;
+      submissionLocked.current = false;
+      abortRequests();
+      publish({ status: 'submitted', receipt });
+    },
+    [abortRequests, owner, publish],
+  );
 
   const recheck = useCallback(() => {
     void load(false);
@@ -424,7 +492,12 @@ export function useStaffDraft(token: string | null) {
 
   const resource: StaffDraftResource =
     result?.owner === owner ? result.resource : { status: 'loading' };
-  const expiry = resource.status === 'ready' ? resource.draft.expiresAt : null;
+  const expiry =
+    resource.status === 'ready'
+      ? resource.draft.expiresAt
+      : resource.status === 'submitted'
+        ? resource.receipt.expiresAt
+        : null;
   useEffect(() => {
     if (!expiry) return;
     let timer: ReturnType<typeof setTimeout>;
@@ -470,5 +543,7 @@ export function useStaffDraft(token: string | null) {
     recheck,
     hasPendingWork,
     rejectAccess,
+    setSubmissionLocked,
+    complete,
   };
 }

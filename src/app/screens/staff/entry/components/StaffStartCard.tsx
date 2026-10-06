@@ -20,15 +20,15 @@ export function StaffStartCard({
       aria-labelledby="staff-start-title"
       aria-busy={pending}
     >
-      <h2 id="staff-start-title">정비 기록 시작</h2>
+      <span className="staff-entry-eyebrow">시작 전 확인</span>
+      <h2 id="staff-start-title">담당 직원을 확인해 주세요</h2>
       <p className="staff-entry-hint staff-start-description">
-        시작하면 현재 설정된 체크리스트로 임시 기록이 만들어집니다. 정비 완료나
-        최종 제출로 처리되지는 않습니다.
+        확인 후 정비 항목을 작성할 수 있습니다.
       </p>
       {!configured && (
         <p className="staff-entry-empty">
-          담당 직원과 사용 가능한 체크리스트가 모두 준비되면 시작할 수 있습니다.
-          관리자에게 설정을 문의해 주세요.
+          담당 직원과 정비 항목이 준비되면 시작할 수 있습니다. 관리자에게 문의해
+          주세요.
         </p>
       )}
       {configured && !uncertain && !opening && (
@@ -47,13 +47,10 @@ export function StaffStartCard({
               onChange={(event) => form.setConfirmed(event.target.checked)}
             />
             <span>
-              표시된 담당 직원 <strong>{context.assignedStaff?.name}</strong>의
+              <strong>{context.assignedStaff?.name}</strong>님의 담당 직원
               배정을 확인했습니다.
             </span>
           </label>
-          <p className="staff-entry-hint">
-            담당자 배정을 확인하는 절차이며, 실제 작업자의 본인 인증은 아닙니다.
-          </p>
           <Button
             type="submit"
             className="staff-start-submit"
@@ -61,9 +58,9 @@ export function StaffStartCard({
             loading={pending}
           >
             {state.status === 'checking'
-              ? '직원 안내 확인 중'
+              ? '담당 직원 확인 중'
               : state.status === 'starting'
-                ? '정비 기록 만드는 중'
+                ? '정비 시작 중'
                 : '정비 시작'}
           </Button>
         </form>
@@ -80,21 +77,28 @@ export function StaffStartCard({
       {uncertain && (
         <div className="staff-start-recovery">
           <p>
-            이미 받은 개인 이어쓰기 링크가 있다면 그 링크를 사용해 주세요. 새로
-            시작하면 별도의 정비 기록이 생길 수 있습니다.
+            받은 작성 링크가 있다면 그 링크를 열어 주세요. 새로 시작하면 정비
+            기록이 중복될 수 있습니다.
           </p>
           <Button onClick={form.prepareFresh}>새 정비 기록 준비</Button>
         </div>
       )}
       {opening && (
         <Button className="staff-start-submit" onClick={form.openIssued}>
-          발급된 작성 화면 다시 열기
+          작성 화면 열기
         </Button>
       )}
-      <p className="staff-entry-hint staff-start-link-note">
-        발급된 개인 이어쓰기 링크를 보관해 주세요. 공용 직원 QR에서는 이전
-        기록이나 이어쓰기 링크를 찾을 수 없습니다.
-      </p>
+      <details className="staff-start-details">
+        <summary>시작 전에 알아두기</summary>
+        <ul>
+          <li>시작하면 임시 기록이 만들어집니다. 정비 완료는 아닙니다.</li>
+          <li>담당 직원 배정 확인이며, 작업자 본인 인증은 아닙니다.</li>
+          <li>
+            작성 화면의 이어쓰기 링크를 보관해 주세요. 이 QR에서는 이전 기록을
+            찾을 수 없습니다.
+          </li>
+        </ul>
+      </details>
     </section>
   );
 }

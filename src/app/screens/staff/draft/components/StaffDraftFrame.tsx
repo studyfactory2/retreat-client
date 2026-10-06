@@ -23,7 +23,7 @@ export function StaffDraftFrame({
           <strong className="staff-draft-brand">
             OH BOK<span>RETREAT</span>
           </strong>
-          <span>직원 정비 체크리스트</span>
+          <span>직원</span>
         </div>
       </header>
       <main

@@ -10,16 +10,16 @@ export function StaffDraftPhotoQueue({
   const { queue, busy, writing, resource } = controller;
   if (!queue.length) return null;
   const labels = {
-    invalid: '선택할 수 없는 파일',
+    invalid: '파일 확인 필요',
     queued: '대기 중',
-    uploading: '확인 및 업로드 중',
+    uploading: '확인·업로드 중',
     failed: '업로드 실패',
     uncertain: '결과 확인 필요',
   };
   return (
     <div className="staff-photos-queue" aria-label="선택한 사진의 업로드 상태">
       <h3>
-        선택한 사진 <span>{queue.length}장 남음</span>
+        사진 업로드 <span>{queue.length}장 남음</span>
       </h3>
       <ul>
         {queue.map((entry) => (
@@ -37,9 +37,8 @@ export function StaffDraftPhotoQueue({
             {entry.message && <p role="status">{entry.message}</p>}
             {entry.checked && entry.status === 'uncertain' && (
               <p>
-                목록을 새로 불러왔습니다. 사진이 보이지 않아도 처리 중일 수
-                있습니다. 이 선택을 닫고, 필요할 때만 다시 선택해 주세요. 같은
-                사진을 다시 올리면 중복될 수 있습니다.
+                목록을 확인했습니다. 사진이 아직 처리 중일 수 있으니, 필요할
+                때만 다시 선택해 주세요. 다시 올리면 중복될 수 있습니다.
               </p>
             )}
             {entry.status !== 'uploading' && (
@@ -56,7 +55,7 @@ export function StaffDraftPhotoQueue({
                         void controller.refresh();
                       }}
                     >
-                      사진 목록 다시 확인
+                      사진 목록 확인
                     </Button>
                   )}
                 {entry.status === 'failed' && entry.checked && entry.file && (
@@ -78,7 +77,7 @@ export function StaffDraftPhotoQueue({
                   onClick={() => controller.dismiss(entry.id)}
                 >
                   {entry.status === 'uncertain'
-                    ? '목록 확인 후 선택 닫기'
+                    ? '확인 후 선택 닫기'
                     : '선택 취소'}
                 </Button>
               </div>
@@ -97,8 +96,8 @@ export function StaffDraftPhotoQueue({
         </Button>
       )}
       <p className="staff-photos-help">
-        화면을 떠나면 아직 올리지 않은 파일 선택이 사라집니다. 사진 처리 결과를
-        확인한 뒤 이동해 주세요.
+        업로드 결과를 확인한 뒤 이동해 주세요. 아직 올리지 않은 파일 선택은
+        화면을 떠나면 사라집니다.
       </p>
     </div>
   );

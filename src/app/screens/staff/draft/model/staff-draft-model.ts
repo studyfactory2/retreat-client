@@ -44,7 +44,12 @@ export function changeStaffDraftAnswer(
 export function changeStaffDraftDetails(
   answers: StaffDraftAnswers,
   itemId: string,
-  change: { description?: string | null; isUrgent?: boolean },
+  change: {
+    description?: string | null;
+    isUrgent?: boolean;
+    repairReported?: boolean;
+    repairNote?: string | null;
+  },
 ): StaffDraftAnswers {
   return {
     ...answers,

@@ -110,20 +110,14 @@ export function StaffDraftPhotoCard({
               {preview.status === 'idle'
                 ? '사진 보기'
                 : preview.status === 'expired'
-                  ? '미리보기 다시 열기'
+                  ? '다시 보기'
                   : '다시 보기'}
             </Button>
           </div>
         )}
       </div>
       <div className="staff-photo-card__body">
-        <p className="staff-photo-card__name">
-          <span>사진 {index + 1}</span>
-          {photo.filename}
-        </p>
-        <p className="staff-photo-card__meta">
-          {size} · {photo.width} × {photo.height}
-        </p>
+        <p className="staff-photo-card__name">사진 {index + 1}</p>
         {preview.status === 'error' && (
           <p className="staff-photo-card__message" role="status">
             {preview.message}
@@ -131,12 +125,12 @@ export function StaffDraftPhotoCard({
         )}
         {preview.status === 'expired' && (
           <p className="staff-photo-card__message" role="status">
-            미리보기 시간이 만료되었습니다. 사진은 첨부된 상태입니다.
+            미리보기 만료 · 첨부 사진은 유지됩니다.
           </p>
         )}
         {deleting === owner ? (
           <div className="staff-photo-card__confirm">
-            <p>첨부된 이 사진을 삭제할까요?</p>
+            <p>이 사진을 삭제할까요?</p>
             <div>
               <Button
                 disabled={removeDisabled}
@@ -163,9 +157,16 @@ export function StaffDraftPhotoCard({
             onClick={() => setDeleting(owner)}
             aria-label={`${index + 1}번 첨부 사진 삭제`}
           >
-            사진 삭제
+            삭제
           </button>
         )}
+        <details className="staff-photo-card__details">
+          <summary>파일 정보</summary>
+          <p>{photo.filename}</p>
+          <p className="staff-photo-card__meta">
+            {size} · {photo.width} × {photo.height}
+          </p>
+        </details>
       </div>
       <StaffDraftPhotoPreview
         open={selected === owner && previewEnabled}

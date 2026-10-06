@@ -30,7 +30,7 @@ export function StaffFrame({
             OH BOK<span>RETREAT</span>
           </div>
           <div className="staff-entry-header__tools">
-            <span>정비 직원 안내</span>
+            <span>직원 정비</span>
             {onRefresh && (
               <button
                 type="button"

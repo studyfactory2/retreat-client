@@ -26,8 +26,8 @@ Follow studyfactory-frontend's organization:
   guest photos, final submission, receipts and answer corrections are implemented.
   Staff QR entry and maintenance start live in staff/entry; partial checklist
   editing and saving live in staff/draft. Neutral draft/entry selects the validated
-  guest or staff flow. Staff draft photo uploads and gallery are implemented;
-  repair controls, final submission and receipts are later work.
+  guest or staff flow, including completed staff receipts. Staff uses a guided
+  check/photos/review flow with repair reporting and final submission.
 - `src/app/shared/ui` and `shared/layout`: business-neutral reusable components.
 - `src/app/styles`: reset, shared tokens, base styles and their single entrypoint.
 
@@ -1576,3 +1576,58 @@ real signed-image loading, actual QR/HTTP/Prisma/S3 integration and full browser
 Back/Forward/clipboard behavior still need manual acceptance. Check reopening,
 separate answer/photo saves, previews/expiry, confirmation/cancelled removal,
 unknown upload/removal results, navigation during pending photos and access loss.
+
+## Staff slice 4 — guided maintenance and final submission
+
+Staff entry now leads with the property and configured employee, one explicit
+start action, and a collapsed checklist preview. Existing staff acknowledgement,
+missing configuration, ambiguous-start handling and QR credential rules remain.
+The staff draft uses three steps: 점검 → 사진 → 확인·제출. One primary action
+advances each step. Status and recovery appear in context; optional notes,
+file metadata and upload help use disclosures. Guest and administrator screens
+and their feature contracts are unchanged.
+
+Inspection supports NORMAL/ABNORMAL, optional descriptions/urgency and staff
+repair reports. A repair report is an employee claim; administrators still own
+issue resolution. Changing away from an abnormal answer confirms before removing
+its dependent details. Required answers are enforced before advancing, while
+나중에 계속하기 saves partial answers and opens the private-link controls.
+Saving and final submission remain distinct. There is no automatic answer save.
+
+The photo stage preserves the existing independent upload queue, previews,
+removal recovery and navigation guards. Users select a purpose and checklist
+location for each READY photo. Before/after images require a section or item;
+defect photos require an abnormal item; repair photos also require a repair
+report. No photo minimum is imposed. Associations stay in memory until final
+submission; reopening requires reselecting them. Unresolved photo work blocks
+review. The picker/queue stay mounted when moving between steps.
+
+저장하고 내용 확인 first saves the answers, refreshes the photo list, then opens
+a review of the saved snapshot and photo mappings. Final submission is an explicit
+정비 완료 제출 action. The staff-submissions feature validates unknown responses
+and sends POST /submissions/submit with the saved expectedUpdatedAt and every
+READY photo exactly once, using only the private draft Bearer credential. The
+backend also blocks PENDING photos and checks current staff/property access.
+
+Submission locks draft/photo mutation and parent draft revalidation synchronously.
+An ambiguous response keeps an immutable request snapshot and checks GET
+/submissions/receipt. No POST is automatically retried. A deliberate identical
+retry is available only after receipt readback confirms no completed receipt yet;
+it retains the exact saved timestamp, photo ordering and associations. Unmount,
+token change, expiry and BFCache restoration abort/fence old requests. Submitted
+staff links recover the staff receipt through the neutral draft entry and do not
+enter guest editing. Receipt access retains the original link expiry and current
+staff assignment restrictions; no staff submitted-detail or corrections API is
+invented. There are no backend, schema, dependency, environment or server changes.
+
+Verification for this slice: app/node TypeScript, warning-free source Oxlint,
+changed-source Prettier with the exact repository configuration, and production
+bundling passed. Disposable current-source probes exercised saved-answer/photo
+review, required/partial answers, repair associations, frozen submission retry,
+receipt reopening, focus/BFCache/expiry and guest-routing compatibility. Six
+actual-component SSR fixtures were rendered in an isolated offline Chrome at
+320/390/768px with no horizontal overflow; their hooks/data were mocked and all
+network was blocked. These are layout and synthetic lifecycle checks, not real
+QR/JWT/HTTP/PostgreSQL/S3 or physical-device acceptance. The existing large main
+bundle warning remains. No repository test files were added. Build checks used
+sample HTTPS origins; deployment must rebuild with actual production origins.

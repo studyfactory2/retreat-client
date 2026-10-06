@@ -17,6 +17,8 @@ export function StaffDraftAnswerField({
   onDetails: (change: {
     description?: string | null;
     isUrgent?: boolean;
+    repairReported?: boolean;
+    repairNote?: string | null;
   }) => void;
 }) {
   const descriptionId = `staff-description-${item.id}`;
@@ -46,7 +48,7 @@ export function StaffDraftAnswerField({
           aria-pressed={answer?.value === 'ABNORMAL'}
           onClick={() => onValue('ABNORMAL')}
         >
-          이상
+          이상 있음
         </button>
         {answer && (
           <button
@@ -67,12 +69,10 @@ export function StaffDraftAnswerField({
             id={descriptionId}
             value={answer.description ?? ''}
             onChange={(event) => onDetails({ description: event.target.value })}
-            rows={3}
+            rows={2}
+            maxLength={2000}
             placeholder="확인한 이상 내용을 적어 주세요."
           />
-          <p className="staff-draft-hint">
-            최대 2,000자 · 임시 저장은 설명 없이도 가능합니다.
-          </p>
           <label className="staff-draft-urgent">
             <input
               type="checkbox"
@@ -83,11 +83,46 @@ export function StaffDraftAnswerField({
             />
             긴급 확인이 필요합니다
           </label>
-          {(answer.repairReported || answer.repairNote !== null) && (
-            <p className="staff-draft-preserved">
-              기존 수리 보고 정보가 함께 보존됩니다. 정상으로 바꾸거나 선택을
-              해제하면 확인 후 해당 정보도 삭제됩니다.
-            </p>
+          <label className="staff-draft-urgent">
+            <input
+              type="checkbox"
+              checked={answer.repairReported}
+              onChange={(event) => {
+                if (
+                  !event.target.checked &&
+                  answer.repairNote &&
+                  !window.confirm(
+                    '수리 보고를 해제하면 수리 메모가 지워집니다. 해제할까요?',
+                  )
+                )
+                  return;
+                onDetails({
+                  repairReported: event.target.checked,
+                  ...(!event.target.checked ? { repairNote: null } : {}),
+                });
+              }}
+            />
+            현장에서 수리했어요
+          </label>
+          {answer.repairReported && (
+            <div className="staff-flow-repair">
+              <label htmlFor={`${descriptionId}-repair`}>
+                수리한 내용 <span>(선택)</span>
+              </label>
+              <textarea
+                id={`${descriptionId}-repair`}
+                rows={2}
+                maxLength={2000}
+                value={answer.repairNote ?? ''}
+                onChange={(event) =>
+                  onDetails({ repairNote: event.target.value })
+                }
+                placeholder="어떻게 수리했는지 알려 주세요."
+              />
+              <p className="staff-draft-hint">
+                수리 보고 후 관리자가 처리 상태를 확인합니다.
+              </p>
+            </div>
           )}
         </div>
       )}

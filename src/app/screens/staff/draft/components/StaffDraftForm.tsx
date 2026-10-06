@@ -1,173 +1,284 @@
-import type { ReactNode } from 'react';
 import { Button } from '../../../../shared/ui/Button/Button';
-import type { useStaffDraft } from '../hooks/use-staff-draft';
-import { changeStaffDraftDetails } from '../model/staff-draft-model';
-import { formatStaffDraftTime } from '../model/staff-draft-display';
+import {
+  useStaffWorkflow,
+  type StaffWorkflowOptions,
+} from '../hooks/use-staff-workflow';
 import { StaffDraftAnswerField } from './StaffDraftAnswerField';
 import { StaffDraftLink } from './StaffDraftLink';
+import { StaffDraftPhotos } from './StaffDraftPhotos';
+import { StaffPhotoAssignmentFields } from './StaffPhotoAssignment';
+import { StaffSubmissionReview } from './StaffSubmissionReview';
+import { StaffSubmissionUncertain } from './StaffSubmissionUncertain';
 
-type DraftSession = ReturnType<typeof useStaffDraft>;
-type ReadyResource = Extract<DraftSession['resource'], { status: 'ready' }>;
 export function StaffDraftForm({
   session,
   resource,
   token,
-  photos,
-}: {
-  session: DraftSession;
-  resource: ReadyResource;
-  token: string;
-  photos: ReactNode;
-}) {
-  const { draft, answers } = resource;
-  const unresolved =
-    resource.mutation === 'conflict' || resource.mutation === 'uncertain';
-  const saving = resource.mutation === 'saving';
+}: StaffWorkflowOptions) {
+  const {
+    draft,
+    answers,
+    step,
+    review,
+    assignments,
+    preparing,
+    later,
+    message,
+    heading,
+    submission,
+    accessReady,
+    photos,
+    unresolved,
+    saving,
+    disabled,
+    answered,
+    requiredCount,
+    photoReady,
+    reviewCurrent,
+    editableDraft,
+    stepTitle,
+    saveStateLabel,
+    nextDisabled,
+    nextLabel,
+    go,
+    advance,
+    continueLater,
+    resume,
+    assignPhoto,
+    changeAnswerDetails,
+    changeGeneralNote,
+  } = useStaffWorkflow({ session, resource, token });
   return (
     <>
-      <section className="staff-draft-intro">
-        <span className="staff-draft-eyebrow">MAINTENANCE · 정비 작성 중</span>
-        <h1>{draft.property.name}</h1>
-        {draft.property.region && <p>{draft.property.region}</p>}
-        <dl className="staff-draft-identity">
-          <div>
-            <dt>담당 직원</dt>
-            <dd>{draft.author.name}</dd>
+      <div className="staff-flow-heading">
+        <p>{draft.property.name}</p>
+        <div>
+          <h1>청소·정비</h1>
+          <span className="staff-flow-state">작성 중</span>
+        </div>
+        <span>
+          {draft.author.name} <span aria-hidden="true">·</span>{' '}
+          {draft.visitDate}
+        </span>
+      </div>
+      <ol className="staff-flow-steps" aria-label="정비 작성 단계">
+        {['점검', '사진', '확인·제출'].map((label, index) => (
+          <li
+            key={label}
+            aria-current={step === index ? 'step' : undefined}
+            className={step > index ? 'is-complete' : ''}
+          >
+            <span>{step > index ? '✓' : index + 1}</span>
+            {label}
+          </li>
+        ))}
+      </ol>
+      {(resource.message || resource.access !== 'ready' || unresolved) &&
+        !submission.locked && (
+          <section className="staff-flow-notice" role="status">
+            <strong>
+              {resource.access === 'checking'
+                ? '연결 확인 중'
+                : unresolved
+                  ? '저장 상태를 확인해 주세요'
+                  : '작성 안내'}
+            </strong>
+            {resource.message && <p>{resource.message}</p>}
+            <div className="staff-draft-actions">
+              <Button
+                disabled={session.busy || preparing}
+                onClick={session.recheck}
+              >
+                다시 확인
+              </Button>
+              {(unresolved || resource.access === 'blocked') && (
+                <Button
+                  disabled={session.busy || preparing}
+                  onClick={session.reload}
+                >
+                  저장된 내용 불러오기
+                </Button>
+              )}
+            </div>
+          </section>
+        )}
+      {submission.locked ? (
+        <StaffSubmissionUncertain submission={submission} />
+      ) : (
+        <>
+          <h2 ref={heading} tabIndex={-1} className="staff-flow-step-title">
+            {stepTitle}
+          </h2>
+          <div hidden={step !== 0 || later}>
+            <section className="staff-draft-card staff-flow-checklist">
+              <div className="staff-flow-section-heading">
+                <h2>{draft.template.title}</h2>
+                <span>
+                  필수 {answered} / {requiredCount}
+                </span>
+              </div>
+              {draft.template.definition.sections.map((section, index) => (
+                <section
+                  className="staff-draft-section"
+                  key={section.id}
+                  aria-labelledby={`staff-section-${section.id}`}
+                >
+                  <h3 id={`staff-section-${section.id}`}>
+                    <span>{String(index + 1).padStart(2, '0')}</span>
+                    {section.title}
+                  </h3>
+                  {section.items.map((item) => (
+                    <StaffDraftAnswerField
+                      key={item.id}
+                      item={item}
+                      disabled={disabled}
+                      answer={answers.items.find(
+                        (answer) => answer.itemId === item.id,
+                      )}
+                      onValue={(value) => session.setAnswer(item.id, value)}
+                      onDetails={(change) =>
+                        changeAnswerDetails(item.id, change)
+                      }
+                    />
+                  ))}
+                </section>
+              ))}
+              <details className="staff-flow-details">
+                <summary>
+                  메모 추가 <span>선택</span>
+                </summary>
+                <label
+                  className="staff-draft-note-label"
+                  htmlFor="staff-general-note"
+                >
+                  추가로 전달할 내용
+                </label>
+                <textarea
+                  id="staff-general-note"
+                  disabled={disabled}
+                  value={answers.generalNote ?? ''}
+                  rows={3}
+                  maxLength={4000}
+                  placeholder="관리자에게 전달할 내용을 적어 주세요."
+                  onChange={(event) => changeGeneralNote(event.target.value)}
+                />
+              </details>
+            </section>
           </div>
-          <div>
-            <dt>정비일</dt>
-            <dd>{draft.visitDate}</dd>
-          </div>
-          <div>
-            <dt>시작 시각</dt>
-            <dd>{formatStaffDraftTime(draft.startedAt)}</dd>
-          </div>
-        </dl>
-        <p className="staff-draft-hint">
-          시작 시 지정된 직원과 체크리스트로 작성합니다. 날짜와 시각은 한국
-          시간을 기준으로 합니다.
-        </p>
-      </section>
-      <section
-        className="staff-draft-card staff-draft-status"
-        aria-live="polite"
-      >
-        <h2>
-          {saving
-            ? '임시 저장 중입니다'
-            : resource.access === 'checking'
-              ? '접근 상태를 확인하고 있습니다'
-              : unresolved
-                ? '저장 내용을 확인해 주세요'
-                : session.dirty
-                  ? '저장하지 않은 변경이 있습니다'
-                  : '저장된 내용을 보고 있습니다'}
-        </h2>
-        <p>마지막 저장: {formatStaffDraftTime(draft.updatedAt)}</p>
-        <p>
-          일부 항목만 작성해도 임시 저장할 수 있습니다. 임시 저장은 정비 완료나
-          최종 제출이 아닙니다.
-        </p>
-        <p>
-          다른 화면으로 이동하거나 뒤로 가기 전에 저장해 주세요. 저장하지 않은
-          입력은 사라질 수 있습니다.
-        </p>
-        {resource.message && (
-          <p className="staff-draft-feedback" role="status">
-            {resource.message}
+        </>
+      )}
+      {/* Keep photo inputs and queued files mounted across steps and interrupted submissions. */}
+      <div hidden={step !== 1 || submission.locked || later}>
+        <StaffDraftPhotos
+          controller={photos}
+          token={token}
+          draftId={draft.id}
+          expiresAt={draft.expiresAt}
+          locked={disabled || step === 2}
+          accessReady={accessReady}
+          onAccessRejected={session.rejectAccess}
+          renderAssignment={(photo) => (
+            <StaffPhotoAssignmentFields
+              id={photo.id}
+              draft={editableDraft}
+              value={assignments[photo.id]}
+              disabled={disabled || photos.busy}
+              onChange={(value) => assignPhoto(photo.id, value)}
+            />
+          )}
+        />
+        {photos.items.length > 0 && (
+          <p className="staff-draft-hint">
+            사진은 업로드되었어요. 사진 종류와 위치는 제출할 때 저장되며,
+            페이지를 다시 열면 다시 선택해야 해요.
           </p>
         )}
-        <div className="staff-draft-actions">
-          <Button disabled={session.busy} onClick={session.recheck}>
-            저장 상태 다시 확인
-          </Button>
-          {(unresolved || resource.access === 'blocked') && (
-            <Button disabled={session.busy} onClick={session.reload}>
-              서버 내용으로 다시 불러오기
-            </Button>
-          )}
-        </div>
-      </section>
-      <form
-        onSubmit={(event) => {
-          event.preventDefault();
-          void session.save();
-        }}
-      >
-        <section className="staff-draft-card">
-          <span className="staff-draft-eyebrow">
-            시작할 때 저장된 체크리스트
-          </span>
-          <h2 className="staff-draft-template-title">{draft.template.title}</h2>
-          <p className="staff-draft-hint">
-            필수 항목도 나중에 이어서 작성할 수 있습니다.
+      </div>
+      {step === 2 && review && !submission.locked && !later && (
+        <StaffSubmissionReview draft={review.draft} photos={review.inputs} />
+      )}
+      {step === 2 && !reviewCurrent && !submission.locked && !later && (
+        <p className="staff-flow-notice" role="status">
+          최신 저장 내용과 사진을 확인하고 있어요. 변경된 내용이 있다면 이전
+          단계에서 다시 확인해 주세요.
+        </p>
+      )}
+      {message && (
+        <p className="staff-flow-notice is-error" role="alert">
+          {message}
+        </p>
+      )}
+      {submission.state.message && !submission.locked && (
+        <p className="staff-flow-notice" role="alert">
+          {submission.state.message}
+        </p>
+      )}
+      {later && !submission.locked && (
+        <div className="staff-flow-later">
+          <p className="staff-flow-saved">
+            {session.dirty || unresolved
+              ? '저장 상태를 다시 확인해 주세요'
+              : '✓ 점검 내용이 저장되었어요'}
           </p>
-          {draft.template.definition.sections.map((section) => (
-            <section
-              className="staff-draft-section"
-              key={section.id}
-              aria-labelledby={`staff-section-${section.id}`}
-            >
-              <h3 id={`staff-section-${section.id}`}>{section.title}</h3>
-              {section.items.map((item) => (
-                <StaffDraftAnswerField
-                  key={item.id}
-                  item={item}
-                  disabled={!session.canEdit}
-                  answer={answers.items.find(
-                    (answer) => answer.itemId === item.id,
-                  )}
-                  onValue={(value) => session.setAnswer(item.id, value)}
-                  onDetails={(change) =>
-                    session.edit((current) =>
-                      changeStaffDraftDetails(current, item.id, change),
-                    )
-                  }
-                />
-              ))}
-            </section>
-          ))}
-        </section>
-        <section className="staff-draft-card">
-          <label
-            className="staff-draft-note-label"
-            htmlFor="staff-general-note"
-          >
-            전체 메모 <span>(선택)</span>
-          </label>
-          <textarea
-            id="staff-general-note"
-            disabled={!session.canEdit}
-            value={answers.generalNote ?? ''}
-            rows={4}
-            placeholder="정비 중 확인한 내용을 남겨 주세요."
-            onChange={(event) =>
-              session.edit((current) => ({
-                ...current,
-                generalNote: event.target.value,
-              }))
-            }
+          <StaffDraftLink
+            token={token}
+            expiresAt={draft.expiresAt}
+            disabled={!accessReady || session.dirty}
           />
-          <p className="staff-draft-hint">최대 4,000자</p>
-        </section>
-        <div className="staff-draft-savebar">
-          <div>
-            <strong>
-              {session.dirty ? '변경 내용 임시 저장' : '현재 내용 저장됨'}
-            </strong>
-            <span>아직 최종 제출되지 않았습니다.</span>
-          </div>
-          <Button type="submit" disabled={!session.canSave} loading={saving}>
-            임시 저장
-          </Button>
+          {Object.keys(assignments).length > 0 && (
+            <p className="staff-draft-hint">
+              사진의 종류와 위치는 다시 열면 선택해 주세요.
+            </p>
+          )}
+          <button
+            className="staff-flow-text-button"
+            type="button"
+            onClick={resume}
+          >
+            계속 작성하기
+          </button>
         </div>
-      </form>
-      {photos}
-      <StaffDraftLink
-        token={token}
-        expiresAt={draft.expiresAt}
-        disabled={resource.access !== 'ready'}
-      />
+      )}
+      {!later && !submission.locked && (
+        <div className="staff-flow-bottom">
+          <p className="staff-flow-save-state" aria-live="polite">
+            {saveStateLabel}
+          </p>
+          <div className="staff-flow-buttons">
+            {step > 0 && (
+              <Button
+                className="staff-flow-back"
+                disabled={disabled}
+                onClick={() => go(step - 1)}
+              >
+                이전
+              </Button>
+            )}
+            <Button
+              loading={saving || preparing}
+              disabled={nextDisabled}
+              onClick={advance}
+            >
+              {nextLabel}
+            </Button>
+          </div>
+          {step === 1 && !photoReady && (
+            <p className="staff-draft-hint">
+              사진 처리 결과를 확인하면 다음 단계로 갈 수 있어요.
+            </p>
+          )}
+          <button
+            className="staff-flow-text-button"
+            type="button"
+            disabled={disabled}
+            onClick={() => {
+              void continueLater();
+            }}
+          >
+            나중에 계속하기
+          </button>
+        </div>
+      )}
     </>
   );
 }

@@ -40,15 +40,15 @@
 .staff-photos-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
-  margin-block: 24px;
+  gap: 12px;
+  margin-block: 20px;
 }
 .staff-photos-empty {
   display: grid;
   justify-items: center;
   gap: 8px;
-  margin-block: 24px;
-  padding: 28px 16px;
+  margin-block: 20px;
+  padding: 24px 16px;
   border: 1px dashed #c5d3ed;
   border-radius: 14px;
   background: #f8faff;
@@ -74,8 +74,8 @@
   min-height: 52px;
   border: 1px solid var(--color-primary);
   border-radius: 12px;
-  background: var(--color-primary);
-  color: white;
+  background: #edf4ff;
+  color: var(--color-primary);
   font-size: 15px;
   font-weight: 650;
   overflow: hidden;
@@ -104,6 +104,21 @@
   line-height: 1.85;
   color: var(--color-muted);
 }
+.staff-photos-details {
+  margin-top: 12px;
+  border-top: 1px solid #e8edf5;
+  color: var(--color-muted);
+  font-size: 12px;
+  line-height: 1.85;
+}
+.staff-photos-details > summary {
+  min-height: 44px;
+  padding-block: 12px;
+  cursor: pointer;
+}
+.staff-photos-details .staff-photos-help {
+  margin: 0 0 10px;
+}
 .staff-photos-status {
   margin-top: 16px;
   font-size: 13px;
@@ -112,7 +127,7 @@
 }
 .staff-photos-notice {
   margin-top: 18px;
-  padding: 16px;
+  padding: 14px;
   border: 1px solid #ead4a8;
   border-radius: 12px;
   background: #fffaf0;
@@ -168,14 +183,15 @@
   display: block;
   overflow-wrap: anywhere;
   color: var(--color-heading);
-  font-size: 13px;
+  font-size: 12px;
   line-height: 1.7;
 }
 .staff-photos-queued > span {
   display: block;
   margin-top: 6px;
   color: var(--color-muted);
-  font-size: 11px;
+  font-size: 12px;
+  font-weight: 600;
 }
 .staff-photos-queued > p {
   margin-top: 10px;

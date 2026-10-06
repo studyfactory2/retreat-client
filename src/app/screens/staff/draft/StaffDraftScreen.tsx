@@ -5,9 +5,10 @@ import { useNavigationGuard } from '../../../core/router/navigation/use-navigati
 import { readPrivateDraftToken } from '../../draft/entry/model/draft-entry-model';
 import { StaffDraftFrame } from './components/StaffDraftFrame';
 import { StaffDraftForm } from './components/StaffDraftForm';
-import { StaffDraftPhotos } from './components/StaffDraftPhotos';
+import { StaffSubmissionReceipt } from './components/StaffSubmissionReceipt';
 import { useStaffDraft } from './hooks/use-staff-draft';
 import './styles/staff-draft.css';
+import './styles/staff-flow.css';
 
 export function StaffDraftScreen() {
   const location = useLocation();
@@ -38,22 +39,10 @@ export function StaffDraftScreen() {
           <h1>정비 내용을 불러오고 있습니다</h1>
           <p>잠시만 기다려 주세요.</p>
         </section>
+      ) : resource.status === 'submitted' ? (
+        <StaffSubmissionReceipt receipt={resource.receipt} token={token} />
       ) : (
-        <StaffDraftForm
-          session={session}
-          resource={resource}
-          token={token}
-          photos={
-            <StaffDraftPhotos
-              token={token}
-              draftId={resource.draft.id}
-              expiresAt={resource.draft.expiresAt}
-              locked={!session.canEdit}
-              accessReady={resource.access === 'ready'}
-              onAccessRejected={session.rejectAccess}
-            />
-          }
-        />
+        <StaffDraftForm session={session} resource={resource} token={token} />
       )}
     </StaffDraftFrame>
   );

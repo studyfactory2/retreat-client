@@ -53,10 +53,13 @@ review/submission and reopening the original completion receipt. Its submitted
 detail view supports private photos and answer corrections with revision checks.
 `/guest?view=report#token=...` also supports standalone problem reports from a
 property QR, with optional private photos, review and the original receipt.
-Personal-stay links do not expose this property-QR report flow. `/staff` remains a
-preparation screen. Guest credentials stay in their matching fragment/request
-state and never enter the administrator session or browser storage. See PROJECT.md
-for the full implemented admin/guest scope and remaining verification boundaries.
+Personal-stay links do not expose this property-QR report flow. `/staff` starts a
+maintenance checklist after confirming the configured employee. Staff private
+drafts guide users through inspection, optional photos, and review/submission;
+the same private link reopens the original completion receipt. Staff and guest
+credentials stay in their matching fragment/request state and never enter the
+administrator session or browser storage. See PROJECT.md for the implemented
+scope and remaining verification boundaries.
 
 ## Administrator access
 

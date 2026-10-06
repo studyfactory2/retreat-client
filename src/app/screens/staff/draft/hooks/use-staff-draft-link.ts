@@ -42,7 +42,7 @@ export function useStaffDraftLink(
         setResult({
           owner,
           busy: false,
-          message: '개인 작성 링크를 복사했습니다. 안전한 곳에 보관해 주세요.',
+          message: '링크를 복사했어요. 나만 볼 수 있는 곳에 보관해 주세요.',
         });
     } catch {
       if (scope.current === owner)

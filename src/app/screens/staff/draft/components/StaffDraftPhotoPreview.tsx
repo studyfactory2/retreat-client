@@ -51,7 +51,7 @@ export function StaffDraftPhotoPreview({
     >
       <div className="staff-photo-preview__panel">
         <header className="staff-photo-preview__heading">
-          <h2 id={`${id}-title`}>사진 {index + 1} 크게 보기</h2>
+          <h2 id={`${id}-title`}>사진 {index + 1}</h2>
           <button
             ref={close}
             type="button"
@@ -62,9 +62,6 @@ export function StaffDraftPhotoPreview({
             닫기
           </button>
         </header>
-        <p id={`${id}-filename`} className="staff-photo-preview__filename">
-          {filename}
-        </p>
         <div
           className="staff-photo-preview__image"
           aria-busy={preview.status === 'loading'}
@@ -83,7 +80,7 @@ export function StaffDraftPhotoPreview({
                 {preview.status === 'loading'
                   ? '사진을 불러오고 있습니다.'
                   : preview.status === 'expired'
-                    ? '미리보기 시간이 만료되었습니다. 사진은 첨부된 상태입니다.'
+                    ? '미리보기가 만료되었습니다. 첨부 사진은 유지됩니다.'
                     : preview.status === 'error'
                       ? preview.message
                       : '사진을 다시 열어 주세요.'}
@@ -95,11 +92,17 @@ export function StaffDraftPhotoPreview({
                   void view.load();
                 }}
               >
-                미리보기 다시 열기
+                다시 보기
               </Button>
             </div>
           )}
         </div>
+        <details className="staff-photo-preview__details">
+          <summary>파일 정보</summary>
+          <p id={`${id}-filename`} className="staff-photo-preview__filename">
+            {filename}
+          </p>
+        </details>
       </div>
     </dialog>
   );
