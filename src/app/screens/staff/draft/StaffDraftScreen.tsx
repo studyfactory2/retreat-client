@@ -1,0 +1,68 @@
+import { useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
+import { Button } from '../../../shared/ui/Button/Button';
+import { readPrivateDraftToken } from '../../draft/entry/model/draft-entry-model';
+import { StaffDraftFrame } from './components/StaffDraftFrame';
+import { StaffDraftForm } from './components/StaffDraftForm';
+import { useStaffDraft } from './hooks/use-staff-draft';
+import './styles/staff-draft.css';
+
+export function StaffDraftScreen() {
+  const location = useLocation();
+  const token = readPrivateDraftToken(location.hash);
+  const session = useStaffDraft(token);
+  const main = useRef<HTMLElement>(null);
+  const { resource, confirmLeave } = session;
+  useEffect(() => {
+    const leave = (event: MouseEvent) => {
+      const target =
+        event.target instanceof Element
+          ? event.target.closest('a[href]')
+          : null;
+      if (
+        !target ||
+        event.defaultPrevented ||
+        event.button !== 0 ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        event.altKey ||
+        target.getAttribute('target') === '_blank'
+      )
+        return;
+      if (!confirmLeave()) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    };
+    document.addEventListener('click', leave, true);
+    return () => document.removeEventListener('click', leave, true);
+  }, [confirmLeave]);
+  useEffect(() => {
+    main.current?.focus({ preventScroll: true });
+  }, [location.hash, resource.status]);
+  return (
+    <StaffDraftFrame mainRef={main} loading={resource.status === 'loading'}>
+      {!token || resource.status === 'error' ? (
+        <section className="staff-draft-card staff-draft-state" role="alert">
+          <h1>작성 내용을 열 수 없습니다</h1>
+          <p>
+            {resource.status === 'error'
+              ? resource.message
+              : '보관한 개인 작성 링크 전체를 다시 열어 주세요.'}
+          </p>
+          {resource.status === 'error' && resource.kind === 'request' && (
+            <Button onClick={session.recheck}>다시 확인</Button>
+          )}
+        </section>
+      ) : resource.status === 'loading' ? (
+        <section className="staff-draft-card staff-draft-state" role="status">
+          <h1>정비 내용을 불러오고 있습니다</h1>
+          <p>잠시만 기다려 주세요.</p>
+        </section>
+      ) : (
+        <StaffDraftForm session={session} resource={resource} token={token} />
+      )}
+    </StaffDraftFrame>
+  );
+}

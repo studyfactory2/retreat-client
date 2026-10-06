@@ -24,8 +24,9 @@ Follow studyfactory-frontend's organization:
   Admin login/layout/dashboard/calendar/stays/properties/stay-imports/submissions,
   maintenance/issues/staff/reports/more, guest/entry, guest/draft, guest/submission, guest/issues, entry and dev exist;
   guest photos, final submission, receipts and answer corrections are implemented.
-  Staff QR entry and read-only maintenance previews live in staff/entry; staff
-  checklist start, editing and submission follow in later slices.
+  Staff QR entry and maintenance start live in staff/entry; partial checklist
+  editing and saving live in staff/draft. Neutral draft/entry selects the validated
+  guest or staff flow. Staff photos, final submission and receipts are later work.
 - `src/app/shared/ui` and `shared/layout`: business-neutral reusable components.
 - `src/app/styles`: reset, shared tokens, base styles and their single entrypoint.
 
@@ -1387,3 +1388,80 @@ files were added. Automatic approval review blocked browser navigation to
 localhost:5175/staff because of the prior port restriction; mobile visual checks
 were not performed. Synthetic checks do not establish live QR/database/HTTP or
 physical-device acceptance. Existing servers were not started or restarted.
+
+
+## Staff slice 2 — maintenance start and partial draft saving
+
+The staff home offers `정비 시작` when the configured assignee and active
+MAINTENANCE template are present. Explicit confirmation acknowledges the displayed
+configured assignee; it is not person authentication. No employee selector or
+editable name/date is introduced. A start preflight checks current QR context.
+POST `/submission-drafts/staff/start` uses only the staff QR Bearer credential and
+`{ requestKey, confirmedStaffId }` UUID v4 values. The backend chooses the employee
+snapshot, Seoul date, MAINTENANCE type and start time, and captures the active
+checklist. A strictly validated issued private URL is opened immediately.
+
+`features/staff-drafts` owns staff types, validation, answer normalization,
+unknown-response readers and APIs. Staff entry/start components and hooks remain
+separate from staff draft components, hooks, models and styles. `/draft` first
+reads GET `/submission-drafts/current` and selects a screen only after complete
+staff or guest validation. The selected screen performs its own lifecycle read.
+Existing guest readers and editor/submission logic remain unchanged. For an
+initial 401, existing strict guest receipt recovery preserves completed guest
+private links; a staff receipt never enables a guest editor. Explicit guest
+`?view=submission` remains the existing guest detail/correction flow. Staff draft
+reads and saves do not use submission endpoints or implement staff receipts.
+
+Staff editing renders the immutable draft template, NORMAL/ABNORMAL choices,
+optional abnormal descriptions, urgency and overall note. Required items may be
+unanswered in partial drafts. Explicit `임시 저장` replaces the complete answer
+set via POST `/submission-drafts/save` with the exact last `expectedUpdatedAt`.
+GET current and POST save use only the private draft Bearer credential, never
+staff QR, guest QR, stay token or administrator JWT. Saved/reopened answers come
+from the backend. Saving does not submit or complete maintenance.
+
+Untouched abnormal answers retain existing `repairReported` and `repairNote`
+fields, including when editing other answers, description, urgency or overall
+note. There are no repair controls. Changing to NORMAL or clearing an abnormal
+answer explicitly warns before discarding description, urgency or repair data;
+NORMAL sends the backend-required cleared fields.
+
+Duplicate starts/saves are locked. Ambiguous start responses are not retried:
+repeating a request key cannot recover its lost token. A deliberate new start is
+explained as a separate draft. Assignment/template changes require updated entry
+context and fresh confirmation. Save conflict freezes editing until the user
+explicitly chooses to discard local input and reload saved content. Uncertain
+saves also block writes; current state must be read before further editing.
+A failed reload preserves local input. No success is inferred from a lost reply.
+
+Private credentials remain only in fragments and memory, not browser storage,
+logs, query parameters, cache/React keys or admin state. Explicit link copying
+explains that the shared QR cannot recover an existing draft. Displayed expiry
+comes from the backend (initial staff lifetime is seven days); saves do not renew
+it. Access denial/expiry removes protected editor data. Token changes, refresh,
+unmount and BFCache restoration abort/fence requests; foreground revalidation
+preserves input through transient errors. Link navigation/document unload warn
+about local or unresolved work. The existing BrowserRouter still does not
+intercept same-document Back/Forward globally; save before navigation.
+
+Remaining staff work: photos/uploads, repair controls, final submission and
+receipts, history, staff accounts if approved, PWA/offline, notifications and
+deployment. Backend, schema, dependencies, environment and existing servers are
+unchanged. No migrations, live database mutations, Git staging/commits/pushes or
+deployment are part of this slice.
+
+Verification: TypeScript, Oxlint with no warnings, exact repository Prettier on
+all changed code, production build and diff checks passed. Disposable synthetic
+checks passed: 262 feature/transport/backend-service assertions, 88 editor/model
+lifecycle assertions, 44 draft-role lifecycle assertions, 17 clipboard lifecycle
+assertions, 59 routing/component/guest-compatibility assertions, and 19 start
+lifecycle groups. Backend service/parser checks used in-memory Prisma fixtures;
+no database was accessed or mutated. No repository test files were added.
+
+The production build used temporary sample HTTPS origins and must be rebuilt with
+real origins for deployment. The existing large-bundle warning remains (main
+chunk about 1001 kB minified). Browser/mobile visual, actual QR/HTTP/database,
+clipboard permissions and physical-device acceptance have not been performed.
+Existing servers/ports were not accessed, started or restarted. Manual acceptance
+should cover confirmation/start, partial save/reopen, two-tab conflicts, lost
+responses, assignment/access invalidation and existing guest links.

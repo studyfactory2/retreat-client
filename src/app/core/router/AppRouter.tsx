@@ -3,7 +3,7 @@ import { Route, Routes } from 'react-router-dom';
 import { EntryScreen } from '../../screens/entry/EntryScreen';
 import { NotFoundScreen } from '../../screens/entry/NotFoundScreen';
 import { GuestEntryScreen } from '../../screens/guest/entry';
-import { GuestDraftScreen } from '../../screens/guest/draft';
+import { DraftEntryScreen } from '../../screens/draft/entry';
 import { StaffEntryScreen } from '../../screens/staff/entry';
 import { AppShell } from '../../shared/layout/AppShell/AppShell';
 import { PageState } from '../../shared/ui/PageState/PageState';
@@ -66,7 +66,7 @@ export function AppRouter() {
         path={appRoutes.guestStay}
         element={<GuestEntryScreen kind="stay" />}
       />
-      <Route path={appRoutes.draft} element={<GuestDraftScreen />} />
+      <Route path={appRoutes.draft} element={<DraftEntryScreen />} />
       <Route path={appRoutes.staff} element={<StaffEntryScreen />} />
       <Route element={<AppShell />}>
         <Route path={appRoutes.home} element={<EntryScreen />} />

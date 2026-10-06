@@ -21,6 +21,9 @@ export function useStaffEntry(token: string | null) {
   const scope = useRef<typeof owner | null>(owner);
   const request = useRef<AbortController | null>(null);
   const generation = useRef(0);
+  const rejection = useRef<{ owner: typeof owner; revision: number } | null>(
+    null,
+  );
   const [revision, setRevision] = useState(0);
   const [result, setResult] = useState<{
     owner: typeof owner;
@@ -44,8 +47,31 @@ export function useStaffEntry(token: string | null) {
     setRevision(generation.current);
   }, [owner]);
 
+  const rejectAccess = useCallback(() => {
+    if (scope.current !== owner || owner.token === null) return;
+    request.current?.abort();
+    request.current = null;
+    generation.current += 1;
+    rejection.current = { owner, revision: generation.current };
+    setRevision(generation.current);
+    setResult({
+      owner,
+      revision: generation.current,
+      resource: {
+        status: 'error',
+        kind: 'unavailable',
+        message: '이 직원용 QR을 사용할 수 없습니다. 관리자에게 문의해 주세요.',
+      },
+    });
+  }, [owner]);
+
   useEffect(() => {
-    if (owner.token === null) return;
+    if (
+      owner.token === null ||
+      (rejection.current?.owner === owner &&
+        rejection.current.revision === revision)
+    )
+      return;
     const credential = owner.token;
     const controller = new AbortController();
     request.current = controller;
@@ -130,5 +156,5 @@ export function useStaffEntry(token: string | null) {
     result?.owner === owner && result.revision === revision
       ? result.resource
       : { status: 'loading' };
-  return { resource, refresh };
+  return { resource, refresh, rejectAccess };
 }

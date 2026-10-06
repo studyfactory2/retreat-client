@@ -1,8 +1,15 @@
+import type { ReactNode } from 'react';
 import type { StaffQrContextDto } from '../../../../features/staff-entry/staff-entry.types';
 import { StaffChecklistPreview } from './StaffChecklistPreview';
 import { StaffIcon } from './StaffIcon';
 
-export function StaffHome({ context }: { context: StaffQrContextDto }) {
+export function StaffHome({
+  context,
+  startCard,
+}: {
+  context: StaffQrContextDto;
+  startCard: ReactNode;
+}) {
   const { property, assignedStaff, checklists } = context;
   return (
     <>
@@ -72,11 +79,12 @@ export function StaffHome({ context }: { context: StaffQrContextDto }) {
           </>
         )}
       </section>
+      {startCard}
       <aside className="staff-entry-note">
         <StaffIcon name="notice" />
         <p>
-          이 화면에서는 안내된 항목만 확인할 수 있습니다. 작업 내용은 입력되거나
-          저장되지 않습니다.
+          위 항목은 시작 전 미리보기입니다. 정비 시작 후 발급되는 개인 작성
+          화면에서 답변을 입력하고 임시 저장할 수 있습니다.
         </p>
       </aside>
     </>
