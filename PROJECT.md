@@ -26,7 +26,8 @@ Follow studyfactory-frontend's organization:
   guest photos, final submission, receipts and answer corrections are implemented.
   Staff QR entry and maintenance start live in staff/entry; partial checklist
   editing and saving live in staff/draft. Neutral draft/entry selects the validated
-  guest or staff flow. Staff photos, final submission and receipts are later work.
+  guest or staff flow. Staff draft photo uploads and gallery are implemented;
+  repair controls, final submission and receipts are later work.
 - `src/app/shared/ui` and `shared/layout`: business-neutral reusable components.
 - `src/app/styles`: reset, shared tokens, base styles and their single entrypoint.
 
@@ -1488,3 +1489,90 @@ acceptance. No API endpoints changed. Manually verify two draft links with unsav
 answers: Back/Forward should show the decision dialog, 계속 작성 should preserve
 answers and restore the current link, and 이동하기 should open the chosen link.
 Repeat while saving and after an uncertain save result.
+
+
+## Staff slice 3 — maintenance draft photo uploads and gallery
+
+The existing staff draft screen now includes an optional photo gallery, separate
+from the checklist answer form. Selecting files starts independent uploads;
+checklist edits still require `임시 저장`. Listing, uploading, viewing or removing
+photos never replaces local answers or advances the answer concurrency timestamp.
+No minimum photo count, mandatory area, purpose selector or saved grouping is
+invented. Photo-purpose/area associations remain a final-submission concern.
+
+`features/staff-draft-photos` separates types, file/limit validation, unknown-response
+readers and APIs. All four routes use only the current private draft Bearer:
+POST `/submission-drafts/photos` sends one multipart `file`, with no text fields
+or manual Content-Type; GET the same path loads READY metadata and server limits;
+GET `/:id/view` obtains a short-lived private viewing URL; POST `/:id/remove`
+sends an empty body and validates the returned DELETED identity. No property/stay
+selection or guest/staff QR/admin credential substitution is permitted.
+
+The gallery validates and displays returned limits within the supported contract
+(JPEG/PNG/WebP, up to 10 MiB per image, up to 40 PENDING/READY records). A local
+batch is capped at eight files with two upload workers. File selection checks
+size/type, then the feature inspects image signatures; backend full decoding,
+40-million-pixel/single-frame checks, orientation normalization, JPEG conversion
+and metadata stripping remain authoritative. HEIC/HEIF receives Korean conversion
+guidance. Progress is an honest per-file state/indeterminate indicator, not an
+invented percentage. Invalid selections retain only name/size/error, not File
+objects; successful or dismissed entries release their selected files. The native
+file input stays mounted across foreground/access checks so returning picker
+selections can be staged without losing unsaved answers.
+
+Failures are shown individually. A failure stops further queue starts while any
+already-running second upload settles, then a fresh gallery read reconciles the
+batch. No write is automatically retried. An uncertain upload cannot be directly
+retried or matched by filename: list first, explicitly close that selection, then
+choose a file again only if needed, with a duplicate warning. The list omits
+PENDING records, so absence is not proof that the first upload failed. Unknown
+removal requires readback; a still-visible photo needs deliberate acknowledgement
+before another confirmed removal. Read failures preserve staged files and block
+new writes until state is known.
+
+Visible uploaded thumbnails request signed URLs lazily using IntersectionObserver;
+a larger native dialog shares the current preview, supports Escape/close and
+returns focus. Missing observer support leaves an explicit preview button.
+Failed/expired images offer deliberate reload without retry loops. View URLs are
+rendered directly with no Bearer headers and no referrer; expiry is bounded by
+the draft lifetime. Tokens and signed URLs stay only in mounted memory/fragments,
+never storage, logs, query parameters added by this client, analytics, cache keys
+or React keys. No local object URLs are created. Old-owner image state is hidden
+and requests fenced on draft changes, access suspension, expiry and unmount.
+
+The navigation implementation from `bed1cec` is preserved. Photos register their
+own live pending-work getter alongside the answer guard. Selected files, uploads,
+removals and unresolved outcomes protect Back/Forward, token-fragment changes,
+router navigation and document unload. Staying keeps the accepted editor mounted;
+leaving aborts/fences old operations and releases local selections. Photo failures
+do not reset the answer editor. Photo access denial clears the entire protected
+staff editor and aborts its pending save. Answer conflicts/uncertain saves block
+new photo mutations until resolved. Foreground/BFCache revalidation preserves
+staged work and marks interrupted writes uncertain instead of claiming success.
+
+Guest photo APIs, readers, hooks and UI are unchanged. No backend/schema,
+dependency, environment, migration, live database/storage operation, server
+lifecycle, Git mutation or deployment change belongs to this slice. Remaining
+staff work is repair controls, final submission with photo associations,
+completion receipts and later history. Staff accounts, PWA/offline, notifications
+and deployment remain separate approval scopes.
+
+Verification: TypeScript, warning-free Oxlint, exact repository Prettier on all
+changed code, production build and diff checks passed. Disposable probes passed
+172 photo feature/backend-service assertions, 77 photo queue/lifecycle/composed
+editor assertions, 44 gallery/component integration assertions, 57 independent
+review/guest-photo regression assertions, 125 existing navigation assertions,
+98 staff answer-editor lifecycle assertions, 59 guest routing/compatibility
+assertions, and 15 preview/modal lifecycle groups. Actual attachment/image services
+ran with in-memory Prisma/S3 replacements; component/DOM/history behavior used
+synthetic fixtures, not mounted browser/device acceptance. No repository test
+files or live database/storage mutations were created.
+
+The production build used temporary sample HTTPS origins; deployment must rebuild
+with real origins. The pre-existing bundle warning remains (main chunk about
+1036 kB minified). Existing servers and restricted browser ports were not accessed
+or restarted. Native phone/computer file-picker timing, physical mobile layout,
+real signed-image loading, actual QR/HTTP/Prisma/S3 integration and full browser
+Back/Forward/clipboard behavior still need manual acceptance. Check reopening,
+separate answer/photo saves, previews/expiry, confirmation/cancelled removal,
+unknown upload/removal results, navigation during pending photos and access loss.

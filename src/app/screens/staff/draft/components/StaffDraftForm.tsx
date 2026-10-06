@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { Button } from '../../../../shared/ui/Button/Button';
 import type { useStaffDraft } from '../hooks/use-staff-draft';
 import { changeStaffDraftDetails } from '../model/staff-draft-model';
@@ -11,10 +12,12 @@ export function StaffDraftForm({
   session,
   resource,
   token,
+  photos,
 }: {
   session: DraftSession;
   resource: ReadyResource;
   token: string;
+  photos: ReactNode;
 }) {
   const { draft, answers } = resource;
   const unresolved =
@@ -159,6 +162,7 @@ export function StaffDraftForm({
           </Button>
         </div>
       </form>
+      {photos}
       <StaffDraftLink
         token={token}
         expiresAt={draft.expiresAt}

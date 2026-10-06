@@ -1,0 +1,220 @@
+.staff-photos-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.staff-photos-heading h2 {
+  margin-top: 5px;
+}
+.staff-photos-heading h2 > span {
+  margin-left: 5px;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--color-muted);
+}
+.staff-photos-count {
+  flex-shrink: 0;
+  padding: 7px 10px;
+  border-radius: 24px;
+  background: var(--color-soft);
+  color: var(--color-primary);
+  font-size: 12px;
+  font-weight: 650;
+}
+.staff-photos-intro {
+  margin-top: 16px;
+  color: var(--color-heading);
+  font-size: 14px;
+  line-height: 1.85;
+}
+.staff-photos-separate {
+  margin-top: 12px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: #f1f5fc;
+  font-size: 12px;
+  line-height: 1.9;
+  color: var(--color-muted);
+}
+.staff-photos-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-block: 24px;
+}
+.staff-photos-empty {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  margin-block: 24px;
+  padding: 28px 16px;
+  border: 1px dashed #c5d3ed;
+  border-radius: 14px;
+  background: #f8faff;
+  color: var(--color-muted);
+  text-align: center;
+  font-size: 13px;
+}
+.staff-photos-empty svg {
+  width: 30px;
+  height: 30px;
+  stroke: #7f99c9;
+  stroke-width: 1.5;
+  margin-bottom: 5px;
+}
+.staff-photos-empty span {
+  font-size: 11px;
+  line-height: 1.7;
+}
+.staff-photos-picker {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 52px;
+  border: 1px solid var(--color-primary);
+  border-radius: 12px;
+  background: var(--color-primary);
+  color: white;
+  font-size: 15px;
+  font-weight: 650;
+  overflow: hidden;
+}
+.staff-photos-picker input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+.staff-photos-picker:focus-within {
+  outline: 3px solid #3772e0;
+  outline-offset: 3px;
+}
+.staff-photos-picker[aria-disabled='true'] {
+  opacity: 0.5;
+}
+.staff-photos-picker[aria-disabled='true'] input {
+  cursor: default;
+}
+.staff-photos-help {
+  margin-top: 12px;
+  font-size: 11px;
+  line-height: 1.85;
+  color: var(--color-muted);
+}
+.staff-photos-status {
+  margin-top: 16px;
+  font-size: 13px;
+  line-height: 1.85;
+  color: var(--color-heading);
+}
+.staff-photos-notice {
+  margin-top: 18px;
+  padding: 16px;
+  border: 1px solid #ead4a8;
+  border-radius: 12px;
+  background: #fffaf0;
+  color: #78500e;
+  font-size: 13px;
+  line-height: 1.85;
+}
+.staff-photos-notice > .ui-button {
+  margin-top: 12px;
+}
+.staff-photos-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+.staff-photos-actions .ui-button,
+.staff-photos-queue > .ui-button {
+  min-height: 44px;
+  padding: 9px 12px;
+  font-size: 12px;
+  background: var(--color-soft);
+  color: var(--color-primary);
+}
+.staff-photos-queue {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--color-border);
+}
+.staff-photos-queue h3 {
+  margin-bottom: 14px;
+  font-size: 15px;
+}
+.staff-photos-queue h3 span {
+  margin-left: 8px;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--color-muted);
+}
+.staff-photos-queue ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.staff-photos-queued {
+  padding: 16px;
+  margin-bottom: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: #f8faff;
+}
+.staff-photos-queued strong {
+  display: block;
+  overflow-wrap: anywhere;
+  color: var(--color-heading);
+  font-size: 13px;
+  line-height: 1.7;
+}
+.staff-photos-queued > span {
+  display: block;
+  margin-top: 6px;
+  color: var(--color-muted);
+  font-size: 11px;
+}
+.staff-photos-queued > p {
+  margin-top: 10px;
+  font-size: 12px;
+  line-height: 1.85;
+  color: var(--color-muted);
+}
+.staff-photos-queued progress {
+  display: block;
+  width: 100%;
+  height: 6px;
+  margin-top: 14px;
+  accent-color: var(--color-primary);
+}
+.staff-photos-queued--failed,
+.staff-photos-queued--uncertain,
+.staff-photos-queued--invalid {
+  background: #fffaf2;
+  border-color: #ead4a8;
+}
+.staff-photos-refresh {
+  display: block;
+  margin: 16px auto -8px;
+  min-height: 44px;
+  padding: 8px;
+  border: 0;
+  background: transparent;
+  color: var(--color-muted);
+  font-size: 12px;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  cursor: pointer;
+}
+.staff-photos-refresh:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+@media (max-width: 360px) {
+  .staff-photos-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

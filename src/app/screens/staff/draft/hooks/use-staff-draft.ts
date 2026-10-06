@@ -38,12 +38,7 @@ export type StaffDraftResource =
       answers: StaffDraftAnswers;
       access: 'ready' | 'checking' | 'blocked';
       mutation:
-        | 'idle'
-        | 'saving'
-        | 'saved'
-        | 'error'
-        | 'conflict'
-        | 'uncertain';
+        'idle' | 'saving' | 'saved' | 'error' | 'conflict' | 'uncertain';
       message: string;
     };
 type ReadyDraft = Extract<StaffDraftResource, { status: 'ready' }>;
@@ -359,6 +354,11 @@ export function useStaffDraft(token: string | null) {
   const recheck = useCallback(() => {
     void load(false);
   }, [load]);
+  const rejectAccess = useCallback(() => {
+    if (scope.current !== owner) return;
+    abortRequests();
+    publish(unavailable());
+  }, [abortRequests, owner, publish]);
   const reload = useCallback(() => {
     if (scope.current !== owner || writeRequest.current) return;
     const local = readCurrent();
@@ -469,5 +469,6 @@ export function useStaffDraft(token: string | null) {
     reload,
     recheck,
     hasPendingWork,
+    rejectAccess,
   };
 }

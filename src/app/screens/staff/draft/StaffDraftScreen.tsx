@@ -5,6 +5,7 @@ import { useNavigationGuard } from '../../../core/router/navigation/use-navigati
 import { readPrivateDraftToken } from '../../draft/entry/model/draft-entry-model';
 import { StaffDraftFrame } from './components/StaffDraftFrame';
 import { StaffDraftForm } from './components/StaffDraftForm';
+import { StaffDraftPhotos } from './components/StaffDraftPhotos';
 import { useStaffDraft } from './hooks/use-staff-draft';
 import './styles/staff-draft.css';
 
@@ -38,7 +39,21 @@ export function StaffDraftScreen() {
           <p>잠시만 기다려 주세요.</p>
         </section>
       ) : (
-        <StaffDraftForm session={session} resource={resource} token={token} />
+        <StaffDraftForm
+          session={session}
+          resource={resource}
+          token={token}
+          photos={
+            <StaffDraftPhotos
+              token={token}
+              draftId={resource.draft.id}
+              expiresAt={resource.draft.expiresAt}
+              locked={!session.canEdit}
+              accessReady={resource.access === 'ready'}
+              onAccessRejected={session.rejectAccess}
+            />
+          }
+        />
       )}
     </StaffDraftFrame>
   );

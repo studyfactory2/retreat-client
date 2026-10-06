@@ -32,9 +32,9 @@ export function NavigationLeaveDialog({
     >
       <h2 id={titleId}>작성 화면을 떠날까요?</h2>
       <p id={descriptionId}>
-        저장하지 않은 입력이나 확인하지 못한 저장 결과가 있습니다. 이동하면
-        저장하지 않은 입력은 사라질 수 있습니다. 저장 중이거나 결과를 모르는
-        경우, 다시 열어 저장 상태를 확인해 주세요.
+        저장하지 않은 입력이나 아직 올리지 않은 사진, 처리 중이거나 결과를
+        확인하지 못한 작업이 있습니다. 이동하면 입력과 파일 선택이 사라질 수
+        있습니다. 다시 열 때 체크리스트와 사진의 저장 상태를 확인해 주세요.
       </p>
       <div className="navigation-leave-actions">
         <Button autoFocus disabled={restoring} onClick={onStay}>
