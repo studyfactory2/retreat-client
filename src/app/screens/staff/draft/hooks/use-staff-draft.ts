@@ -38,7 +38,12 @@ export type StaffDraftResource =
       answers: StaffDraftAnswers;
       access: 'ready' | 'checking' | 'blocked';
       mutation:
-        'idle' | 'saving' | 'saved' | 'error' | 'conflict' | 'uncertain';
+        | 'idle'
+        | 'saving'
+        | 'saved'
+        | 'error'
+        | 'conflict'
+        | 'uncertain';
       message: string;
     };
 type ReadyDraft = Extract<StaffDraftResource, { status: 'ready' }>;
@@ -367,16 +372,10 @@ export function useStaffDraft(token: string | null) {
       return;
     void load(true);
   }, [load, owner, readCurrent]);
-  const confirmLeave = useCallback(() => {
-    if (scope.current !== owner) return true;
+  const hasPendingWork = useCallback(() => {
+    if (scope.current !== owner) return false;
     const local = readCurrent();
-    return (
-      local?.status !== 'ready' ||
-      !hasLocalWork(local) ||
-      window.confirm(
-        '저장하지 않은 입력이나 확인하지 못한 저장 결과가 있습니다. 화면을 떠날까요?',
-      )
-    );
+    return local?.status === 'ready' && hasLocalWork(local);
   }, [owner, readCurrent]);
 
   useEffect(() => {
@@ -469,6 +468,6 @@ export function useStaffDraft(token: string | null) {
     save,
     reload,
     recheck,
-    confirmLeave,
+    hasPendingWork,
   };
 }

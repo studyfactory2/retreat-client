@@ -1,5 +1,6 @@
 import { lazy, Suspense } from 'react';
-import { Route, Routes } from 'react-router-dom';
+import { Route } from 'react-router-dom';
+import { NavigationBoundary } from './navigation/NavigationBoundary';
 import { EntryScreen } from '../../screens/entry/EntryScreen';
 import { NotFoundScreen } from '../../screens/entry/NotFoundScreen';
 import { GuestEntryScreen } from '../../screens/guest/entry';
@@ -60,7 +61,7 @@ const ConnectionScreen = import.meta.env.DEV
 
 export function AppRouter() {
   return (
-    <Routes>
+    <NavigationBoundary>
       <Route path={appRoutes.guest} element={<GuestEntryScreen kind="qr" />} />
       <Route
         path={appRoutes.guestStay}
@@ -193,6 +194,6 @@ export function AppRouter() {
           </Route>
         </Route>
       </Route>
-    </Routes>
+    </NavigationBoundary>
   );
 }

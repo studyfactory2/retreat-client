@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Button } from '../../../shared/ui/Button/Button';
+import { useNavigationGuard } from '../../../core/router/navigation/use-navigation-guard';
 import { readPrivateDraftToken } from '../../draft/entry/model/draft-entry-model';
 import { StaffDraftFrame } from './components/StaffDraftFrame';
 import { StaffDraftForm } from './components/StaffDraftForm';
@@ -12,32 +13,8 @@ export function StaffDraftScreen() {
   const token = readPrivateDraftToken(location.hash);
   const session = useStaffDraft(token);
   const main = useRef<HTMLElement>(null);
-  const { resource, confirmLeave } = session;
-  useEffect(() => {
-    const leave = (event: MouseEvent) => {
-      const target =
-        event.target instanceof Element
-          ? event.target.closest('a[href]')
-          : null;
-      if (
-        !target ||
-        event.defaultPrevented ||
-        event.button !== 0 ||
-        event.metaKey ||
-        event.ctrlKey ||
-        event.shiftKey ||
-        event.altKey ||
-        target.getAttribute('target') === '_blank'
-      )
-        return;
-      if (!confirmLeave()) {
-        event.preventDefault();
-        event.stopPropagation();
-      }
-    };
-    document.addEventListener('click', leave, true);
-    return () => document.removeEventListener('click', leave, true);
-  }, [confirmLeave]);
+  const { resource, hasPendingWork } = session;
+  useNavigationGuard(hasPendingWork);
   useEffect(() => {
     main.current?.focus({ preventScroll: true });
   }, [location.hash, resource.status]);

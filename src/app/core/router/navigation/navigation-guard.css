@@ -1,0 +1,37 @@
+.navigation-leave-dialog {
+  width: min(440px, calc(100% - 40px));
+  margin: auto;
+  padding: 28px;
+  border: 1px solid var(--color-border, #dce4f1);
+  border-radius: 20px;
+  background: #fff;
+  color: #17284f;
+  box-shadow: 0 24px 80px rgb(17 35 77 / 20%);
+}
+
+.navigation-leave-dialog::backdrop {
+  background: rgb(13 30 65 / 45%);
+}
+
+.navigation-leave-dialog h2 {
+  margin: 0 0 16px;
+  font-size: 22px;
+}
+
+.navigation-leave-dialog p {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.navigation-leave-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.navigation-leave-actions .ui-button {
+  flex: 1;
+  min-height: 44px;
+}

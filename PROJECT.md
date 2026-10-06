@@ -1440,9 +1440,20 @@ explains that the shared QR cannot recover an existing draft. Displayed expiry
 comes from the backend (initial staff lifetime is seven days); saves do not renew
 it. Access denial/expiry removes protected editor data. Token changes, refresh,
 unmount and BFCache restoration abort/fence requests; foreground revalidation
-preserves input through transient errors. Link navigation/document unload warn
-about local or unresolved work. The existing BrowserRouter still does not
-intercept same-document Back/Forward globally; save before navigation.
+preserves input through transient errors.
+
+Staff drafts register a live pending-work guard above the route tree. The
+accepted route and private credential remain mounted until the user chooses
+계속 작성 or 이동하기, including Back/Forward, token-fragment changes and router
+PUSH/REPLACE navigation. Dirty answers, saves in progress, conflicts and uncertain
+results all require a decision. Document unload keeps the native browser warning.
+BrowserRouter receives a window adapter that synchronously observes its history
+writes without patching the real window/history. Native fragment entries carry
+only numeric positions and random keys in history state; credentials remain in
+the existing URL fragment/memory. Staying traverses back to a known entry; unknown
+or overwritten history positions conservatively restore the accepted URL with
+replacement instead of guessing a traversal direction. New route tokens never
+reach the role selector/editor before leave approval.
 
 Remaining staff work: photos/uploads, repair controls, final submission and
 receipts, history, staff accounts if approved, PWA/offline, notifications and
@@ -1465,3 +1476,15 @@ clipboard permissions and physical-device acceptance have not been performed.
 Existing servers/ports were not accessed, started or restarted. Manual acceptance
 should cover confirmation/start, partial save/reopen, two-tab conflicts, lost
 responses, assignment/access invalidation and existing guest links.
+
+Staff draft navigation follow-up: the accepted route now stays mounted until
+unsaved/pending work is explicitly kept or discarded. The source-matched temporary
+build passed TypeScript, scoped Oxlint, repository Prettier and production build
+checks. Disposable probes passed 326 synthetic assertions: 125 history/navigation,
+98 staff draft lifecycle, 59 guest routing/component compatibility and 44 draft
+role lifecycle. These exercise actual source and installed router history with
+fixtures; they do not establish mounted React/browser/mobile or live backend
+acceptance. No API endpoints changed. Manually verify two draft links with unsaved
+answers: Back/Forward should show the decision dialog, 계속 작성 should preserve
+answers and restore the current link, and 이동하기 should open the chosen link.
+Repeat while saving and after an uncertain save result.
