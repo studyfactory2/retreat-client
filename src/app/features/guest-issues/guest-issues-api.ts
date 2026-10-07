@@ -3,6 +3,7 @@ import { isGuestId } from '../guest-entry/guest-entry-validation';
 import {
   readGuestIssueCategories,
   readGuestIssueReceipt,
+  invalidGuestIssueResponse,
 } from './guest-issues-readers';
 import type {
   GuestIssueCategoryListDto,
@@ -38,7 +39,7 @@ export async function reportGuestIssue(
   if (!isGuestId(expectedPropertyId))
     throw invalidGuestIssueInput('휴양소 정보를 다시 확인해 주세요.');
   const body = prepareGuestIssueReport(input);
-  return readGuestIssueReceipt(
+  const receipt = readGuestIssueReceipt(
     await apiRequest<unknown>('/guest/issues/report', {
       method: 'POST',
       token: qrToken,
@@ -49,9 +50,12 @@ export async function reportGuestIssue(
         guestName: body.guestName,
         title: body.title,
         description: body.description,
+        isUrgent: body.isUrgent,
         photos: body.photos.map(({ id, token }) => ({ id, token })),
       },
     }),
     expectedPropertyId,
   );
+  if (receipt.isUrgent !== body.isUrgent) throw invalidGuestIssueResponse();
+  return receipt;
 }

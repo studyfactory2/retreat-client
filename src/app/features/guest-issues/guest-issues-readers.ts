@@ -65,6 +65,7 @@ export function readGuestIssueReceipt(
     'status',
     'property',
     'receivedAt',
+    'isUrgent',
   ]);
   const property = issueObject(receipt.property, ['id', 'name']);
   if (
@@ -74,7 +75,8 @@ export function readGuestIssueReceipt(
     !isGuestId(property.id) ||
     property.id.toLowerCase() !== expectedPropertyId.toLowerCase() ||
     !isGuestText(property.name, 100) ||
-    !isGuestTimestamp(receipt.receivedAt)
+    !isGuestTimestamp(receipt.receivedAt) ||
+    (receipt.isUrgent !== undefined && typeof receipt.isUrgent !== 'boolean')
   )
     throw invalidGuestIssueResponse();
   // Replays contain the original property label and timestamp. A rename or
@@ -84,5 +86,7 @@ export function readGuestIssueReceipt(
     status: 'RECEIVED',
     property: { id: property.id.toLowerCase(), name: property.name },
     receivedAt: receipt.receivedAt,
+    // Receipts saved before urgency existed represent the original false value.
+    isUrgent: receipt.isUrgent ?? false,
   };
 }

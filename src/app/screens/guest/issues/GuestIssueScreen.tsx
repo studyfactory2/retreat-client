@@ -14,6 +14,7 @@ import { GuestIssueFields } from './components/GuestIssueFields';
 import { GuestIssueReview } from './components/GuestIssueReview';
 import { GuestIssueReceipt } from './components/GuestIssueReceipt';
 import { GuestIssueNotice } from './components/GuestIssueNotice';
+import { GuestManagerContact } from '../components/GuestManagerContact';
 import '../entry/styles/guest-entry.css';
 import './styles/guest-issues.css';
 
@@ -180,6 +181,7 @@ export function GuestIssueScreen() {
             {resource.mode === 'received' && resource.receipt ? (
               <GuestIssueReceipt
                 receipt={resource.receipt}
+                contactPhone={resource.context.property.publicContactPhone}
                 disabled={resource.access !== 'ready'}
                 onHome={goHome}
               />
@@ -215,6 +217,10 @@ export function GuestIssueScreen() {
                           관리자에게 문의해 주세요. 분류가 준비되면 신고를
                           작성할 수 있습니다.
                         </p>
+                        <GuestManagerContact
+                          phone={resource.context.property.publicContactPhone}
+                          disabled={resource.access !== 'ready'}
+                        />
                         <Button
                           className="guest-issue-secondary"
                           disabled={resource.access === 'checking'}

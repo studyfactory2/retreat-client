@@ -1,3 +1,7 @@
+import {
+  PUBLIC_CONTACT_MAX_LENGTH,
+  PUBLIC_CONTACT_HELP,
+} from '../../../../features/property-contact/public-contact';
 import { Button } from '../../../../shared/ui/Button/Button';
 import type {
   PropertyFormErrors,
@@ -115,6 +119,55 @@ export function PropertyForm({
               </p>
               {fieldError('region')}
             </div>
+          </div>
+        </section>
+
+        <section
+          className="property-form__section"
+          aria-labelledby="property-contact-title"
+        >
+          <div className="property-form__section-heading">
+            <h2 id="property-contact-title">이용객 공개 연락처</h2>
+            <p>
+              공용 QR과 개인 이용 링크를 연 이용객에게 표시됩니다. 공개해도 되는
+              관리자 연락처만 입력해 주세요.
+            </p>
+          </div>
+          <div className="property-field">
+            <label htmlFor="property-publicContactPhone">
+              관리자 연락처{' '}
+              <span className="property-field__optional">선택</span>
+            </label>
+            <input
+              id="property-publicContactPhone"
+              name="publicContactPhone"
+              type="tel"
+              maxLength={PUBLIC_CONTACT_MAX_LENGTH}
+              autoComplete="off"
+              placeholder="예: 02-1234-5678"
+              value={values.publicContactPhone}
+              onChange={(event) =>
+                onChange({ ...values, publicContactPhone: event.target.value })
+              }
+              onPaste={(event) => {
+                const pasted = event.clipboardData.getData('text');
+                if (/[\t\r\n]/.test(pasted)) {
+                  event.preventDefault();
+                  onChange({ ...values, publicContactPhone: pasted });
+                }
+              }}
+              aria-invalid={!!errors.publicContactPhone || undefined}
+              aria-describedby={descriptionId(
+                'publicContactPhone',
+                'property-contact-hint',
+              )}
+            />
+            <p className="property-field__hint" id="property-contact-hint">
+              {PUBLIC_CONTACT_HELP} 번호를 지우고 저장하면 이용객에게 더 이상
+              표시되지 않습니다. 담당 직원의 전화번호는 자동으로 공개되지
+              않습니다.
+            </p>
+            {fieldError('publicContactPhone')}
           </div>
         </section>
 

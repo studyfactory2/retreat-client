@@ -50,7 +50,13 @@ export const guestIssueCategoryChangedMessage =
   '신고 분류가 변경되었거나 더 이상 사용할 수 없습니다. 입력과 사진은 보관 중입니다. 현재 분류를 선택하고 내용을 다시 검토해 주세요.';
 
 export function emptyGuestIssueForm(): GuestIssueReportFields {
-  return { categoryId: '', guestName: '', title: '', description: '' };
+  return {
+    categoryId: '',
+    guestName: '',
+    title: '',
+    description: '',
+    isUrgent: false,
+  };
 }
 
 export function readyGuestIssueReport(
@@ -87,7 +93,7 @@ export function unavailableGuestIssueReport(): GuestIssueReportResource {
 export function dirtyGuestIssueReport(local: ReadyGuestIssueReport): boolean {
   return (
     local.mode !== 'received' &&
-    Object.values(local.form).some((value) => value !== '')
+    Object.values(local.form).some((value) => value !== '' && value !== false)
   );
 }
 

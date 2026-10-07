@@ -1,6 +1,7 @@
 import type { ReactNode, RefObject } from 'react';
 import { Link, type To } from 'react-router-dom';
 import type { GuestView } from '../model/guest-entry-model';
+import { isPublicContactTel } from '../../../../features/property-contact/public-contact';
 import { GuestIcon } from './GuestIcon';
 import '../styles/guest-home.css';
 
@@ -35,6 +36,9 @@ export function GuestFrame({
         if (
           event.target instanceof Element &&
           event.target.closest('a') &&
+          !isPublicContactTel(
+            event.target.closest('a')?.getAttribute('href'),
+          ) &&
           confirmNavigation &&
           !confirmNavigation(
             event.target.closest('a')?.getAttribute('href') ?? '',

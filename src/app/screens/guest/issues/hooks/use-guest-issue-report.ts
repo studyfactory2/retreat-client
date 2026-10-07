@@ -230,7 +230,10 @@ export function useGuestIssueReport(token: string | null) {
     [editable, publish],
   );
   const setField = useCallback(
-    (field: keyof GuestIssueReportFields, value: string) => {
+    <Field extends keyof GuestIssueReportFields>(
+      field: Field,
+      value: GuestIssueReportFields[Field],
+    ) => {
       edit((form) => ({ ...form, [field]: value }));
     },
     [edit],

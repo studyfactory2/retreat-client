@@ -2,6 +2,7 @@ export interface AdminPropertyDto {
   id: string;
   name: string;
   region: string | null;
+  publicContactPhone: string | null;
   isActive: boolean;
   staffUserId: string | null;
   vehicleRegistrationEnabled: boolean;
@@ -32,12 +33,14 @@ export interface GetAdminPropertiesInput {
 export interface CreateAdminPropertyInput {
   name: string;
   region?: string | null;
+  publicContactPhone?: string | null;
   vehicleRegistrationEnabled?: boolean;
 }
 
 export interface UpdateAdminPropertyInput {
   name?: string;
   region?: string | null;
+  publicContactPhone?: string | null;
   vehicleRegistrationEnabled?: boolean;
   isActive?: boolean;
 }

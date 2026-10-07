@@ -1,13 +1,16 @@
 import type { GuestIssueReceiptDto } from '../../../../features/guest-issues/guest-issues.types';
 import { Button } from '../../../../shared/ui/Button/Button';
 import { formatGuestStayTimestamp } from '../../entry/model/guest-entry-model';
+import { GuestManagerContact } from '../../components/GuestManagerContact';
 
 export function GuestIssueReceipt({
   receipt,
+  contactPhone,
   disabled,
   onHome,
 }: {
   receipt: GuestIssueReceiptDto;
+  contactPhone: string | null;
   disabled: boolean;
   onHome: () => void;
 }) {
@@ -35,6 +38,10 @@ export function GuestIssueReceipt({
           </dd>
         </div>
         <div>
+          <dt>긴급 여부</dt>
+          <dd>{receipt.isUrgent ? '긴급' : '일반'}</dd>
+        </div>
+        <div>
           <dt>접수 번호</dt>
           <dd className="guest-issue-receipt__id">{receipt.issueId}</dd>
         </div>
@@ -49,6 +56,7 @@ export function GuestIssueReceipt({
           필요하면 접수 번호를 보관해 주세요.
         </p>
       </div>
+      <GuestManagerContact phone={contactPhone} disabled={disabled} />
       <Button disabled={disabled} onClick={onHome}>
         휴양소 홈으로
       </Button>

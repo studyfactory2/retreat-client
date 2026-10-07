@@ -57,6 +57,7 @@ export function usePropertySave(
         for (const field of [
           'name',
           'region',
+          'publicContactPhone',
           'isActive',
           'vehicleRegistrationEnabled',
         ] as const) {

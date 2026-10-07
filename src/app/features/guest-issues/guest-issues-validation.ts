@@ -93,6 +93,7 @@ export function prepareGuestIssueReport(
     'guestName',
     'title',
     'description',
+    'isUrgent',
     'photos',
   ]);
   if (!isGuestId(draft.requestKey))
@@ -102,6 +103,8 @@ export function prepareGuestIssueReport(
     );
   if (!isGuestId(draft.categoryId))
     throw invalidGuestIssueInput('문제 분류를 선택해 주세요.', 'categoryId');
+  if (draft.isUrgent !== undefined && typeof draft.isUrgent !== 'boolean')
+    throw invalidGuestIssueInput('긴급 여부를 확인해 주세요.', 'isUrgent');
   const guestName = reportText(
     draft.guestName,
     'guestName',
@@ -161,6 +164,7 @@ export function prepareGuestIssueReport(
     guestName,
     title,
     description,
+    isUrgent: draft.isUrgent ?? false,
     photos,
   });
 }

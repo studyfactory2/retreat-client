@@ -1,3 +1,7 @@
+import {
+  readPublicContactPhone,
+  requirePublicContactInput,
+} from '../property-contact/public-contact';
 import { apiRequest } from '../../core/api/api-client';
 import { ApiRequestError } from '../../core/api/api-error';
 import type {
@@ -94,6 +98,10 @@ export function readAdminProperty(
     id: value.id.toLowerCase(),
     name: value.name,
     region: value.region,
+    publicContactPhone: readPublicContactPhone(
+      value.publicContactPhone,
+      invalidResponse,
+    ),
     isActive: value.isActive,
     staffUserId: value.staffUserId?.toLowerCase() ?? null,
     vehicleRegistrationEnabled: value.vehicleRegistrationEnabled,
@@ -149,11 +157,22 @@ function readPage(
 function requireSavedFields(
   property: AdminPropertyDto,
   input: CreateAdminPropertyInput | UpdateAdminPropertyInput,
+  response: unknown,
 ) {
+  // Legacy GET responses may omit this field, but an explicit write needs an
+  // acknowledgement. Omission cannot prove that clearing the number succeeded.
+  if (
+    input.publicContactPhone !== undefined &&
+    (!isRecord(response) || response.publicContactPhone === undefined)
+  )
+    throw invalidResponse();
   if (
     (input.name !== undefined && property.name !== input.name.trim()) ||
     (input.region !== undefined &&
       property.region !== (input.region?.trim() || null)) ||
+    (input.publicContactPhone !== undefined &&
+      property.publicContactPhone !==
+        requirePublicContactInput(input.publicContactPhone)) ||
     (input.vehicleRegistrationEnabled !== undefined &&
       property.vehicleRegistrationEnabled !== input.vehicleRegistrationEnabled)
   )
@@ -218,6 +237,13 @@ export async function createAdminProperty(
     body: {
       name: input.name,
       ...(input.region === undefined ? {} : { region: input.region }),
+      ...(input.publicContactPhone === undefined
+        ? {}
+        : {
+            publicContactPhone: requirePublicContactInput(
+              input.publicContactPhone,
+            ),
+          }),
       ...(input.vehicleRegistrationEnabled === undefined
         ? {}
         : { vehicleRegistrationEnabled: input.vehicleRegistrationEnabled }),
@@ -228,11 +254,13 @@ export async function createAdminProperty(
     !property.isActive ||
     property.staffUserId !== null ||
     (input.region === undefined && property.region !== null) ||
+    (input.publicContactPhone === undefined &&
+      property.publicContactPhone !== null) ||
     (input.vehicleRegistrationEnabled === undefined &&
       property.vehicleRegistrationEnabled)
   )
     throw invalidResponse();
-  requireSavedFields(property, input);
+  requireSavedFields(property, input, value);
   return property;
 }
 
@@ -252,6 +280,13 @@ export async function updateAdminProperty(
       body: {
         ...(input.name === undefined ? {} : { name: input.name }),
         ...(input.region === undefined ? {} : { region: input.region }),
+        ...(input.publicContactPhone === undefined
+          ? {}
+          : {
+              publicContactPhone: requirePublicContactInput(
+                input.publicContactPhone,
+              ),
+            }),
         ...(input.vehicleRegistrationEnabled === undefined
           ? {}
           : { vehicleRegistrationEnabled: input.vehicleRegistrationEnabled }),
@@ -262,6 +297,6 @@ export async function updateAdminProperty(
   const property = readAdminProperty(value, propertyId);
   if (input.isActive !== undefined && property.isActive !== input.isActive)
     throw invalidResponse();
-  requireSavedFields(property, input);
+  requireSavedFields(property, input, value);
   return property;
 }

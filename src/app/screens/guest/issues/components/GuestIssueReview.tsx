@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { ReadyGuestIssueReport } from '../model/guest-issue-report-model';
 import { Button } from '../../../../shared/ui/Button/Button';
+import { GuestManagerContact } from '../../components/GuestManagerContact';
 
 export function GuestIssueReview({
   resource,
@@ -35,6 +36,10 @@ export function GuestIssueReview({
           <dd>{resource.reviewCategory?.name ?? '분류 확인 필요'}</dd>
         </div>
         <div>
+          <dt>긴급 여부</dt>
+          <dd>{body.isUrgent ? '긴급' : '일반'}</dd>
+        </div>
+        <div>
           <dt>이름</dt>
           <dd>{body.guestName}</dd>
         </div>
@@ -56,10 +61,14 @@ export function GuestIssueReview({
       <div className="guest-issue-note">
         <p>접수 후에는 이 화면에서 신고 내용이나 사진을 수정할 수 없습니다.</p>
         <p>
-          체크리스트와 별도로 접수되는 신고입니다. 긴급한 도움이 필요하면
+          긴급 표시는 별도 알림을 보내지 않습니다. 바로 도움이 필요하면
           관리자에게 직접 연락해 주세요.
         </p>
       </div>
+      <GuestManagerContact
+        phone={resource.context.property.publicContactPhone}
+        disabled={resource.access !== 'ready'}
+      />
       {!resource.attempt && (
         <>
           <label className="guest-issue-confirm">

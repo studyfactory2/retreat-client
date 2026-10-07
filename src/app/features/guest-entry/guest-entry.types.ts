@@ -6,6 +6,10 @@ export interface GuestPropertyDto {
   region: string | null;
 }
 
+export interface GuestPublicPropertyDto extends GuestPropertyDto {
+  publicContactPhone: string | null;
+}
+
 export interface GuestChecklistDefinition {
   schemaVersion: 1;
   sections: {
@@ -30,7 +34,7 @@ export interface GuestChecklistDto {
 
 export interface GuestQrContextDto {
   flow: 'GUEST';
-  property: GuestPropertyDto;
+  property: GuestPublicPropertyDto;
   checklists: GuestChecklistDto[];
 }
 
@@ -40,7 +44,7 @@ export interface GuestStayContextDto {
   checkInAt: string;
   checkOutAt: string;
   expiresAt: string;
-  property: GuestPropertyDto & { vehicleRegistrationEnabled: boolean };
+  property: GuestPublicPropertyDto & { vehicleRegistrationEnabled: boolean };
   checklists: GuestChecklistDto[];
 }
 

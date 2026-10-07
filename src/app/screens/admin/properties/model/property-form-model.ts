@@ -1,3 +1,8 @@
+import {
+  isPublicContactPhone,
+  normalizePublicContactPhone,
+  PUBLIC_CONTACT_HELP,
+} from '../../../../features/property-contact/public-contact';
 import { ApiRequestError } from '../../../../core/api/api-error';
 import type {
   AdminPropertyDto,
@@ -8,6 +13,7 @@ import type {
 export interface PropertyFormValues {
   name: string;
   region: string;
+  publicContactPhone: string;
   vehicleRegistrationEnabled: boolean;
   isActive: boolean;
 }
@@ -26,6 +32,7 @@ export function createPropertyFormValues(
   return {
     name: property?.name ?? '',
     region: property?.region ?? '',
+    publicContactPhone: property?.publicContactPhone ?? '',
     vehicleRegistrationEnabled: property?.vehicleRegistrationEnabled ?? false,
     isActive: property?.isActive ?? true,
   };
@@ -40,6 +47,9 @@ export function validatePropertyForm(
     errors.name = '휴양소 이름은 100자 이하여야 합니다.';
   if ([...values.region.trim()].length > 100)
     errors.region = '지역은 100자 이하여야 합니다.';
+  const contact = normalizePublicContactPhone(values.publicContactPhone);
+  if (contact !== null && !isPublicContactPhone(contact))
+    errors.publicContactPhone = PUBLIC_CONTACT_HELP;
   if (typeof values.vehicleRegistrationEnabled !== 'boolean')
     errors.vehicleRegistrationEnabled = '차량 등록 사용 여부를 선택해 주세요.';
   if (typeof values.isActive !== 'boolean')
@@ -68,6 +78,7 @@ export function buildCreatePropertyInput(
   return {
     name: values.name.trim(),
     region: nullableText(values.region),
+    publicContactPhone: normalizePublicContactPhone(values.publicContactPhone),
     vehicleRegistrationEnabled: values.vehicleRegistrationEnabled,
   };
 }
@@ -82,6 +93,11 @@ export function buildUpdatePropertyInput(
     changes.name = values.name.trim();
   const region = nullableText(values.region);
   if (region !== nullableText(original.region ?? '')) changes.region = region;
+  const publicContactPhone = normalizePublicContactPhone(
+    values.publicContactPhone,
+  );
+  if (publicContactPhone !== original.publicContactPhone)
+    changes.publicContactPhone = publicContactPhone;
   if (values.vehicleRegistrationEnabled !== original.vehicleRegistrationEnabled)
     changes.vehicleRegistrationEnabled = values.vehicleRegistrationEnabled;
   if (values.isActive !== original.isActive) changes.isActive = values.isActive;

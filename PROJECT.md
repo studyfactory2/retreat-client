@@ -1685,3 +1685,52 @@ screenshots. No repository test files were added. The pre-existing large-bundle
 warning remains. The build used example HTTPS origins and must be rebuilt with
 production origins at deployment. All backend source and staff screens remain
 unchanged; Git staging/commits, environment files and services remain user-owned.
+
+## Redesign slice 2 — public manager contact and standalone report urgency
+
+Property settings now edit the dedicated nullable publicContactPhone through the
+existing administrator property APIs. The Korean form explicitly explains guest
+visibility. A blank value sends null to clear the number; unchanged fields are
+omitted. Same-field concurrent property updates retain the existing last-write-wins
+contract; no revision field or automatic retry was added. An explicit contact
+write requires the returned field and expected value before showing success.
+Missing or contradictory acknowledgements use the existing uncertain-save state.
+
+features/property-contact owns display-number validation and safe tel construction.
+Numbers use 7–15 ASCII digits with an optional leading + and single ordinary-space
+or hyphen separators, up to 32 display characters. Only outer ordinary spaces are
+trimmed; controls, markup and unsupported punctuation are rejected. This validates
+format, not ownership or reachability. The server enforces the same rules.
+
+GET /qr/guest and GET /guest/stays/current add only the configured public contact
+to their authorized property context. Absent fields from older responses mean
+unconfigured; malformed explicit values fail response validation. Staff phone
+numbers are never a fallback. Both home variants and standalone-report review,
+receipt and unavailable-category guidance reuse GuestManagerContact. An absent
+number shows 등록된 연락처가 없습니다. without a call action. Pending report
+access disables the call link; rejected access removes the protected context.
+GuestFrame permits only validated tel links through its internal-route guard;
+all other route and document-unload protections remain unchanged.
+
+Standalone QR reports add the optional 긴급한 문제예요 checkbox, initially false.
+The flag participates in validation, dirty state, immutable review, the exact
+submission/retry body, and the receipt. Backend omission and legacy receipt
+omission mean false; explicit non-booleans fail. A receipt contradicting the
+requested urgency is treated as an uncertain result. Existing photo claims,
+cancellation, credential isolation and duplicate-request handling remain intact.
+The existing administrator urgency readers, badges and filters require no UI
+changes. Personal stay links do not gain standalone report authorization.
+Urgency sets a priority flag only; it sends no notification and places no call.
+
+Verification: frontend typecheck, Oxlint, changed-source exact Prettier and a
+production build passed in an isolated source/dependency copy. Temporary probes
+cover contact validation/DTOs/services, form/API reads and writes, urgency/replay,
+access fencing, photo preservation and actual administrator readers/components.
+These are synthetic checks using mocked transport/database and React rendering,
+not authenticated HTTP/PostgreSQL, interactive browser or phone-dialer acceptance.
+The browser approval review rejected opening localhost:5175 because of the earlier
+port restriction; mobile/desktop interaction and visual verification remain open.
+The pre-existing large-bundle warning remains. Build used example HTTPS origins.
+The backend migration file is supplied but not applied; apply it and regenerate
+the backend Prisma client before live acceptance. No staff screens, dependencies,
+environment files, permanent test files or service lifecycle were changed.

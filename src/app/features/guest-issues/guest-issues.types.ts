@@ -18,6 +18,7 @@ export interface GuestIssueReceiptDto {
   status: 'RECEIVED';
   property: { id: string; name: string };
   receivedAt: string;
+  isUrgent: boolean;
 }
 
 export interface GuestIssuePhotoClaim {
@@ -30,6 +31,7 @@ export interface GuestIssueReportFields {
   guestName: string;
   title: string;
   description: string;
+  isUrgent: boolean;
 }
 
 export interface GuestIssueReportInput {
@@ -38,6 +40,7 @@ export interface GuestIssueReportInput {
   guestName: string;
   title: string;
   description: string | null;
+  isUrgent: boolean;
   photos: GuestIssuePhotoClaim[];
 }
 
@@ -47,6 +50,7 @@ export interface GuestIssueReportDraft {
   guestName: string;
   title: string;
   description?: string | null;
+  isUrgent?: boolean;
   photos?: GuestIssuePhotoClaim[];
 }
 

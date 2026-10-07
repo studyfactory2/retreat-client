@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { Link, type To } from 'react-router-dom';
 import type { GuestEntryContext } from '../../../../features/guest-entry/guest-entry.types';
+import { GuestManagerContact } from '../../components/GuestManagerContact';
 import { GuestHomeHeader } from './GuestHomeHeader';
 import { GuestHomeChecklists } from './GuestHomeChecklists';
 import { GuestIcon } from './GuestIcon';
@@ -52,6 +53,7 @@ export function GuestHome({
           </Link>
         )}
       </section>
+      <GuestManagerContact phone={entry.context.property.publicContactPhone} />
       {entry.kind === 'stay' &&
         entry.context.property.vehicleRegistrationEnabled &&
         vehicleCard}

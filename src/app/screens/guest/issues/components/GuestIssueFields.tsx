@@ -100,6 +100,23 @@ export function GuestIssueFields({
           최대 2,000자 · 비밀번호 등 민감한 정보는 적지 마세요.
         </p>
       </div>
+      <label className="guest-issue-urgency">
+        <input
+          type="checkbox"
+          checked={form.isUrgent}
+          disabled={disabled}
+          aria-describedby="issue-urgency-help"
+          onChange={(event) =>
+            edit((current) => ({ ...current, isUrgent: event.target.checked }))
+          }
+        />
+        <span>
+          <strong>긴급한 문제예요</strong>
+          <small id="issue-urgency-help">
+            빠른 확인이 필요한 문제라면 선택해 주세요.
+          </small>
+        </span>
+      </label>
     </section>
   );
 }

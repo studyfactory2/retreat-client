@@ -1,5 +1,7 @@
+import { readPublicContactPhone } from '../property-contact/public-contact';
 import type {
   GuestPropertyDto,
+  GuestPublicPropertyDto,
   GuestPropertyGuideDto,
   GuestQrContextDto,
   GuestStayContextDto,
@@ -29,12 +31,23 @@ function readGuestProperty(value: unknown): GuestPropertyDto {
   };
 }
 
+function readGuestPublicProperty(value: unknown): GuestPublicPropertyDto {
+  const property = readGuestObject(value);
+  return {
+    ...readGuestProperty(property),
+    publicContactPhone: readPublicContactPhone(
+      property.publicContactPhone,
+      invalidGuestEntryResponse,
+    ),
+  };
+}
+
 export function readGuestQrContext(value: unknown): GuestQrContextDto {
   const context = readGuestObject(value);
   if (context.flow !== 'GUEST') throw invalidGuestEntryResponse();
   return {
     flow: 'GUEST',
-    property: readGuestProperty(context.property),
+    property: readGuestPublicProperty(context.property),
     checklists: readGuestChecklists(context.checklists),
   };
 }
@@ -49,7 +62,8 @@ export function readGuestStayContext(value: unknown): GuestStayContextDto {
     !isGuestTimestamp(context.checkOutAt) ||
     !isGuestTimestamp(context.expiresAt) ||
     Date.parse(context.checkInAt) >= Date.parse(context.checkOutAt) ||
-    Date.parse(context.expiresAt) !== Date.parse(context.checkOutAt) + 7 * 86_400_000 ||
+    Date.parse(context.expiresAt) !==
+      Date.parse(context.checkOutAt) + 7 * 86_400_000 ||
     typeof property.vehicleRegistrationEnabled !== 'boolean'
   )
     throw invalidGuestEntryResponse();
@@ -62,7 +76,7 @@ export function readGuestStayContext(value: unknown): GuestStayContextDto {
     checkOutAt: context.checkOutAt,
     expiresAt: context.expiresAt,
     property: {
-      ...readGuestProperty(property),
+      ...readGuestPublicProperty(property),
       vehicleRegistrationEnabled: property.vehicleRegistrationEnabled,
     },
     checklists: readGuestChecklists(context.checklists),

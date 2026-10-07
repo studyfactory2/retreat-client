@@ -233,6 +233,42 @@
   accent-color: var(--color-primary);
   flex-shrink: 0;
 }
+.guest-issue-urgency {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px;
+  margin-top: 20px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: var(--color-soft);
+  cursor: pointer;
+}
+.guest-issue-urgency input {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  margin: 2px 0 0;
+  accent-color: var(--color-primary);
+}
+.guest-issue-urgency strong,
+.guest-issue-urgency small {
+  display: block;
+  line-height: 1.7;
+}
+.guest-issue-urgency strong {
+  color: var(--color-heading);
+  font-size: 14px;
+  font-weight: 600;
+}
+.guest-issue-urgency small {
+  color: var(--color-muted);
+  font-size: 12px;
+  margin-top: 2px;
+}
+.guest-issues .guest-manager-contact {
+  margin-top: 16px;
+}
 .guest-issue-receipt__mark {
   display: grid;
   place-items: center;
