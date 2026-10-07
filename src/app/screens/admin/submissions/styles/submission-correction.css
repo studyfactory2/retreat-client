@@ -1,11 +1,12 @@
 .submission-correction {
-  padding: 20px;
+  padding: 18px;
+  font-size: 14px;
 }
 .submission-correction form,
 .submission-correction-fields,
 .submission-correction-review {
   display: grid;
-  gap: 18px;
+  gap: 14px;
   min-width: 0;
 }
 .submission-correction-section {
@@ -18,7 +19,7 @@
 }
 .submission-correction-item {
   margin: 0;
-  padding: 14px;
+  padding: 12px;
   min-width: 0;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
@@ -44,8 +45,8 @@
   gap: 8px;
 }
 .submission-correction-choices button {
-  min-height: 42px;
-  padding: 8px 16px;
+  min-height: 44px;
+  padding: 8px 12px;
   border: 1px solid var(--color-border);
   border-radius: 7px;
   background: var(--color-surface);
@@ -121,7 +122,7 @@
 .submission-correction-change {
   border: 1px solid var(--color-border);
   border-radius: 8px;
-  padding: 14px;
+  padding: 12px;
   min-width: 0;
 }
 .submission-correction-change h4 small {
@@ -149,7 +150,7 @@
   font-size: 0.78rem;
 }
 .submission-correction-consequence {
-  padding: 14px;
+  padding: 12px;
   border: 1px solid #e4cda4;
   background: #fffbf2;
   border-radius: 8px;
@@ -168,7 +169,7 @@
   color: var(--color-muted);
 }
 .submission-correction-message {
-  padding: 14px;
+  padding: 12px;
   background: var(--color-soft);
   border-radius: 8px;
   line-height: 1.6;
@@ -188,6 +189,9 @@
   }
   .submission-correction-compare {
     grid-template-columns: minmax(0, 1fr);
+  }
+  .submission-correction textarea {
+    font-size: 16px;
   }
   .submission-correction .submission-detail-actions > button {
     flex: 1 1 140px;

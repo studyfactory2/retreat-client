@@ -68,10 +68,9 @@ function HistoryWorkspace({
     >
       <div className="submission-detail-section-heading">
         <div>
-          <p className="submission-detail-eyebrow">SAVED HISTORY</p>
-          <h2 id="submission-history-heading">제출 이력</h2>
+          <h2 id="submission-history-heading">버전별 기록</h2>
           <p className="submission-detail-caption">
-            버전별로 저장된 전체 내용과 첨부 사진을 확인합니다.
+            저장 당시 내용과 사진을 확인하세요.
           </p>
         </div>
         <Button

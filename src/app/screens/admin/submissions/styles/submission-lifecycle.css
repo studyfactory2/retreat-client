@@ -1,5 +1,6 @@
 .submission-lifecycle {
-  padding: 20px;
+  padding: 18px;
+  font-size: 14px;
 }
 .submission-lifecycle--cancel {
   border-color: #dfb8bf;
@@ -15,7 +16,7 @@
 .submission-lifecycle form,
 .submission-lifecycle-confirmation {
   display: grid;
-  gap: 14px;
+  gap: 12px;
   min-width: 0;
 }
 .submission-lifecycle p {
@@ -100,6 +101,9 @@
 @media (max-width: 560px) {
   .submission-lifecycle {
     padding: 16px;
+  }
+  .submission-lifecycle textarea {
+    font-size: 16px;
   }
   .submission-lifecycle .submission-detail-actions > button {
     flex: 1 1 140px;

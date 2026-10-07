@@ -76,9 +76,8 @@ function SubmissionListWorkspace({
     <div className="admin-submissions">
       <header className="submission-heading">
         <div>
-          <p className="submission-heading__eyebrow">운영 기록</p>
-          <h1>체크리스트 기록</h1>
-          <p>현재 저장된 입실·퇴실·정비 기록을 확인하세요.</p>
+          <h1>제출 기록</h1>
+          <p>입실·퇴실·정비 체크리스트를 확인하세요.</p>
         </div>
         <Button
           className="admin-button-secondary"
@@ -95,7 +94,7 @@ function SubmissionListWorkspace({
         <div className="submission-linked-filter">
           <div>
             <strong>연결된 이용 일정의 기록</strong>
-            <p>선택한 일정에 연결된 기록만 조회하고 있습니다.</p>
+            <p>선택한 일정에 연결된 기록만 표시합니다.</p>
           </div>
           <Button
             className="admin-button-secondary"
@@ -143,14 +142,14 @@ function SubmissionListWorkspace({
       ) : resource.status === 'loading' || correctedPage !== null ? (
         <div role="status">
           <PageState
-            title="체크리스트 기록을 불러오는 중"
+            title="제출 기록을 불러오는 중"
             description="조회 조건에 맞는 기록을 확인하고 있습니다."
           />
         </div>
       ) : resource.status === 'error' ? (
         <div role="alert">
           <PageState
-            title="체크리스트 기록을 불러오지 못했습니다"
+            title="제출 기록을 불러오지 못했습니다"
             description={resource.message}
           >
             <Button onClick={refresh}>다시 불러오기</Button>
@@ -164,7 +163,7 @@ function SubmissionListWorkspace({
               <strong>{resource.data.total.toLocaleString('ko-KR')}건</strong>
             </p>
             <span>
-              이상 응답은 체크리스트 답변 기준이며, 현재 처리 중인 문제 수와
+              이상 응답 수는 체크리스트 기준이며, 현재 처리 중인 문제 수와
               다릅니다.
             </span>
           </div>
@@ -199,7 +198,7 @@ function SubmissionListWorkspace({
           {resource.data.totalPages > 1 && (
             <nav
               className="submission-pagination"
-              aria-label="체크리스트 기록 페이지"
+              aria-label="제출 기록 페이지"
             >
               <Button
                 className="admin-button-secondary"

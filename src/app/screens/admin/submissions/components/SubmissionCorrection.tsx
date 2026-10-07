@@ -84,7 +84,6 @@ export function SubmissionCorrection({
     >
       <div className="submission-detail-section-heading">
         <div>
-          <p className="submission-detail-eyebrow">관리자 정정</p>
           <h2 ref={heading} id={headingId} tabIndex={-1}>
             제출 내용 정정
           </h2>

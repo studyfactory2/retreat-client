@@ -113,16 +113,15 @@ export function SubmissionStayLink({
     >
       <div className="submission-detail-section-heading">
         <div>
-          <p className="submission-detail-eyebrow">이용 일정 연결</p>
-          <h2 id="submission-stay-title">체크리스트와 일정 확인</h2>
+          <h2 id="submission-stay-title">이용 일정 연결</h2>
         </div>
         <span className="submission-detail-badge">
           {record.stayId ? '연결됨' : '연결되지 않음'}
         </span>
       </div>
       <p className="submission-stay-intro">
-        작성자가 남긴 정보와 이용 일정을 비교해 연결하세요. 답변과 사진은 그대로
-        보존되며, 연결 변경 사유는 이력에 남습니다.
+        작성자 정보와 일정을 비교해 연결하세요. 답변·사진은 보존되고 변경 사유가
+        이력에 남습니다.
       </p>
       {record.stayId && (
         <p>

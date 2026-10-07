@@ -53,7 +53,7 @@ export function SubmissionListFilters({
       className="submission-filters"
       noValidate
       ref={form}
-      aria-label="체크리스트 기록 조회 조건"
+      aria-label="제출 기록 조회 조건"
       onSubmit={(event) => {
         event.preventDefault();
         apply();
@@ -61,33 +61,35 @@ export function SubmissionListFilters({
     >
       <fieldset className="submission-filters__types">
         <legend>기록 유형</legend>
-        {(['ALL', 'CHECK_IN', 'CHECK_OUT', 'MAINTENANCE'] as const).map(
-          (type) => (
-            <label
-              key={type}
-              className={(values.type ?? 'ALL') === type ? 'is-selected' : ''}
-            >
-              <input
-                type="radio"
-                name="submission-type"
-                value={type}
-                checked={(values.type ?? 'ALL') === type}
-                onChange={() =>
-                  setValues((current) => ({
-                    ...current,
-                    type: type === 'ALL' ? undefined : type,
-                  }))
-                }
-              />
-              <span>
-                {type === 'ALL' ? '전체 기록' : submissionTypeLabel[type]}
-              </span>
-            </label>
-          ),
-        )}
+        <div>
+          {(['ALL', 'CHECK_IN', 'CHECK_OUT', 'MAINTENANCE'] as const).map(
+            (type) => (
+              <label
+                key={type}
+                className={(values.type ?? 'ALL') === type ? 'is-selected' : ''}
+              >
+                <input
+                  type="radio"
+                  name="submission-type"
+                  value={type}
+                  checked={(values.type ?? 'ALL') === type}
+                  onChange={() =>
+                    setValues((current) => ({
+                      ...current,
+                      type: type === 'ALL' ? undefined : type,
+                    }))
+                  }
+                />
+                <span>
+                  {type === 'ALL' ? '전체' : submissionTypeLabel[type]}
+                </span>
+              </label>
+            ),
+          )}
+        </div>
       </fieldset>
       <div className="submission-filters__fields">
-        <div className="submission-filter-field">
+        <div className="submission-filter-field submission-filter-field--property">
           <label htmlFor="submission-property">휴양소</label>
           <select
             id="submission-property"
@@ -197,31 +199,34 @@ export function SubmissionListFilters({
             )}
           </div>
         ))}
-        <Button type="submit">조회</Button>
-        <Button
-          className="admin-button-secondary"
-          onClick={() => {
-            const reset = { page: 1, stayId: input.stayId };
-            setValues(reset);
-            setErrors({});
-            onApply(reset);
-          }}
-        >
-          조건 초기화
-        </Button>
       </div>
-      <p id="submission-date-hint" className="submission-filters__hint">
-        날짜는 기록의 방문일 기준입니다. 제출 일시와는 다를 수 있습니다.
-      </p>
-      <p id="submission-link-hint" className="submission-filters__hint">
-        미연결은 휴양소 QR로 제출된 입실·퇴실 기록 중 일정이 연결되지 않은
-        기록입니다.
-      </p>
-      {propertiesLoading && (
-        <p className="submission-filters__hint" role="status">
-          휴양소 선택 목록을 불러오고 있습니다.
-        </p>
-      )}
+      <div className="submission-filters__footer">
+        <div className="submission-filters__hints">
+          <p id="submission-date-hint">
+            날짜는 방문일 기준이며, 제출 일시와 다를 수 있습니다.
+          </p>
+          <p id="submission-link-hint">
+            미연결: 휴양소 QR로 제출한 입실·퇴실 기록 중 연결된 일정이 없는 기록
+          </p>
+          {propertiesLoading && (
+            <p role="status">휴양소 선택 목록을 불러오고 있습니다.</p>
+          )}
+        </div>
+        <div className="submission-filters__actions">
+          <Button type="submit">조회</Button>
+          <Button
+            className="admin-button-secondary"
+            onClick={() => {
+              const reset = { page: 1, stayId: input.stayId };
+              setValues(reset);
+              setErrors({});
+              onApply(reset);
+            }}
+          >
+            조건 초기화
+          </Button>
+        </div>
+      </div>
     </form>
   );
 }

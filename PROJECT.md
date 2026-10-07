@@ -1989,3 +1989,93 @@ port-specific authorization question is pending. No alternate access, new server
 service restart or live-data mutation was used. Thus 320px/390px/tablet/desktop
 layout, photo rendering, focus/touch behavior, fixed-nav clearance and before/after
 screenshots have not yet been verified in a browser for this slice.
+
+## Slice 6B — clearer administrator submission list and detail
+
+The submission screens now follow Slice 6A's compact cobalt/navy/white styling.
+Only `screens/admin/submissions` and this reference changed; the shared admin
+shell, other admin bodies, guest/staff screens, API modules and request hooks
+remain unchanged. The user explicitly authorized browser review on the existing
+localhost:5175 frontend for this slice. No server lifecycle action was performed.
+
+The list is titled 제출 기록 and uses compact filters and operational rows, with
+separate checklist-type and submitted/cancelled badges. The property name and
+기록 보기 both link to the same detail URL with the existing return context.
+All property/type/status/stay/link-status/visit-date filters, native date pickers
+and partial-date badInput validation, paging/canonical URL behavior and selected
+stay reset rules remain. Dates still filter visitDate, not submittedAt. Abnormal
+answer counts remain separate from current issue counts. Loading, invalid, empty
+and error states retain their existing behavior with scoped compact styling.
+
+Detail starts with the current revision, property, checklist type/status, original
+submitter/submission time and visit date. The latest action, actual actor/source
+and required saved reason remain distinct and visible; the actor can be a guest,
+staff member or administrator. Cancelled records explicitly retain their answers,
+photos and history. Saved answers and photos come before management controls;
+desktop uses two columns and smaller screens follow the same reading order.
+Unanswered optional items, answer urgency, staff repair notes, photo purposes,
+locations and full filenames remain available. Entire notes are retained.
+
+SubmissionCurrentSummary and SubmissionMetadata separate summary and detailed
+presentation. Captured metadata and complete paginated history use native details
+controls. Historical snapshots retain historical labels and read-only rendering;
+they never replace the current editable revision. Original author/contact/template,
+source, stay link and all timestamps remain accessible. The header's 기록 관리
+button only focuses and scrolls to the existing management area; it changes no
+route, hash, editor state or API request.
+
+Correction, stay association, cancellation and restoration keep the same single
+active-editor orchestration, eligibility, reasons, consequence review and explicit
+confirmation. Dirty/busy/blocked handling, document-unload warnings, duplicate
+locks, token/revision fencing and conflict/uncertain-result recovery are unchanged.
+All successful mutations still reload current detail/history rather than treating
+a potentially historical retry receipt as current data. The existing page-local
+navigation guard does not add global sidebar/browser-Back protection. Private
+photos still require explicit viewing, use revision-specific ADMIN authorization
+only for the view API, and keep signed URLs temporary with no API token on images.
+
+Verification: Yarn TypeScript, non-fixing Oxlint, exact changed-source Prettier,
+production build with sample public HTTPS origins and Git diff whitespace checks
+passed using the isolated-copy workflow. 1,022 distinct temporary synthetic
+feature/hook/model/component assertions covered correction/lifecycle/stay linking,
+reason/confirmation/editor guards, filters/native partial dates/paging/URL returns,
+history boundaries, photo expiry and credential/request fencing. No repository
+test files or dependencies were added. The existing bundle warning remains
+(main JavaScript about 1,122 kB minified).
+
+Actual browser layout inspection used a clearly labelled static fixture served
+temporarily by the existing frontend. It rendered real components and their
+styles with fictional data, without live API/session/storage requests. Fifteen
+fixture states were checked at 320x780, 390x844, 820x1000 and 1440x1000, including
+long Korean names/filenames, sixteen checklist items, ten photos, current/cancelled/
+restored/historical records, loading/empty/error/invalid filters, correction and
+lifecycle confirmation panels, and a synthetic photo image. No horizontal page
+overflow was observed. Native disclosures opened with keyboard focus visible;
+focused history/retry/confirmation controls remained above mobile navigation.
+Filter controls measured at least 44px and bottom-navigation links 56px; the
+mobile main region retained 97px bottom clearance. Representative screenshots
+were saved outside the repository and the temporary public fixture was removed.
+
+These browser checks establish fixture layout only. The real app was reachable
+but authenticated submission access was not established during this review.
+Mounted live React editor interactions, actual saves/conflicts, authenticated
+HTTP/database behavior, real signed-photo loading, physical phones and native
+safe-area/device behavior remain unverified. No real records, backend/schema,
+environment files, deployments, migrations, staging or commits were changed.
+
+## Property settings — mobile management card polish
+
+The property editor now separates assigned-staff identity from four equal
+management buttons. Dedicated PropertyManagementCard component/styles use a
+two-column phone/tablet grid, four desktop columns, 8px gaps and 52px tap targets.
+Long names, inactive badges and unassigned staff remain readable. Existing route
+callbacks, dirty-discard confirmation, focus restoration and busy/discard locks
+remain in PropertyEditor; no API, form-save or shared styling changes were made.
+
+Verification: isolated Yarn typecheck, non-fixing lint, exact changed-source
+Prettier and production build passed (existing large-chunk warning remains).
+Actual-component static browser fixtures covered assigned, long/inactive,
+unassigned and busy states at 320, 390, 820 and 1440px with no horizontal overflow;
+all management buttons measured 52px high, and keyboard focus was visible.
+These are fictional visual fixtures, not authenticated navigation/save or physical
+phone acceptance. Temporary public preview removed; no server or backend changes.

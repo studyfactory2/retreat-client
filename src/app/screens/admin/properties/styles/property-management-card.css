@@ -1,0 +1,84 @@
+.property-management-card {
+  min-width: 0;
+  margin-bottom: 20px;
+  padding: 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-surface);
+}
+
+.property-management-card__staff {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: baseline;
+  gap: 16px;
+  margin: 0 0 14px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.property-management-card__staff dt {
+  color: var(--color-muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.property-management-card__staff dd {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  min-width: 0;
+  margin: 0;
+}
+
+.property-management-card__staff strong {
+  min-width: 0;
+  color: var(--color-heading);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.property-management-card__inactive {
+  padding: 2px 7px;
+  border-radius: 5px;
+  background: var(--color-background);
+  color: var(--color-muted);
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.property-management-card__actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.property-management-card__action.ui-button {
+  min-width: 0;
+  min-height: 52px;
+  padding: 12px 8px;
+  border-color: #d9e3f6;
+  border-radius: 8px;
+  background: #f5f8ff;
+  color: var(--color-heading);
+  font-size: 13px;
+  line-height: 1.5;
+  text-align: center;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+.property-management-card__action.ui-button:hover:not(:disabled) {
+  border-color: var(--color-primary);
+  background: var(--color-soft);
+  color: var(--color-primary);
+}
+
+@media (min-width: 1100px) {
+  .property-management-card__actions {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}

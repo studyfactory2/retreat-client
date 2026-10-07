@@ -8,6 +8,7 @@ import {
 import type { AdminPropertyDto } from '../../../../features/admin-properties/admin-property-management.types';
 import { Button } from '../../../../shared/ui/Button/Button';
 import { PropertyForm } from './PropertyForm';
+import { PropertyManagementCard } from './PropertyManagementCard';
 import {
   buildCreatePropertyInput,
   buildUpdatePropertyInput,
@@ -150,54 +151,11 @@ export function PropertyEditor({
         </div>
       </header>
       {original && (
-        <div className="properties-summary">
-          <p>
-            담당 직원{' '}
-            <strong>
-              {original.staff
-                ? `${original.staff.name}${original.staff.isActive ? '' : ' · 비활성'}`
-                : '미배정'}
-            </strong>
-          </p>
-          <Button
-            className="admin-button-secondary"
-            disabled={mutation.state.busy || discarding}
-            onClick={() =>
-              leave(appRoutes.adminPropertyStaff.replace(':id', original.id))
-            }
-          >
-            담당 직원 관리
-          </Button>
-          <Button
-            className="admin-button-secondary"
-            disabled={mutation.state.busy || discarding}
-            onClick={() =>
-              leave(appRoutes.adminPropertyQr.replace(':id', original.id))
-            }
-          >
-            QR 관리
-          </Button>
-          <Button
-            className="admin-button-secondary"
-            disabled={mutation.state.busy || discarding}
-            onClick={() =>
-              leave(
-                appRoutes.adminPropertyChecklists.replace(':id', original.id),
-              )
-            }
-          >
-            체크리스트 관리
-          </Button>
-          <Button
-            className="admin-button-secondary"
-            disabled={mutation.state.busy || discarding}
-            onClick={() =>
-              leave(appRoutes.adminPropertyGuide.replace(':id', original.id))
-            }
-          >
-            이용 안내 관리
-          </Button>
-        </div>
+        <PropertyManagementCard
+          property={original}
+          disabled={mutation.state.busy || discarding}
+          onNavigate={leave}
+        />
       )}
       {mutation.state.message && (
         <div

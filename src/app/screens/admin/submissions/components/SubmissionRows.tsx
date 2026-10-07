@@ -20,7 +20,7 @@ export function SubmissionRows({
           <tr role="row">
             {[
               '휴양소',
-              '유형 / 방문일',
+              '유형 · 상태 / 방문일',
               '작성자',
               '기록 요약',
               '제출 일시 · 한국 시간',
@@ -34,21 +34,31 @@ export function SubmissionRows({
         </thead>
         <tbody role="rowgroup">
           {items.map((item) => (
-            <tr key={item.id} role="row">
+            <tr
+              key={item.id}
+              role="row"
+              className={
+                item.status === 'CANCELLED' ? 'submission-row--cancelled' : ''
+              }
+            >
               <td role="cell">
                 <span className="submission-mobile-label" aria-hidden="true">
                   휴양소
                 </span>
-                <strong className="submission-property-name">
+                <Link
+                  className="submission-property-name"
+                  to={`/admin/submissions/${item.id}${detailSearch}`}
+                  aria-label={`${item.property.name} ${item.visitDate} ${submissionTypeLabel[item.type]} 기록 상세`}
+                >
                   {item.property.name}
-                </strong>
+                </Link>
                 {item.property.region && (
                   <p className="submission-row-muted">{item.property.region}</p>
                 )}
               </td>
               <td role="cell">
                 <span className="submission-mobile-label" aria-hidden="true">
-                  유형 / 방문일
+                  유형 · 상태 / 방문일
                 </span>
                 <div className="submission-badges">
                   <span className="submission-type-badge">

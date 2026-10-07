@@ -39,9 +39,6 @@ export function SubmissionPhotos({
         <p className="submission-detail-muted">첨부된 사진이 없습니다.</p>
       ) : (
         <>
-          <p className="submission-detail-caption">
-            사진 보기를 누르면 해당 버전에 첨부된 사진을 불러옵니다.
-          </p>
           <ul className="submission-photo-list">
             {revision.photos.map((item, index) => (
               <li key={item.id}>

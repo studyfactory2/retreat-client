@@ -1,11 +1,5 @@
-import { Link } from 'react-router-dom';
 import type { AdminSubmissionRecord } from '../../../../features/admin-submissions/admin-submissions.types';
-import {
-  submissionRoleLabel,
-  submissionSourceLabel,
-  submissionTime,
-  submissionTypeLabel,
-} from '../model/submission-detail-model';
+import { SubmissionMetadata } from './SubmissionMetadata';
 
 export function SubmissionRecord({
   record,
@@ -24,103 +18,8 @@ export function SubmissionRecord({
   return (
     <div className="submission-record">
       <section className="submission-detail-card">
-        <h3>{historical ? '당시 저장된 기본 정보' : '제출 기본 정보'}</h3>
-        <dl className="submission-detail-grid">
-          <div>
-            <dt>휴양소</dt>
-            <dd>
-              {record.property.name}
-              {record.property.region && (
-                <span className="submission-detail-muted">
-                  {' '}
-                  · {record.property.region}
-                </span>
-              )}
-            </dd>
-          </div>
-          <div>
-            <dt>체크 종류 / 방문일</dt>
-            <dd>
-              {submissionTypeLabel(record.type)} · {record.visitDate}
-            </dd>
-          </div>
-          <div>
-            <dt>작성자</dt>
-            <dd>
-              {record.author.name} · {submissionRoleLabel(record.author.role)}
-            </dd>
-          </div>
-          <div>
-            <dt>작성 경로</dt>
-            <dd>{submissionSourceLabel(record.authorSource)}</dd>
-          </div>
-          <div>
-            <dt>연락처</dt>
-            <dd>{record.author.phone || '미입력'}</dd>
-          </div>
-          <div>
-            <dt>회사 / 부서</dt>
-            <dd>
-              {record.author.company || '미입력'} /{' '}
-              {record.author.department || '미입력'}
-            </dd>
-          </div>
-          <div>
-            <dt>{historical ? '당시 연결된 이용 일정' : '연결된 이용 일정'}</dt>
-            <dd>
-              {record.stayId ? (
-                <Link to={`/admin/stays/${record.stayId}?view=list`}>
-                  이용 일정 보기{historical ? ' (현재 정보)' : ''} →
-                </Link>
-              ) : (
-                '연결되지 않음'
-              )}
-            </dd>
-          </div>
-          <div>
-            <dt>사용한 체크리스트</dt>
-            <dd>
-              {record.template.title} · 버전 {record.template.version}
-            </dd>
-          </div>
-          {record.type === 'MAINTENANCE' && (
-            <div>
-              <dt>정비 시작</dt>
-              <dd>{submissionTime(record.startedAt)}</dd>
-            </div>
-          )}
-          <div>
-            <dt>제출 시각</dt>
-            <dd>{submissionTime(record.submittedAt)}</dd>
-          </div>
-          {record.cancelledAt && (
-            <div>
-              <dt>취소 시각</dt>
-              <dd>{submissionTime(record.cancelledAt)}</dd>
-            </div>
-          )}
-          <div>
-            <dt>최초 기록 / 마지막 저장</dt>
-            <dd>
-              {submissionTime(record.createdAt)}
-              <br />
-              {submissionTime(record.updatedAt)}
-            </dd>
-          </div>
-        </dl>
-        <p className="submission-detail-caption">
-          한국 시간 기준 · 휴양소·작성자·체크리스트 문구는 이 기록에 저장된
-          내용입니다.
-        </p>
-        {record.authorSource === 'STAFF_QR' && (
-          <p className="submission-detail-caption">
-            직원 QR에서 확인한 담당자 정보입니다.
-          </p>
-        )}
-      </section>
-      <section className="submission-detail-card">
         <div className="submission-detail-section-heading">
-          <h3>체크 내용</h3>
+          <h3>{historical ? '이 버전의 체크 내용' : '현재 체크 내용'}</h3>
           <p>
             {record.answers.items.length} / {itemCount}항목 응답
           </p>
@@ -140,7 +39,7 @@ export function SubmissionRecord({
                       <strong>{item.label}</strong>
                       <div className="submission-check-badges">
                         <span
-                          className={`submission-detail-badge ${answer?.value === 'ABNORMAL' ? 'submission-detail-badge--danger' : ''}`}
+                          className={`submission-detail-badge ${!answer ? 'submission-detail-badge--muted' : answer.value === 'ABNORMAL' ? 'submission-detail-badge--danger' : 'submission-detail-badge--success'}`}
                         >
                           {answer
                             ? answer.value === 'NORMAL'
@@ -190,12 +89,13 @@ export function SubmissionRecord({
           </p>
         )}
       </section>
-      <section className="submission-detail-card">
+      <section className="submission-detail-card submission-general-note">
         <h3>전체 메모</h3>
         <p className="submission-detail-text">
           {record.answers.generalNote || '작성된 메모가 없습니다.'}
         </p>
       </section>
+      <SubmissionMetadata record={record} historical={historical} />
     </div>
   );
 }

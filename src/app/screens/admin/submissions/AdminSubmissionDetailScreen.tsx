@@ -12,6 +12,7 @@ import { SubmissionLifecycle } from './components/SubmissionLifecycle';
 import { submissionLifecycleSavedMessage } from './model/submission-lifecycle-model';
 import { SubmissionCorrection } from './components/SubmissionCorrection';
 import { SubmissionRecord } from './components/SubmissionRecord';
+import { SubmissionCurrentSummary } from './components/SubmissionCurrentSummary';
 import { SubmissionPhotos } from './components/SubmissionPhotos';
 import { SubmissionHistory } from './components/SubmissionHistory';
 import {
@@ -19,13 +20,7 @@ import {
   type SubmissionLinkEditState,
 } from './components/SubmissionStayLink';
 import { useSubmissionLinkNavigation } from './hooks/use-submission-link-navigation';
-import {
-  submissionActionLabel,
-  submissionRoleLabel,
-  submissionSourceLabel,
-  submissionTime,
-  submissionTypeLabel,
-} from './model/submission-detail-model';
+import { submissionTypeLabel } from './model/submission-detail-model';
 import {
   readSubmissionListFilters,
   submissionListSearch,
@@ -72,6 +67,7 @@ function SubmissionWorkspace({
     editState.busy,
   );
   const discardPrompt = useRef<HTMLElement>(null);
+  const management = useRef<HTMLElement>(null);
   const discardTrigger = useRef<HTMLElement | null>(null);
   useEffect(() => {
     if (navigation.pending) {
@@ -145,14 +141,21 @@ function SubmissionWorkspace({
     <div className="submission-detail">
       <header className="submission-detail-heading">
         <div>
-          <p className="submission-detail-eyebrow">SUBMISSION RECORD</p>
           <h1>{submissionTypeLabel(revision.record.type)} 상세</h1>
-          <p>
-            {revision.record.property.name} · {revision.record.author.name} ·{' '}
-            {revision.record.visitDate}
-          </p>
         </div>
         <div className="submission-detail-actions">
+          {(detail.currentRevision < 2_147_483_647 ||
+            revision.record.type !== 'MAINTENANCE') && (
+            <Button
+              className="admin-button-secondary"
+              onClick={() => {
+                management.current?.focus({ preventScroll: true });
+                management.current?.scrollIntoView({ block: 'start' });
+              }}
+            >
+              기록 관리
+            </Button>
+          )}
           <Link
             className="ui-button admin-button-secondary"
             to={returnTo}
@@ -204,186 +207,196 @@ function SubmissionWorkspace({
           </div>
         </section>
       )}
-      <section className="submission-detail-card submission-current-revision">
-        <div className="submission-detail-section-heading">
-          <h2>현재 저장된 내용 · 버전 {detail.currentRevision}</h2>
-          <span
-            className={`submission-detail-badge${detail.status === 'CANCELLED' ? ' submission-detail-badge--danger' : ''}`}
-          >
-            {detail.status === 'CANCELLED' ? '취소됨' : '제출됨'}
-          </span>
-        </div>
-        <p>
-          {submissionActionLabel(revision.action)} ·{' '}
-          {submissionTime(revision.createdAt)} · {revision.actor.name} (
-          {submissionRoleLabel(revision.actor.role)} /{' '}
-          {submissionSourceLabel(revision.actorSource)})
-        </p>
-        {revision.reason && (
-          <p className="submission-detail-text">
-            <strong>사유: </strong>
-            {revision.reason}
-          </p>
-        )}
-        {detail.status === 'CANCELLED' && (
-          <p className="submission-detail-notice">
-            취소된 제출 기록입니다. 취소 전후의 저장 내용은 아래 이력에서 확인할
-            수 있습니다.
-          </p>
-        )}
-      </section>
-      {detail.currentRevision < 2_147_483_647 && (
-        <div className="submission-detail-actions" aria-label="제출 기록 관리">
-          {detail.status === 'SUBMITTED' && (
-            <Button
-              className={
-                activeEditor === 'correction' ? '' : 'admin-button-secondary'
-              }
-              disabled={
-                editState.busy ||
-                !!editState.blocked ||
-                navigation.pending ||
-                activeEditor === 'correction'
-              }
-              aria-expanded={activeEditor === 'correction'}
-              onClick={() => changeEditor('correction')}
-            >
-              내용 정정
-            </Button>
-          )}
-          {detail.status === 'SUBMITTED' ? (
-            <Button
-              className="admin-button-secondary submission-lifecycle-danger"
-              disabled={
-                editState.busy ||
-                !!editState.blocked ||
-                navigation.pending ||
-                activeEditor === 'cancel'
-              }
-              aria-expanded={activeEditor === 'cancel'}
-              onClick={() => changeEditor('cancel')}
-            >
-              제출 취소
-            </Button>
-          ) : (
-            <Button
-              className="admin-button-secondary"
-              disabled={
-                editState.busy ||
-                !!editState.blocked ||
-                navigation.pending ||
-                activeEditor === 'restore'
-              }
-              aria-expanded={activeEditor === 'restore'}
-              onClick={() => changeEditor('restore')}
-            >
-              제출 복원
-            </Button>
-          )}
-          {activeEditor !== 'stay' && (
-            <Button
-              className="admin-button-secondary"
-              disabled={
-                editState.busy || !!editState.blocked || navigation.pending
-              }
-              onClick={() => changeEditor('stay')}
-            >
-              {revision.record.type === 'MAINTENANCE' ||
-              detail.status === 'CANCELLED'
-                ? '변경 닫기'
-                : '이용 일정 연결로'}
-            </Button>
-          )}
-        </div>
-      )}
-      <fieldset
-        className="submission-editor-boundary"
-        disabled={navigation.pending}
-        aria-label="제출 기록 변경"
+      <SubmissionCurrentSummary detail={detail} />
+      <div className="submission-detail-evidence">
+        <SubmissionRecord record={revision.record} />
+        <SubmissionPhotos
+          key={revision.id}
+          revision={revision}
+          token={token}
+          rejectSession={rejectSession}
+        />
+      </div>
+      <section
+        className="submission-management"
+        aria-label="제출 기록 관리"
+        ref={management}
+        tabIndex={-1}
       >
-        {activeEditor === 'cancel' || activeEditor === 'restore' ? (
-          <SubmissionLifecycle
-            key={`lifecycle:${activeEditor}:${revision.id}`}
-            detail={detail}
-            action={activeEditor}
-            token={token}
-            rejectSession={rejectSession}
-            onEditStateChange={setEditState}
-            onReload={refreshRecord}
-            onClose={() => changeEditor('stay')}
-            onSaved={(receipt) => {
-              navigation.keep();
-              setEditState({ dirty: false, busy: false });
-              setActiveEditor('stay');
-              setNotice(
-                submissionLifecycleSavedMessage(activeEditor, receipt.revision),
-              );
-              refresh();
-            }}
-          />
-        ) : activeEditor === 'correction' && detail.status === 'SUBMITTED' ? (
-          <SubmissionCorrection
-            key={`correction:${revision.id}`}
-            detail={detail}
-            token={token}
-            rejectSession={rejectSession}
-            onEditStateChange={setEditState}
-            onReload={refreshRecord}
-            onClose={() => changeEditor('stay')}
-            onSaved={(receipt) => {
-              navigation.keep();
-              setEditState({ dirty: false, busy: false });
-              setActiveEditor('stay');
-              setNotice(
-                receipt.changed
-                  ? `정정 내용을 버전 ${receipt.revision}으로 저장했습니다. 현재 내용과 처리 이력을 확인해 주세요.`
-                  : '저장된 답변·메모와 같아 새 정정 이력은 추가되지 않았습니다.',
-              );
-              refresh();
-            }}
-          />
-        ) : (
-          revision.record.type !== 'MAINTENANCE' && (
-            <SubmissionStayLink
-              key={`stay-link:${revision.id}`}
+        {detail.currentRevision < 2_147_483_647 && (
+          <div
+            className="submission-detail-actions submission-management-toolbar"
+            aria-label="제출 기록 관리"
+          >
+            {detail.status === 'SUBMITTED' && (
+              <Button
+                className={
+                  activeEditor === 'correction' ? '' : 'admin-button-secondary'
+                }
+                disabled={
+                  editState.busy ||
+                  !!editState.blocked ||
+                  navigation.pending ||
+                  activeEditor === 'correction'
+                }
+                aria-expanded={activeEditor === 'correction'}
+                onClick={() => changeEditor('correction')}
+              >
+                내용 정정
+              </Button>
+            )}
+            {detail.status === 'SUBMITTED' ? (
+              <Button
+                className="admin-button-secondary submission-lifecycle-danger"
+                disabled={
+                  editState.busy ||
+                  !!editState.blocked ||
+                  navigation.pending ||
+                  activeEditor === 'cancel'
+                }
+                aria-expanded={activeEditor === 'cancel'}
+                onClick={() => changeEditor('cancel')}
+              >
+                제출 취소
+              </Button>
+            ) : (
+              <Button
+                className="admin-button-secondary"
+                disabled={
+                  editState.busy ||
+                  !!editState.blocked ||
+                  navigation.pending ||
+                  activeEditor === 'restore'
+                }
+                aria-expanded={activeEditor === 'restore'}
+                onClick={() => changeEditor('restore')}
+              >
+                제출 복원
+              </Button>
+            )}
+            {activeEditor !== 'stay' && (
+              <Button
+                className="admin-button-secondary"
+                disabled={
+                  editState.busy || !!editState.blocked || navigation.pending
+                }
+                onClick={() => changeEditor('stay')}
+              >
+                {revision.record.type === 'MAINTENANCE' ||
+                detail.status === 'CANCELLED'
+                  ? '변경 닫기'
+                  : '이용 일정 연결로'}
+              </Button>
+            )}
+          </div>
+        )}
+        <fieldset
+          className="submission-editor-boundary"
+          disabled={navigation.pending}
+          aria-label="제출 기록 변경"
+        >
+          {activeEditor === 'cancel' || activeEditor === 'restore' ? (
+            <SubmissionLifecycle
+              key={`lifecycle:${activeEditor}:${revision.id}`}
               detail={detail}
+              action={activeEditor}
               token={token}
               rejectSession={rejectSession}
               onEditStateChange={setEditState}
-              onRefresh={refreshRecord}
-              onOpenStay={() =>
-                navigation.request(() =>
-                  navigate(`/admin/stays/${revision.record.stayId}?view=list`),
-                )
-              }
+              onReload={refreshRecord}
+              onClose={() => changeEditor('stay')}
               onSaved={(receipt) => {
                 navigation.keep();
                 setEditState({ dirty: false, busy: false });
+                setActiveEditor('stay');
                 setNotice(
-                  receipt.changed
-                    ? '이용 일정 연결 변경이 저장되었습니다. 아래는 최신 제출 기록입니다.'
-                    : '연결 내용을 확인했습니다. 저장된 연결과 같아 새 이력은 추가되지 않았습니다.',
+                  submissionLifecycleSavedMessage(
+                    activeEditor,
+                    receipt.revision,
+                  ),
                 );
                 refresh();
               }}
             />
-          )
-        )}
-      </fieldset>
-      <SubmissionRecord record={revision.record} />
-      <SubmissionPhotos
-        key={revision.id}
-        revision={revision}
-        token={token}
-        rejectSession={rejectSession}
-      />
-      <SubmissionHistory
-        submissionId={detail.id}
-        currentRevision={detail.currentRevision}
-        token={token}
-        rejectSession={rejectSession}
-        onRefreshDetail={refreshRecord}
-      />
+          ) : activeEditor === 'correction' && detail.status === 'SUBMITTED' ? (
+            <SubmissionCorrection
+              key={`correction:${revision.id}`}
+              detail={detail}
+              token={token}
+              rejectSession={rejectSession}
+              onEditStateChange={setEditState}
+              onReload={refreshRecord}
+              onClose={() => changeEditor('stay')}
+              onSaved={(receipt) => {
+                navigation.keep();
+                setEditState({ dirty: false, busy: false });
+                setActiveEditor('stay');
+                setNotice(
+                  receipt.changed
+                    ? `정정 내용을 버전 ${receipt.revision}으로 저장했습니다. 현재 내용과 처리 이력을 확인해 주세요.`
+                    : '저장된 답변·메모와 같아 새 정정 이력은 추가되지 않았습니다.',
+                );
+                refresh();
+              }}
+            />
+          ) : (
+            revision.record.type !== 'MAINTENANCE' && (
+              <SubmissionStayLink
+                key={`stay-link:${revision.id}`}
+                detail={detail}
+                token={token}
+                rejectSession={rejectSession}
+                onEditStateChange={setEditState}
+                onRefresh={refreshRecord}
+                onOpenStay={() =>
+                  navigation.request(() =>
+                    navigate(
+                      `/admin/stays/${revision.record.stayId}?view=list`,
+                    ),
+                  )
+                }
+                onSaved={(receipt) => {
+                  navigation.keep();
+                  setEditState({ dirty: false, busy: false });
+                  setNotice(
+                    receipt.changed
+                      ? '이용 일정 연결 변경이 저장되었습니다. 아래는 최신 제출 기록입니다.'
+                      : '연결 내용을 확인했습니다. 저장된 연결과 같아 새 이력은 추가되지 않았습니다.',
+                  );
+                  refresh();
+                }}
+              />
+            )
+          )}
+        </fieldset>
+      </section>
+      <details className="submission-detail-disclosure submission-history-disclosure">
+        <summary>
+          <span>
+            <strong>
+              제출 이력{' '}
+              <span className="submission-disclosure-version">
+                버전 {detail.currentRevision}
+              </span>
+            </strong>
+            <span className="submission-detail-caption">
+              이전 저장 내용 · 변경 사유 · 당시 사진
+            </span>
+          </span>
+          <span className="submission-disclosure-indicator" aria-hidden="true">
+            +
+          </span>
+        </summary>
+        <div className="submission-disclosure-body">
+          <SubmissionHistory
+            submissionId={detail.id}
+            currentRevision={detail.currentRevision}
+            token={token}
+            rejectSession={rejectSession}
+            onRefreshDetail={refreshRecord}
+          />
+        </div>
+      </details>
     </div>
   );
 }
