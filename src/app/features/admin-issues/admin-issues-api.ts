@@ -2,6 +2,9 @@ import { apiRequest } from '../../core/api/api-client';
 import { ApiRequestError } from '../../core/api/api-error';
 import type {
   AdminIssueDetailDto,
+  AdminIssueRecordDto,
+  ChangeAdminIssueUrgencyInput,
+  ChangeAdminIssueRecurrenceInput,
   AdminIssueFilters,
   AdminIssueHistoryDto,
   AdminIssueListDto,
@@ -26,10 +29,15 @@ import {
 
 import {
   prepareIssueNote,
+  requireActionVersion,
+  prepareIssueUrgency,
+  prepareIssueRecurrence,
   prepareIssueStatus,
 } from './admin-issue-action-validation';
 import {
   readIssueNoteResult,
+  readIssueUrgencyResult,
+  readIssueRecurrenceResult,
   readIssueStatusResult,
 } from './admin-issue-action-readers';
 
@@ -206,4 +214,91 @@ export async function changeAdminIssueStatus(
     },
   );
   return readIssueStatusResult(response, issueId, body);
+}
+
+export const ISSUE_RECURRENCE_PAGE_SIZE = 5;
+
+export async function getAdminIssueRecurrenceCandidates(
+  issue: AdminIssueRecordDto,
+  page: number,
+  token: string,
+  signal?: AbortSignal,
+): Promise<AdminIssueListDto> {
+  const issueId = requireIssueId(issue.id);
+  requireIssuePage(page);
+  requireActionVersion(issue.currentVersion);
+  const query = new URLSearchParams({
+    expectedVersion: String(issue.currentVersion),
+    page: String(page),
+    limit: String(ISSUE_RECURRENCE_PAGE_SIZE),
+  });
+  const response = await apiRequest<unknown>(
+    `/admin/issues/${issueId}/recurrence-candidates?${query}`,
+    { token, signal },
+  );
+  const result = readIssuePage(
+    response,
+    page,
+    ISSUE_RECURRENCE_PAGE_SIZE,
+    readIssueSummary,
+  );
+  if (
+    new Set(result.items.map((item) => item.id)).size !== result.items.length ||
+    result.totalPages > 100_000 ||
+    result.items.some((item, index, items) => {
+      const previous = items[index - 1];
+      return (
+        item.id === issueId ||
+        item.id === issue.recurrenceOfIssueId ||
+        item.property.id !== issue.property.id ||
+        Date.parse(item.reportedAt) >= Date.parse(issue.reportedAt) ||
+        (previous !== undefined &&
+          (Date.parse(previous.reportedAt) < Date.parse(item.reportedAt) ||
+            (previous.reportedAt === item.reportedAt &&
+              previous.id <= item.id)))
+      );
+    })
+  )
+    throw invalidIssueResponse();
+  return result;
+}
+
+export async function changeAdminIssueUrgency(
+  id: string,
+  input: ChangeAdminIssueUrgencyInput,
+  token: string,
+  signal?: AbortSignal,
+): Promise<AdminIssueDetailDto> {
+  const issueId = requireIssueId(id);
+  const body = prepareIssueUrgency(input);
+  const response = await apiRequest<unknown>(
+    `/admin/issues/${issueId}/urgency`,
+    {
+      method: 'POST',
+      token,
+      signal,
+      body: { ...body },
+    },
+  );
+  return readIssueUrgencyResult(response, issueId, body);
+}
+
+export async function changeAdminIssueRecurrence(
+  id: string,
+  input: ChangeAdminIssueRecurrenceInput,
+  token: string,
+  signal?: AbortSignal,
+): Promise<AdminIssueDetailDto> {
+  const issueId = requireIssueId(id);
+  const body = prepareIssueRecurrence(input, issueId);
+  const response = await apiRequest<unknown>(
+    `/admin/issues/${issueId}/recurrence`,
+    {
+      method: 'POST',
+      token,
+      signal,
+      body: { ...body },
+    },
+  );
+  return readIssueRecurrenceResult(response, issueId, body);
 }

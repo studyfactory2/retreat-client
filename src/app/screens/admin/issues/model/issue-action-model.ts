@@ -2,6 +2,8 @@ import { ApiRequestError } from '../../../../core/api/api-error';
 import {
   prepareIssueNote,
   prepareIssueStatus,
+  prepareIssueUrgency,
+  prepareIssueRecurrence,
 } from '../../../../features/admin-issues/admin-issue-action-validation';
 import type {
   AdminIssueRecordDto,
@@ -10,7 +12,9 @@ import type {
 
 export type IssueActionCommand =
   | { kind: 'note'; note: string }
-  | { kind: 'status'; status: 'IN_PROGRESS' | 'RESOLVED'; note: string };
+  | { kind: 'status'; status: 'IN_PROGRESS' | 'RESOLVED'; note: string }
+  | { kind: 'urgency'; isUrgent: boolean; note: string }
+  | { kind: 'recurrence'; recurrenceOfIssueId: string | null; note: string };
 
 export type IssueActionMutation = {
   status: 'idle' | 'saving' | 'error' | 'conflict' | 'unknown';
@@ -77,7 +81,10 @@ export function prepareIssueAction(
   selection: IssueActionSelection,
   rawNote: string,
 ):
-  | { command: IssueActionCommand; error?: never }
+  | {
+      command: Extract<IssueActionCommand, { kind: 'note' | 'status' }>;
+      error?: never;
+    }
   | { command?: never; error: IssueActionError } {
   if (issue.cancelledAt !== null)
     return {
@@ -136,4 +143,79 @@ export function prepareIssueAction(
       },
     };
   }
+}
+
+export function prepareIssueManagementAction(
+  issue: AdminIssueRecordDto,
+  command: Extract<IssueActionCommand, { kind: 'urgency' | 'recurrence' }>,
+):
+  | {
+      command: Extract<IssueActionCommand, { kind: 'urgency' | 'recurrence' }>;
+      error?: never;
+    }
+  | { command?: never; error: IssueActionError } {
+  if (issue.cancelledAt !== null)
+    return {
+      error: {
+        field: 'action',
+        message: '취소된 이상사항은 변경할 수 없습니다.',
+      },
+    };
+  if (
+    (command.kind === 'urgency' && command.isUrgent === issue.isUrgent) ||
+    (command.kind === 'recurrence' &&
+      command.recurrenceOfIssueId === issue.recurrenceOfIssueId)
+  )
+    return {
+      error: { field: 'action', message: '변경할 내용을 선택해 주세요.' },
+    };
+  try {
+    const input = { ...command, expectedVersion: issue.currentVersion };
+    const prepared =
+      command.kind === 'urgency'
+        ? prepareIssueUrgency({
+            expectedVersion: input.expectedVersion,
+            isUrgent: command.isUrgent,
+            note: command.note,
+          })
+        : prepareIssueRecurrence({
+            expectedVersion: input.expectedVersion,
+            recurrenceOfIssueId: command.recurrenceOfIssueId,
+            note: command.note,
+          });
+    return { command: { ...command, note: prepared.note } };
+  } catch (error: unknown) {
+    return {
+      error: {
+        field:
+          error instanceof ApiRequestError &&
+          error.code === 'INVALID_ISSUE_NOTE'
+            ? 'note'
+            : 'action',
+        message:
+          error instanceof ApiRequestError
+            ? error.message
+            : '변경 내용과 사유를 확인해 주세요.',
+      },
+    };
+  }
+}
+
+export function issueActionSavedMessage(
+  command: IssueActionCommand,
+  previousStatus: IssueStatus,
+): string {
+  if (command.kind === 'note') return '메모를 저장했습니다.';
+  if (command.kind === 'urgency')
+    return command.isUrgent
+      ? '긴급한 이상사항으로 변경했습니다.'
+      : '긴급 표시를 해제했습니다.';
+  if (command.kind === 'recurrence')
+    return command.recurrenceOfIssueId
+      ? '이전 이상사항 연결을 저장했습니다.'
+      : '이전 이상사항 연결을 해제했습니다.';
+  if (command.status === 'RESOLVED') return '해결 처리했습니다.';
+  return previousStatus === 'RESOLVED'
+    ? '다시 조치 중으로 변경했습니다.'
+    : '조치를 시작했습니다.';
 }

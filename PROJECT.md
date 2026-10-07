@@ -1734,3 +1734,56 @@ The pre-existing large-bundle warning remains. Build used example HTTPS origins.
 The backend migration file is supplied but not applied; apply it and regenerate
 the backend Prisma client before live acceptance. No staff screens, dependencies,
 environment files, permanent test files or service lifecycle were changed.
+
+## Redesign slice 3 — administrator urgency and recurring problems
+
+Issue detail adds compact urgency and 이전 이상사항 연결 summaries. Administrators
+can change urgency or link/change/unlink a separate earlier report, with a required
+1–500-character reason and explicit review before saving. Reopening continues the
+same issue; recurrence relates two independent reports without changing status.
+Cancelled records remain readable and expose no mutation controls.
+
+The existing shared useIssueAction lock now dispatches notes, status, urgency and
+recurrence. Feature input preparation, response readers and before/after receipt
+checks allow only the intended field change while preserving source, original
+REPORTED event/photos, status and resolution data. 404/409, exhausted versions and
+uncertain writes require explicit detail/history reload; no automatic write retry
+or silent rebase occurs. All calls use only the current administrator JWT.
+
+Only one editor mounts at a time. Switching between note/status, urgency and
+recurrence uses the existing unsaved-input confirmation, so a successful mutation
+cannot erase another editor's draft. Page-local reload/return and newly added
+related-record links use the same guard; document unload warns while dirty/busy.
+The existing global sidebar/browser-back boundary is unchanged. Inputs remain in
+memory, with no browser persistence. Version/token/unmount changes abort and fence
+requests; successful receipts refresh the current badge and paginated history.
+
+GET /admin/issues/:id/recurrence-candidates uses expectedVersion plus page/limit,
+with five candidates per page. The server selects the same property, strictly
+earlier reportedAt and noncancelled records, excluding self/current link. Readers
+validate pagination, scope, chronology, unique IDs and ordering. Each page is a
+current read, not a cross-page snapshot. Final eligibility is rechecked at save,
+including defensive ancestry/cycle checks. A shrinking list retains a route back
+to available pages without discarding the selected candidate or reason.
+
+The current linked summary loads independently through the existing detail API,
+showing title/date/status and a guarded link. A cancelled/ineligible old target or
+failed target read does not prevent explicit unlink. Historical snapshots show
+the saved recurrence link and urgency; UPDATED uses a neutral 관리 내용 변경 label
+because it can now represent more than a note. New POST /urgency and /recurrence
+return the existing detail shape; recurrenceOfIssueId: null explicitly unlinks.
+
+No guest/staff behavior, authentication model, schema, migration, dependency,
+environment or service lifecycle changes are included. Real browser, authenticated
+API and database acceptance remain separate from temporary model/React/service
+probes. The earlier localhost:5175 browser restriction remains unresolved; do not
+claim narrow-screen visual or interactive verification from synthetic rendering.
+
+Verification: Yarn typecheck, warning-free Oxlint, changed-source exact Prettier
+and the production build passed in isolated source/dependency copies. Independent
+feature/hook probes passed 252 assertions and UI/model/React-render probes passed
+51, covering strict receipts, original evidence, pagination, editor switching,
+conflicts, uncertain writes, access changes and cancelled-target unlink behavior.
+These use fixture data and mocked transport/React scheduling; no actual browser,
+phone or live database mutation was performed. The pre-existing large main-bundle
+warning remains. The build used example HTTPS origins and is not a deployment.

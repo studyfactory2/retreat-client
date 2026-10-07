@@ -19,6 +19,7 @@ type Props = {
   token: string;
   rejectSession: (token: string) => void;
   onRefreshDetail: () => void;
+  onNavigate?: (to: string) => void;
 };
 
 export function IssueHistory(props: Props) {
@@ -35,6 +36,7 @@ function HistoryWorkspace({
   token,
   rejectSession,
   onRefreshDetail,
+  onNavigate,
 }: Props) {
   const [page, setPage] = useState(1);
   const [expanded, setExpanded] = useState<string | null>(null);
@@ -117,6 +119,11 @@ function HistoryWorkspace({
                     >
                       {issueStatusLabel(event.record.status)}
                     </span>
+                    {event.record.isUrgent && (
+                      <span className="issue-detail-badge issue-detail-badge--danger">
+                        긴급
+                      </span>
+                    )}
                     {event.record.cancelledAt && (
                       <span className="issue-detail-badge issue-detail-badge--muted">
                         취소됨
@@ -164,7 +171,10 @@ function HistoryWorkspace({
                         ? '현재 버전의 저장 내용입니다.'
                         : `버전 ${event.version}에 저장된 과거 기록입니다. 현재 내용과 다를 수 있습니다.`}
                     </p>
-                    <IssueRecord record={event.record} />
+                    <IssueRecord
+                      record={event.record}
+                      onNavigate={onNavigate}
+                    />
                     <IssuePhotos
                       key={`history-photo:${event.id}`}
                       event={event}

@@ -11,10 +11,12 @@ export function IssueRecord({
   record,
   title = '저장된 신고 내용',
   showSourceLink = false,
+  onNavigate,
 }: {
   record: AdminIssueRecordDto;
   title?: string;
   showSourceLink?: boolean;
+  onNavigate?: (to: string) => void;
 }) {
   return (
     <section className="issue-detail-card issue-record">
@@ -80,6 +82,33 @@ export function IssueRecord({
           </dd>
         </div>
         <div className="issue-detail-grid__wide">
+          <dt>이전 이상사항 연결</dt>
+          <dd>
+            {record.recurrenceOfIssueId ? (
+              <Link
+                className="issue-detail-source-link"
+                to={`/admin/issues/${record.recurrenceOfIssueId}`}
+                onClick={(event) => {
+                  if (
+                    onNavigate &&
+                    !event.metaKey &&
+                    !event.ctrlKey &&
+                    !event.altKey &&
+                    !event.shiftKey
+                  ) {
+                    event.preventDefault();
+                    onNavigate(`/admin/issues/${record.recurrenceOfIssueId}`);
+                  }
+                }}
+              >
+                연결된 이전 이상사항 보기 <span aria-hidden="true">→</span>
+              </Link>
+            ) : (
+              '연결 없음'
+            )}
+          </dd>
+        </div>
+        <div className="issue-detail-grid__wide">
           <dt>신고 경로</dt>
           <dd>
             {record.source ? (
@@ -109,6 +138,18 @@ export function IssueRecord({
         <Link
           className="issue-detail-source-link"
           to={`/admin/submissions/${record.sourceSubmissionId}`}
+          onClick={(event) => {
+            if (
+              onNavigate &&
+              !event.metaKey &&
+              !event.ctrlKey &&
+              !event.altKey &&
+              !event.shiftKey
+            ) {
+              event.preventDefault();
+              onNavigate(`/admin/submissions/${record.sourceSubmissionId}`);
+            }
+          }}
         >
           원본 체크리스트 보기 <span aria-hidden="true">→</span>
         </Link>

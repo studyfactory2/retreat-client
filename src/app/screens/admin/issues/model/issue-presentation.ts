@@ -38,7 +38,7 @@ export function issueTime(value: string | null): string {
 export function issueEventLabel(type: IssueEventType): string {
   return {
     REPORTED: '최초 신고',
-    UPDATED: '메모 추가',
+    UPDATED: '관리 내용 변경',
     STATUS_CHANGED: '처리 상태 변경',
     REPAIR_REPORTED: '직원 조치 보고',
     RESOLVED: '해결 처리',

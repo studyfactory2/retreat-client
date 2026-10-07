@@ -3,6 +3,8 @@ import { ApiRequestError } from '../../../../core/api/api-error';
 import {
   addAdminIssueNote,
   changeAdminIssueStatus,
+  changeAdminIssueUrgency,
+  changeAdminIssueRecurrence,
 } from '../../../../features/admin-issues/admin-issues-api';
 import { prepareIssueStatus } from '../../../../features/admin-issues/admin-issue-action-validation';
 import { verifyIssueActionReceipt } from '../../../../features/admin-issues/admin-issue-action-readers';
@@ -46,27 +48,48 @@ export function useIssueAction(
         expectedVersion: detail.issue.currentVersion,
         note: command.note,
       };
-      const receipt =
-        command.kind === 'note'
-          ? await addAdminIssueNote(
-              detail.issue.id,
-              input,
-              token,
-              controller.signal,
-            )
-          : await changeAdminIssueStatus(
-              detail.issue.id,
-              prepareIssueStatus(
-                {
-                  expectedVersion: input.expectedVersion,
-                  status: command.status,
-                  ...(command.note.trim() ? { note: command.note } : {}),
-                },
-                detail.issue.status,
-              ),
-              token,
-              controller.signal,
-            );
+      let receipt: AdminIssueDetailDto;
+      switch (command.kind) {
+        case 'note':
+          receipt = await addAdminIssueNote(
+            detail.issue.id,
+            input,
+            token,
+            controller.signal,
+          );
+          break;
+        case 'status':
+          receipt = await changeAdminIssueStatus(
+            detail.issue.id,
+            prepareIssueStatus(
+              {
+                expectedVersion: input.expectedVersion,
+                status: command.status,
+                ...(command.note.trim() ? { note: command.note } : {}),
+              },
+              detail.issue.status,
+            ),
+            token,
+            controller.signal,
+          );
+          break;
+        case 'urgency':
+          receipt = await changeAdminIssueUrgency(
+            detail.issue.id,
+            { ...input, isUrgent: command.isUrgent },
+            token,
+            controller.signal,
+          );
+          break;
+        case 'recurrence':
+          receipt = await changeAdminIssueRecurrence(
+            detail.issue.id,
+            { ...input, recurrenceOfIssueId: command.recurrenceOfIssueId },
+            token,
+            controller.signal,
+          );
+          break;
+      }
       if (controller.signal.aborted) return;
       verifyIssueActionReceipt(detail, receipt, adminId, command.kind);
       // A second click cannot send the old version while the parent installs the receipt.

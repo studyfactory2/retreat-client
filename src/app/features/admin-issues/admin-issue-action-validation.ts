@@ -2,10 +2,13 @@ import { ApiRequestError } from '../../core/api/api-error';
 import type {
   AddAdminIssueNoteInput,
   ChangeAdminIssueStatusInput,
+  ChangeAdminIssueUrgencyInput,
+  ChangeAdminIssueRecurrenceInput,
   IssueStatus,
 } from './admin-issues.types';
+import { requireIssueId } from './admin-issues-validation';
 
-function requireActionVersion(expectedVersion: number): void {
+export function requireActionVersion(expectedVersion: number): void {
   if (
     !Number.isInteger(expectedVersion) ||
     expectedVersion < 1 ||
@@ -17,6 +20,58 @@ function requireActionVersion(expectedVersion: number): void {
       'INVALID_ISSUE_VERSION',
     );
   }
+}
+
+export const ISSUE_MANAGEMENT_REASON_LIMIT = 500;
+
+function managementReason(value: unknown): string {
+  const note = typeof value === 'string' ? value.trim() : '';
+  if (!note || [...note].length > ISSUE_MANAGEMENT_REASON_LIMIT)
+    throw new ApiRequestError(
+      '변경 사유는 1자 이상 500자 이하로 입력해 주세요.',
+      400,
+      'INVALID_ISSUE_NOTE',
+    );
+  return note;
+}
+
+export function prepareIssueUrgency(
+  input: ChangeAdminIssueUrgencyInput,
+): ChangeAdminIssueUrgencyInput {
+  requireActionVersion(input.expectedVersion);
+  if (typeof input.isUrgent !== 'boolean')
+    throw new ApiRequestError(
+      '변경할 긴급 여부를 확인해 주세요.',
+      400,
+      'INVALID_ISSUE_URGENCY',
+    );
+  return {
+    expectedVersion: input.expectedVersion,
+    isUrgent: input.isUrgent,
+    note: managementReason(input.note),
+  };
+}
+
+export function prepareIssueRecurrence(
+  input: ChangeAdminIssueRecurrenceInput,
+  issueId?: string,
+): ChangeAdminIssueRecurrenceInput {
+  requireActionVersion(input.expectedVersion);
+  const recurrenceOfIssueId =
+    input.recurrenceOfIssueId === null
+      ? null
+      : requireIssueId(input.recurrenceOfIssueId);
+  if (issueId !== undefined && recurrenceOfIssueId === requireIssueId(issueId))
+    throw new ApiRequestError(
+      '현재 이상사항을 이전 기록으로 연결할 수 없습니다.',
+      400,
+      'INVALID_ISSUE_RECURRENCE',
+    );
+  return {
+    expectedVersion: input.expectedVersion,
+    recurrenceOfIssueId,
+    note: managementReason(input.note),
+  };
 }
 
 function actionNote(value: unknown): string {

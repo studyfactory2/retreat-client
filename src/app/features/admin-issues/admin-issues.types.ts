@@ -69,3 +69,17 @@ export interface ChangeAdminIssueStatusInput {
   status: 'IN_PROGRESS' | 'RESOLVED';
   note?: string;
 }
+
+export interface ChangeAdminIssueUrgencyInput {
+  expectedVersion: number;
+  isUrgent: boolean;
+  note: string;
+}
+
+export interface ChangeAdminIssueRecurrenceInput {
+  expectedVersion: number;
+  recurrenceOfIssueId: string | null;
+  note: string;
+}
+
+export type AdminIssueActionKind = 'note' | 'status' | 'urgency' | 'recurrence';

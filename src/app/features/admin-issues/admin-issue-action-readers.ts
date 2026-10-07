@@ -2,6 +2,9 @@ import type {
   AddAdminIssueNoteInput,
   AdminIssueDetailDto,
   ChangeAdminIssueStatusInput,
+  ChangeAdminIssueUrgencyInput,
+  ChangeAdminIssueRecurrenceInput,
+  AdminIssueActionKind,
 } from './admin-issues.types';
 import { readIssueDetail } from './admin-issues-readers';
 import { invalidIssueResponse } from './admin-issues-validation';
@@ -86,7 +89,7 @@ export function verifyIssueActionReceipt(
   before: AdminIssueDetailDto,
   after: AdminIssueDetailDto,
   adminId: string,
-  kind: 'note' | 'status',
+  kind: AdminIssueActionKind,
 ): void {
   const original = before.issue;
   const current = after.issue;
@@ -96,11 +99,9 @@ export function verifyIssueActionReceipt(
     'title',
     'description',
     'areaLabel',
-    'isUrgent',
     'sourceSubmissionId',
     'sourceItemId',
     'sourceRevisionId',
-    'recurrenceOfIssueId',
     'reportedAt',
   ] as const;
   if (
@@ -113,14 +114,41 @@ export function verifyIssueActionReceipt(
     current.property.id !== original.property.id ||
     current.category.id !== original.category.id ||
     unchangedFields.some((field) => current[field] !== original[field]) ||
+    (kind === 'urgency'
+      ? current.isUrgent === original.isUrgent
+      : current.isUrgent !== original.isUrgent) ||
+    (kind === 'recurrence'
+      ? current.recurrenceOfIssueId === original.recurrenceOfIssueId
+      : current.recurrenceOfIssueId !== original.recurrenceOfIssueId) ||
     JSON.stringify(current.source) !== JSON.stringify(original.source) ||
     JSON.stringify(after.report) !== JSON.stringify(before.report) ||
     Date.parse(current.updatedAt) <= Date.parse(original.updatedAt) ||
-    (kind === 'note' &&
+    (kind !== 'status' &&
       (current.status !== original.status ||
         current.resolvedAt !== original.resolvedAt ||
         current.resolvedByUserId !== original.resolvedByUserId)) ||
     (kind === 'status' && current.status === original.status)
   )
     throw invalidIssueResponse();
+}
+
+export function readIssueUrgencyResult(
+  value: unknown,
+  issueId: string,
+  input: ChangeAdminIssueUrgencyInput,
+): AdminIssueDetailDto {
+  const detail = readIssueNoteResult(value, issueId, input);
+  if (detail.issue.isUrgent !== input.isUrgent) throw invalidIssueResponse();
+  return detail;
+}
+
+export function readIssueRecurrenceResult(
+  value: unknown,
+  issueId: string,
+  input: ChangeAdminIssueRecurrenceInput,
+): AdminIssueDetailDto {
+  const detail = readIssueNoteResult(value, issueId, input);
+  if (detail.issue.recurrenceOfIssueId !== input.recurrenceOfIssueId)
+    throw invalidIssueResponse();
+  return detail;
 }
