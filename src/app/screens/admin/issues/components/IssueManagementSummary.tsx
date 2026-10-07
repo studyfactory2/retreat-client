@@ -1,4 +1,4 @@
-import { useId } from 'react';
+import { useId, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import type { AdminIssueRecordDto } from '../../../../features/admin-issues/admin-issues.types';
 import { Button } from '../../../../shared/ui/Button/Button';
@@ -19,6 +19,7 @@ export function IssueManagementSummary({
   onLinkedRefresh,
   onEdit,
   onNavigate,
+  children,
 }: {
   issue: AdminIssueRecordDto;
   activeEditor: IssueEditorKind;
@@ -27,8 +28,8 @@ export function IssueManagementSummary({
   onLinkedRefresh: () => void;
   onEdit: (kind: IssueEditorKind) => void;
   onNavigate: (to: string) => void;
+  children?: ReactNode;
 }) {
-  const id = useId();
   const recurrenceId = useId();
   const editable =
     issue.cancelledAt === null && issue.currentVersion <= 2_147_483_646;
@@ -37,36 +38,26 @@ export function IssueManagementSummary({
     : null;
   return (
     <div className="issue-management-summary">
-      <section
-        className="issue-detail-card issue-management-urgency"
-        aria-labelledby={id}
-      >
-        <div>
-          <h2 id={id}>긴급도</h2>
-          <span
-            className={`issue-detail-badge issue-detail-badge--${issue.isUrgent ? 'danger' : 'muted'}`}
-          >
-            {issue.isUrgent ? '긴급' : '일반'}
-          </span>
-        </div>
-        {editable && (
+      <div className="issue-management-toolbar" aria-label="신고 관리 메뉴">
+        {editable && activeEditor !== 'record' && (
           <Button
-            className="admin-button-secondary"
-            disabled={locked || activeEditor === 'urgency'}
-            aria-expanded={activeEditor === 'urgency'}
-            onClick={() => onEdit('urgency')}
+            className="admin-button-secondary issue-management-record-toggle"
+            disabled={locked}
+            onClick={() => onEdit('record')}
           >
-            {issue.isUrgent ? '긴급 해제' : '긴급으로 변경'}
+            메모·처리 상태 기록으로
           </Button>
         )}
-      </section>
-      <section
-        className="issue-detail-card issue-management-recurrence"
-        aria-labelledby={recurrenceId}
-      >
-        <div className="issue-detail-section-heading">
-          <h2 id={recurrenceId}>이전 이상사항 연결</h2>
-          {editable && (
+        {editable && (
+          <>
+            <Button
+              className="admin-button-secondary"
+              disabled={locked || activeEditor === 'urgency'}
+              aria-expanded={activeEditor === 'urgency'}
+              onClick={() => onEdit('urgency')}
+            >
+              {issue.isUrgent ? '긴급 해제' : '긴급으로 변경'}
+            </Button>
             <Button
               className="admin-button-secondary"
               disabled={locked || activeEditor === 'recurrence'}
@@ -75,76 +66,74 @@ export function IssueManagementSummary({
             >
               {issue.recurrenceOfIssueId ? '연결 변경·해제' : '이전 신고 선택'}
             </Button>
-          )}
-        </div>
-        {linked.status === 'loading' ? (
-          <p className="issue-detail-caption" role="status">
-            연결된 신고를 불러오는 중입니다.
-          </p>
-        ) : linked.status === 'ready' && linkedTo ? (
-          <div className="issue-linked-report">
-            <Link
-              to={linkedTo}
-              aria-disabled={locked || undefined}
-              onClick={(event) => {
-                if (
-                  locked ||
-                  (!event.metaKey &&
-                    !event.ctrlKey &&
-                    !event.altKey &&
-                    !event.shiftKey)
-                ) {
-                  event.preventDefault();
-                  if (!locked) onNavigate(linkedTo);
-                }
-              }}
-            >
-              {linked.data.title}
-              <span aria-hidden="true"> →</span>
-            </Link>
-            <div className="issue-detail-badges">
-              <span
-                className={`issue-detail-badge issue-detail-badge--${issueStatusTone(linked.data.status)}`}
-              >
-                {issueStatusLabel(linked.data.status)}
-              </span>
-              {linked.data.cancelledAt && (
-                <span className="issue-detail-badge issue-detail-badge--muted">
-                  취소됨
-                </span>
-              )}
-              <time dateTime={linked.data.reportedAt}>
-                {issueTime(linked.data.reportedAt)}
-              </time>
-            </div>
-          </div>
-        ) : linked.status === 'error' ? (
-          <div className="issue-recurrence-load-error" role="alert">
-            <p>{linked.message}</p>
-            <Button
-              className="admin-button-secondary"
-              disabled={locked}
-              onClick={onLinkedRefresh}
-            >
-              연결된 신고 다시 불러오기
-            </Button>
-          </div>
-        ) : (
-          <p className="issue-detail-caption">연결된 이전 신고가 없습니다.</p>
+          </>
         )}
-        <p className="issue-detail-caption">
-          다시 조치는 같은 기록을 이어서 처리할 때 사용합니다. 이전 이상사항
-          연결은 별도로 접수된 반복 문제를 연결합니다.
-        </p>
-      </section>
-      {editable && activeEditor !== 'record' && (
-        <Button
-          className="admin-button-secondary issue-management-record-toggle"
-          disabled={locked}
-          onClick={() => onEdit('record')}
+        {children}
+      </div>
+      {(issue.recurrenceOfIssueId ||
+        linked.status === 'loading' ||
+        linked.status === 'error') && (
+        <section
+          className="issue-management-recurrence"
+          aria-labelledby={recurrenceId}
         >
-          메모·처리 상태 기록으로
-        </Button>
+          <h3 id={recurrenceId}>연결된 이전 신고</h3>
+          {linked.status === 'loading' ? (
+            <p className="issue-detail-caption" role="status">
+              연결된 신고를 불러오는 중입니다.
+            </p>
+          ) : linked.status === 'ready' && linkedTo ? (
+            <div className="issue-linked-report">
+              <Link
+                to={linkedTo}
+                aria-disabled={locked || undefined}
+                onClick={(event) => {
+                  if (
+                    locked ||
+                    (!event.metaKey &&
+                      !event.ctrlKey &&
+                      !event.altKey &&
+                      !event.shiftKey)
+                  ) {
+                    event.preventDefault();
+                    if (!locked) onNavigate(linkedTo);
+                  }
+                }}
+              >
+                {linked.data.title}
+                <span aria-hidden="true"> →</span>
+              </Link>
+              <div className="issue-detail-badges">
+                <span
+                  className={`issue-detail-badge issue-detail-badge--${issueStatusTone(linked.data.status)}`}
+                >
+                  {issueStatusLabel(linked.data.status)}
+                </span>
+                {linked.data.cancelledAt && (
+                  <span className="issue-detail-badge issue-detail-badge--muted">
+                    취소됨
+                  </span>
+                )}
+                <time dateTime={linked.data.reportedAt}>
+                  {issueTime(linked.data.reportedAt)}
+                </time>
+              </div>
+            </div>
+          ) : linked.status === 'error' ? (
+            <div className="issue-recurrence-load-error" role="alert">
+              <p>{linked.message}</p>
+              <Button
+                className="admin-button-secondary"
+                disabled={locked}
+                onClick={onLinkedRefresh}
+              >
+                연결된 신고 다시 불러오기
+              </Button>
+            </div>
+          ) : (
+            <p className="issue-detail-caption">연결된 이전 신고가 없습니다.</p>
+          )}
+        </section>
       )}
     </div>
   );

@@ -82,7 +82,7 @@ export function IssueFilters({
         {error('status')}
       </fieldset>
       <div className="issue-filters__fields">
-        <div className="issue-field">
+        <div className="issue-field issue-field--property">
           <label htmlFor="issue-property">휴양소</label>
           <select
             id="issue-property"
@@ -182,8 +182,7 @@ export function IssueFilters({
       <div className="issue-filters__footer">
         <div>
           <p id="issue-date-hint">
-            접수일 · 한국 시간 기준. 날짜를 비우면 전체 기간이며, 시작일이나
-            종료일만 선택할 수도 있습니다.
+            접수일은 한국 시간 기준 · 날짜를 비우면 전체 기간
           </p>
           {propertiesLoading && (
             <p role="status">휴양소 선택 목록을 불러오고 있습니다.</p>

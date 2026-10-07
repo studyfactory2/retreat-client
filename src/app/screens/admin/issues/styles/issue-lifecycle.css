@@ -1,5 +1,5 @@
 .issue-lifecycle {
-  padding: 20px;
+  padding: 16px;
 }
 .issue-lifecycle--cancel {
   border-color: #dfb8bf;
@@ -15,7 +15,7 @@
 .issue-lifecycle form,
 .issue-lifecycle-confirmation {
   display: grid;
-  gap: 14px;
+  gap: 12px;
   min-width: 0;
 }
 .issue-lifecycle p {
@@ -44,6 +44,7 @@
 }
 .issue-lifecycle form > label {
   font-weight: 650;
+  font-size: 13px;
 }
 .issue-lifecycle .issue-lifecycle-confirmation h3 {
   margin: 0;
@@ -68,7 +69,7 @@
   line-height: 1.6;
 }
 .issue-lifecycle-consequences {
-  padding: 14px;
+  padding: 12px;
   border-radius: 8px;
   background: var(--color-soft);
 }
@@ -101,5 +102,14 @@
   }
   .issue-lifecycle .issue-action-buttons > button {
     flex: 1 1 140px;
+  }
+}
+
+.issue-lifecycle-confirmation {
+  font-size: 13px;
+}
+@media (max-width: 640px) {
+  .issue-lifecycle textarea {
+    font-size: 16px;
   }
 }

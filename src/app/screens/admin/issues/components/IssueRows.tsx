@@ -25,21 +25,32 @@ export function IssueRows({
           접수일이 최근인 순서로 정렬된 이상사항 목록
         </caption>
         <thead>
-          <tr>
-            <th scope="col">신고 내용</th>
-            <th scope="col">휴양소</th>
-            <th scope="col">처리 상태</th>
-            <th scope="col">접수일</th>
-            <th scope="col">상세</th>
+          <tr role="row">
+            <th role="columnheader" scope="col">
+              신고 내용
+            </th>
+            <th role="columnheader" scope="col">
+              휴양소
+            </th>
+            <th role="columnheader" scope="col">
+              처리 상태
+            </th>
+            <th role="columnheader" scope="col">
+              접수일
+            </th>
+            <th role="columnheader" scope="col">
+              상세
+            </th>
           </tr>
         </thead>
         <tbody>
           {items.map((issue) => (
             <tr
+              role="row"
               key={issue.id}
               className={issue.cancelledAt ? 'issue-row--cancelled' : undefined}
             >
-              <td>
+              <td role="cell">
                 <div className="issue-row-labels">
                   {issue.cancelledAt && (
                     <span className="issue-list-cancelled">취소됨</span>
@@ -49,19 +60,24 @@ export function IssueRows({
                   )}
                   <span>{issue.category.name}</span>
                 </div>
-                <strong className="issue-row-title">{issue.title}</strong>
+                <Link
+                  className="issue-row-title"
+                  to={`${appRoutes.adminIssues}/${issue.id}${issueSearch(filters)}`}
+                >
+                  {issue.title}
+                </Link>
                 {issue.areaLabel && (
                   <p className="issue-list-muted">{issue.areaLabel}</p>
                 )}
               </td>
-              <td>
+              <td role="cell">
                 <span className="issue-list-mobile-label">휴양소</span>
                 <strong>{issue.property.name}</strong>
                 {issue.property.region && (
                   <p className="issue-list-muted">{issue.property.region}</p>
                 )}
               </td>
-              <td>
+              <td role="cell">
                 <span className="issue-list-mobile-label">처리 상태</span>
                 <span
                   className={`issue-list-status issue-list-status--${issueStatusTone(issue.status)}`}
@@ -77,13 +93,13 @@ export function IssueRows({
                   </p>
                 )}
               </td>
-              <td>
+              <td role="cell">
                 <span className="issue-list-mobile-label">접수일</span>
                 <time dateTime={issue.reportedAt}>
                   {issueTime(issue.reportedAt)}
                 </time>
               </td>
-              <td>
+              <td role="cell">
                 <Link
                   className="issue-list-link"
                   to={`${appRoutes.adminIssues}/${issue.id}${issueSearch(filters)}`}

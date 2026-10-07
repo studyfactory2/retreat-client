@@ -1,18 +1,13 @@
 import { useEffect } from 'react';
-import { matchPath, NavLink, Outlet, useLocation } from 'react-router-dom';
+import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { appRoutes } from '../../../core/router/routes';
 import { useAdminSession } from '../../../core/session/use-admin-session';
 import { AdminNavigation } from './components/AdminNavigation';
 import './styles/admin-layout.css';
-import './styles/admin-dashboard-layout.css';
 
 export function AdminLayout() {
   const { state, logout } = useAdminSession();
   const { pathname } = useLocation();
-  const isDashboard = !!matchPath(
-    { path: appRoutes.admin, end: true },
-    pathname,
-  );
 
   useEffect(() => {
     document.getElementById('main-content')?.focus({ preventScroll: true });
@@ -22,9 +17,7 @@ export function AdminLayout() {
   if (state.status !== 'authenticated') return null;
 
   return (
-    <div
-      className={`admin-layout${isDashboard ? ' admin-layout--dashboard' : ''}`}
-    >
+    <div className="admin-layout">
       <a
         className="admin-layout__skip"
         href="#main-content"
@@ -42,21 +35,10 @@ export function AdminLayout() {
         <NavLink
           className="admin-layout__brand"
           to={appRoutes.admin}
-          aria-label={
-            isDashboard ? 'ITCEN 휴양소 관리 홈' : '오복 휴양소 관리 홈'
-          }
+          aria-label="ITCEN 휴양소 관리 홈"
         >
-          {isDashboard ? (
-            <>
-              ITCEN<span>휴양소 관리</span>
-            </>
-          ) : (
-            <>
-              OH BOK<span>RETREAT</span>
-            </>
-          )}
+          ITCEN<span>휴양소 관리</span>
         </NavLink>
-        <span className="admin-layout__workspace">휴양소 관리</span>
         <div className="admin-layout__account">
           <span className="admin-layout__avatar" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none">
@@ -65,7 +47,7 @@ export function AdminLayout() {
             </svg>
           </span>
           <span className="admin-layout__identity">
-            <strong>{state.user.name}</strong>
+            <strong title={state.user.name}>{state.user.name}</strong>
             <span>관리자</span>
           </span>
           <button
@@ -80,23 +62,11 @@ export function AdminLayout() {
 
       <aside className="admin-layout__sidebar">
         <div className="admin-layout__navigation">
-          <p className="admin-layout__nav-label">WORKSPACE</p>
+          <p className="admin-layout__nav-label">관리 메뉴</p>
           <AdminNavigation />
         </div>
         <div className="admin-layout__signature">
-          {isDashboard ? (
-            <small>운영 · OH BOK</small>
-          ) : (
-            <>
-              <span aria-hidden="true" />
-              <p>
-                편안한 쉼을 위한
-                <br />
-                세심한 관리.
-              </p>
-              <small>OH BOK RETREAT</small>
-            </>
-          )}
+          <small>운영 · OH BOK</small>
         </div>
       </aside>
 

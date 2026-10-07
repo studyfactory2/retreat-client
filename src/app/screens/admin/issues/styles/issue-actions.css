@@ -1,42 +1,37 @@
 .issue-actions {
   min-width: 0;
 }
-.issue-actions__eyebrow {
-  margin: 0 0 6px !important;
-  color: var(--color-primary) !important;
-  font-size: 11px;
-  font-weight: 700;
-}
 .issue-actions__intro {
-  margin: 0 0 24px;
+  margin: 0 0 14px;
   color: var(--color-muted);
   font-size: 13px;
-  line-height: 1.8;
+  line-height: 1.65;
 }
 .issue-actions__choices {
   min-width: 0;
-  margin: 0 0 24px;
+  margin: 0 0 14px;
   padding: 0;
   border: 0;
 }
 .issue-actions__choices legend {
   padding: 0;
-  margin-bottom: 12px;
-  color: var(--color-heading);
-  font-size: 13px;
+  margin-bottom: 8px;
+  color: var(--color-muted);
+  font-size: 12px;
   font-weight: 650;
 }
 .issue-actions__choices > div {
   display: flex;
-  gap: 12px;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 .issue-actions__choices label {
   display: flex;
-  flex: 1;
+  flex: 1 1 120px;
   align-items: flex-start;
-  gap: 10px;
+  gap: 8px;
   min-width: 0;
-  padding: 16px;
+  padding: 10px;
   border: 1px solid var(--color-input-border);
   border-radius: var(--radius-sm);
   cursor: pointer;
@@ -59,12 +54,14 @@
 }
 .issue-actions__choices label > span {
   display: grid;
-  gap: 6px;
+  gap: 3px;
   min-width: 0;
 }
 .issue-actions__choices strong {
   color: var(--color-heading);
-  font-size: 14px;
+  font-size: 13px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
 }
 .issue-actions__choices label > span > span {
   color: var(--color-muted);
@@ -90,14 +87,14 @@
 }
 .issue-actions__note textarea {
   width: 100%;
-  min-height: 132px;
-  padding: 13px 15px;
+  min-height: 100px;
+  padding: 10px 12px;
   border: 1px solid var(--color-input-border);
   border-radius: var(--radius-sm);
   color: var(--color-text);
   background: var(--color-surface);
   font: inherit;
-  line-height: 1.8;
+  line-height: 1.65;
   resize: vertical;
 }
 .issue-actions__note textarea:disabled {
@@ -112,13 +109,13 @@
   margin: 0;
   color: var(--color-muted);
   font-size: 12px;
-  line-height: 1.8;
+  line-height: 1.65;
 }
 .issue-actions__error {
   margin: 0;
   color: var(--color-danger);
   font-size: 12px;
-  line-height: 1.8;
+  line-height: 1.65;
 }
 .issue-actions__choices + .issue-actions__error {
   margin: -12px 0 18px;
@@ -128,7 +125,7 @@
   justify-content: flex-end;
   flex-wrap: wrap;
   gap: 10px;
-  margin-top: 20px;
+  margin-top: 14px;
 }
 .issue-action-buttons > .ui-button {
   min-height: 44px;
@@ -136,8 +133,8 @@
 .issue-action-confirmation,
 .issue-action-notice {
   min-width: 0;
-  margin-top: 22px;
-  padding: 20px;
+  margin-top: 14px;
+  padding: 14px;
   border: 1px solid #c8d9fc;
   border-radius: var(--radius-sm);
   background: #f4f7ff;
@@ -148,14 +145,14 @@
   background: #fffbf2;
 }
 .issue-action-confirmation h3 {
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 .issue-action-confirmation p,
 .issue-action-notice p {
   margin: 10px 0 0;
   color: var(--color-muted);
   font-size: 13px;
-  line-height: 1.8;
+  line-height: 1.65;
 }
 .issue-action-confirmation__subject {
   color: var(--color-heading) !important;
@@ -191,11 +188,10 @@
 }
 @media (max-width: 680px) {
   .issue-actions__choices > div {
-    flex-direction: column;
-    gap: 10px;
+    gap: 8px;
   }
   .issue-actions__choices label {
-    padding: 14px;
+    padding: 10px;
   }
   .issue-actions__note textarea {
     font-size: 16px;
@@ -210,11 +206,16 @@
   }
   .issue-action-confirmation,
   .issue-action-notice {
-    padding: 16px;
+    padding: 10px;
   }
 }
 @media (max-width: 360px) {
   .issue-action-confirmation .issue-action-buttons {
     grid-template-columns: minmax(0, 1fr);
   }
+}
+
+.issue-actions__note textarea:focus-visible {
+  outline: 3px solid #adc7f6;
+  outline-offset: 2px;
 }

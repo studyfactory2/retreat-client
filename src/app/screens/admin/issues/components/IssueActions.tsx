@@ -11,7 +11,7 @@ import {
   type IssueActionMutation,
   type IssueActionSelection,
 } from '../model/issue-action-model';
-import { issueStatusLabel, issueStatusTone } from '../model/issue-presentation';
+import { issueNextStep } from '../model/issue-detail-summary';
 import {
   IssueActionConfirmation,
   type IssueActionConfirmationState,
@@ -55,6 +55,7 @@ export function IssueActions({
   const noteRequired = issueActionNoteRequired(issue.status, selection);
   const noteLabel = issueActionNoteLabel(issue.status, selection);
   const count = [...note.trim()].length;
+  const nextStep = issueNextStep(issue.status);
 
   useEffect(() => {
     onDirtyChange(dirty);
@@ -125,19 +126,10 @@ export function IssueActions({
     >
       <div className="issue-detail-section-heading">
         <div>
-          <p className="issue-actions__eyebrow">관리자 처리</p>
-          <h2 id={headingId}>처리 내용을 기록하세요</h2>
+          <h2 id={headingId}>처리 기록</h2>
         </div>
-        <span
-          className={`issue-detail-badge issue-detail-badge--${issueStatusTone(issue.status)}`}
-        >
-          {issueStatusLabel(issue.status)}
-        </span>
       </div>
-      <p className="issue-actions__intro">
-        확인한 내용과 조치 결과를 남기면 담당 관리자와 함께 처리 이력에
-        기록됩니다.
-      </p>
+      <p className="issue-actions__intro">{nextStep.description}</p>
       {unavailable ? (
         <p className="issue-detail-notice">
           이 기록에는 더 이상 변경 내용을 추가할 수 없습니다. 저장된 내용과
@@ -180,7 +172,13 @@ export function IssueActions({
                     />
                     <span>
                       <strong>{option.label}</strong>
-                      <span>{option.description}</span>
+                      <span>
+                        {option.value === nextStep.selection
+                          ? '다음 처리'
+                          : option.value === 'NOTE'
+                            ? '상태 유지'
+                            : '처리 완료'}
+                      </span>
                     </span>
                   </label>
                 ))}
@@ -202,7 +200,7 @@ export function IssueActions({
               <textarea
                 id={noteId}
                 ref={noteInput}
-                rows={5}
+                rows={3}
                 value={note}
                 disabled={locked || !!confirmation}
                 aria-required={noteRequired}
@@ -214,9 +212,6 @@ export function IssueActions({
                 }}
               />
               <p id={hintId} className="issue-actions__hint">
-                {noteRequired
-                  ? '확인한 내용과 처리 사유를 입력해 주세요.'
-                  : '필요한 경우 확인한 내용을 함께 남겨 주세요.'}{' '}
                 최대 2000자 ·{' '}
                 <span
                   className={count > 2000 ? 'issue-actions__error' : undefined}
@@ -272,7 +267,9 @@ export function IssueActions({
                   입력 초기화
                 </Button>
                 <Button type="submit" loading={busy}>
-                  {selection === 'NOTE' ? '메모 저장' : '변경 내용 확인'}
+                  {selection === 'NOTE'
+                    ? '메모 저장'
+                    : `${issueActionOptions(issue.status).find((option) => option.value === selection)?.label} 확인`}
                 </Button>
               </div>
             )}

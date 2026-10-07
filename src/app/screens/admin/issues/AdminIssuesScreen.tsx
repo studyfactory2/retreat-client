@@ -71,9 +71,8 @@ function IssuesWorkspace({
     <div className="admin-issues">
       <header className="issue-list-heading">
         <div>
-          <p className="issue-list-eyebrow">휴양소 운영 관리</p>
           <h1>이상사항</h1>
-          <p>접수된 불편사항과 사진, 그동안의 처리 기록을 확인하세요.</p>
+          <p>신고 확인부터 조치 기록까지 한곳에서 관리하세요.</p>
         </div>
         <div className="issue-list-heading__actions">
           <Link
@@ -151,7 +150,7 @@ function IssuesWorkspace({
               filters.status === 'RESOLVED'
                 ? issueStatusLabel(filters.status)
                 : '전체 상태'}{' '}
-              · 조회된 신고{' '}
+              · 신고{' '}
               <strong>{resource.data.total.toLocaleString('ko-KR')}건</strong>
             </p>
             <span>

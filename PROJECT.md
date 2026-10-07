@@ -1934,3 +1934,58 @@ HTTP, PostgreSQL or S3 acceptance. The earlier local-port restriction remains
 unresolved; no browser visual verification is claimed. The existing large-bundle
 warning remains, and the build used example HTTPS origins. No schema/migrations,
 dependencies, permanent tests, environment files, Git writes or services were changed.
+
+## Slice 6A — shared administrator shell and clearer issue pages
+
+All authenticated administrator routes now use the approved compact dashboard
+shell: ITCEN text branding, discreet OH BOK operator credit, consistent header,
+sidebar, content gutters and mobile bottom navigation. The dashboard-only shell
+stylesheet was consolidated into `layout/styles/admin-layout.css`. Session/logout,
+route activation, skip-link/path-change focus, safe-area padding and fixed-nav
+clearance remain; native disclosure summaries also receive scroll clearance.
+Dashboard and other administrator screen bodies, guest/staff screens, shared
+UI/global styles and API/authentication code are unchanged.
+
+The issue list keeps its live property/status/urgency/cancellation/date filters,
+URL state, paging and newest-report ordering. Smaller headings, filter spacing
+and operational rows reduce scrolling. All filter controls remain visible, with
+paired fields on small screens. Cancellation stays separate from processing
+status. Both the title and detail link preserve the filter/page return context.
+Loading, invalid-filter, empty and error states use compact scoped styling.
+
+Issue detail prioritizes the explicitly labeled current saved title, property,
+location, description, processing status and urgency. Cancellation reason remains
+visible. A presentation-only comparison identifies changed title, description,
+category or location relative to the original report. Original photo evidence
+appears beside/before the action workspace. Desktop uses two columns; smaller
+screens stack them. Original reporter/source/full content and complete paginated
+history use keyboard-accessible native disclosures. The history summary shows the
+latest event date/type, a short note preview and photo count, without repeating a
+full latest-event record. Every historical snapshot/photo remains accessible.
+
+A compact toolbar groups urgency, earlier-report relationship and cancellation
+controls. The existing note/status editor retains its initial note selection and
+highlights the appropriate next-step option without selecting or saving it.
+Only one editor remains mounted. Reasons, confirmation steps, page-local dirty
+navigation/document-unload protection, duplicate locks, uncertain/conflict recovery,
+credential fencing and lifecycle-success fresh detail/history reads are preserved.
+The existing global sidebar/browser-Back guard boundary is unchanged. No endpoint,
+backend/schema, dependency, credential or persistence changes are included.
+
+Verification: integrated Yarn TypeScript, non-fixing Oxlint, exact repository
+Prettier on changed source, and a production build with sample public HTTPS
+configuration passed. Temporary synthetic transport/React/model/SSR probes covered
+1,121 assertions for issue actions/lifecycle, confirmations and editor guards,
+URL filters/paging, shell/session/navigation and summary presentation. Source
+comparisons confirmed 459 preserved files, including unchanged feature/hooks,
+dashboard/other bodies and guest/staff flows. These are synthetic checks, not
+real browser/mobile or authenticated database acceptance. No repository tests
+were added. The existing main-bundle size warning remains (about 1,119 kB).
+
+Actual browser visual acceptance remains pending: automatic approval review
+rejected opening `http://localhost:5175/admin/issues` because the earlier explicit
+port restriction was not clearly revoked by an ambiguous answer. An explicit
+port-specific authorization question is pending. No alternate access, new server,
+service restart or live-data mutation was used. Thus 320px/390px/tablet/desktop
+layout, photo rendering, focus/touch behavior, fixed-nav clearance and before/after
+screenshots have not yet been verified in a browser for this slice.

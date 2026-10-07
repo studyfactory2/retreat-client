@@ -18,6 +18,8 @@ import { issueLifecycleSavedMessage } from '../model/issue-lifecycle-model';
 import { IssueActions } from './IssueActions';
 import { IssueNavigationNotice } from './IssueNavigationNotice';
 import { IssueRecord } from './IssueRecord';
+import { IssueCurrentSummary } from './IssueCurrentSummary';
+import { issueEventLabel, issueTime } from '../model/issue-presentation';
 import { IssuePhotos } from './IssuePhotos';
 import { IssueHistory } from './IssueHistory';
 import { IssueEventSummary } from './IssueEventSummary';
@@ -112,11 +114,7 @@ export function IssueDetailContent({
     <div className="issue-detail">
       <header className="issue-detail-heading">
         <div>
-          <p className="issue-detail-eyebrow">신고 내용과 처리 기록</p>
           <h1>이상사항 상세</h1>
-          <p>
-            {issue.property.name} · {issue.category.name}
-          </p>
         </div>
         <div className="issue-detail-actions">
           <Link
@@ -169,8 +167,7 @@ export function IssueDetailContent({
         <div className="issue-detail-cancelled" role="status">
           <strong>취소된 이상사항입니다.</strong>
           <p>
-            최초 신고·사진·이력은 유지됩니다. 목록에서 취소만 또는 전체를
-            선택하면 찾을 수 있습니다.
+            처리 상태와 증거는 유지됩니다. {issueTime(issue.cancelledAt)} 취소
           </p>
           <p className="issue-detail-text">
             <strong>취소 사유: </strong>
@@ -178,170 +175,177 @@ export function IssueDetailContent({
           </p>
         </div>
       )}
-      <section aria-labelledby="issue-current-heading">
-        <div className="issue-detail-section-heading">
-          <h2 id="issue-current-heading">현재 저장된 내용</h2>
-          <p className="issue-detail-caption">
-            버전 {issue.currentVersion} · 한국 시간
-          </p>
+      <div className="issue-detail-workspace">
+        <div className="issue-detail-overview">
+          <IssueCurrentSummary issue={issue} original={report.record} />
+          <section
+            className="issue-detail-card issue-original-evidence"
+            aria-label="최초 신고 사진"
+          >
+            <IssuePhotos
+              key={`report:${report.id}`}
+              event={report}
+              title="최초 신고 사진"
+              token={token}
+              rejectSession={rejectSession}
+            />
+          </section>
         </div>
-        <IssueRecord
-          record={issue}
-          title="현재 이상사항"
-          showSourceLink
-          onNavigate={openIssue}
-        />
-      </section>
-      <fieldset
-        className="issue-detail-action-boundary"
-        disabled={navigation.pending}
-        aria-label="이상사항 처리"
-      >
-        <IssueManagementSummary
-          issue={issue}
-          activeEditor={activeEditor}
-          locked={busy || blocked || navigation.pending}
-          linked={linked.resource}
-          onLinkedRefresh={linked.refresh}
-          onEdit={openEditor}
-          onNavigate={openIssue}
-        />
-        {issue.currentVersion <= 2_147_483_646 && (
-          <div className="issue-lifecycle-actions">
-            {issue.cancelledAt === null ? (
-              <Button
-                className="admin-button-secondary issue-lifecycle-danger"
-                disabled={
-                  busy ||
-                  blocked ||
-                  navigation.pending ||
-                  activeEditor === 'cancel'
-                }
-                aria-expanded={activeEditor === 'cancel'}
-                onClick={() => openEditor('cancel')}
-              >
-                신고 취소
-              </Button>
-            ) : (
-              <Button
-                className="admin-button-secondary"
-                disabled={
-                  busy ||
-                  blocked ||
-                  navigation.pending ||
-                  activeEditor === 'restore'
-                }
-                aria-expanded={activeEditor === 'restore'}
-                onClick={() => openEditor('restore')}
-              >
-                신고 복원
-              </Button>
+        <fieldset
+          className="issue-detail-action-boundary issue-detail-card"
+          disabled={navigation.pending}
+          aria-label="이상사항 처리"
+        >
+          <IssueManagementSummary
+            issue={issue}
+            activeEditor={activeEditor}
+            locked={busy || blocked || navigation.pending}
+            linked={linked.resource}
+            onLinkedRefresh={linked.refresh}
+            onEdit={openEditor}
+            onNavigate={openIssue}
+          >
+            {issue.currentVersion <= 2_147_483_646 && (
+              <div className="issue-lifecycle-actions">
+                {issue.cancelledAt === null ? (
+                  <Button
+                    className="admin-button-secondary issue-lifecycle-danger"
+                    disabled={
+                      busy ||
+                      blocked ||
+                      navigation.pending ||
+                      activeEditor === 'cancel'
+                    }
+                    aria-expanded={activeEditor === 'cancel'}
+                    onClick={() => openEditor('cancel')}
+                  >
+                    신고 취소
+                  </Button>
+                ) : (
+                  <Button
+                    className="admin-button-secondary"
+                    disabled={
+                      busy ||
+                      blocked ||
+                      navigation.pending ||
+                      activeEditor === 'restore'
+                    }
+                    aria-expanded={activeEditor === 'restore'}
+                    onClick={() => openEditor('restore')}
+                  >
+                    신고 복원
+                  </Button>
+                )}
+              </div>
             )}
-          </div>
-        )}
-        {activeEditor === 'cancel' || activeEditor === 'restore' ? (
-          <IssueLifecycleEditor
-            key={`${issue.id}:${issue.currentVersion}:${activeEditor}`}
-            issue={issue}
-            action={activeEditor}
-            mutation={mutation}
-            onSubmit={(command) => {
-              if (!navigation.pending) void submit(command);
-            }}
-            onReload={reload}
-            onDirtyChange={setDirty}
-            onClose={() => openEditor('record')}
-          />
-        ) : activeEditor === 'record' ? (
-          <IssueActions
-            key={`${issue.id}:${issue.currentVersion}:record`}
-            issue={issue}
-            mutation={mutation}
-            onSubmit={(command) => {
-              if (!navigation.pending) void submit(command);
-            }}
-            onReload={reload}
-            onDirtyChange={setDirty}
-          />
-        ) : (
-          <IssueManagementEditor
-            key={`${issue.id}:${issue.currentVersion}:${activeEditor}`}
-            issue={issue}
-            kind={activeEditor}
-            mutation={mutation}
-            candidates={candidates.resource}
-            page={candidatePage}
-            onPage={setCandidatePage}
-            onCandidatesRefresh={candidates.refresh}
-            onSubmit={(command) => {
-              if (!navigation.pending) void submit(command);
-            }}
-            onReload={reload}
-            onDirtyChange={setDirty}
-            onClose={() => openEditor('record')}
-          />
-        )}
-      </fieldset>
-      <section
-        className="issue-original-report"
-        aria-labelledby="issue-report-heading"
-      >
-        <div className="issue-detail-section-heading">
-          <div>
-            <h2 id="issue-report-heading">최초 신고</h2>
-            <p className="issue-detail-caption">
-              처리 이력이 추가되어도 최초 신고자와 당시 내용은 별도로
-              보존됩니다.
-            </p>
-          </div>
-        </div>
-        <div className="issue-detail-card">
+          </IssueManagementSummary>
+          {activeEditor === 'cancel' || activeEditor === 'restore' ? (
+            <IssueLifecycleEditor
+              key={`${issue.id}:${issue.currentVersion}:${activeEditor}`}
+              issue={issue}
+              action={activeEditor}
+              mutation={mutation}
+              onSubmit={(command) => {
+                if (!navigation.pending) void submit(command);
+              }}
+              onReload={reload}
+              onDirtyChange={setDirty}
+              onClose={() => openEditor('record')}
+            />
+          ) : activeEditor === 'record' ? (
+            <IssueActions
+              key={`${issue.id}:${issue.currentVersion}:record`}
+              issue={issue}
+              mutation={mutation}
+              onSubmit={(command) => {
+                if (!navigation.pending) void submit(command);
+              }}
+              onReload={reload}
+              onDirtyChange={setDirty}
+            />
+          ) : (
+            <IssueManagementEditor
+              key={`${issue.id}:${issue.currentVersion}:${activeEditor}`}
+              issue={issue}
+              kind={activeEditor}
+              mutation={mutation}
+              candidates={candidates.resource}
+              page={candidatePage}
+              onPage={setCandidatePage}
+              onCandidatesRefresh={candidates.refresh}
+              onSubmit={(command) => {
+                if (!navigation.pending) void submit(command);
+              }}
+              onReload={reload}
+              onDirtyChange={setDirty}
+              onClose={() => openEditor('record')}
+            />
+          )}
+        </fieldset>
+      </div>
+      <details className="issue-detail-disclosure issue-original-report">
+        <summary>
+          <span>
+            <strong>최초 신고</strong>
+            <span className="issue-detail-caption">
+              신고 당시 내용 · 신고자 · 출처
+            </span>
+          </span>
+          <span className="issue-disclosure-indicator" aria-hidden="true">
+            +
+          </span>
+        </summary>
+        <div className="issue-disclosure-body">
           <IssueEventSummary event={report} />
-          <p className="issue-detail-notice">
+          <p className="issue-detail-caption">
             {report.actor.role === 'GUEST'
-              ? '이용객이 직접 입력한 신고자 정보입니다.'
+              ? '신고자 정보는 이용객이 직접 입력했습니다.'
               : report.actor.role === 'STAFF'
-                ? '신고 당시 휴양소에 배정된 직원 정보가 기록되었습니다.'
-                : '최초 신고 당시 기록된 작성자 정보입니다.'}
+                ? '신고 당시 배정된 직원 정보입니다.'
+                : '최초 신고 당시 작성자 정보입니다.'}
           </p>
           <IssueRecord
             record={report.record}
-            title="최초 신고 내용"
+            title="최초 신고 당시 내용"
+            showSourceLink
             onNavigate={openIssue}
           />
-          <IssuePhotos
-            key={`report:${report.id}`}
-            event={report}
+        </div>
+      </details>
+      <details className="issue-detail-disclosure issue-audit-disclosure">
+        <summary>
+          <span>
+            <strong>
+              처리 이력{' '}
+              <span className="issue-disclosure-count">
+                버전 {issue.currentVersion}
+              </span>
+            </strong>
+            <span className="issue-detail-caption">
+              최근: {issueEventLabel(latestEvent.type)} ·{' '}
+              {issueTime(latestEvent.createdAt)}
+              {latestEvent.photos.length > 0
+                ? ` · 사진 ${latestEvent.photos.length}장`
+                : ''}
+            </span>
+            {latestEvent.note && (
+              <span className="issue-history-preview">{latestEvent.note}</span>
+            )}
+          </span>
+          <span className="issue-disclosure-indicator" aria-hidden="true">
+            +
+          </span>
+        </summary>
+        <div className="issue-disclosure-body">
+          <IssueHistory
+            detail={detail}
             token={token}
             rejectSession={rejectSession}
+            onRefreshDetail={reload}
+            onNavigate={openIssue}
           />
         </div>
-      </section>
-      {latestEvent.id !== report.id && (
-        <section
-          className="issue-detail-card"
-          aria-labelledby="issue-latest-heading"
-        >
-          <div className="issue-detail-section-heading">
-            <h2 id="issue-latest-heading">최근 처리 기록</h2>
-            <p className="issue-detail-caption">버전 {latestEvent.version}</p>
-          </div>
-          <IssueEventSummary event={latestEvent} />
-          <IssuePhotos
-            key={`latest:${latestEvent.id}`}
-            event={latestEvent}
-            token={token}
-            rejectSession={rejectSession}
-          />
-        </section>
-      )}
-      <IssueHistory
-        detail={detail}
-        token={token}
-        rejectSession={rejectSession}
-        onRefreshDetail={reload}
-        onNavigate={openIssue}
-      />
+      </details>
     </div>
   );
 }

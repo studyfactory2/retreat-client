@@ -1,34 +1,37 @@
 .issue-management-summary {
-  display: grid;
-  gap: 12px;
   min-width: 0;
 }
-.issue-management-summary .issue-detail-card,
-.issue-management-editor.issue-detail-card {
-  padding: 18px 20px;
-  box-shadow: none;
+.issue-management-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding-bottom: 14px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--color-border);
 }
-.issue-management-summary h2,
+.issue-management-toolbar > .ui-button,
+.issue-management-toolbar .issue-lifecycle-actions > .ui-button {
+  padding-inline: 10px;
+  min-height: 44px;
+  font-size: 12px;
+}
+.issue-management-toolbar .issue-lifecycle-actions {
+  display: contents;
+}
+.issue-management-recurrence {
+  padding: 12px;
+  margin: -4px 0 16px;
+  background: #f5f8fe;
+  border: 1px solid #e2e9f6;
+  border-radius: 8px;
+}
+.issue-management-recurrence h3 {
+  margin-bottom: 5px;
+  font-size: 12px;
+}
 .issue-management-editor h2 {
   font-size: 16px;
-}
-.issue-management-urgency,
-.issue-management-urgency > div {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-.issue-management-urgency > div {
-  justify-content: flex-start;
-}
-.issue-management-recurrence .issue-detail-section-heading {
-  margin-bottom: 12px;
-  align-items: center;
-}
-.issue-management-recurrence > .issue-detail-caption {
-  margin: 10px 0 0;
 }
 .issue-linked-report {
   display: grid;
@@ -56,13 +59,13 @@
   justify-self: start;
 }
 .issue-management-editor {
-  margin-top: 14px;
+  margin-top: 0;
 }
 .issue-management-editor > .issue-detail-caption {
-  margin: -5px 0 18px;
+  margin: -3px 0 12px;
 }
 .issue-management-editor .issue-actions__note {
-  margin-top: 18px;
+  margin-top: 14px;
 }
 .issue-management-editor .issue-actions__note textarea {
   min-height: 92px;
@@ -154,10 +157,6 @@
   line-height: 1.7;
 }
 @media (max-width: 640px) {
-  .issue-management-summary .issue-detail-card,
-  .issue-management-editor.issue-detail-card {
-    padding: 15px;
-  }
   .issue-candidate {
     display: grid;
     grid-template-columns: 18px minmax(0, 1fr);
@@ -166,8 +165,4 @@
     grid-column: 2;
     justify-self: start;
   }
-}
-
-.issue-management-summary + .issue-actions {
-  margin-top: 14px;
 }

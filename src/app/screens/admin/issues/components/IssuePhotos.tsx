@@ -9,10 +9,12 @@ import { issueEventLabel, issueTime } from '../model/issue-presentation';
 
 export function IssuePhotos({
   event,
+  title = '첨부 사진',
   token,
   rejectSession,
 }: {
   event: AdminIssueEventDto;
+  title?: string;
   token: string;
   rejectSession: (token: string) => void;
 }) {
@@ -30,20 +32,15 @@ export function IssuePhotos({
   return (
     <section className="issue-photos">
       <div className="issue-detail-section-heading">
-        <h4>첨부 사진</h4>
+        <h3>{title}</h3>
         <p className="issue-detail-caption">
           {event.photos.length}장 · 버전 {event.version}
         </p>
       </div>
       {event.photos.length === 0 ? (
-        <p className="issue-detail-caption">
-          이 이력에 첨부된 사진이 없습니다.
-        </p>
+        <p className="issue-detail-caption">첨부된 사진이 없습니다.</p>
       ) : (
         <>
-          <p className="issue-detail-caption">
-            사진 보기를 누르면 이 이력에 저장된 사진을 불러옵니다.
-          </p>
           <ul className="issue-photo-list">
             {event.photos.map((item, index) => (
               <li key={item.id}>
