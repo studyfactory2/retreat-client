@@ -46,7 +46,10 @@ tokens. Screen-local code remains with its screen. Avoid empty scaffolding and
 one growing file containing every DTO. The visual direction follows the approved
 blue/navy/white references: cobalt primary actions, deep navy headings, white
 surfaces, cool pale backgrounds, restrained shadows and generous spacing. Keep
-OH BOK branding; reference mockups do not define additional feature scope. Use
+ITCEN as the primary text brand on the redesigned admin dashboard and guest home,
+with OH BOK credited discreetly as the operator. Other screens keep their current
+branding until their approved redesign slice. No approved official logo asset is
+present; do not fabricate one. Reference mockups do not define extra scope. Use
 semantic HTML, keyboard focus, readable contrast, and phone-first guest/staff
 layouts. Administrator pages also support desktop/tablet.
 
@@ -1631,3 +1634,54 @@ network was blocked. These are layout and synthetic lifecycle checks, not real
 QR/JWT/HTTP/PostgreSQL/S3 or physical-device acceptance. The existing large main
 bundle warning remains. No repository test files were added. Build checks used
 sample HTTPS origins; deployment must rebuild with actual production origins.
+
+
+## Redesign slice 1 — administrator dashboard and guest home
+
+The dashboard uses compact scheduled-arrival/departure summaries with current
+checklist breakdowns, selected-date maintenance rows, and a separate current-work
+column for open issues and unfinished maintenance across all dates. Starts and
+completions are never subtracted to infer unfinished work. Past dates continue
+to use current saved evidence. Detailed count semantics are available in a native
+집계 기준 disclosure; the schedule/occupancy distinction and current-work scope
+remain visible. Errors/loading never substitute zero counts.
+
+Dashboard drilldowns live in model/dashboard-links: calendar links retain the
+selected date/property and open that day's full schedule; maintenance started
+and submitted lists retain their distinct date fields, while unfinished work and
+NEW/IN_PROGRESS issue lists omit dates. Existing fetch hooks, unknown-response
+validation, URL filters, session rejection and manual refresh remain unchanged.
+AdminLayout opts into the compact header, ITCEN text branding and mobile bottom
+navigation treatment only for the dashboard route, preserving all active-route
+logic and fixed-navigation clearance. Other administrator screens retain their
+layout. The operator is identified as OH BOK, including on mobile.
+
+Guest home separates its compact property header and checklist actions into
+screen-local components. Shared QR supports arrival/departure templates, the
+existing guide and issue reporting. Personal stay links retain planned Seoul
+schedule details and show the vehicle card only when collection is enabled.
+Unavailable templates remain noninteractive. Guide publication is not exposed by
+the home context, so the working guide route and its authoritative unpublished
+state remain. Personal links do not gain QR-only issue actions. Existing vehicle
+save/clear/reconfirmation/conflict handling and all entry access states remain.
+
+GuestFrame opts into home-only styles via view === home. The specificity of
+shared-frame overrides is higher than the base entry styles so CSS import order
+does not alter home spacing or navigation clearance. Guide/start/report/draft and
+staff layouts are unchanged. Branding uses plain text because no approved logo
+assets exist in the repository. This slice adds no APIs, dependencies, schema,
+PWA, contact/urgency, recurrence or record-correction functionality.
+
+Verification: Yarn typecheck, warning-free Oxlint, exact changed-source Prettier,
+and a production build passed. Temporary probes passed 95 dashboard/guest fixture
+and navigation assertions plus 38 focused guest render assertions. These are
+synthetic model/SSR checks with fixture data and mocked hooks, not interactive
+browser or authenticated backend acceptance. Standalone HTML fixtures cover
+normal, long-name, empty, loading, error, unavailable and vehicle review states.
+The browser tool rejected file URLs, and no approved existing preview was
+available during verification; mobile/tablet/desktop layout, keyboard interactions
+and actual overflow therefore remain unverified. Do not describe SSR output as
+screenshots. No repository test files were added. The pre-existing large-bundle
+warning remains. The build used example HTTPS origins and must be rebuilt with
+production origins at deployment. All backend source and staff screens remain
+unchanged; Git staging/commits, environment files and services remain user-owned.

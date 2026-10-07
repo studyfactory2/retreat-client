@@ -1,13 +1,18 @@
 import { useEffect } from 'react';
-import { NavLink, Outlet, useLocation } from 'react-router-dom';
+import { matchPath, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { appRoutes } from '../../../core/router/routes';
 import { useAdminSession } from '../../../core/session/use-admin-session';
 import { AdminNavigation } from './components/AdminNavigation';
 import './styles/admin-layout.css';
+import './styles/admin-dashboard-layout.css';
 
 export function AdminLayout() {
   const { state, logout } = useAdminSession();
   const { pathname } = useLocation();
+  const isDashboard = !!matchPath(
+    { path: appRoutes.admin, end: true },
+    pathname,
+  );
 
   useEffect(() => {
     document.getElementById('main-content')?.focus({ preventScroll: true });
@@ -17,7 +22,9 @@ export function AdminLayout() {
   if (state.status !== 'authenticated') return null;
 
   return (
-    <div className="admin-layout">
+    <div
+      className={`admin-layout${isDashboard ? ' admin-layout--dashboard' : ''}`}
+    >
       <a
         className="admin-layout__skip"
         href="#main-content"
@@ -35,9 +42,19 @@ export function AdminLayout() {
         <NavLink
           className="admin-layout__brand"
           to={appRoutes.admin}
-          aria-label="오복 휴양소 관리 홈"
+          aria-label={
+            isDashboard ? 'ITCEN 휴양소 관리 홈' : '오복 휴양소 관리 홈'
+          }
         >
-          OH BOK<span>RETREAT</span>
+          {isDashboard ? (
+            <>
+              ITCEN<span>휴양소 관리</span>
+            </>
+          ) : (
+            <>
+              OH BOK<span>RETREAT</span>
+            </>
+          )}
         </NavLink>
         <span className="admin-layout__workspace">휴양소 관리</span>
         <div className="admin-layout__account">
@@ -67,13 +84,19 @@ export function AdminLayout() {
           <AdminNavigation />
         </div>
         <div className="admin-layout__signature">
-          <span aria-hidden="true" />
-          <p>
-            편안한 쉼을 위한
-            <br />
-            세심한 관리.
-          </p>
-          <small>OH BOK RETREAT</small>
+          {isDashboard ? (
+            <small>운영 · OH BOK</small>
+          ) : (
+            <>
+              <span aria-hidden="true" />
+              <p>
+                편안한 쉼을 위한
+                <br />
+                세심한 관리.
+              </p>
+              <small>OH BOK RETREAT</small>
+            </>
+          )}
         </div>
       </aside>
 

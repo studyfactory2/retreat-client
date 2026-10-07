@@ -23,9 +23,12 @@ export function AdminNavigation() {
       (to === appRoutes.adminCalendar && stayRoute)
     );
   }
+  const morePage = !!matchPath(
+    { path: appRoutes.adminMore, end: true },
+    pathname,
+  );
   const moreActive =
-    pathname === appRoutes.adminMore ||
-    adminSecondaryMenu.some((item) => activeRoute(item.to));
+    morePage || adminSecondaryMenu.some((item) => activeRoute(item.to));
   return (
     <nav aria-label="관리자 메뉴">
       {[...adminPrimaryMenu, ...adminSecondaryMenu].map((item) => {
@@ -51,13 +54,7 @@ export function AdminNavigation() {
       <Link
         className={`admin-layout__nav-link admin-layout__nav-link--more${moreActive ? ' active' : ''}`}
         to={appRoutes.adminMore}
-        aria-current={
-          moreActive
-            ? pathname === appRoutes.adminMore
-              ? 'page'
-              : 'location'
-            : undefined
-        }
+        aria-current={moreActive ? (morePage ? 'page' : 'location') : undefined}
       >
         <AdminMenuIcon name="more" />
         <span>더보기</span>

@@ -51,8 +51,8 @@ export function GuestStayVehicleCard({
         <span className="guest-badge">{badge}</span>
       </div>
       <p className="guest-vehicle-intro">
-        관리자에게 전달할 차량번호 한 개를 입력해 주세요. 차량번호의 법적 유효성
-        확인이나 주차 출입 등록을 위한 기능은 아닙니다.
+        관리자에게 전달할 차량번호입니다. 주차 출입 등록이나 차량번호의 법적
+        유효성 확인은 지원하지 않습니다.
       </p>
 
       {snapshot && (
@@ -135,9 +135,9 @@ export function GuestStayVehicleCard({
               }}
             />
             <p id="guest-vehicle-help" className="guest-hint">
-              공백을 제외한 3~20자 · 숫자를 포함한 한글, 영문, 숫자, 하이픈(-)
+              숫자 포함 3~20자 · 한글, 영문, 숫자, 하이픈(-)
               <br />
-              일반 공백은 제거되고 영문은 대문자로 저장됩니다.
+              일반 공백은 빼고 영문은 대문자로 저장합니다.
             </p>
           </div>
           <div className="guest-vehicle-actions">
@@ -210,8 +210,8 @@ export function GuestStayVehicleCard({
         </Button>
       )}
       <p className="guest-hint guest-vehicle-leave-hint">
-        입력한 내용은 저장 버튼을 눌러야 반영됩니다. 저장하기 전에 화면을 닫거나
-        이동하면 입력 내용이 사라질 수 있습니다.
+        저장 버튼을 눌러야 반영됩니다. 저장 전 화면을 닫거나 이동하면 입력
+        내용이 사라질 수 있습니다.
       </p>
     </section>
   );

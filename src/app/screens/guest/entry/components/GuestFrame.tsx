@@ -2,6 +2,7 @@ import type { ReactNode, RefObject } from 'react';
 import { Link, type To } from 'react-router-dom';
 import type { GuestView } from '../model/guest-entry-model';
 import { GuestIcon } from './GuestIcon';
+import '../styles/guest-home.css';
 
 export function GuestFrame({
   children,
@@ -26,9 +27,10 @@ export function GuestFrame({
   onRefresh?: () => void;
   confirmNavigation?: (href: string) => boolean;
 }) {
+  const homePresentation = view === 'home';
   return (
     <div
-      className={`guest-entry${ready ? ' guest-entry--navigable' : ''}`}
+      className={`guest-entry${homePresentation ? ' guest-entry--home' : ''}${ready ? ' guest-entry--navigable' : ''}`}
       onClickCapture={(event) => {
         if (
           event.target instanceof Element &&
@@ -58,13 +60,17 @@ export function GuestFrame({
             <Link
               className="guest-brand"
               to={home}
-              aria-label="오복 이용 안내 홈"
+              aria-label={
+                homePresentation ? '아이티센 이용 안내 홈' : '오복 이용 안내 홈'
+              }
             >
-              OH BOK<span>RETREAT</span>
+              {homePresentation ? 'ITCEN' : 'OH BOK'}
+              <span>{homePresentation ? '휴양소 이용 안내' : 'RETREAT'}</span>
             </Link>
           ) : (
             <div className="guest-brand">
-              OH BOK<span>RETREAT</span>
+              {homePresentation ? 'ITCEN' : 'OH BOK'}
+              <span>{homePresentation ? '휴양소 이용 안내' : 'RETREAT'}</span>
             </div>
           )}
           <div className="guest-header__tools">
@@ -93,7 +99,13 @@ export function GuestFrame({
         {children}
       </main>
       <footer className="guest-footer">
-        머무는 모든 순간에, 오복이 함께합니다.
+        {homePresentation ? (
+          <>
+            운영 <strong>OH BOK</strong>
+          </>
+        ) : (
+          '머무는 모든 순간에, 오복이 함께합니다.'
+        )}
       </footer>
       {ready && (
         <nav

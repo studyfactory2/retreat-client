@@ -1,5 +1,4 @@
 import { useSearchParams } from 'react-router-dom';
-import { appRoutes } from '../../../core/router/routes';
 import { useAdminSession } from '../../../core/session/use-admin-session';
 import {
   formatSeoulUpdatedAt,
@@ -8,10 +7,9 @@ import {
 import { useAdminPropertyOptions } from '../../../features/admin-properties/use-admin-property-options';
 import { Button } from '../../../shared/ui/Button/Button';
 import { PageState } from '../../../shared/ui/PageState/PageState';
-import { issueSearch } from '../issues/model/issue-filters';
-import { maintenanceSearch } from '../maintenance/model/maintenance-filters';
 import { DashboardFilters } from './components/DashboardFilters';
 import { DashboardOverview } from './components/DashboardOverview';
+import { dashboardLinks } from './model/dashboard-links';
 import { readDashboardFilters } from './model/dashboard-filters';
 import { useAdminDashboard } from './hooks/use-admin-dashboard';
 import './styles/dashboard.css';
@@ -43,34 +41,7 @@ function DashboardWorkspace({
   const data =
     dashboard.resource.status === 'ready' ? dashboard.resource.data : undefined;
   const selectedDate = input.date ?? data?.date ?? getSeoulToday();
-  const maintenanceScope = {
-    page: 1,
-    propertyId: input.propertyId,
-    dateField: 'STARTED',
-    view: 'ALL',
-  } as const;
-  const maintenanceLinks = {
-    started: `${appRoutes.adminMaintenance}${maintenanceSearch({
-      ...maintenanceScope,
-      from: selectedDate,
-      to: selectedDate,
-    })}`,
-    completed: `${appRoutes.adminMaintenance}${maintenanceSearch({
-      ...maintenanceScope,
-      dateField: 'SUBMITTED',
-      view: 'COMPLETED',
-      from: selectedDate,
-      to: selectedDate,
-    })}`,
-    unfinished: `${appRoutes.adminMaintenance}${maintenanceSearch({
-      ...maintenanceScope,
-      view: 'UNFINISHED',
-    })}`,
-  };
-  const issueLinks = {
-    new: `${appRoutes.adminIssues}${issueSearch({ page: 1, propertyId: input.propertyId, status: 'NEW' })}`,
-    inProgress: `${appRoutes.adminIssues}${issueSearch({ page: 1, propertyId: input.propertyId, status: 'IN_PROGRESS' })}`,
-  };
+  const links = dashboardLinks(selectedDate, input.propertyId);
   const propertyOptions =
     properties.resource.status === 'ready' ? properties.resource.data : [];
   const propertyName = input.propertyId
@@ -90,11 +61,8 @@ function DashboardWorkspace({
     <div className="admin-dashboard">
       <header className="dashboard-heading">
         <div>
-          <p className="dashboard-heading__eyebrow">OPERATIONS OVERVIEW</p>
+          <p className="dashboard-heading__eyebrow">관리자 대시보드</p>
           <h1>운영 현황</h1>
-          <p className="dashboard-heading__description">
-            날짜별 이용 현황과 현재 확인할 업무를 한눈에 살펴보세요.
-          </p>
         </div>
         <Button
           className="admin-button-secondary"
@@ -130,9 +98,6 @@ function DashboardWorkspace({
             </button>
           </div>
         )}
-        <p className="dashboard-query__hint">
-          한국 시간 기준 · 전체 휴양소에는 비활성 휴양소도 포함됩니다.
-        </p>
       </section>
 
       <p
@@ -184,7 +149,6 @@ function DashboardWorkspace({
             >
               <span className="dashboard-state__spinner" aria-hidden="true" />
               <h2>운영 현황을 불러오고 있습니다</h2>
-              <p>선택한 조건의 기록을 확인하고 있습니다.</p>
             </div>
           )}
           {dashboard.resource.status === 'error' && (
@@ -200,12 +164,14 @@ function DashboardWorkspace({
           {data && (
             <DashboardOverview
               data={data}
-              maintenanceLinks={maintenanceLinks}
-              issueLinks={issueLinks}
+              calendarLink={links.calendar}
+              maintenanceLinks={links.maintenance}
+              issueLinks={links.issues}
             />
           )}
         </section>
       )}
+      <footer className="dashboard-footer">운영 · OH BOK</footer>
     </div>
   );
 }

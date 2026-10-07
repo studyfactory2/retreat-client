@@ -1,6 +1,6 @@
 .admin-dashboard {
   min-width: 0;
-  max-width: 1220px;
+  max-width: 1160px;
   margin-inline: auto;
 }
 .dashboard-announcement {
@@ -15,30 +15,25 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 24px;
-  margin-bottom: 28px;
+  gap: 16px;
+  margin-bottom: 18px;
 }
 .dashboard-heading__eyebrow {
   color: var(--color-primary);
   font-size: 10px;
   font-weight: 700;
-  letter-spacing: 1.8px;
-  margin-bottom: 8px;
+  letter-spacing: 0.3px;
+  margin-bottom: 4px;
 }
 .dashboard-heading h1 {
   color: var(--color-heading);
-  font-size: clamp(28px, 3vw, 34px);
+  font-size: clamp(24px, 3vw, 28px);
   letter-spacing: -1px;
   font-weight: 650;
   line-height: 1.4;
 }
-.dashboard-heading__description {
-  margin-top: 8px;
-  color: var(--color-muted);
-  font-size: 14px;
-}
 .dashboard-query {
-  padding: 20px 24px;
+  padding: 16px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   background: var(--color-surface);
@@ -47,11 +42,11 @@
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
-  gap: 16px;
+  gap: 12px;
 }
 .dashboard-filters__field {
   display: grid;
-  gap: 8px;
+  gap: 5px;
   min-width: 0;
 }
 .dashboard-filters__field label {
@@ -63,7 +58,7 @@
 .dashboard-filters__field select {
   width: 100%;
   min-width: 0;
-  min-height: 46px;
+  min-height: 44px;
   padding: 10px 12px;
   border: 1px solid var(--color-input-border);
   border-radius: 8px;
@@ -89,13 +84,8 @@
   gap: 8px;
 }
 .dashboard-filters__actions .ui-button {
-  min-height: 46px;
-  padding: 10px 20px;
-}
-.dashboard-query__hint {
-  margin-top: 14px;
-  color: var(--color-muted);
-  font-size: 11px;
+  min-height: 44px;
+  padding: 10px 16px;
 }
 .dashboard-query__error {
   margin-top: 16px;
@@ -116,7 +106,7 @@
   font: inherit;
 }
 .dashboard-results {
-  margin-top: 24px;
+  margin-top: 16px;
 }
 .dashboard-results__meta {
   display: flex;
@@ -124,7 +114,7 @@
   justify-content: space-between;
   align-items: baseline;
   gap: 8px 16px;
-  margin-bottom: 24px;
+  margin-bottom: 12px;
   color: var(--color-muted);
   font-size: 11px;
 }
@@ -143,7 +133,7 @@
   display: grid;
   justify-items: center;
   text-align: center;
-  padding: 70px 24px;
+  padding: 40px 20px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   background: var(--color-surface);
@@ -177,24 +167,28 @@
     gap: 12px;
   }
   .dashboard-heading > .ui-button {
-    min-height: 42px;
+    min-height: 44px;
     padding: 10px 12px;
     font-size: 12px;
   }
-  .dashboard-heading__description {
-    font-size: 13px;
-  }
   .dashboard-query {
-    padding: 18px 16px;
+    padding: 12px;
   }
   .dashboard-filters {
     display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    gap: 14px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 12px;
   }
   .dashboard-filters__property {
+    grid-column: 1 / -1;
+    grid-row: 1;
     max-width: none;
     min-width: 0;
+  }
+  .dashboard-filters__actions .ui-button {
+    min-width: 44px;
+    padding-inline: 8px;
+    font-size: 13px;
   }
   .dashboard-filters__actions > .ui-button {
     flex: 1;
@@ -203,4 +197,16 @@
   .dashboard-filters__field select {
     font-size: 16px;
   }
+}
+
+.dashboard-footer {
+  margin-top: 16px;
+  color: var(--color-muted);
+  font-size: 11px;
+}
+.dashboard-state .page-state {
+  padding: 24px 20px;
+}
+.dashboard-state .page-state h1 {
+  font-size: 21px;
 }
