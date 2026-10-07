@@ -16,12 +16,21 @@ import {
   readNullableIssueTimestamp,
 } from './admin-issues-validation';
 
-export function readIssueSummary(value: unknown): AdminIssueSummaryDto {
+export function readIssueSummary(
+  value: unknown,
+  requireCancellation = false,
+): AdminIssueSummaryDto {
   const data = readIssueObject(value);
   const property = readIssueObject(data.property);
   const category = readIssueObject(data.category);
   const status = readIssueEnum(data.status, issueStatuses);
   const resolvedAt = readNullableIssueTimestamp(data.resolvedAt);
+  // Legacy summary consumers only listed active issues. Explicit cancellation
+  // browsing requires the new field so an older response cannot hide its state.
+  const cancelledAt =
+    data.cancelledAt === undefined && !requireCancellation
+      ? null
+      : readNullableIssueTimestamp(data.cancelledAt);
   if (
     typeof data.isUrgent !== 'boolean' ||
     (status === 'RESOLVED') !== (resolvedAt !== null)
@@ -45,6 +54,7 @@ export function readIssueSummary(value: unknown): AdminIssueSummaryDto {
     currentVersion: readIssueInteger(data.currentVersion, 1, 2_147_483_647),
     reportedAt: readIssueTimestamp(data.reportedAt),
     resolvedAt,
+    cancelledAt,
     updatedAt: readIssueTimestamp(data.updatedAt),
   };
 }

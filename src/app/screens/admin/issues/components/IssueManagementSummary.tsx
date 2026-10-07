@@ -9,7 +9,8 @@ import {
   issueTime,
 } from '../model/issue-presentation';
 
-export type IssueEditorKind = 'record' | 'urgency' | 'recurrence';
+export type IssueEditorKind =
+  'record' | 'urgency' | 'recurrence' | 'cancel' | 'restore';
 export function IssueManagementSummary({
   issue,
   activeEditor,

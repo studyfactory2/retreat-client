@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { useAdminSession } from '../../../core/session/use-admin-session';
 import { Button } from '../../../shared/ui/Button/Button';
@@ -39,6 +39,7 @@ function IssueWorkspace({
     token,
     rejectSession,
   );
+  const [lifecycleNotice, setLifecycleNotice] = useState<string>();
   const [search] = useSearchParams();
   const returnTo = `/admin/issues${issueSearch(readIssueFilters(search))}`;
   useEffect(() => {
@@ -79,8 +80,17 @@ function IssueWorkspace({
       adminId={adminId}
       rejectSession={rejectSession}
       returnTo={returnTo}
-      refresh={refresh}
+      refresh={() => {
+        setLifecycleNotice(undefined);
+        refresh();
+      }}
       acceptSaved={acceptSaved}
+      lifecycleNotice={lifecycleNotice}
+      clearLifecycleNotice={() => setLifecycleNotice(undefined)}
+      onLifecycleSaved={(message) => {
+        setLifecycleNotice(message);
+        refresh();
+      }}
     />
   );
 }

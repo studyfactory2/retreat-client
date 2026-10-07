@@ -1880,3 +1880,57 @@ browser/mobile acceptance. The earlier local-port restriction remains unresolved
 no browser visual acceptance is claimed. The existing large-bundle warning remains,
 and the build used example HTTPS origins. No dependencies, permanent tests,
 environment files, schema/migrations, Git writes or service operations were added.
+
+## Slice 5 — administrator issue-report cancellation and restoration
+
+Issue details now offer secondary destructive 신고 취소 for noncancelled reports,
+and 신고 복원 with the stored cancellation reason for cancelled reports. Each
+requires a trimmed nonblank reason of 1–1000 Unicode characters, a frozen review
+and explicit confirmation. Korean guidance distinguishes cancellation (mistaken/
+duplicate report) from resolution (fixed problem) and reopening (further work).
+Restoration preserves the current processing status: resolved reports stay resolved.
+Original report/photos/history, current content and source/recurrence context remain.
+
+The list adds cancellation=active|cancelled|all with 취소 제외 / 취소만 / 전체 labels.
+Omission retains active behavior. The filter survives URL navigation, pagination,
+detail entry and return; invalid or repeated values block reads until corrected.
+Cancelled rows retain their processing-status badge and add a separate 취소됨 badge.
+Property, urgency, status, report-date and descending sort behavior are unchanged.
+List summaries now expose nullable cancelledAt. Explicit cancellation-filter reads
+require that field; legacy default/recurrence summary omission maps to null. A
+cancelled recurrence candidate is rejected by the feature reader.
+
+New feature lifecycle types, validation, receipt readers and API code remain
+separate from screen components, models and scoped CSS. POST /admin/issues/:id/cancel
+and /restore send only expectedVersion and reason with the administrator JWT.
+The shared useIssueAction hook dispatches lifecycle operations through the same
+synchronous lock used by notes/status/urgency/recurrence. Only restoration is
+available on cancelled reports. Scope/session/unmount changes abort and fence
+requests. Validation failures retain input; conflicts and uncertain results block
+all mutation flows until an explicit latest-record read. There is no automatic retry.
+
+Only one editor mounts at a time. Switching, closing, page-local return and refresh
+preserve dirty-input confirmation; document unload warns while dirty/busy. The
+existing global sidebar/browser-Back boundary is unchanged. Lifecycle success
+receipts identify a saved event/version and may be historical after an exact retry.
+The success notice survives the fresh detail/history read; historical receipt
+status is never installed as current detail. Existing regular action receipts keep
+their prior behavior.
+
+Cancellation excludes a report from operational counts/exports without changing
+processing status. Restoration includes it under existing status/date rules.
+Neither action changes checklists, stays or related reports. Recurrence links
+remain readable even when an earlier report is cancelled; cancelled reports cannot
+be selected as new targets. Existing submission-correction audit behavior remains,
+so restoration preserves later saved corrections instead of restoring an old snapshot.
+
+Verification: integrated Yarn TypeScript, Oxlint, exact changed-source Prettier and
+production build passed in isolated source/dependency copies. Temporary feature/
+API/shared-hook/list-hook probes passed 320 assertions; prior Slice 3 frontend
+regressions passed 252; UI/model/React/URL probes passed 293. Backend service probes
+separately exercised counts, exports, guest replay and correction compatibility.
+These are synthetic fixtures/mocked dependencies, not browser/mobile, authenticated
+HTTP, PostgreSQL or S3 acceptance. The earlier local-port restriction remains
+unresolved; no browser visual verification is claimed. The existing large-bundle
+warning remains, and the build used example HTTPS origins. No schema/migrations,
+dependencies, permanent tests, environment files, Git writes or services were changed.

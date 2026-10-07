@@ -18,6 +18,7 @@ export interface AdminIssueFilters {
   propertyId?: string;
   status?: string;
   isUrgent?: string;
+  cancellation?: string;
   from?: string;
   to?: string;
 }
@@ -34,6 +35,7 @@ export type AdminIssueSummaryDto = Pick<
   | 'currentVersion'
   | 'reportedAt'
   | 'resolvedAt'
+  | 'cancelledAt'
   | 'updatedAt'
 >;
 

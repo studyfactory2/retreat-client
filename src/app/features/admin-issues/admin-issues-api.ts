@@ -61,7 +61,14 @@ export async function getAdminIssues(
     page: String(filters.page),
     limit: String(ISSUE_LIST_PAGE_SIZE),
   });
-  for (const key of ['propertyId', 'status', 'isUrgent', 'from', 'to'] as const)
+  for (const key of [
+    'propertyId',
+    'status',
+    'isUrgent',
+    'cancellation',
+    'from',
+    'to',
+  ] as const)
     if (filters[key] !== undefined)
       query.set(
         key,
@@ -75,7 +82,7 @@ export async function getAdminIssues(
     value,
     filters.page,
     ISSUE_LIST_PAGE_SIZE,
-    readIssueSummary,
+    (item) => readIssueSummary(item, filters.cancellation !== undefined),
   );
   const from =
     filters.from === undefined
@@ -94,6 +101,9 @@ export async function getAdminIssues(
         (filters.propertyId !== undefined &&
           item.property.id !== filters.propertyId.toLowerCase()) ||
         (filters.status !== undefined && item.status !== filters.status) ||
+        ((filters.cancellation ?? 'active') === 'active' &&
+          item.cancelledAt !== null) ||
+        (filters.cancellation === 'cancelled' && item.cancelledAt === null) ||
         (filters.isUrgent !== undefined &&
           item.isUrgent !== (filters.isUrgent === 'true')) ||
         (from !== undefined && reportedAt < from) ||
@@ -240,7 +250,7 @@ export async function getAdminIssueRecurrenceCandidates(
     response,
     page,
     ISSUE_RECURRENCE_PAGE_SIZE,
-    readIssueSummary,
+    (item) => readIssueSummary(item),
   );
   if (
     new Set(result.items.map((item) => item.id)).size !== result.items.length ||
@@ -249,6 +259,7 @@ export async function getAdminIssueRecurrenceCandidates(
       const previous = items[index - 1];
       return (
         item.id === issueId ||
+        item.cancelledAt !== null ||
         item.id === issue.recurrenceOfIssueId ||
         item.property.id !== issue.property.id ||
         Date.parse(item.reportedAt) >= Date.parse(issue.reportedAt) ||

@@ -21,6 +21,7 @@ export function readIssueFilters(search: URLSearchParams): AdminIssueFilters {
     propertyId: isIssueId(propertyId) ? propertyId.toLowerCase() : propertyId,
     status: field(search, 'status'),
     isUrgent: field(search, 'isUrgent'),
+    cancellation: field(search, 'cancellation'),
     from: field(search, 'from'),
     to: field(search, 'to'),
   };
@@ -28,8 +29,23 @@ export function readIssueFilters(search: URLSearchParams): AdminIssueFilters {
 
 export function issueSearch(filters: AdminIssueFilters): string {
   const query = new URLSearchParams();
-  for (const key of ['propertyId', 'status', 'isUrgent', 'from', 'to'] as const)
+  for (const key of [
+    'propertyId',
+    'status',
+    'isUrgent',
+    'cancellation',
+    'from',
+    'to',
+  ] as const)
     if (filters[key] !== undefined) query.set(key, filters[key]);
   if (filters.page > 1) query.set('page', String(filters.page));
   return query.size ? `?${query}` : '';
+}
+
+export function issueCancellationLabel(value: string | undefined): string {
+  return value === 'cancelled'
+    ? '취소만'
+    : value === 'all'
+      ? '전체'
+      : '취소 제외';
 }

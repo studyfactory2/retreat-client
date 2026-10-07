@@ -13,6 +13,8 @@ import {
 } from './IssueManagementSummary';
 import { IssueManagementEditor } from './IssueManagementEditor';
 import '../styles/issue-management.css';
+import { IssueLifecycleEditor } from './IssueLifecycleEditor';
+import { issueLifecycleSavedMessage } from '../model/issue-lifecycle-model';
 import { IssueActions } from './IssueActions';
 import { IssueNavigationNotice } from './IssueNavigationNotice';
 import { IssueRecord } from './IssueRecord';
@@ -28,6 +30,9 @@ export function IssueDetailContent({
   returnTo,
   refresh,
   acceptSaved,
+  lifecycleNotice,
+  onLifecycleSaved,
+  clearLifecycleNotice,
 }: {
   detail: AdminIssueDetailDto;
   token: string;
@@ -36,6 +41,9 @@ export function IssueDetailContent({
   returnTo: string;
   refresh: () => void;
   acceptSaved: (detail: AdminIssueDetailDto, expectedVersion: number) => void;
+  lifecycleNotice?: string;
+  onLifecycleSaved: (message: string) => void;
+  clearLifecycleNotice: () => void;
 }) {
   const navigate = useNavigate();
   const [dirty, setDirty] = useState(false);
@@ -52,6 +60,7 @@ export function IssueDetailContent({
     adminId,
     rejectSession,
     (receipt, command) => {
+      clearLifecycleNotice();
       setDirty(false);
       setCandidatePage(1);
       setActiveEditor('record');
@@ -60,6 +69,14 @@ export function IssueDetailContent({
         message: issueActionSavedMessage(command, detail.issue.status),
       });
       acceptSaved(receipt, detail.issue.currentVersion);
+    },
+    (receipt, command) => {
+      setDirty(false);
+      setCandidatePage(1);
+      setActiveEditor('record');
+      onLifecycleSaved(
+        issueLifecycleSavedMessage(command.kind, receipt.version),
+      );
     },
   );
   const busy = mutation.status === 'saving';
@@ -87,9 +104,9 @@ export function IssueDetailContent({
   };
   const openIssue = (to: string) => navigation.request(() => navigate(to));
   useEffect(() => {
-    if (savedNotice?.version === detail.issue.currentVersion)
+    if (lifecycleNotice || savedNotice?.version === detail.issue.currentVersion)
       noticeRef.current?.focus();
-  }, [savedNotice, detail.issue.currentVersion]);
+  }, [savedNotice, lifecycleNotice, detail.issue.currentVersion]);
   const { issue, report, latestEvent } = detail;
   return (
     <div className="issue-detail">
@@ -128,7 +145,17 @@ export function IssueDetailContent({
           onDiscard={navigation.discard}
         />
       )}
-      {savedNotice?.version === issue.currentVersion && (
+      {lifecycleNotice && (
+        <div
+          className="issue-detail-success"
+          role="status"
+          ref={noticeRef}
+          tabIndex={-1}
+        >
+          {lifecycleNotice}
+        </div>
+      )}
+      {!lifecycleNotice && savedNotice?.version === issue.currentVersion && (
         <div
           className="issue-detail-success"
           role="status"
@@ -142,8 +169,12 @@ export function IssueDetailContent({
         <div className="issue-detail-cancelled" role="status">
           <strong>취소된 이상사항입니다.</strong>
           <p>
-            최초 신고와 이후 이력은 확인할 수 있습니다. 일반 목록에는 표시되지
-            않습니다.
+            최초 신고·사진·이력은 유지됩니다. 목록에서 취소만 또는 전체를
+            선택하면 찾을 수 있습니다.
+          </p>
+          <p className="issue-detail-text">
+            <strong>취소 사유: </strong>
+            {issue.cancellationReason || '기록된 사유 없음'}
           </p>
         </div>
       )}
@@ -175,7 +206,53 @@ export function IssueDetailContent({
           onEdit={openEditor}
           onNavigate={openIssue}
         />
-        {activeEditor === 'record' ? (
+        {issue.currentVersion <= 2_147_483_646 && (
+          <div className="issue-lifecycle-actions">
+            {issue.cancelledAt === null ? (
+              <Button
+                className="admin-button-secondary issue-lifecycle-danger"
+                disabled={
+                  busy ||
+                  blocked ||
+                  navigation.pending ||
+                  activeEditor === 'cancel'
+                }
+                aria-expanded={activeEditor === 'cancel'}
+                onClick={() => openEditor('cancel')}
+              >
+                신고 취소
+              </Button>
+            ) : (
+              <Button
+                className="admin-button-secondary"
+                disabled={
+                  busy ||
+                  blocked ||
+                  navigation.pending ||
+                  activeEditor === 'restore'
+                }
+                aria-expanded={activeEditor === 'restore'}
+                onClick={() => openEditor('restore')}
+              >
+                신고 복원
+              </Button>
+            )}
+          </div>
+        )}
+        {activeEditor === 'cancel' || activeEditor === 'restore' ? (
+          <IssueLifecycleEditor
+            key={`${issue.id}:${issue.currentVersion}:${activeEditor}`}
+            issue={issue}
+            action={activeEditor}
+            mutation={mutation}
+            onSubmit={(command) => {
+              if (!navigation.pending) void submit(command);
+            }}
+            onReload={reload}
+            onDirtyChange={setDirty}
+            onClose={() => openEditor('record')}
+          />
+        ) : activeEditor === 'record' ? (
           <IssueActions
             key={`${issue.id}:${issue.currentVersion}:record`}
             issue={issue}

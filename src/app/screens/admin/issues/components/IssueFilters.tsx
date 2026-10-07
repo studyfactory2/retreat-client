@@ -135,6 +135,30 @@ export function IssueFilters({
           </select>
           {error('isUrgent')}
         </div>
+        <div className="issue-field">
+          <label htmlFor="issue-cancellation">취소 여부</label>
+          <select
+            id="issue-cancellation"
+            name="cancellation"
+            value={draft.cancellation ?? 'active'}
+            onChange={(event) => change('cancellation', event.target.value)}
+            aria-invalid={showErrors && !!errors.cancellation}
+            aria-describedby={
+              showErrors && errors.cancellation
+                ? 'issue-cancellation-error'
+                : undefined
+            }
+          >
+            {draft.cancellation !== undefined &&
+              !['active', 'cancelled', 'all'].includes(draft.cancellation) && (
+                <option value={draft.cancellation}>잘못된 취소 조건</option>
+              )}
+            <option value="active">취소 제외</option>
+            <option value="cancelled">취소만</option>
+            <option value="all">전체</option>
+          </select>
+          {error('cancellation')}
+        </div>
         {(['from', 'to'] as const).map((key) => (
           <div className="issue-field" key={key}>
             <label htmlFor={`issue-${key}`}>

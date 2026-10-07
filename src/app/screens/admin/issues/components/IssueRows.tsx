@@ -35,9 +35,15 @@ export function IssueRows({
         </thead>
         <tbody>
           {items.map((issue) => (
-            <tr key={issue.id}>
+            <tr
+              key={issue.id}
+              className={issue.cancelledAt ? 'issue-row--cancelled' : undefined}
+            >
               <td>
                 <div className="issue-row-labels">
+                  {issue.cancelledAt && (
+                    <span className="issue-list-cancelled">취소됨</span>
+                  )}
                   {issue.isUrgent && (
                     <span className="issue-list-urgent">긴급</span>
                   )}

@@ -20,7 +20,10 @@ export const issueActorSources = [
   'SYSTEM',
 ] as const;
 export type IssueFilterErrors = Partial<
-  Record<'propertyId' | 'status' | 'isUrgent' | 'from' | 'to', string>
+  Record<
+    'propertyId' | 'status' | 'isUrgent' | 'cancellation' | 'from' | 'to',
+    string
+  >
 >;
 
 export function isIssueId(value: unknown): value is string {
@@ -45,6 +48,11 @@ export function validateIssueFilters(
   filters: AdminIssueFilters,
 ): IssueFilterErrors {
   const errors: IssueFilterErrors = {};
+  if (
+    filters.cancellation !== undefined &&
+    !['active', 'cancelled', 'all'].includes(filters.cancellation)
+  )
+    errors.cancellation = '신고 취소 여부를 다시 선택해 주세요.';
   if (filters.propertyId !== undefined && !isIssueId(filters.propertyId))
     errors.propertyId = '조회할 휴양소를 다시 선택해 주세요.';
   if (

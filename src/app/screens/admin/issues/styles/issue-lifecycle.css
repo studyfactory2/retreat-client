@@ -1,0 +1,105 @@
+.issue-lifecycle {
+  padding: 20px;
+}
+.issue-lifecycle--cancel {
+  border-color: #dfb8bf;
+}
+.issue-lifecycle-danger.ui-button {
+  color: #a22b3e;
+  background: #fff;
+  border: 1px solid #d9a4ae;
+}
+.issue-lifecycle-danger.ui-button:not(:disabled):hover {
+  background: #fff1f3;
+}
+.issue-lifecycle form,
+.issue-lifecycle-confirmation {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+}
+.issue-lifecycle p {
+  margin: 0;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+.issue-lifecycle textarea {
+  width: 100%;
+  min-height: 90px;
+  padding: 10px 12px;
+  resize: vertical;
+  font: inherit;
+  line-height: 1.6;
+  background: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: 7px;
+}
+.issue-lifecycle textarea:disabled {
+  background: #f2f5f9;
+}
+.issue-lifecycle textarea:focus-visible {
+  outline: 3px solid #adc7f6;
+  outline-offset: 2px;
+}
+.issue-lifecycle form > label {
+  font-weight: 650;
+}
+.issue-lifecycle .issue-lifecycle-confirmation h3 {
+  margin: 0;
+}
+.issue-lifecycle-subject {
+  font-weight: 700;
+  color: var(--color-heading);
+}
+.issue-lifecycle-summary {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+}
+.issue-lifecycle-summary dt {
+  color: var(--color-muted);
+  font-size: 0.8rem;
+  margin-bottom: 4px;
+}
+.issue-lifecycle-summary dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.6;
+}
+.issue-lifecycle-consequences {
+  padding: 14px;
+  border-radius: 8px;
+  background: var(--color-soft);
+}
+.issue-lifecycle-consequences p + p {
+  margin-top: 8px;
+}
+.issue-lifecycle-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 0;
+  line-height: 1.6;
+}
+.issue-lifecycle-check input {
+  width: 18px;
+  height: 18px;
+  margin-top: 3px;
+  flex: 0 0 auto;
+  accent-color: var(--color-primary);
+}
+.issue-lifecycle-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 0 0 16px;
+}
+@media (max-width: 560px) {
+  .issue-lifecycle {
+    padding: 16px;
+  }
+  .issue-lifecycle .issue-action-buttons > button {
+    flex: 1 1 140px;
+  }
+}

@@ -18,7 +18,8 @@ export function useAdminIssues(
   rejectSession: (token: string) => void,
   enabled = true,
 ) {
-  const { page, propertyId, status, isUrgent, from, to } = filters;
+  const { page, propertyId, status, isUrgent, cancellation, from, to } =
+    filters;
   const [revision, setRevision] = useState(0);
   const key = `${issueSearch(filters)}:${enabled}:${revision}`;
   const [result, setResult] = useState<{
@@ -30,7 +31,7 @@ export function useAdminIssues(
     if (!enabled) return;
     const controller = new AbortController();
     void getAdminIssues(
-      { page, propertyId, status, isUrgent, from, to },
+      { page, propertyId, status, isUrgent, cancellation, from, to },
       token,
       controller.signal,
     ).then(
@@ -66,6 +67,7 @@ export function useAdminIssues(
     propertyId,
     status,
     isUrgent,
+    cancellation,
     from,
     to,
     key,

@@ -14,7 +14,9 @@ export type IssueActionCommand =
   | { kind: 'note'; note: string }
   | { kind: 'status'; status: 'IN_PROGRESS' | 'RESOLVED'; note: string }
   | { kind: 'urgency'; isUrgent: boolean; note: string }
-  | { kind: 'recurrence'; recurrenceOfIssueId: string | null; note: string };
+  | { kind: 'recurrence'; recurrenceOfIssueId: string | null; note: string }
+  | { kind: 'cancel'; reason: string }
+  | { kind: 'restore'; reason: string };
 
 export type IssueActionMutation = {
   status: 'idle' | 'saving' | 'error' | 'conflict' | 'unknown';
@@ -205,6 +207,10 @@ export function issueActionSavedMessage(
   command: IssueActionCommand,
   previousStatus: IssueStatus,
 ): string {
+  if (command.kind === 'cancel' || command.kind === 'restore')
+    return command.kind === 'cancel'
+      ? '신고 취소 처리를 확인했습니다.'
+      : '신고 복원 처리를 확인했습니다.';
   if (command.kind === 'note') return '메모를 저장했습니다.';
   if (command.kind === 'urgency')
     return command.isUrgent

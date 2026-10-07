@@ -11,6 +11,7 @@ import { IssueRows } from './components/IssueRows';
 import { useAdminIssues } from './hooks/use-admin-issues';
 import {
   issueFilterErrors,
+  issueCancellationLabel,
   issueSearch,
   readIssueFilters,
 } from './model/issue-filters';
@@ -153,7 +154,9 @@ function IssuesWorkspace({
               · 조회된 신고{' '}
               <strong>{resource.data.total.toLocaleString('ko-KR')}건</strong>
             </p>
-            <span>취소된 신고 제외 · 접수일 최신순</span>
+            <span>
+              {issueCancellationLabel(filters.cancellation)} · 접수일 최신순
+            </span>
           </div>
           {resource.data.items.length === 0 ? (
             <PageState

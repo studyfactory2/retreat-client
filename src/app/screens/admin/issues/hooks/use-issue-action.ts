@@ -8,6 +8,8 @@ import {
 } from '../../../../features/admin-issues/admin-issues-api';
 import { prepareIssueStatus } from '../../../../features/admin-issues/admin-issue-action-validation';
 import { verifyIssueActionReceipt } from '../../../../features/admin-issues/admin-issue-action-readers';
+import { changeAdminIssueLifecycle } from '../../../../features/admin-issues/admin-issue-lifecycle.api';
+import type { AdminIssueLifecycleReceipt } from '../../../../features/admin-issues/admin-issue-lifecycle.types';
 import type { AdminIssueDetailDto } from '../../../../features/admin-issues/admin-issues.types';
 import type {
   IssueActionCommand,
@@ -20,6 +22,10 @@ export function useIssueAction(
   adminId: string,
   rejectSession: (token: string) => void,
   onSaved: (detail: AdminIssueDetailDto, command: IssueActionCommand) => void,
+  onLifecycleSaved?: (
+    receipt: AdminIssueLifecycleReceipt,
+    command: Extract<IssueActionCommand, { kind: 'cancel' | 'restore' }>,
+  ) => void,
 ) {
   const scope = `${detail.issue.id}:${detail.issue.currentVersion}`;
   const pending = useRef<AbortController | null>(null);
@@ -39,11 +45,40 @@ export function useIssueAction(
   }, [scope, token]);
 
   async function submit(command: IssueActionCommand) {
-    if (pending.current || blocked.current || detail.issue.cancelledAt) return;
+    if (pending.current || blocked.current) return;
+    if (
+      command.kind === 'restore'
+        ? detail.issue.cancelledAt === null
+        : detail.issue.cancelledAt !== null
+    )
+      return;
+    if (
+      (command.kind === 'cancel' || command.kind === 'restore') &&
+      !onLifecycleSaved
+    )
+      return;
     const controller = new AbortController();
     pending.current = controller;
     setResult({ owner: token, scope, state: { status: 'saving' } });
     try {
+      if (command.kind === 'cancel' || command.kind === 'restore') {
+        const receipt = await changeAdminIssueLifecycle(
+          detail.issue,
+          command.kind,
+          {
+            expectedVersion: detail.issue.currentVersion,
+            reason: command.reason,
+          },
+          token,
+          controller.signal,
+        );
+        if (controller.signal.aborted) return;
+        // Lifecycle receipts can describe an earlier successful action; the parent
+        // refreshes current detail/history instead of installing that historical state.
+        blocked.current = true;
+        onLifecycleSaved?.(receipt, command);
+        return;
+      }
       const input = {
         expectedVersion: detail.issue.currentVersion,
         note: command.note,
