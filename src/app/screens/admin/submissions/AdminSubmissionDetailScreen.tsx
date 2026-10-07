@@ -8,6 +8,8 @@ import {
 import { useAdminSession } from '../../../core/session/use-admin-session';
 import { Button } from '../../../shared/ui/Button/Button';
 import { PageState } from '../../../shared/ui/PageState/PageState';
+import { SubmissionLifecycle } from './components/SubmissionLifecycle';
+import { submissionLifecycleSavedMessage } from './model/submission-lifecycle-model';
 import { SubmissionCorrection } from './components/SubmissionCorrection';
 import { SubmissionRecord } from './components/SubmissionRecord';
 import { SubmissionPhotos } from './components/SubmissionPhotos';
@@ -61,9 +63,9 @@ function SubmissionWorkspace({
     dirty: false,
     busy: false,
   });
-  const [activeEditor, setActiveEditor] = useState<'stay' | 'correction'>(
-    'stay',
-  );
+  const [activeEditor, setActiveEditor] = useState<
+    'stay' | 'correction' | 'cancel' | 'restore'
+  >('stay');
   const [notice, setNotice] = useState<string>();
   const navigation = useSubmissionLinkNavigation(
     editState.dirty,
@@ -87,7 +89,7 @@ function SubmissionWorkspace({
       setActiveEditor('stay');
       refresh();
     });
-  function changeEditor(next: 'stay' | 'correction') {
+  function changeEditor(next: 'stay' | 'correction' | 'cancel' | 'restore') {
     if (
       editState.busy ||
       editState.blocked ||
@@ -230,12 +232,9 @@ function SubmissionWorkspace({
           </p>
         )}
       </section>
-      {detail.status === 'SUBMITTED' &&
-        detail.currentRevision < 2_147_483_647 && (
-          <div
-            className="submission-detail-actions"
-            aria-label="제출 기록 관리"
-          >
+      {detail.currentRevision < 2_147_483_647 && (
+        <div className="submission-detail-actions" aria-label="제출 기록 관리">
+          {detail.status === 'SUBMITTED' && (
             <Button
               className={
                 activeEditor === 'correction' ? '' : 'admin-button-secondary'
@@ -251,27 +250,78 @@ function SubmissionWorkspace({
             >
               내용 정정
             </Button>
-            {activeEditor === 'correction' && (
-              <Button
-                className="admin-button-secondary"
-                disabled={
-                  editState.busy || !!editState.blocked || navigation.pending
-                }
-                onClick={() => changeEditor('stay')}
-              >
-                {revision.record.type === 'MAINTENANCE'
-                  ? '정정 닫기'
-                  : '이용 일정 연결로'}
-              </Button>
-            )}
-          </div>
-        )}
+          )}
+          {detail.status === 'SUBMITTED' ? (
+            <Button
+              className="admin-button-secondary submission-lifecycle-danger"
+              disabled={
+                editState.busy ||
+                !!editState.blocked ||
+                navigation.pending ||
+                activeEditor === 'cancel'
+              }
+              aria-expanded={activeEditor === 'cancel'}
+              onClick={() => changeEditor('cancel')}
+            >
+              제출 취소
+            </Button>
+          ) : (
+            <Button
+              className="admin-button-secondary"
+              disabled={
+                editState.busy ||
+                !!editState.blocked ||
+                navigation.pending ||
+                activeEditor === 'restore'
+              }
+              aria-expanded={activeEditor === 'restore'}
+              onClick={() => changeEditor('restore')}
+            >
+              제출 복원
+            </Button>
+          )}
+          {activeEditor !== 'stay' && (
+            <Button
+              className="admin-button-secondary"
+              disabled={
+                editState.busy || !!editState.blocked || navigation.pending
+              }
+              onClick={() => changeEditor('stay')}
+            >
+              {revision.record.type === 'MAINTENANCE' ||
+              detail.status === 'CANCELLED'
+                ? '변경 닫기'
+                : '이용 일정 연결로'}
+            </Button>
+          )}
+        </div>
+      )}
       <fieldset
         className="submission-editor-boundary"
         disabled={navigation.pending}
         aria-label="제출 기록 변경"
       >
-        {activeEditor === 'correction' && detail.status === 'SUBMITTED' ? (
+        {activeEditor === 'cancel' || activeEditor === 'restore' ? (
+          <SubmissionLifecycle
+            key={`lifecycle:${activeEditor}:${revision.id}`}
+            detail={detail}
+            action={activeEditor}
+            token={token}
+            rejectSession={rejectSession}
+            onEditStateChange={setEditState}
+            onReload={refreshRecord}
+            onClose={() => changeEditor('stay')}
+            onSaved={(receipt) => {
+              navigation.keep();
+              setEditState({ dirty: false, busy: false });
+              setActiveEditor('stay');
+              setNotice(
+                submissionLifecycleSavedMessage(activeEditor, receipt.revision),
+              );
+              refresh();
+            }}
+          />
+        ) : activeEditor === 'correction' && detail.status === 'SUBMITTED' ? (
           <SubmissionCorrection
             key={`correction:${revision.id}`}
             detail={detail}

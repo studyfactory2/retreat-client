@@ -1,0 +1,107 @@
+.submission-lifecycle {
+  padding: 20px;
+}
+.submission-lifecycle--cancel {
+  border-color: #dfb8bf;
+}
+.submission-lifecycle-danger.ui-button {
+  color: #a22b3e;
+  background: #fff;
+  border: 1px solid #d9a4ae;
+}
+.submission-lifecycle-danger.ui-button:not(:disabled):hover {
+  background: #fff1f3;
+}
+.submission-lifecycle form,
+.submission-lifecycle-confirmation {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+}
+.submission-lifecycle p {
+  margin: 0;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+.submission-lifecycle textarea {
+  width: 100%;
+  padding: 10px 12px;
+  min-height: 90px;
+  resize: vertical;
+  font: inherit;
+  line-height: 1.6;
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 7px;
+}
+.submission-lifecycle textarea:disabled {
+  background: #f2f5f9;
+}
+.submission-lifecycle textarea:focus-visible {
+  outline: 3px solid #adc7f6;
+  outline-offset: 2px;
+}
+.submission-lifecycle form > label {
+  font-weight: 650;
+}
+.submission-lifecycle .submission-lifecycle-confirmation h3 {
+  margin: 0;
+}
+.submission-lifecycle-transition {
+  color: var(--color-primary);
+  font-weight: 700;
+}
+.submission-lifecycle-summary {
+  margin: 0;
+  display: grid;
+  gap: 12px;
+}
+.submission-lifecycle-summary dt {
+  color: var(--color-muted);
+  font-size: 0.8rem;
+  margin-bottom: 4px;
+}
+.submission-lifecycle-summary dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.6;
+}
+.submission-lifecycle-consequences,
+.submission-lifecycle-notice {
+  padding: 14px;
+  border-radius: 8px;
+  background: var(--color-soft);
+}
+.submission-lifecycle-consequences p + p,
+.submission-lifecycle-notice p + p {
+  margin-top: 8px;
+}
+.submission-lifecycle-notice {
+  margin-top: 16px;
+}
+.submission-lifecycle-notice button {
+  margin-top: 12px;
+}
+.submission-lifecycle-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  line-height: 1.6;
+  padding: 8px 0;
+}
+.submission-lifecycle-check input {
+  width: 18px;
+  height: 18px;
+  margin-top: 3px;
+  flex: 0 0 auto;
+  accent-color: var(--color-primary);
+}
+@media (max-width: 560px) {
+  .submission-lifecycle {
+    padding: 16px;
+  }
+  .submission-lifecycle .submission-detail-actions > button {
+    flex: 1 1 140px;
+  }
+}

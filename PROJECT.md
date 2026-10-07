@@ -1835,3 +1835,48 @@ The earlier localhost:5175 browser restriction remains unresolved; no browser or
 mobile visual verification is claimed. The pre-existing large-bundle warning
 remains. The build used example HTTPS origins. No schema, migrations, dependencies,
 environment files, permanent tests, guest/staff screens or services were changed.
+
+## Slice 4B — administrator checklist cancellation and restoration
+
+Submitted CHECK_IN, CHECK_OUT and MAINTENANCE detail screens now offer the secondary
+destructive 제출 취소 action. Cancelled records remain readable with their status,
+history and photos, and offer 제출 복원. Both flows require a trimmed nonblank
+1–1000-character reason, a frozen consequence review and explicit confirmation.
+Korean guidance explains that evidence/history remain and linked issues are
+unchanged. Restoration preserves the original submittedAt and current saved answers
+and photos; it neither revives earlier removed photos/repair data nor restores the
+associated stay or extends private-link expiry.
+
+Correction, stay linking, cancellation and restoration share one active editor and
+the existing dirty/busy/blocked navigation boundary. Switching, close, page return
+and refresh protect unsaved input; document unload warns while dirty/busy. A blocked
+or uncertain action cannot be bypassed by opening another editor. The existing
+global sidebar/browser-Back protection is unchanged. Validation failures retain
+input; conflicts and uncertain responses require explicit latest-record reload
+before another write. No mutation is automatically retried.
+
+features/admin-submissions owns lifecycle types, strict input preparation, receipt
+readers and API calls. Components, presentation model, mutation hook and scoped
+mobile styles remain separate. POST /admin/submissions/:id/cancel and /restore
+use only the administrator JWT and { expectedRevision, reason }, without query or
+identity/answer/photo fields. Receipts validate the target status, next revision,
+monotonic timestamp and cancelledAt. Token/record/revision/status/action changes and
+unmount abort and fence requests. Duplicate saves are blocked synchronously.
+
+Exact backend retries may return a historical success after a later opposite action.
+Success notices therefore identify the saved revision and always refresh current
+detail/history; receipt status is never installed as the latest state. Cancelled
+records cannot be corrected/relinked. Restored records regain only their existing
+eligibility, and valid submission totals/exports/calendar indicators follow existing
+rules. Independent issue counts remain governed by issue state.
+
+Verification: integrated Yarn TypeScript, Oxlint, exact changed-source Prettier and
+production build passed in isolated source/dependency copies. Temporary feature/
+API/hook probes passed 265 assertions; model/SSR/component/editor-guard probes
+passed 237. Backend compatibility probes exercise counts, exports, issue evidence,
+private access and receipts using real services with in-memory dependencies.
+These are synthetic checks, not authenticated HTTP/PostgreSQL/S3 or interactive
+browser/mobile acceptance. The earlier local-port restriction remains unresolved;
+no browser visual acceptance is claimed. The existing large-bundle warning remains,
+and the build used example HTTPS origins. No dependencies, permanent tests,
+environment files, schema/migrations, Git writes or service operations were added.
