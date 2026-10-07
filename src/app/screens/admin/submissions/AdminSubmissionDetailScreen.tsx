@@ -8,6 +8,7 @@ import {
 import { useAdminSession } from '../../../core/session/use-admin-session';
 import { Button } from '../../../shared/ui/Button/Button';
 import { PageState } from '../../../shared/ui/PageState/PageState';
+import { SubmissionCorrection } from './components/SubmissionCorrection';
 import { SubmissionRecord } from './components/SubmissionRecord';
 import { SubmissionPhotos } from './components/SubmissionPhotos';
 import { SubmissionHistory } from './components/SubmissionHistory';
@@ -60,6 +61,9 @@ function SubmissionWorkspace({
     dirty: false,
     busy: false,
   });
+  const [activeEditor, setActiveEditor] = useState<'stay' | 'correction'>(
+    'stay',
+  );
   const [notice, setNotice] = useState<string>();
   const navigation = useSubmissionLinkNavigation(
     editState.dirty,
@@ -79,8 +83,23 @@ function SubmissionWorkspace({
   const refreshRecord = () =>
     navigation.request(() => {
       setNotice(undefined);
+      setEditState({ dirty: false, busy: false });
+      setActiveEditor('stay');
       refresh();
     });
+  function changeEditor(next: 'stay' | 'correction') {
+    if (
+      editState.busy ||
+      editState.blocked ||
+      navigation.pending ||
+      next === activeEditor
+    )
+      return;
+    navigation.request(() => {
+      setEditState({ dirty: false, busy: false });
+      setActiveEditor(next);
+    });
+  }
   const [search] = useSearchParams();
   const maintenanceReturn = maintenanceReturnPath(search);
   const returnTo =
@@ -166,9 +185,9 @@ function SubmissionWorkspace({
           aria-labelledby="submission-link-discard-title"
         >
           <h2 id="submission-link-discard-title">
-            입력한 연결 변경 내용을 버릴까요?
+            저장하지 않은 변경 내용을 버릴까요?
           </h2>
-          <p>아직 저장하지 않은 선택과 사유는 사라집니다.</p>
+          <p>아직 저장하지 않은 답변, 선택과 사유는 사라집니다.</p>
           <div className="submission-detail-actions">
             <Button
               className="admin-button-secondary"
@@ -211,31 +230,96 @@ function SubmissionWorkspace({
           </p>
         )}
       </section>
-      {revision.record.type !== 'MAINTENANCE' && (
-        <SubmissionStayLink
-          key={`stay-link:${revision.id}`}
-          detail={detail}
-          token={token}
-          rejectSession={rejectSession}
-          onEditStateChange={setEditState}
-          onRefresh={refreshRecord}
-          onOpenStay={() =>
-            navigation.request(() =>
-              navigate(`/admin/stays/${revision.record.stayId}?view=list`),
-            )
-          }
-          onSaved={(receipt) => {
-            navigation.keep();
-            setEditState({ dirty: false, busy: false });
-            setNotice(
-              receipt.changed
-                ? '이용 일정 연결 변경이 저장되었습니다. 아래는 최신 제출 기록입니다.'
-                : '연결 내용을 확인했습니다. 저장된 연결과 같아 새 이력은 추가되지 않았습니다.',
-            );
-            refresh();
-          }}
-        />
-      )}
+      {detail.status === 'SUBMITTED' &&
+        detail.currentRevision < 2_147_483_647 && (
+          <div
+            className="submission-detail-actions"
+            aria-label="제출 기록 관리"
+          >
+            <Button
+              className={
+                activeEditor === 'correction' ? '' : 'admin-button-secondary'
+              }
+              disabled={
+                editState.busy ||
+                !!editState.blocked ||
+                navigation.pending ||
+                activeEditor === 'correction'
+              }
+              aria-expanded={activeEditor === 'correction'}
+              onClick={() => changeEditor('correction')}
+            >
+              내용 정정
+            </Button>
+            {activeEditor === 'correction' && (
+              <Button
+                className="admin-button-secondary"
+                disabled={
+                  editState.busy || !!editState.blocked || navigation.pending
+                }
+                onClick={() => changeEditor('stay')}
+              >
+                {revision.record.type === 'MAINTENANCE'
+                  ? '정정 닫기'
+                  : '이용 일정 연결로'}
+              </Button>
+            )}
+          </div>
+        )}
+      <fieldset
+        className="submission-editor-boundary"
+        disabled={navigation.pending}
+        aria-label="제출 기록 변경"
+      >
+        {activeEditor === 'correction' && detail.status === 'SUBMITTED' ? (
+          <SubmissionCorrection
+            key={`correction:${revision.id}`}
+            detail={detail}
+            token={token}
+            rejectSession={rejectSession}
+            onEditStateChange={setEditState}
+            onReload={refreshRecord}
+            onClose={() => changeEditor('stay')}
+            onSaved={(receipt) => {
+              navigation.keep();
+              setEditState({ dirty: false, busy: false });
+              setActiveEditor('stay');
+              setNotice(
+                receipt.changed
+                  ? `정정 내용을 버전 ${receipt.revision}으로 저장했습니다. 현재 내용과 처리 이력을 확인해 주세요.`
+                  : '저장된 답변·메모와 같아 새 정정 이력은 추가되지 않았습니다.',
+              );
+              refresh();
+            }}
+          />
+        ) : (
+          revision.record.type !== 'MAINTENANCE' && (
+            <SubmissionStayLink
+              key={`stay-link:${revision.id}`}
+              detail={detail}
+              token={token}
+              rejectSession={rejectSession}
+              onEditStateChange={setEditState}
+              onRefresh={refreshRecord}
+              onOpenStay={() =>
+                navigation.request(() =>
+                  navigate(`/admin/stays/${revision.record.stayId}?view=list`),
+                )
+              }
+              onSaved={(receipt) => {
+                navigation.keep();
+                setEditState({ dirty: false, busy: false });
+                setNotice(
+                  receipt.changed
+                    ? '이용 일정 연결 변경이 저장되었습니다. 아래는 최신 제출 기록입니다.'
+                    : '연결 내용을 확인했습니다. 저장된 연결과 같아 새 이력은 추가되지 않았습니다.',
+                );
+                refresh();
+              }}
+            />
+          )
+        )}
+      </fieldset>
       <SubmissionRecord record={revision.record} />
       <SubmissionPhotos
         key={revision.id}

@@ -14,7 +14,11 @@ import {
 import { SubmissionStayLinkEditor } from './SubmissionStayLinkEditor';
 import '../styles/submission-stay-link.css';
 
-export type SubmissionLinkEditState = { dirty: boolean; busy: boolean };
+export type SubmissionLinkEditState = {
+  dirty: boolean;
+  busy: boolean;
+  blocked?: boolean;
+};
 
 export function SubmissionStayLink({
   detail,
@@ -53,9 +57,9 @@ export function SubmissionStayLink({
   const busy = mutation.state.busy;
   const dirty = !!selected || reason.length > 0 || mode === 'unlink';
   useEffect(() => {
-    onEditStateChange({ dirty, busy });
+    onEditStateChange({ dirty, busy, blocked });
     return () => onEditStateChange({ dirty: false, busy: false });
-  }, [dirty, busy, onEditStateChange]);
+  }, [dirty, busy, blocked, onEditStateChange]);
 
   function closeEditor() {
     setMode(null);

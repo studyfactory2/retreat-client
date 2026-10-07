@@ -155,11 +155,16 @@ export function SubmissionListFilters({
             <option value="LINKED">연결됨</option>
             {values.linkStatus &&
               !['LINKED', 'UNLINKED'].includes(values.linkStatus) && (
-                <option value={values.linkStatus}>확인할 수 없는 연결 조건</option>
+                <option value={values.linkStatus}>
+                  확인할 수 없는 연결 조건
+                </option>
               )}
           </select>
           {errors.linkStatus && (
-            <p className="submission-field-error" id="submission-link-status-error">
+            <p
+              className="submission-field-error"
+              id="submission-link-status-error"
+            >
               {errors.linkStatus}
             </p>
           )}
@@ -209,7 +214,8 @@ export function SubmissionListFilters({
         날짜는 기록의 방문일 기준입니다. 제출 일시와는 다를 수 있습니다.
       </p>
       <p id="submission-link-hint" className="submission-filters__hint">
-        미연결은 휴양소 QR로 제출된 입실·퇴실 기록 중 일정이 연결되지 않은 기록입니다.
+        미연결은 휴양소 QR로 제출된 입실·퇴실 기록 중 일정이 연결되지 않은
+        기록입니다.
       </p>
       {propertiesLoading && (
         <p className="submission-filters__hint" role="status">

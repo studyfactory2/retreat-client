@@ -1,6 +1,9 @@
 import { Link } from 'react-router-dom';
 import type { AdminSubmissionSummary } from '../../../../features/admin-submissions/admin-submissions.types';
-import { submissionTime, submissionTypeLabel } from '../model/submission-list-model';
+import {
+  submissionTime,
+  submissionTypeLabel,
+} from '../model/submission-list-model';
 
 export function SubmissionRows({
   items,

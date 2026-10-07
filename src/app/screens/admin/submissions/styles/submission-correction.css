@@ -1,0 +1,195 @@
+.submission-correction {
+  padding: 20px;
+}
+.submission-correction form,
+.submission-correction-fields,
+.submission-correction-review {
+  display: grid;
+  gap: 18px;
+  min-width: 0;
+}
+.submission-correction-section {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+.submission-correction-section h3 {
+  margin: 0;
+}
+.submission-correction-item {
+  margin: 0;
+  padding: 14px;
+  min-width: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+.submission-correction-item.is-abnormal {
+  border-color: #d5a3ad;
+  background: #fffcfc;
+}
+.submission-correction-item legend {
+  max-width: 100%;
+  padding: 0 5px;
+  font-weight: 650;
+  overflow-wrap: anywhere;
+}
+.submission-correction-item legend span {
+  color: var(--color-muted);
+  font-size: 0.75rem;
+  font-weight: 400;
+}
+.submission-correction-choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.submission-correction-choices button {
+  min-height: 42px;
+  padding: 8px 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 7px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  cursor: pointer;
+}
+.submission-correction-choices button[aria-pressed='true'] {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+  background: var(--color-soft);
+  font-weight: 700;
+}
+.submission-correction-choices button:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+.submission-correction-answer-details,
+.submission-correction-text-fields {
+  display: grid;
+  gap: 8px;
+}
+.submission-correction-answer-details {
+  margin-top: 14px;
+}
+.submission-correction textarea {
+  display: block;
+  width: 100%;
+  min-height: 84px;
+  padding: 10px 12px;
+  resize: vertical;
+  border: 1px solid var(--color-border);
+  border-radius: 7px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  line-height: 1.6;
+}
+.submission-correction textarea:disabled {
+  background: #f2f5f9;
+}
+.submission-correction textarea:focus-visible,
+.submission-correction-choices button:focus-visible {
+  outline: 3px solid #adc7f6;
+  outline-offset: 2px;
+}
+.submission-correction-text-fields label,
+.submission-correction-answer-details > label {
+  font-weight: 650;
+}
+.submission-correction-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 0;
+  line-height: 1.6;
+  font-weight: 500;
+}
+.submission-correction-check input {
+  width: 18px;
+  height: 18px;
+  margin-top: 3px;
+  flex: 0 0 auto;
+  accent-color: var(--color-primary);
+}
+.submission-correction p {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.submission-correction .submission-detail-notice p + p {
+  margin-top: 8px;
+}
+.submission-correction-change {
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 14px;
+  min-width: 0;
+}
+.submission-correction-change h4 small {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--color-muted);
+  font-size: 0.76rem;
+  font-weight: 400;
+}
+.submission-correction-compare {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+.submission-correction-compare > div {
+  min-width: 0;
+  padding: 12px;
+  background: #f4f7fb;
+  border-radius: 6px;
+}
+.submission-correction-compare h5 {
+  margin: 0 0 8px;
+  color: var(--color-muted);
+  font-size: 0.78rem;
+}
+.submission-correction-consequence {
+  padding: 14px;
+  border: 1px solid #e4cda4;
+  background: #fffbf2;
+  border-radius: 8px;
+  line-height: 1.7;
+}
+.submission-correction-consequence ul {
+  margin: 10px 0;
+  padding-left: 22px;
+}
+.submission-correction-consequence li {
+  overflow-wrap: anywhere;
+}
+.submission-correction-consequence li span {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--color-muted);
+}
+.submission-correction-message {
+  padding: 14px;
+  background: var(--color-soft);
+  border-radius: 8px;
+  line-height: 1.6;
+}
+.submission-correction-message .submission-detail-actions {
+  margin-top: 10px;
+}
+.submission-editor-boundary {
+  padding: 0;
+  margin: 0;
+  border: 0;
+  min-width: 0;
+}
+@media (max-width: 560px) {
+  .submission-correction {
+    padding: 16px;
+  }
+  .submission-correction-compare {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .submission-correction .submission-detail-actions > button {
+    flex: 1 1 140px;
+  }
+}

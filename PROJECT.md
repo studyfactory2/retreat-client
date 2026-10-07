@@ -1787,3 +1787,51 @@ conflicts, uncertain writes, access changes and cancelled-target unlink behavior
 These use fixture data and mocked transport/React scheduling; no actual browser,
 phone or live database mutation was performed. The pre-existing large main-bundle
 warning remains. The build used example HTTPS origins and is not a deployment.
+
+## Slice 4A — administrator submitted-checklist corrections
+
+Submitted CHECK_IN, CHECK_OUT and MAINTENANCE detail screens now expose 내용 정정.
+The editor uses the captured checklist, existing answers and general note, with a
+required trimmed 1–1000-character reason. A frozen before/after review shows only
+actual answer/note changes, affected photo names/locations and removed staff repair
+information. Explicit confirmation is required. Reason-only or normalized unchanged
+input creates no revision. Original author, property, template, visit/submission
+time and stay association remain unchanged.
+
+features/admin-submissions owns correction types, strict input preparation, effect
+calculation, API calls and receipt validation. Screen components, form models,
+mutation hook and scoped responsive styles remain separate. All writes use only
+the administrator JWT and POST /admin/submissions/:id/correct with expectedRevision,
+the full desired items, nullable generalNote and reason. No repair/photo/context
+fields are sent. Success refreshes existing current detail and paginated history;
+the immutable correction is attributed to the administrator as ADMIN_SESSION.
+
+One editor is active at a time. Switching between correction and stay linking,
+closing, page-local return and reload preserve the existing unsaved-input prompt;
+document unload warns while dirty or busy. Pending or uncertain work cannot be
+bypassed by switching editors. Validation failures keep input. Conflict, missing
+records and uncertain responses block further writes until explicit latest-record
+reload; this discards the local editor only after its existing dirty confirmation.
+There is no automatic mutation retry. Token/record/revision changes and unmount
+abort and fence responses. The existing global sidebar/browser-back guard boundary
+is unchanged; it is not a new application-wide navigation blocker.
+
+Existing issue urgency remains independent of corrected answer urgency. Only a
+newly created issue uses the answer flag; existing priority/status/resolution/
+cancellation/recurrence and original evidence remain intact. NORMAL does not resolve
+an issue. Maintenance repair data remains while an answer stays ABNORMAL, and is
+removed from the new revision on NORMAL/optional omission. Valid maintenance
+before/after associations remain regardless of answer state. DEFECT/REPAIR photos
+that become invalid leave the current revision but remain in history and original
+issue evidence. Corrections never delete uploads or restore removed associations.
+
+Verification: integrated Yarn typecheck, Oxlint, exact changed-source Prettier and
+production build passed in an isolated source/dependency copy. Temporary feature/
+API/hook probes passed 249 assertions and UI/model/React probes passed 104, including
+strict receipts, scope fencing, duplicate locks, uncertain responses, photo/repair
+consequences and bilateral editor/navigation guards. These are fixture/mocked
+checks, not interactive browser, authenticated HTTP or PostgreSQL acceptance.
+The earlier localhost:5175 browser restriction remains unresolved; no browser or
+mobile visual verification is claimed. The pre-existing large-bundle warning
+remains. The build used example HTTPS origins. No schema, migrations, dependencies,
+environment files, permanent tests, guest/staff screens or services were changed.
