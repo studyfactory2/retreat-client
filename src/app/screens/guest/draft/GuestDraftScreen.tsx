@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
+import { useNavigationGuard } from '../../../core/router/navigation/use-navigation-guard';
 import { Button } from '../../../shared/ui/Button/Button';
 import { readGuestAccess } from '../entry/model/guest-entry-model';
 import { GuestSubmissionScreen } from '../submission';
@@ -7,6 +8,7 @@ import { GuestDraftForm } from './components/GuestDraftForm';
 import { GuestSubmissionReceipt } from './components/GuestSubmissionReceipt';
 import { useGuestDraft } from './hooks/use-guest-draft';
 import './styles/guest-draft.css';
+import './styles/guest-flow.css';
 
 export function GuestDraftScreen() {
   const location = useLocation();
@@ -23,6 +25,7 @@ function GuestDraftSessionScreen() {
   const access = readGuestAccess(location.hash);
   const token = access.status === 'ready' ? access.token : null;
   const draft = useGuestDraft(token);
+  useNavigationGuard(draft.hasPendingWork);
   const main = useRef<HTMLElement>(null);
   const status =
     access.status === 'ready' ? draft.resource.status : access.status;
@@ -31,7 +34,7 @@ function GuestDraftSessionScreen() {
     window.scrollTo(0, 0);
   }, [location.pathname, location.hash, status]);
   return (
-    <div className="guest-draft">
+    <div className="guest-draft guest-draft--journey">
       <button
         className="guest-draft-skip"
         onClick={() => {
@@ -44,7 +47,7 @@ function GuestDraftSessionScreen() {
       <header className="guest-draft-header">
         <div>
           <div className="guest-draft-brand">
-            OH BOK<span>RETREAT</span>
+            ITCEN<span>휴양소 이용 안내</span>
           </div>
           <span>이용객 체크리스트</span>
         </div>
@@ -91,15 +94,13 @@ function GuestDraftSessionScreen() {
           />
         ) : (
           <GuestDraftForm
-            {...draft}
+            session={draft}
             resource={draft.resource}
             token={access.token}
           />
         )}
       </main>
-      <footer className="guest-draft-footer">
-        머무는 모든 순간에, 오복이 함께합니다.
-      </footer>
+      <footer className="guest-draft-footer">운영 OH BOK</footer>
     </div>
   );
 }

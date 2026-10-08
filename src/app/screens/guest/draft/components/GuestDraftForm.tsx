@@ -1,131 +1,118 @@
-import { useState } from 'react';
-import type { GuestDraftAnswers } from '../../../../features/guest-drafts/guest-drafts.types';
 import { Button } from '../../../../shared/ui/Button/Button';
-import { formatGuestStayTimestamp } from '../../entry/model/guest-entry-model';
 import type { DraftResource } from '../hooks/use-guest-draft';
 import {
-  changeDraftAnswer,
-  changeDraftDetails,
-} from '../model/guest-draft-model';
-import { DraftAnswerField } from './DraftAnswerField';
+  useGuestWorkflow,
+  type GuestDraftSession,
+} from '../hooks/use-guest-workflow';
+import { guestFlowSteps } from '../model/guest-flow-model';
+import { GuestChecklistStep } from './GuestChecklistStep';
 import { DraftResumeLink } from './DraftResumeLink';
 import { GuestDraftPhotos } from './GuestDraftPhotos';
+import { GuestPhotoAssignment } from './GuestPhotoAssignment';
 import { GuestSubmissionReview } from './GuestSubmissionReview';
 import { GuestSubmissionUncertain } from './GuestSubmissionUncertain';
-import { useGuestDraftPhotos } from '../hooks/use-guest-draft-photos';
-import { assertGuestChecklistComplete } from '../../../../features/guest-submissions/guest-submissions-validation';
-import type { useGuestDraft } from '../hooks/use-guest-draft';
 
 export function GuestDraftForm({
+  session,
   resource,
   token,
-  dirty,
-  edit,
-  save,
-  submit,
-  reload,
-  recheck,
 }: {
+  session: GuestDraftSession;
   resource: Extract<DraftResource, { status: 'ready' }>;
   token: string;
-  dirty: boolean;
-  edit: (change: (answers: GuestDraftAnswers) => GuestDraftAnswers) => void;
-  save: () => Promise<void>;
-  submit: ReturnType<typeof useGuestDraft>['submit'];
-  reload: () => void;
-  recheck: () => void;
 }) {
   const { draft, answers, access, mutation, message, attempt } = resource;
-  const [reviewVersion, setReviewVersion] = useState<string | null>(null);
-  const [reviewMessage, setReviewMessage] = useState('');
-  const finalReview = reviewVersion === draft.updatedAt;
-  const submitting = mutation === 'submitting';
-  const unresolvedSubmission = attempt !== null;
-  const photos = useGuestDraftPhotos({
-    token,
-    draftId: draft.id,
-    locked:
-      access !== 'ready' ||
-      mutation === 'saving' ||
-      mutation === 'conflict' ||
-      mutation === 'uncertain' ||
-      finalReview ||
-      unresolvedSubmission,
-    onAccessRejected: recheck,
-  });
+  const {
+    disabled,
+    photoWork,
+    step,
+    heading,
+    later,
+    message: workflowMessage,
+    answered,
+    required,
+    photos,
+    editableDraft,
+    assignments,
+    assign,
+    resume,
+    review,
+    reviewCurrent,
+    submit,
+    back,
+    saveLabel,
+    preparing,
+    advance,
+    continueLater,
+  } = useGuestWorkflow(session, resource, token);
   const title = draft.type === 'CHECK_IN' ? '입실 체크' : '퇴실 체크';
-  const saving = mutation === 'saving';
-  const review = mutation === 'conflict' || mutation === 'uncertain';
-  const total = draft.template.definition.sections.reduce(
-    (count, section) => count + section.items.length,
-    0,
-  );
-  const disabled =
-    saving ||
-    review ||
-    access !== 'ready' ||
-    finalReview ||
-    unresolvedSubmission ||
-    photos.busy;
-  const photoBlocked = photos.busy || photos.blocked;
+  const unresolvedSave = mutation === 'conflict' || mutation === 'uncertain';
+  const locked = disabled || photoWork;
   return (
-    <>
-      <section className="guest-draft-intro">
-        <p className="guest-draft-eyebrow">이용객 체크리스트</p>
-        <h1>{title}</h1>
-        <p className="guest-draft-property">
-          {draft.property.region ? `${draft.property.region} · ` : ''}
-          {draft.property.name}
+    <div className="guest-flow">
+      <header className="guest-flow-intro">
+        <p className="guest-draft-eyebrow">
+          {draft.property.region || '휴양소'} · {title}
         </p>
+        <h1>{draft.property.name}</h1>
         <p>
-          시설 상태를 확인해 주세요. 화면을 나가기 전 임시 저장하면 작성
-          링크에서 이어서 작성할 수 있습니다.
+          {draft.author.name} <span aria-hidden="true">·</span>{' '}
+          {draft.visitDate.replaceAll('-', '.')}
         </p>
-      </section>
-      <section
-        className="guest-draft-card guest-draft-person"
-        aria-label="이용 정보"
-      >
-        <dl>
-          <div>
-            <dt>이용일</dt>
-            <dd>{draft.visitDate.replaceAll('-', '.')}</dd>
-          </div>
-          <div>
-            <dt>이름</dt>
-            <dd>{draft.author.name}</dd>
-          </div>
-          {(draft.author.company || draft.author.department) && (
+        <details className="guest-flow-identity">
+          <summary>이용 정보</summary>
+          <dl>
             <div>
-              <dt>회사 · 부서</dt>
+              <dt>이름</dt>
+              <dd>{draft.author.name}</dd>
+            </div>
+            <div>
+              <dt>이용일</dt>
+              <dd>{draft.visitDate.replaceAll('-', '.')}</dd>
+            </div>
+            {draft.author.company && (
+              <div>
+                <dt>회사</dt>
+                <dd>{draft.author.company}</dd>
+              </div>
+            )}
+            {draft.author.department && (
+              <div>
+                <dt>부서</dt>
+                <dd>{draft.author.department}</dd>
+              </div>
+            )}
+            {draft.author.phone && (
+              <div>
+                <dt>연락처</dt>
+                <dd>{draft.author.phone}</dd>
+              </div>
+            )}
+            <div>
+              <dt>체크리스트</dt>
               <dd>
-                {[draft.author.company, draft.author.department]
-                  .filter(Boolean)
-                  .join(' · ')}
+                {draft.template.title} · 버전 {draft.template.version}
               </dd>
             </div>
-          )}
-        </dl>
-      </section>
-      <div className="guest-draft-progress" aria-label="체크리스트 작성 현황">
-        <div>
-          <strong>
-            {answers.items.length}
-            <span> / {total} 항목</span>
-          </strong>
-          <span>작성한 항목</span>
-        </div>
-        <progress
-          value={answers.items.length}
-          max={total}
-          aria-label="작성한 항목"
-        />
-        <p>
-          일부 항목만 임시 저장할 수 있습니다. 최종 제출 전에는 필수 항목과 이상
-          내용을 모두 확인해 주세요.
-        </p>
-      </div>
-      {((message && !unresolvedSubmission) || access === 'checking') && (
+          </dl>
+        </details>
+      </header>
+      <ol className="guest-flow-steps" aria-label="체크리스트 진행 단계">
+        <li className="is-complete">
+          <span aria-hidden="true">✓</span>이용 정보
+        </li>
+        {guestFlowSteps.map((label, index) => (
+          <li
+            key={label}
+            className={step > index ? 'is-complete' : ''}
+            aria-current={step === index ? 'step' : undefined}
+          >
+            <span aria-hidden="true">{step > index ? '✓' : index + 2}</span>
+            {label}
+          </li>
+        ))}
+      </ol>
+      {((message && !attempt) || access === 'checking') && (
         <section
           className={`guest-draft-notice${mutation === 'saved' && access === 'ready' ? ' guest-draft-notice--saved' : ''}`}
           role={
@@ -134,107 +121,87 @@ export function GuestDraftForm({
         >
           <p>
             {access === 'checking'
-              ? '작성 링크와 최신 저장 상태를 확인하고 있습니다. 현재 입력은 유지됩니다.'
+              ? '작성 링크와 저장 상태를 확인하고 있습니다. 현재 입력은 유지됩니다.'
               : message}
           </p>
           {access === 'blocked' && (
-            <Button className="guest-draft-secondary" onClick={recheck}>
+            <Button className="guest-draft-secondary" onClick={session.recheck}>
               연결 다시 확인
             </Button>
           )}
-          {review && !unresolvedSubmission && access !== 'checking' && (
-            <Button className="guest-draft-secondary" onClick={reload}>
+          {unresolvedSave && !attempt && access !== 'checking' && (
+            <Button
+              className="guest-draft-secondary"
+              disabled={photoWork}
+              onClick={session.reload}
+            >
               서버 내용으로 다시 불러오기
             </Button>
           )}
         </section>
       )}
-      <form
-        className="guest-draft-form"
-        onSubmit={(event) => {
-          event.preventDefault();
-          if (!disabled && !photoBlocked) void save();
-        }}
-        aria-busy={saving}
-      >
-        {draft.template.definition.sections.map((section, index) => (
-          <section
-            className="guest-draft-section"
-            key={section.id}
-            aria-labelledby={`draft-section-${section.id}`}
-          >
-            <h2 id={`draft-section-${section.id}`}>
-              <span>{String(index + 1).padStart(2, '0')}</span>
-              {section.title}
-            </h2>
-            {section.items.map((item) => (
-              <DraftAnswerField
-                key={item.id}
-                item={item}
-                disabled={disabled}
-                answer={answers.items.find(
-                  (answer) => answer.itemId === item.id,
-                )}
-                onValue={(value) =>
-                  edit((current) => changeDraftAnswer(current, item.id, value))
-                }
-                onDetails={(change) =>
-                  edit((current) =>
-                    changeDraftDetails(current, item.id, change),
-                  )
-                }
-              />
-            ))}
-          </section>
-        ))}
-        <section className="guest-draft-card guest-draft-note">
-          <label htmlFor="draft-general-note">
-            추가 전달 사항 <span>선택</span>
-          </label>
-          <textarea
-            id="draft-general-note"
-            rows={4}
-            maxLength={4000}
-            disabled={disabled}
-            placeholder="함께 전달할 내용이 있다면 남겨주세요."
-            value={answers.generalNote ?? ''}
-            onChange={(event) =>
-              edit((current) => ({
-                ...current,
-                generalNote: event.target.value || null,
-              }))
-            }
+      <h2 className="guest-flow-heading" ref={heading} tabIndex={-1}>
+        {attempt
+          ? '제출 결과 확인'
+          : later
+            ? '저장했습니다. 나중에 이어서 작성하세요'
+            : step === 0
+              ? '시설 상태를 확인해 주세요'
+              : step === 1
+                ? '사진은 필요할 때만 남겨주세요'
+                : '제출 확인'}
+      </h2>
+      {workflowMessage && (
+        <p className="guest-draft-notice" role="alert">
+          {workflowMessage}
+        </p>
+      )}
+      <div hidden={step !== 0 || later || attempt !== null}>
+        <div className="guest-flow-progress">
+          <span>
+            필수 항목{' '}
+            <strong>
+              {answered} / {required}
+            </strong>
+          </span>
+          <progress
+            value={answered}
+            max={Math.max(required, 1)}
+            aria-label="작성한 필수 항목"
           />
-        </section>
-        <div className="guest-draft-save">
-          <p role="status">
-            {saving
-              ? '저장하고 있습니다…'
-              : dirty
-                ? '아직 저장하지 않은 변경 사항이 있습니다.'
-                : `최근 저장: ${formatGuestStayTimestamp(draft.updatedAt)} · 한국 시간`}
-          </p>
-          <Button
-            type="submit"
-            loading={saving}
-            disabled={!dirty || disabled || photoBlocked}
-          >
-            임시 저장
-          </Button>
-          <p>임시 저장한 내용은 최종 제출된 기록으로 처리되지 않습니다.</p>
         </div>
-      </form>
-      <GuestDraftPhotos controller={photos} />
-      {unresolvedSubmission ? (
+        <GuestChecklistStep
+          draft={draft}
+          answers={answers}
+          disabled={locked || step !== 0 || later}
+          edit={session.edit}
+        />
+      </div>
+      {/* Keep the gallery and its private previews mounted through every stage. */}
+      <div hidden={step !== 1 || later || attempt !== null}>
+        <GuestDraftPhotos
+          controller={photos}
+          renderAssignment={(photo, index) => (
+            <GuestPhotoAssignment
+              photo={photo}
+              index={index}
+              draft={editableDraft}
+              value={assignments[photo.id] ?? ''}
+              disabled={locked || step !== 1 || later}
+              onChange={(value) => assign(photo.id, value)}
+            />
+          )}
+        />
+      </div>
+      {attempt ? (
         mutation === 'submission-uncertain' ? (
           <GuestSubmissionUncertain
             message={message}
             checking={access === 'checking'}
-            onCheck={recheck}
+            onCheck={session.recheck}
             canRetry={access === 'ready'}
             onRetry={() => {
-              if (access === 'ready')
-                void submit(attempt.photos, attempt.draft.updatedAt);
+              void session.submit(attempt.photos, attempt.draft.updatedAt);
             }}
           />
         ) : (
@@ -242,81 +209,113 @@ export function GuestDraftForm({
             className="guest-draft-card guest-submission-pending"
             role="status"
           >
-            <h2>체크리스트를 제출하고 있습니다</h2>
-            <p>제출 결과를 확인할 때까지 이 화면을 유지해 주세요.</p>
+            <h3>제출 결과를 확인하고 있습니다</h3>
+            <p>확인이 끝날 때까지 잠시 기다려 주세요.</p>
           </section>
         )
-      ) : finalReview ? (
-        <GuestSubmissionReview
-          key={`${draft.updatedAt}:${photos.items.map((photo) => photo.id).join(':')}`}
-          draft={draft}
-          photos={photos.items}
-          disabled={access !== 'ready' || photoBlocked || review || dirty}
-          submitting={submitting}
-          onCancel={() => {
-            setReviewVersion(null);
-            setReviewMessage('');
-          }}
-          onSubmit={(assignments) => {
-            void submit(assignments, reviewVersion, photos.refresh);
-          }}
-        />
-      ) : (
-        <section className="guest-draft-card guest-submission-next">
-          <h2>마지막으로 한 번 더 확인해 주세요</h2>
+      ) : later ? (
+        <section className="guest-flow-later">
           <p>
-            저장한 답변과 사진을 검토한 뒤 최종 제출합니다. 사진은 선택
-            사항입니다.
+            아직 최종 제출되지 않았습니다. 아래 링크를 보관하면 저장한 답변과
+            업로드한 사진을 다시 열 수 있습니다.
           </p>
-          {dirty && <p>먼저 변경 내용을 임시 저장해 주세요.</p>}
-          {photoBlocked && (
-            <p>사진 작업을 마치고 목록을 확인하면 검토할 수 있습니다.</p>
-          )}
-          {reviewVersion && reviewVersion !== draft.updatedAt && (
-            <p role="alert">
-              저장 내용이 변경되었습니다. 최신 답변을 다시 검토해 주세요.
+          {photos.items.length > 0 && (
+            <p className="guest-flow-caution">
+              사진과 이상 항목의 연결은 최종 제출할 때 저장됩니다. 이 화면에서는
+              유지되지만, 링크를 새로 열면 다시 선택해 주세요.
             </p>
           )}
-          {reviewMessage && <p role="alert">{reviewMessage}</p>}
-          <Button
-            disabled={dirty || disabled || photoBlocked}
-            onClick={() => {
-              try {
-                assertGuestChecklistComplete(draft);
-                setReviewMessage('');
-                setReviewVersion(draft.updatedAt);
-              } catch (error: unknown) {
-                setReviewMessage(
-                  error instanceof Error
-                    ? error.message
-                    : '필수 답변과 이상 설명을 확인해 주세요.',
-                );
-              }
-            }}
-          >
-            제출 전 검토
+          <DraftResumeLink
+            token={token}
+            expiresAt={draft.expiresAt}
+            disabled={locked}
+            guided
+          />
+          <Button disabled={locked} onClick={resume}>
+            계속 작성하기
           </Button>
         </section>
+      ) : step === 2 && review ? (
+        <>
+          {!reviewCurrent && (
+            <p className="guest-draft-notice" role="alert">
+              저장 내용 또는 사진 상태가 달라졌습니다. 이전 단계에서 다시 확인해
+              주세요.
+            </p>
+          )}
+          <GuestSubmissionReview
+            draft={review.draft}
+            photos={review.photos}
+            assignments={review.assignments}
+            disabled={locked || !reviewCurrent}
+            submitting={mutation === 'submitting'}
+            onSubmit={submit}
+            onCancel={back}
+            backDisabled={locked}
+          />
+        </>
+      ) : (
+        <section className="guest-flow-actions" aria-label="작성 단계 이동">
+          <p role="status">{saveLabel}</p>
+          {photoWork && (
+            <p className="guest-flow-caution" role="status">
+              사진 처리와 선택한 파일의 확인을 마친 뒤 이동할 수 있습니다.
+            </p>
+          )}
+          <div>
+            {step === 1 && (
+              <Button
+                className="guest-draft-secondary"
+                disabled={locked}
+                onClick={back}
+              >
+                이전
+              </Button>
+            )}
+            <Button
+              loading={preparing}
+              disabled={locked || (step === 1 && photos.blocked)}
+              onClick={advance}
+            >
+              {step === 0 ? '다음: 사진' : '저장하고 제출 내용 확인'}
+            </Button>
+          </div>
+          <button
+            className="guest-flow-later-button"
+            type="button"
+            disabled={locked}
+            onClick={() => {
+              void continueLater();
+            }}
+          >
+            나중에 계속하기
+          </button>
+          <p>일부만 작성해도 저장할 수 있습니다. 최종 제출과는 다릅니다.</p>
+        </section>
       )}
-      <DraftResumeLink
-        token={token}
-        expiresAt={draft.expiresAt}
-        disabled={saving || unresolvedSubmission || access !== 'ready'}
-      />
-      <button
-        type="button"
-        className="guest-draft-reload"
-        disabled={
-          saving ||
-          unresolvedSubmission ||
-          finalReview ||
-          photos.busy ||
-          access === 'checking'
-        }
-        onClick={reload}
-      >
-        서버 저장 내용 다시 불러오기
-      </button>
-    </>
+      {!attempt && !later && step !== 2 && (
+        <details className="guest-flow-recovery">
+          <summary>이어쓰기 링크 · 저장 내용 확인</summary>
+          <DraftResumeLink
+            token={token}
+            expiresAt={draft.expiresAt}
+            disabled={locked}
+            guided
+          />
+          <p>
+            현재 입력은 자동 저장되지 않습니다. 나가기 전 ‘나중에 계속하기’를
+            눌러 주세요.
+          </p>
+          <button
+            type="button"
+            className="guest-draft-reload"
+            disabled={locked}
+            onClick={session.reload}
+          >
+            서버에 저장된 내용 다시 불러오기
+          </button>
+        </details>
+      )}
+    </div>
   );
 }

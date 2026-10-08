@@ -1,4 +1,4 @@
-import type { ChangeEvent } from 'react';
+import { useState, type ChangeEvent } from 'react';
 import { Link, type To } from 'react-router-dom';
 import { getSeoulToday } from '../../../../core/dates/seoul-date';
 import type { GuestDraftType } from '../../../../features/guest-drafts/guest-drafts.types';
@@ -33,6 +33,10 @@ export function GuestStartForm({
     (value) => value.type === type,
   );
   const { state, pending, setField } = form;
+  const [optionalOpen, setOptionalOpen] = useState(false);
+  const optionalHasErrors = optionalFields.some(
+    (field) => state.errors[field.name],
+  );
   const locked =
     pending || state.status === 'uncertain' || state.status === 'denied';
   const error = (field: keyof GuestStartFields) =>
@@ -61,8 +65,16 @@ export function GuestStartForm({
       <header className="guest-start-heading">
         <span className="guest-eyebrow">{entry.context.property.name}</span>
         <h1>{title}</h1>
-        <p>이용 정보를 확인하고 시설 상태를 기록해 주세요.</p>
+        <p>이용 정보를 확인한 뒤 시설 상태를 알려 주세요.</p>
       </header>
+      <ol className="guest-start-steps" aria-label="체크리스트 작성 단계">
+        {['이용 정보', '시설 확인', '사진', '제출 확인'].map((step, index) => (
+          <li key={step} aria-current={index === 0 ? 'step' : undefined}>
+            <span aria-hidden="true">{index + 1}</span>
+            {step}
+          </li>
+        ))}
+      </ol>
       {!checklist ? (
         <section className="guest-card guest-empty">
           <h2>체크리스트를 준비하고 있습니다</h2>
@@ -78,9 +90,9 @@ export function GuestStartForm({
           }}
         >
           <div className="guest-card__heading">
-            <h2>이용객 정보</h2>
+            <h2>이용 정보</h2>
             <span className="guest-badge">
-              {entry.kind === 'stay' ? '개인 이용 일정' : '휴양소 공용 QR'}
+              {entry.kind === 'stay' ? '등록된 일정' : '직접 입력'}
             </span>
           </div>
           {entry.kind === 'stay' ? (
@@ -102,14 +114,10 @@ export function GuestStartForm({
                     )}
                   </dd>
                 </div>
-                <div>
-                  <dt>휴양소</dt>
-                  <dd>{entry.context.property.name}</dd>
-                </div>
               </dl>
               <p className="guest-hint">
-                개인 이용 일정에 등록된 정보로 작성됩니다. 변경이 필요하면
-                관리자에게 문의해 주세요.
+                등록된 이름과 예정일로 작성합니다. 변경이 필요하면 관리자에게
+                문의해 주세요.
               </p>
             </>
           ) : (
@@ -144,27 +152,38 @@ export function GuestStartForm({
                   한국 시간 기준으로 실제 이용일을 선택해 주세요.
                 </p>
               </div>
-              {optionalFields.map((field) => (
-                <div className="guest-start-field" key={field.name}>
-                  <label htmlFor={`guest-start-${field.name}`}>
-                    {field.label}{' '}
-                    <span className="guest-start-optional">선택</span>
-                  </label>
-                  <input
-                    {...inputProps(field.name)}
-                    type={field.name === 'phone' ? 'tel' : 'text'}
-                    autoComplete={field.autoComplete}
-                  />
-                  {error(field.name)}
+              <details
+                className="guest-start-optional-fields"
+                open={optionalOpen || optionalHasErrors}
+                onToggle={(event) => setOptionalOpen(event.currentTarget.open)}
+              >
+                <summary>
+                  추가 정보 <span>선택 · 회사, 부서, 연락처</span>
+                </summary>
+                <div>
+                  {optionalFields.map((field) => (
+                    <div className="guest-start-field" key={field.name}>
+                      <label htmlFor={`guest-start-${field.name}`}>
+                        {field.label}{' '}
+                        <span className="guest-start-optional">선택</span>
+                      </label>
+                      <input
+                        {...inputProps(field.name)}
+                        type={field.name === 'phone' ? 'tel' : 'text'}
+                        autoComplete={field.autoComplete}
+                      />
+                      {error(field.name)}
+                    </div>
+                  ))}
                 </div>
-              ))}
+              </details>
             </fieldset>
           )}
           <div className="guest-start-notice">
             <GuestIcon name="notice" />
             <p>
-              체크리스트를 시작하면 답변을 임시 저장할 수 있습니다. 발급되는
-              개인 이어쓰기 링크를 보관해 주세요.
+              작성 중에 저장하고 나중에 이어갈 수 있습니다. 마지막 확인 단계에서
+              제출해 주세요.
             </p>
           </div>
           {state.message && (
@@ -202,7 +221,7 @@ export function GuestStartForm({
               ? '이용 정보 확인 중'
               : state.status === 'starting'
                 ? '체크리스트 시작 중'
-                : `${title} 시작하기`}
+                : '다음: 시설 확인'}
           </Button>
         </form>
       )}

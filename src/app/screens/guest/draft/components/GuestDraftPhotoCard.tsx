@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Button } from '../../../../shared/ui/Button/Button';
 import type { GuestDraftPhotoDto } from '../../../../features/guest-draft-photos/guest-draft-photos.types';
 import type { GuestDraftPhotosController } from '../hooks/use-guest-draft-photos';
@@ -13,6 +13,7 @@ type Props = {
   disabled: boolean;
   getPreview: GuestDraftPhotosController['getPreview'];
   onRemove: GuestDraftPhotosController['remove'];
+  assignment?: ReactNode;
 };
 type Preview =
   | { status: 'idle' | 'loading' | 'expired' }
@@ -25,6 +26,7 @@ export function GuestDraftPhotoCard({
   disabled,
   getPreview,
   onRemove,
+  assignment,
 }: Props) {
   const [preview, setPreview] = useState<{
     source: typeof getPreview;
@@ -163,6 +165,7 @@ export function GuestDraftPhotoCard({
             미리보기 시간이 만료되었습니다. 사진은 첨부된 상태입니다.
           </p>
         )}
+        {assignment}
         {confirmDelete ? (
           <div className="guest-photo-card__confirm">
             <p>이 사진을 삭제할까요?</p>

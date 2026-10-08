@@ -510,7 +510,16 @@ export function useGuestDraftPhotos({
     window.addEventListener('beforeunload', warn);
     return () => window.removeEventListener('beforeunload', warn);
   }, [state.writing, state.queue.length, state.removal]);
+  const hasPendingWork = useCallback(() => {
+    const value = read();
+    return (
+      operation.current !== null ||
+      value.queue.length > 0 ||
+      value.removal !== null
+    );
+  }, [read]);
   return {
+    hasPendingWork,
     ...state,
     items: state.resource.status === 'ready' ? state.resource.list.items : [],
     limits:

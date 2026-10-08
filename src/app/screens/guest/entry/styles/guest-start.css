@@ -63,31 +63,80 @@
   color: var(--color-muted);
 }
 .guest-start {
-  max-width: 680px;
+  max-width: 640px;
   margin-inline: auto;
 }
+.guest-start > .guest-home-link {
+  margin-bottom: 10px;
+}
 .guest-start-heading {
-  margin-bottom: 24px;
+  margin-bottom: 18px;
   overflow-wrap: anywhere;
 }
 .guest-start-heading h1 {
-  margin-top: 8px;
+  margin-top: 5px;
   color: var(--color-heading);
-  font-size: clamp(27px, 5vw, 34px);
+  font-size: clamp(25px, 5vw, 30px);
   letter-spacing: -0.7px;
-  line-height: 1.4;
+  line-height: 1.35;
 }
 .guest-start-heading p {
-  margin-top: 10px;
+  margin-top: 7px;
   color: var(--color-muted);
-  font-size: 14px;
-  line-height: 1.9;
+  font-size: 13px;
+  line-height: 1.7;
+}
+.guest-start-steps {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  margin: 0 0 18px;
+  padding: 0;
+  list-style: none;
+}
+.guest-start-steps li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  padding-block: 8px;
+  border-bottom: 2px solid var(--color-border);
+  color: var(--color-muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.guest-start-steps li > span {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #e9eef7;
+  font-size: 11px;
+  font-weight: 650;
+}
+.guest-start-steps li[aria-current='step'] {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  font-weight: 650;
+}
+.guest-start-steps li[aria-current='step'] > span {
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+}
+.guest-start .guest-start-form {
+  padding: 22px;
+  border-radius: 16px;
+  box-shadow: none;
+}
+.guest-start-form h2 {
+  font-size: 17px;
 }
 .guest-start-fields {
   display: grid;
-  gap: 22px;
+  gap: 18px;
   min-width: 0;
-  margin: 28px 0 0;
+  margin: 20px 0 0;
   padding: 0;
   border: 0;
 }
@@ -115,8 +164,8 @@
   width: 100%;
   min-width: 0;
   max-width: 100%;
-  min-height: 50px;
-  padding: 12px 14px;
+  min-height: 48px;
+  padding: 11px 12px;
   border: 1px solid #b6c6e1;
   border-radius: var(--radius-sm);
   background: var(--color-surface);
@@ -138,8 +187,8 @@
 }
 .guest-start-summary {
   display: grid;
-  gap: 18px;
-  margin: 28px 0 20px;
+  gap: 12px;
+  margin: 20px 0 14px;
 }
 .guest-start-summary > div {
   display: flex;
@@ -162,15 +211,15 @@
 .guest-start-notice {
   display: flex;
   gap: 10px;
-  margin-top: 28px;
-  padding: 16px;
-  border-radius: 12px;
+  margin-top: 20px;
+  padding: 12px;
+  border-radius: 10px;
   background: var(--color-soft);
   color: #31548c;
 }
 .guest-start-notice p {
   font-size: 12px;
-  line-height: 1.85;
+  line-height: 1.7;
 }
 .guest-start-notice .guest-icon {
   width: 18px;
@@ -178,8 +227,8 @@
   margin-top: 2px;
 }
 .guest-start-feedback {
-  margin-top: 20px;
-  padding: 16px;
+  margin-top: 16px;
+  padding: 14px;
   border: 1px solid #d7e3fa;
   border-radius: 12px;
   background: #f5f8ff;
@@ -200,8 +249,53 @@
 }
 .guest-start .guest-start-submit {
   width: 100%;
-  min-height: 54px;
-  margin-top: 24px;
+  min-height: 50px;
+  margin-top: 18px;
+}
+.guest-start-optional-fields {
+  min-width: 0;
+  padding-top: 4px;
+  border-top: 1px solid var(--color-border);
+}
+.guest-start-optional-fields summary {
+  min-height: 44px;
+  padding-block: 12px;
+  color: var(--color-heading);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.guest-start-optional-fields summary span {
+  margin-left: 5px;
+  color: var(--color-muted);
+  font-size: 11px;
+  font-weight: 400;
+}
+.guest-start-optional-fields > div {
+  display: grid;
+  gap: 16px;
+  padding-top: 8px;
+}
+.guest-start :where(input, summary, button, a):focus-visible {
+  outline: 3px solid #3772e0;
+  outline-offset: 3px;
+}
+@media (min-width: 600px) {
+  .guest-start-optional-fields > div {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .guest-start-optional-fields .guest-start-field:last-child {
+    grid-column: 1 / -1;
+  }
+}
+@media (max-width: 380px) {
+  .guest-start .guest-start-form {
+    padding: 16px;
+  }
+  .guest-start-optional-fields summary span {
+    display: block;
+    margin: 4px 0 0;
+  }
 }
 .guest-start-sr-only {
   position: absolute;

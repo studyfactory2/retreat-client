@@ -2,17 +2,20 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { appConfig } from '../../../../core/config/environment';
 import { Button } from '../../../../shared/ui/Button/Button';
 import { formatGuestStayTimestamp } from '../../entry/model/guest-entry-model';
+import '../styles/guest-journey-edge.css';
 
 export function DraftResumeLink({
   token,
   expiresAt,
   disabled,
   completed = false,
+  guided = false,
 }: {
   token: string;
   expiresAt: string;
   disabled: boolean;
   completed?: boolean;
+  guided?: boolean;
 }) {
   const owner = useMemo(() => ({ token }), [token]);
   const scope = useRef<typeof owner | null>(owner);
@@ -40,7 +43,7 @@ export function DraftResumeLink({
       if (scope.current === owner)
         setResult({
           owner,
-          message: `${completed ? '제출 확인' : '작성'} 링크를 복사했습니다. 안전한 곳에 보관해 주세요.`,
+          message: `${completed ? '제출 확인' : guided ? '이어쓰기' : '작성'} 링크를 복사했습니다. 안전한 곳에 보관해 주세요.`,
         });
     } catch {
       if (scope.current === owner)
@@ -54,12 +57,16 @@ export function DraftResumeLink({
   };
   return (
     <section
-      className="guest-draft-card guest-draft-resume"
+      className={`guest-draft-card guest-draft-resume${guided ? ' guest-resume-guided' : ''}`}
       aria-labelledby="draft-resume-title"
     >
       <div>
         <h2 id="draft-resume-title">
-          {completed ? '제출 확인 링크 보관하기' : '나중에 이어서 작성하기'}
+          {completed
+            ? '제출 확인 링크 보관하기'
+            : guided
+              ? '이어쓰기 링크 보관하기'
+              : '나중에 이어서 작성하기'}
         </h2>
         <p>
           {completed
@@ -67,6 +74,12 @@ export function DraftResumeLink({
             : '이 링크에서 임시 저장한 내용을 다시 열 수 있습니다.'}{' '}
           링크를 가진 사람은 내용을 볼 수 있으니 다른 사람에게 공유하지 마세요.
         </p>
+        {guided && !completed && (
+          <p className="guest-resume-guided-qr">
+            공용 QR을 다시 스캔해도 이 작성 내용은 열리지 않아요. 반드시 이 개인
+            링크로 이어서 작성해 주세요.
+          </p>
+        )}
         <p>
           사용 기한: {formatGuestStayTimestamp(expiresAt)} · 한국 시간
           <br />
@@ -80,7 +93,11 @@ export function DraftResumeLink({
           void copy();
         }}
       >
-        {completed ? '제출 확인 링크 복사' : '작성 링크 복사'}
+        {completed
+          ? '제출 확인 링크 복사'
+          : guided
+            ? '이어쓰기 링크 복사'
+            : '작성 링크 복사'}
       </Button>
       <p className="guest-draft-copy-status" role="status">
         {result?.owner === owner ? result.message : ''}

@@ -341,7 +341,7 @@ export function useGuestDraft(token: string | null) {
     [owner, publish, readCurrent],
   );
 
-  const save = useCallback(async () => {
+  const save = useCallback(async (): Promise<GuestDraftDto | null> => {
     const local = readCurrent();
     if (
       scope.current !== owner ||
@@ -350,14 +350,15 @@ export function useGuestDraft(token: string | null) {
       readRequest.current ||
       local?.status !== 'ready' ||
       local.access !== 'ready' ||
-      needsReview(local) ||
-      sameDraftAnswers(local.answers, local.draft.answers)
+      needsReview(local)
     )
-      return;
+      return null;
     if (isExpired(local.draft)) {
       publish(unavailable());
-      return;
+      return null;
     }
+    if (sameDraftAnswers(local.answers, local.draft.answers))
+      return local.draft;
     const controller = new AbortController();
     writeRequest.current = controller;
     publish({ ...local, mutation: 'saving', message: '' });
@@ -372,7 +373,7 @@ export function useGuestDraft(token: string | null) {
         owner.token,
         controller.signal,
       );
-      if (!active()) return;
+      if (!active()) return null;
       publish(
         isExpired(draft)
           ? unavailable()
@@ -386,8 +387,9 @@ export function useGuestDraft(token: string | null) {
               message: '임시 저장했습니다. 아직 최종 제출되지 않았습니다.',
             },
       );
+      return isExpired(draft) ? null : draft;
     } catch (error: unknown) {
-      if (!active()) return;
+      if (!active()) return null;
       if (rejectAccess(error)) {
         queuedCheck.current = true;
         publish({ ...local, access: 'checking' });
@@ -415,6 +417,7 @@ export function useGuestDraft(token: string | null) {
               ? error.message
               : draftUncertainMessage,
         });
+      return null;
     } finally {
       if (writeRequest.current === controller) {
         writeRequest.current = null;
@@ -697,7 +700,18 @@ export function useGuestDraft(token: string | null) {
     return () => window.removeEventListener('beforeunload', warn);
   }, [dirty, saving]);
 
+  const hasPendingWork = useCallback(() => {
+    const local = readCurrent();
+    return (
+      local?.status === 'ready' &&
+      (writeRequest.current !== null ||
+        needsReview(local) ||
+        !sameDraftAnswers(local.answers, local.draft.answers))
+    );
+  }, [readCurrent]);
+
   return {
+    hasPendingWork,
     resource,
     dirty,
     edit,

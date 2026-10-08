@@ -2148,3 +2148,101 @@ The real preview remained at /admin/login after the sign-in request. Actual
 maintenance data, authenticated submission detail/photos and physical phone/native
 safe-area acceptance remain unverified. No real records were modified. The public
 fixture was removed after review; screenshots/probes stay only in temporary files.
+
+## Slice 7A — guided guest arrival and departure checklists
+
+The existing guest start and private-draft screens now use a compact guided
+journey: 이용 정보 → 시설 확인 → 사진 → 제출 확인 → submitted receipt. The
+property QR still collects a required self-reported name/date and optional
+company/department/phone; optional fields expand without losing their values.
+Personal-stay entry still displays backend-owned identity and planned dates.
+Native date controls, template/access errors and ambiguous-start recovery are
+unchanged. ITCEN text branding and discreet OH BOK credit apply only to these
+approved journey screens; guest home, guides, issues, vehicles, submitted
+correction, administrator and staff workflows are unchanged.
+
+`use-guest-workflow` owns screen steps, in-memory photo/item mappings, saved
+review and save-for-later presentation. Checklist components and pure flow
+models remain separate from feature APIs and existing business hooks. Normal /
+abnormal answers, contextual details/urgency, optional notes and the captured
+template/version remain available. The primary next action is separate from
+`나중에 계속하기`, which allows partial saves and exposes the private resume link.
+The link guidance explicitly distinguishes shared QR entry from resuming a
+private draft. Checklist answers are not automatically saved; credentials and
+drafts are not persisted in browser storage.
+
+The existing photo controller and gallery stay mounted inside hidden stage
+wrappers. Back/next preserves uploaded-photo previews and in-memory mappings;
+active operations, selected-file queues and unresolved removals block stage
+changes. The existing navigation boundary and document-unload protection cover
+unsaved answers, pending photo work, mappings and review preparation. Reopening
+loads saved answers/photos, but photo/item mappings must be selected again
+because the backend persists those only at final submission.
+
+Before review, the workflow validates completion/mappings, saves answers, then
+refreshes the READY photo list and builds a read-only saved snapshot. The save
+hook now returns the validated saved DTO (or a verified clean DTO), and returns
+null after failure, expiry or stale ownership; the API contract is unchanged.
+Review is blocked when answers, the saved version or the photo list differ.
+Every uploaded photo must retain DEFECT → ABNORMAL item linkage, while zero
+photos remain valid. The original final-submit preflight, expectedUpdatedAt,
+ordered frozen retry payload and receipt recovery remain authoritative. A READY
+list alone does not prove that no PENDING upload exists; the backend still checks
+that at final submission. Uncertain writes are never automatically retried.
+
+Credential/API flow is preserved: GET /qr/guest or /guest/stays/current rechecks
+entry with its matching QR or personal-stay Bearer. POST
+/submission-drafts/guest/start uses QR Bearer and guest details; POST
+/guest/stays/drafts/start uses personal-stay Bearer and only type/requestKey.
+The returned private-draft Bearer exclusively owns GET /submissions/receipt,
+GET /submission-drafts/current, POST /submission-drafts/save, all four
+/submission-drafts/photos endpoints and POST /submissions/submit. Signed image
+URLs still receive no API credential and expire as before. Receipt retains
+`제출 내용 보기` and clearly labels original-submission counts/time.
+
+Verification (2026-10-08): Yarn typecheck, full non-fixing Oxlint, exact Prettier
+on changed source, production build with sample HTTPS public origins, and
+whitespace checks passed in the isolated source/dependency copy. The existing
+large-bundle warning remains. Temporary probes passed 95 feature/business-hook
+assertions, 59 workflow assertions and seven component-render cases, covering
+QR/personal starts, ambiguous starts, partial saves, version conflicts, unknown
+writes, duplicate locks, stale/unmounted responses, optional photos, mapping
+preservation/validation, review invalidation, access expiry/rejection and receipt
+recovery. No permanent test files or dependencies were added.
+
+Browser verification used the existing authorized localhost:5175 server with a
+temporary, explicitly fictional bundle of the actual UI/hooks and mocked feature
+APIs. Production transport/session modules were excluded; CSP plus fetch/XHR
+blocks prevented network calls. Inspected 320/390/768/1440px layouts, long Korean
+property/answer/note/filename content, required QR input, native date input,
+personal-stay fixed identity/date, partial save/resume, no-photo final submission,
+photo mappings and loaded preview across Back/Next, unknown-upload reconciliation
+with disabled step controls, lost-submit-response receipt recovery, submitted
+detail navigation destination, and missing-template/expired/denied/request-error
+states. No horizontal overflow appeared in these inspected states. Keyboard Tab
+focus was visible, stage/save-later headings received focus, and the 320px start
+action remained above the fixed entry navigation at the bottom of the page.
+Browser console reported no warnings/errors. Review screenshots contain only
+fictional information. The temporary public fixture was removed after review.
+
+These checks do not establish authenticated backend/PostgreSQL/S3 acceptance,
+real signed-image delivery, OS/native photo picking, physical-phone keyboard/IME
+behavior, or real cross-tab/network races. The fixture used a MemoryRouter and
+stubbed navigation-guard registration: application browser Back/Forward and
+real private-link reopen acceptance still need manual verification (pending-work
+callbacks and stale ownership were exercised synthetically). No real records
+were created or changed. Backend, environment, Git staging/commits, migrations,
+deployment and server lifecycle were untouched.
+
+Slice 7A review follow-up (2026-10-08): photo/item selections now keep navigation
+and document-unload protection after a failed photo-list refresh. The workflow
+reconciles selections only against a successful list, removing associations for
+photos confirmed absent while preserving selections through list errors. This
+also avoids stale warnings after a confirmed removal followed by another failure.
+A temporary probe using the actual workflow and photo controller passed 49
+assertions; the original implementation failed its guard-retention assertion.
+Coverage includes failed refresh, same-photo recovery, confirmed removal, clearing
+a selection, and photo refresh failure after saving answers for review. Existing
+154 synthetic assertions and seven rendering cases, typecheck, non-fixing lint,
+Prettier and production build also passed. These are isolated/mock checks, not
+live BrowserRouter, backend/S3 or device acceptance. No API contracts changed.

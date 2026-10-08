@@ -4,6 +4,7 @@ import type { GuestView } from '../model/guest-entry-model';
 import { isPublicContactTel } from '../../../../features/property-contact/public-contact';
 import { GuestIcon } from './GuestIcon';
 import '../styles/guest-home.css';
+import '../../draft/styles/guest-journey-edge.css';
 
 export function GuestFrame({
   children,
@@ -29,9 +30,11 @@ export function GuestFrame({
   confirmNavigation?: (href: string) => boolean;
 }) {
   const homePresentation = view === 'home';
+  const journeyPresentation = view === 'check-in' || view === 'check-out';
+  const clientBrand = homePresentation || journeyPresentation;
   return (
     <div
-      className={`guest-entry${homePresentation ? ' guest-entry--home' : ''}${ready ? ' guest-entry--navigable' : ''}`}
+      className={`guest-entry${homePresentation ? ' guest-entry--home' : ''}${journeyPresentation ? ' guest-entry--journey' : ''}${ready ? ' guest-entry--navigable' : ''}`}
       onClickCapture={(event) => {
         if (
           event.target instanceof Element &&
@@ -65,16 +68,16 @@ export function GuestFrame({
               className="guest-brand"
               to={home}
               aria-label={
-                homePresentation ? '아이티센 이용 안내 홈' : '오복 이용 안내 홈'
+                clientBrand ? '아이티센 이용 안내 홈' : '오복 이용 안내 홈'
               }
             >
-              {homePresentation ? 'ITCEN' : 'OH BOK'}
-              <span>{homePresentation ? '휴양소 이용 안내' : 'RETREAT'}</span>
+              {clientBrand ? 'ITCEN' : 'OH BOK'}
+              <span>{clientBrand ? '휴양소 이용 안내' : 'RETREAT'}</span>
             </Link>
           ) : (
             <div className="guest-brand">
-              {homePresentation ? 'ITCEN' : 'OH BOK'}
-              <span>{homePresentation ? '휴양소 이용 안내' : 'RETREAT'}</span>
+              {clientBrand ? 'ITCEN' : 'OH BOK'}
+              <span>{clientBrand ? '휴양소 이용 안내' : 'RETREAT'}</span>
             </div>
           )}
           <div className="guest-header__tools">
@@ -103,7 +106,7 @@ export function GuestFrame({
         {children}
       </main>
       <footer className="guest-footer">
-        {homePresentation ? (
+        {clientBrand ? (
           <>
             운영 <strong>OH BOK</strong>
           </>

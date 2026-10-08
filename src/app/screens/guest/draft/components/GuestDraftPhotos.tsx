@@ -1,4 +1,5 @@
-import { useId } from 'react';
+import { useId, type ReactNode } from 'react';
+import type { GuestDraftPhotoDto } from '../../../../features/guest-draft-photos/guest-draft-photos.types';
 import { Button } from '../../../../shared/ui/Button/Button';
 import type { GuestDraftPhotosController } from '../hooks/use-guest-draft-photos';
 import { formatGuestPhotoSize } from '../model/guest-draft-photo-model';
@@ -7,8 +8,10 @@ import '../styles/guest-draft-photos.css';
 
 export function GuestDraftPhotos({
   controller,
+  renderAssignment,
 }: {
   controller: GuestDraftPhotosController;
+  renderAssignment?: (photo: GuestDraftPhotoDto, index: number) => ReactNode;
 }) {
   const inputId = useId();
   const { resource, queue, items, limits, busy, locked, removal } = controller;
@@ -33,8 +36,8 @@ export function GuestDraftPhotos({
         )}
       </div>
       <p className="guest-photos__intro">
-        이상이 있는 부분을 사진으로 남겨 주세요. 제출 전 확인 화면에서 사진과
-        이상 항목을 연결할 수 있습니다.
+        사진 없이도 제출할 수 있어요. 사진을 추가했다면 이상 항목을 연결해
+        주세요.
       </p>
       {resource.status === 'loading' ? (
         <p className="guest-photos__status" role="status">
@@ -66,13 +69,15 @@ export function GuestDraftPhotos({
                   disabled={disabled}
                   getPreview={controller.getPreview}
                   onRemove={controller.remove}
+                  assignment={renderAssignment?.(photo, index)}
                 />
               ))}
             </div>
           ) : (
             <div className="guest-photos__empty">
               <span aria-hidden="true">+</span>
-              <p>아직 첨부한 사진이 없습니다.</p>
+              <p>첨부한 사진이 없어요.</p>
+              <small>필요한 경우에만 추가해 주세요.</small>
             </div>
           )}
           <label
@@ -95,12 +100,22 @@ export function GuestDraftPhotos({
             />
           </label>
           <p className="guest-photos__help">
-            한 장당 최대 10MB · JPEG, PNG, WebP · 최대 40장
+            한 장당 최대{' '}
+            {(
+              (limits?.maxBytes ?? 10 * 1024 * 1024) /
+              (1024 * 1024)
+            ).toLocaleString('ko-KR')}
+            MiB · JPEG, PNG, WebP · 최대 {limits?.maxPhotos ?? 40}장
             <br />
             HEIC·HEIF 사진은 JPEG로 변환한 뒤 선택해 주세요.
           </p>
         </>
       )}
+      <p className="guest-photos__help">
+        사진은 답변과 별도로 바로 올라갑니다. 항목 연결은 최종 제출할 때
+        저장되며, 이 화면 안에서는 유지되지만 링크를 다시 열면 다시 선택해야
+        해요.
+      </p>
       {controller.notice && (
         <p className="guest-photos__status" role="status">
           {controller.notice}
