@@ -1,0 +1,152 @@
+.admin-property-select {
+  position: relative;
+  min-width: 0;
+}
+
+.admin-property-select > label {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--color-heading);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.admin-property-select .admin-property-select__trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  padding: 10px 11px;
+  border: 1px solid var(--color-input-border);
+  border-radius: 8px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.admin-property-select__trigger > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-property-select__trigger:disabled {
+  color: var(--color-muted);
+  cursor: wait;
+}
+
+.admin-property-select__trigger svg {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+  stroke-width: 1.6;
+}
+
+.admin-property-select .admin-property-select__panel {
+  position: absolute;
+  inset: calc(100% + 6px) 0 auto;
+  z-index: 20;
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: var(--color-surface);
+  box-shadow: 0 8px 24px rgb(19 36 72 / 12%);
+}
+
+.admin-property-select__search-row label {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--color-muted);
+  font-size: 12px;
+}
+
+.admin-property-select .admin-property-select__search {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  padding: 9px;
+  border: 1px solid var(--color-input-border);
+  border-radius: 6px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-size: 14px;
+}
+
+.admin-property-select .admin-property-select__options {
+  display: grid;
+  gap: 3px;
+  max-height: min(240px, 35dvh);
+  margin: 9px 0;
+  padding: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  list-style: none;
+}
+
+.admin-property-select__options button {
+  display: grid;
+  gap: 2px;
+  width: 100%;
+  min-height: 44px;
+  padding: 9px 8px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.5;
+  text-align: left;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+
+.admin-property-select__options button:is(:hover, [aria-pressed='true']) {
+  border-color: #d7e4fb;
+  background: var(--color-soft);
+  color: var(--color-primary);
+}
+
+.admin-property-select__options strong {
+  font-weight: 600;
+}
+
+.admin-property-select__options small,
+.admin-property-select .admin-property-select__count {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 11px;
+}
+
+.admin-property-select .admin-property-select__close {
+  min-height: 44px;
+  width: 100%;
+  margin-top: 4px;
+  border: 0;
+  border-radius: 6px;
+  background: var(--color-background);
+  color: var(--color-heading);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.admin-property-select :is(button, input):focus-visible {
+  outline: 3px solid #82aaf1;
+  outline-offset: 2px;
+}
+
+@media (max-width: 760px) {
+  .admin-property-select .admin-property-select__search,
+  .admin-property-select .admin-property-select__trigger {
+    font-size: 16px;
+  }
+}

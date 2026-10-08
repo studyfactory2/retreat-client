@@ -48,3 +48,13 @@ export interface AdminCalendarData {
   items: AdminCalendarStayDto[];
   total: number;
 }
+
+export interface AdminCalendarPageInput extends AdminCalendarInput {
+  page: number;
+}
+
+export interface AdminCalendarPageData extends AdminCalendarData {
+  page: number;
+  limit: number;
+  totalPages: number;
+}

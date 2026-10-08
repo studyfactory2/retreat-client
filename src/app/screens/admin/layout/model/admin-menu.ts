@@ -2,6 +2,7 @@ import { appRoutes } from '../../../../core/router/routes';
 import type { AdminMenuIconName } from '../components/AdminMenuIcon';
 interface AdminMenuEntry {
   to: string;
+  href?: string;
   label: string;
   mobileLabel: string;
   icon: AdminMenuIconName;
@@ -16,6 +17,7 @@ export const adminPrimaryMenu: AdminMenuEntry[] = [
   },
   {
     to: appRoutes.adminCalendar,
+    href: `${appRoutes.adminCalendar}?view=schedule-list`,
     label: '이용 일정',
     mobileLabel: '일정',
     icon: 'calendar',

@@ -5,12 +5,14 @@ import { useAdminSession } from '../../../core/session/use-admin-session';
 import { useAdminPropertyOptions } from '../../../features/admin-properties/use-admin-property-options';
 import type { GetAdminStaysInput } from '../../../features/admin-stays/admin-stay-management.types';
 import { Button } from '../../../shared/ui/Button/Button';
-import { PageState } from '../../../shared/ui/PageState/PageState';
+import { AdminListState } from '../components/AdminListState';
+import { AdminListPagination } from '../components/AdminListPagination';
 import { StayListCard } from './components/StayListCard';
 import { StayListFilters } from './components/StayListFilters';
 import { StayViewNavigation } from './components/StayViewNavigation';
 import { readStayListFilters, stayListSearch } from './model/stay-list-model';
 import { useAdminStays } from './hooks/use-admin-stays';
+import '../styles/admin-directory.css';
 import './styles/stay-list.css';
 
 export function AdminStayListScreen() {
@@ -66,12 +68,11 @@ function StayListWorkspace({
   }
 
   return (
-    <div className="admin-stay-list">
+    <div className="admin-stay-list admin-directory">
       <header className="stay-list-heading">
         <div>
-          <p className="stay-list-heading__eyebrow">이용 일정 관리</p>
-          <h1>이용 일정 목록</h1>
-          <p>이용객과 휴양소별 일정을 확인하고 취소된 기록도 찾아보세요.</p>
+          <h1>전체·취소 기록</h1>
+          <p>이용객으로 검색하거나 취소된 일정을 확인하세요.</p>
         </div>
         <div className="stay-list-heading__actions">
           <Link
@@ -81,7 +82,7 @@ function StayListWorkspace({
             엑셀 가져오기
           </Link>
           <Link className="ui-button" to={createHref}>
-            이용 일정 등록
+            일정 등록
           </Link>
           <Button
             className="admin-button-secondary"
@@ -96,9 +97,10 @@ function StayListWorkspace({
         </div>
       </header>
       <StayViewNavigation
-        view="list"
+        view="records"
         calendarHref={`${appRoutes.adminCalendar}${calendarSearch}`}
-        listHref={`${appRoutes.adminStays}${returnSearch}`}
+        listHref={`${appRoutes.adminCalendar}?view=schedule-list${filters.propertyId ? `&propertyId=${filters.propertyId}` : ''}`}
+        recordsHref={`${appRoutes.adminStays}${returnSearch}`}
       />
       <StayListFilters
         key={returnSearch}
@@ -127,34 +129,33 @@ function StayListWorkspace({
       )}
       {resource.status === 'loading' || correctedPage !== null ? (
         <div role="status">
-          <PageState
+          <AdminListState
             title="이용 일정을 불러오는 중"
             description="조회 조건에 맞는 일정을 확인하고 있습니다."
+            loading
           />
         </div>
       ) : resource.status === 'error' ? (
         <div role="alert">
-          <PageState
+          <AdminListState
             title="이용 일정 목록을 불러오지 못했습니다"
             description={resource.message}
+            error
           >
             <Button onClick={refresh}>다시 불러오기</Button>
-          </PageState>
+          </AdminListState>
         </div>
       ) : (
         <>
           <div className="stay-list-summary" role="status">
             <p>
-              {filtered ? '조회 결과' : '전체 일정'}{' '}
+              {filtered ? '조회 결과' : '전체·취소 기록'}{' '}
               <strong>{resource.data.total.toLocaleString('ko-KR')}건</strong>
             </p>
-            <span>
-              입·퇴실 예정 시간은 한국 시간 기준이며, 실제 입·퇴실 여부를
-              나타내지 않습니다.
-            </span>
+            <span>등록된 일정과 실제 입·퇴실 여부는 다릅니다.</span>
           </div>
           {resource.data.items.length === 0 ? (
-            <PageState
+            <AdminListState
               title={
                 filtered
                   ? '조건에 맞는 이용 일정이 없습니다'
@@ -175,47 +176,47 @@ function StayListWorkspace({
                   이용 일정 등록
                 </Link>
               )}
-            </PageState>
+            </AdminListState>
           ) : (
-            <ul className="stay-list-grid" aria-label="이용 일정 목록">
-              {resource.data.items.map((stay) => (
-                <li key={stay.id}>
-                  <StayListCard
-                    stay={stay}
-                    detailHref={`/admin/stays/${stay.id}${detailSearch}`}
-                  />
-                </li>
-              ))}
-            </ul>
-          )}
-          {resource.data.totalPages > 1 && (
-            <nav
-              className="stay-list-pagination"
-              aria-label="이용 일정 목록 페이지"
+            <section
+              className="admin-directory-table"
+              aria-label="이용 일정 기록"
             >
-              <Button
-                className="admin-button-secondary"
-                disabled={filters.page <= 1}
-                onClick={() =>
-                  applyFilters({ ...filters, page: filters.page - 1 })
-                }
+              <div className="admin-directory-table-head" aria-hidden="true">
+                <span>휴양소 · 이용객</span>
+                <div className="admin-directory-fields">
+                  <span>입실 예정</span>
+                  <span>퇴실 예정</span>
+                </div>
+                <span>일정 상태</span>
+                <span>관리</span>
+              </div>
+              <ul
+                className="admin-directory-rows"
+                role="list"
+                aria-label="이용 일정 목록"
               >
-                이전
-              </Button>
-              <span aria-current="page">
-                {filters.page} / {resource.data.totalPages} 페이지
-              </span>
-              <Button
-                className="admin-button-secondary"
-                disabled={filters.page >= resource.data.totalPages}
-                onClick={() =>
-                  applyFilters({ ...filters, page: filters.page + 1 })
-                }
-              >
-                다음
-              </Button>
-            </nav>
+                {resource.data.items.map((stay) => (
+                  <li key={stay.id}>
+                    <StayListCard
+                      stay={stay}
+                      detailHref={`/admin/stays/${stay.id}${detailSearch}`}
+                    />
+                  </li>
+                ))}
+              </ul>
+            </section>
           )}
+          <p className="admin-directory-footnote">
+            입·퇴실 예정 시간은 한국 시간 기준입니다. 체크리스트 제출 여부는
+            일정 현황에서 확인하세요.
+          </p>
+          <AdminListPagination
+            label="이용 일정 목록 페이지"
+            page={filters.page}
+            totalPages={resource.data.totalPages}
+            onPage={(page) => applyFilters({ ...filters, page })}
+          />
         </>
       )}
     </div>

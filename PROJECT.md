@@ -2409,3 +2409,105 @@ and still requires authenticated manual review. Property/staff forms, assignment
 rules, guest/staff screens (including Slices 7A/7B), backend/schema/environment,
 release/deployment work and services were unchanged. No staging, commits, pushes,
 migrations, deployment or server lifecycle operations were performed.
+
+## Slice 9 — schedule management across properties (2026-10-08)
+
+This frontend-only slice builds on the committed Slice 8 shell. A fresh 이용 일정
+menu visit opens the compact 일정 현황 list at `/admin/calendar?view=schedule-list`.
+Explicit `/admin/calendar` links still open the calendar; `/admin/stays` remains
+available as 전체·취소 기록. These three views have shared navigation. Registration
+and Excel-import entry points remain, while stay forms/import/detail contents
+and their writes are unchanged.
+
+The existing contracts require two list purposes: GET /admin/stays supports guest
+search and cancelled records but does not return checklist classifications.
+GET /admin/calendar returns authoritative arrival/departure checklist evidence,
+but only for non-cancelled schedules and a bounded date/property query. The new
+operational list therefore requests one calendar page with limit=12, from/to,
+optional propertyId and page. It displays real totals and server statuses:
+작성 예정, 미제출, 제출 완료 and 확인 필요, with expandable review reasons and links
+to existing submitted-checklist filters. It never infers occupancy or readiness.
+The retained records list preserves guest search, property/status filters,
+pagination and registration/cancellation labels; contact/company details remain
+accessible in the unchanged stay detail.
+
+A shared searchable property selector filters the existing loaded name/region
+options, includes inactive properties, supports keyboard dismissal/focus return,
+and does not query once per property. Apply/reset and an applied-condition summary
+keep draft inputs distinct from the displayed results. Date ranges use existing
+inclusive Seoul boundaries and the backend's maximum 62 days. Response readers
+remain strict; the new hook aborts old requests, fences credentials/results and
+preserves existing session rejection and deliberate read retry behavior.
+
+Calendar cells now show the day count and arrival/departure/continuing markers,
+with clear selected-day styling, month navigation, Today and a button focusing the
+full selected-day list. The calendar still fetches every page (100 records/request)
+for one month and checks page consistency; busy days are not truncated. Selected
+date/month, property and operational range/page survive calendar/list switching,
+stay detail/return and browser Back/Forward. Legacy record detail links retain
+search/status/property/page via their original view=list discriminator. Keyboard
+paging focuses the persistent results summary while the new page loads.
+
+Desktop uses aligned operational columns, tablet places property/guest identity
+above dates/status/actions, and phone rows stack readable fields. Shared shell
+styles are unchanged. Calendar negative horizontal margins were removed after the
+baseline fixture reproduced scrollWidth=324 at a 320px viewport. Property search
+now normalizes/truncates by Unicode code points, matching existing staff search,
+and removes the UTF-16 input maxlength: the baseline 99 Korean characters plus
+one emoji produced a broken surrogate; the fixed model and browser retain the
+whole emoji within the 100-character limit. No backend validation changed.
+
+Verification used a fresh isolated source/dependency copy, independent of cancelled
+release work. Yarn typecheck, full non-fixing Oxlint, exact changed-source Prettier,
+production build and whitespace checks passed. The existing large-bundle build
+warning remains. Temporary actual-module probes covered Unicode normalization,
+property-picker keyboard/selection behavior, calendar readers and full-calendar
+regression, 12-record pagination, URL validation/navigation, page clamping, aborts,
+stale credentials/responses and loading/error/empty states. No permanent test
+files, dependencies or deployment artifacts were added.
+
+Browser verification used the authorized existing localhost:5175 server with a
+standalone fictional bundle of actual screens, hooks and response readers. Its
+transport/session are mocked, all writes reject, and CSP connect-src none plus
+fetch/XHR blocking exclude live API traffic. Fixtures include 60 properties,
+210 stays, 12 cancellations, 138 active month records fetched in two calendar
+pages and 60 entries on a busy day, plus quiet days, month-spanning stays, all
+checklist states and long Korean/English names. Temporary public fixture files
+were removed after review; screenshots outside the repository contain fiction only.
+
+The schedule list/calendar were inspected at 320, 390, 768 and 1440px. No page-wide
+horizontal overflow was observed; the fixed 320px calendar fits from x=16 to 304.
+Property search/apply/reset, paging, detail/return, browser Back/Forward, month/day
+selection, all 60 busy-day rows, expanded review reasons, cancelled record filters,
+loading/empty/error states and deliberate recovery were exercised. Native keyboard
+date editing verified both the 62-day rejection and a valid changed range. Picker
+Escape restored focus; paging focused results; Tab showed a visible 3px outline.
+At 320px the pagination bottom was about 95px above the fixed navigation after
+scrolling to the end. The browser console had no application warnings/errors.
+
+These are synthetic/browser-fixture results, not authenticated administrator JWT,
+real backend/database, physical phone/IME/date-picker, screen-reader or concurrent
+live-data acceptance. Manual signed-in review and a document reload remain needed.
+No live records, backend/schema/environment, guest/staff flows, Git staging/commits,
+migrations, deployment or service lifecycle were changed. The Slice 8 overflow
+and Unicode findings above are resolved by this slice; its other boundaries remain.
+
+
+### Slice 9 reset follow-up — 2026-10-08
+
+Fixed draft filters surviving Reset when the normalized applied URL stays the
+same. Schedule and calendar forms now handle native reset events, explicitly
+resetting controlled dates, property selection and validation errors. Empty-result
+and invalid-query reset buttons target the same forms. Parent callbacks return
+the exact defaults they apply: schedule keeps the selected month and resets page
+and property; calendar uses today's Seoul date, evaluated once at click time.
+
+The temporary regression probe failed on the original retained property and
+passed after the fix. It covers unchanged mounted forms, custom applied filters,
+validation, repeated resets, date rollover and external form/button associations.
+Typecheck, non-fixing lint, changed-source Prettier, production build and existing
+schedule/navigation/calendar probes passed in the isolated source copy. The
+existing bundle-size warning remains. These checks use synthetic component hooks
+and presentation fixtures; native browser reset dispatch and signed-in live API
+acceptance were not rerun for this follow-up. No permanent tests or dependencies
+were added.

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { AdminPropertyOption } from '../../../../features/admin-properties/admin-properties.types';
 import type { GetAdminStaysInput } from '../../../../features/admin-stays/admin-stay-management.types';
 import { Button } from '../../../../shared/ui/Button/Button';
+import { AdminPropertySelect } from '../../components/AdminPropertySelect';
 
 type StayListFiltersProps = {
   input: GetAdminStaysInput;
@@ -21,12 +22,10 @@ export function StayListFilters({
   const [status, setStatus] = useState<GetAdminStaysInput['status']>(
     input.status,
   );
-  const missingProperty =
-    propertyId && !properties?.some((item) => item.id === propertyId);
 
   return (
     <form
-      className="stay-list-filters"
+      className="stay-list-filters admin-directory-filters"
       aria-label="이용 일정 조회 조건"
       onSubmit={(event) => {
         event.preventDefault();
@@ -45,43 +44,24 @@ export function StayListFilters({
           name="search"
           type="search"
           placeholder="이름, 회사, 부서 또는 연락처"
-          maxLength={100}
           value={search}
           onChange={(event) => setSearch(event.target.value)}
         />
       </div>
-      <div>
-        <label htmlFor="stay-list-property">휴양소</label>
-        <select
-          id="stay-list-property"
-          name="propertyId"
-          value={propertyId}
-          disabled={propertiesLoading}
-          aria-describedby={
-            propertiesLoading
-              ? 'stay-list-properties-loading'
-              : properties === undefined
-                ? 'stay-list-properties-error'
-                : undefined
-          }
-          onChange={(event) => setPropertyId(event.target.value)}
-        >
-          <option value="">전체 휴양소</option>
-          {missingProperty && (
-            <option value={propertyId}>
-              {propertiesLoading
-                ? '선택한 휴양소 확인 중'
-                : '선택한 휴양소 · 목록에서 확인 불가'}
-            </option>
-          )}
-          {properties?.map((property) => (
-            <option key={property.id} value={property.id}>
-              {property.name}
-              {property.isActive ? '' : ' · 비활성'}
-            </option>
-          ))}
-        </select>
-      </div>
+      <AdminPropertySelect
+        id="stay-list-property"
+        value={propertyId}
+        properties={properties}
+        loading={propertiesLoading}
+        describedBy={
+          propertiesLoading
+            ? 'stay-list-properties-loading'
+            : properties === undefined
+              ? 'stay-list-properties-error'
+              : undefined
+        }
+        onChange={setPropertyId}
+      />
       <div>
         <label htmlFor="stay-list-status">일정 상태</label>
         <select
@@ -102,9 +82,22 @@ export function StayListFilters({
           <option value="CANCELLED">취소됨</option>
         </select>
       </div>
-      <Button type="submit" className="admin-button-secondary">
-        조회
-      </Button>
+      <div className="admin-directory-filter-actions">
+        <Button type="submit" className="admin-button-secondary">
+          조회
+        </Button>
+        <Button
+          className="admin-directory-reset"
+          onClick={() => {
+            setSearch('');
+            setPropertyId('');
+            setStatus(undefined);
+            onApply({ page: 1 });
+          }}
+        >
+          초기화
+        </Button>
+      </div>
       {propertiesLoading && (
         <p
           id="stay-list-properties-loading"

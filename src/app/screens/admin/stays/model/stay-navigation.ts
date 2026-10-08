@@ -4,25 +4,62 @@ import { getSeoulToday } from '../../../../core/dates/seoul-date';
 import { readCalendarFilters } from '../../calendar/model/calendar-model';
 import type { AdminStayDto } from '../../../../features/admin-stays/admin-stays.types';
 import { isCalendarDate } from '../../../../features/admin-calendar/admin-calendar-filters';
+import {
+  readScheduleListFilters,
+  scheduleListSearch,
+} from '../../schedule/model/schedule-list-model';
+
+export function getScheduleViewSearch(search: URLSearchParams, today: string) {
+  const parsed = readScheduleListFilters(search, today);
+  const calendar = readCalendarFilters(search, today);
+  const filters = parsed.error
+    ? readScheduleListFilters(
+        new URLSearchParams({
+          date: calendar.date,
+          ...(calendar.propertyId ? { propertyId: calendar.propertyId } : {}),
+        }),
+        today,
+      ).filters
+    : parsed.filters;
+  const listSearch = scheduleListSearch(filters);
+  const calendarQuery = new URLSearchParams(listSearch);
+  calendarQuery.set('view', 'calendar');
+  return { filters, listSearch, calendarSearch: `?${calendarQuery}` };
+}
 
 export function getStayNavigation(search: URLSearchParams) {
   const { date, propertyId } = readCalendarFilters(search, getSeoulToday());
-  const query = new URLSearchParams({ date });
-  if (propertyId) query.set('propertyId', propertyId);
   const isList = search.get('view') === 'list';
   const listFilters = readStayListFilters(search);
   const list = appRoutes.adminStays + stayListSearch(listFilters);
   const listContext = new URLSearchParams(stayListSearch(listFilters));
   listContext.set('view', 'list');
+  if (search.get('view') === 'schedule-list') {
+    const context = getScheduleViewSearch(search, getSeoulToday());
+    return {
+      isList: true,
+      returnTo: appRoutes.adminCalendar + context.listSearch,
+      returnLabel: '일정 현황으로 돌아가기',
+      detailSearch: context.listSearch,
+      date: context.filters.date,
+      propertyId: context.filters.propertyId,
+      search: context.calendarSearch,
+      calendar: appRoutes.adminCalendar + context.calendarSearch,
+    };
+  }
+  const calendarSearch = getScheduleViewSearch(
+    search,
+    getSeoulToday(),
+  ).calendarSearch;
   return {
     isList,
-    returnTo: isList ? list : `${appRoutes.adminCalendar}?${query}`,
+    returnTo: isList ? list : `${appRoutes.adminCalendar}${calendarSearch}`,
     returnLabel: isList ? '목록으로 돌아가기' : '일정으로 돌아가기',
-    detailSearch: isList ? `?${listContext}` : `?${query}`,
+    detailSearch: isList ? `?${listContext}` : calendarSearch,
     date,
     propertyId,
-    search: `?${query}`,
-    calendar: `${appRoutes.adminCalendar}?${query}`,
+    search: calendarSearch,
+    calendar: `${appRoutes.adminCalendar}${calendarSearch}`,
   };
 }
 

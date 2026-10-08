@@ -19,33 +19,15 @@ export function StayListCard({
   detailHref: string;
 }) {
   return (
-    <article className="stay-list-card">
-      <div className="stay-list-card__topline">
-        <span
-          className={`stay-list-card__status${stay.status === 'CANCELLED' ? ' stay-list-card__status--cancelled' : ''}`}
-        >
-          {stay.status === 'ACTIVE' ? '등록됨' : '취소됨'}
-        </span>
+    <article className="admin-directory-row">
+      <div className="admin-directory-identity">
+        <h2>{stay.property.name}</h2>
+        <p className="stay-list-guest">{stay.guestName}</p>
         {!stay.property.isActive && (
-          <span className="stay-list-card__inactive">비활성 휴양소</span>
+          <p className="admin-directory-muted">비활성 휴양소</p>
         )}
       </div>
-      <h2>{stay.guestName}</h2>
-      <p className="stay-list-card__property">{stay.property.name}</p>
-      <dl className="stay-list-card__details">
-        <div>
-          <dt>회사 · 부서</dt>
-          <dd>
-            {[stay.company, stay.department].filter(Boolean).join(' · ') ||
-              '미등록'}
-          </dd>
-        </div>
-        <div>
-          <dt>연락처</dt>
-          <dd>{stay.phone || '미등록'}</dd>
-        </div>
-      </dl>
-      <dl className="stay-list-card__period">
+      <dl className="admin-directory-fields">
         <div>
           <dt>입실 예정</dt>
           <dd>
@@ -63,8 +45,13 @@ export function StayListCard({
           </dd>
         </div>
       </dl>
+      <span
+        className={`admin-directory-status${stay.status === 'CANCELLED' ? ' admin-directory-status--inactive' : ''}`}
+      >
+        {stay.status === 'ACTIVE' ? '등록됨' : '취소됨'}
+      </span>
       <Link
-        className="stay-list-card__detail"
+        className="admin-directory-detail"
         to={detailHref}
         aria-label={`${stay.guestName}, ${stay.property.name} 이용 일정 상세 보기`}
       >

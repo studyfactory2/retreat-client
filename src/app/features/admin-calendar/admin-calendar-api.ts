@@ -4,6 +4,8 @@ import { isCalendarDate, isCalendarPropertyId } from './admin-calendar-filters';
 import type {
   AdminCalendarData,
   AdminCalendarInput,
+  AdminCalendarPageData,
+  AdminCalendarPageInput,
   AdminCalendarStayDto,
   CalendarChecklistDto,
   CalendarChecklistStatus,
@@ -11,6 +13,7 @@ import type {
 } from './admin-calendar.types';
 
 const PAGE_LIMIT = 100;
+export const SCHEDULE_LIST_PAGE_SIZE = 12;
 const MAX_PAGE = 100_000;
 const DAY_MS = 24 * 60 * 60 * 1_000;
 const SEOUL_OFFSET_MS = 9 * 60 * 60 * 1_000;
@@ -28,9 +31,7 @@ const REVIEW_REASONS: ReadonlySet<string> = new Set([
   'INVALID_SUBMISSION_RECORD',
 ]);
 
-interface CalendarPage extends AdminCalendarData {
-  totalPages: number;
-}
+type CalendarPage = AdminCalendarPageData;
 
 function invalidResponse(): ApiRequestError {
   return new ApiRequestError(
@@ -208,6 +209,8 @@ function readPage(
   value: unknown,
   input: AdminCalendarInput,
   page: number,
+  limit = PAGE_LIMIT,
+  allowOutOfRange = false,
 ): CalendarPage {
   if (
     !isRecord(value) ||
@@ -220,14 +223,14 @@ function readPage(
     seoulDate(value.asOf) !== value.today ||
     !Array.isArray(value.items) ||
     value.page !== page ||
-    value.limit !== PAGE_LIMIT ||
+    value.limit !== limit ||
     !isCount(value.total) ||
     !isCount(value.totalPages) ||
-    value.totalPages !== Math.ceil(value.total / PAGE_LIMIT) ||
+    value.totalPages !== Math.ceil(value.total / limit) ||
     value.totalPages > MAX_PAGE ||
-    (page > 1 && page > value.totalPages) ||
+    (!allowOutOfRange && page > 1 && page > value.totalPages) ||
     value.items.length !==
-      Math.min(PAGE_LIMIT, value.total - (page - 1) * PAGE_LIMIT)
+      Math.max(0, Math.min(limit, value.total - (page - 1) * limit))
   )
     throw invalidResponse();
   const today = value.today;
@@ -240,14 +243,12 @@ function readPage(
     items: value.items.map((item) => readStay(item, input, today)),
     total: value.total,
     totalPages: value.totalPages,
+    page,
+    limit,
   };
 }
 
-export async function getAdminCalendar(
-  input: AdminCalendarInput,
-  token: string,
-  signal?: AbortSignal,
-): Promise<AdminCalendarData> {
+function requireCalendarInput(input: AdminCalendarInput): void {
   const days = (Date.parse(input.to) - Date.parse(input.from)) / DAY_MS + 1;
   if (
     !isCalendarDate(input.from) ||
@@ -261,6 +262,14 @@ export async function getAdminCalendar(
       400,
       'INVALID_CALENDAR_FILTER',
     );
+}
+
+export async function getAdminCalendar(
+  input: AdminCalendarInput,
+  token: string,
+  signal?: AbortSignal,
+): Promise<AdminCalendarData> {
+  requireCalendarInput(input);
 
   const items: AdminCalendarStayDto[] = [];
   const ids = new Set<string>();
@@ -318,4 +327,50 @@ export async function getAdminCalendar(
     items,
     total: lastPage.total,
   };
+}
+
+// The operational list reads exactly one server page. The calendar above still
+// reads every page in its bounded month so no date cells omit scheduled stays.
+export async function getAdminCalendarPage(
+  input: AdminCalendarPageInput,
+  token: string,
+  signal?: AbortSignal,
+): Promise<AdminCalendarPageData> {
+  requireCalendarInput(input);
+  if (!Number.isInteger(input.page) || input.page < 1 || input.page > MAX_PAGE)
+    throw new ApiRequestError(
+      '조회할 페이지를 확인해 주세요.',
+      400,
+      'INVALID_CALENDAR_PAGE',
+    );
+  signal?.throwIfAborted();
+  const query = new URLSearchParams({
+    from: input.from,
+    to: input.to,
+    page: String(input.page),
+    limit: String(SCHEDULE_LIST_PAGE_SIZE),
+  });
+  if (input.propertyId !== undefined)
+    query.set('propertyId', input.propertyId.toLowerCase());
+  const result = readPage(
+    await apiRequest<unknown>(`/admin/calendar?${query}`, { token, signal }),
+    input,
+    input.page,
+    SCHEDULE_LIST_PAGE_SIZE,
+    true,
+  );
+  const ids = new Set<string>();
+  for (const [index, stay] of result.items.entries()) {
+    const previous = result.items[index - 1];
+    if (
+      ids.has(stay.id) ||
+      (previous &&
+        (Date.parse(stay.checkInAt) < Date.parse(previous.checkInAt) ||
+          (stay.checkInAt === previous.checkInAt && stay.id <= previous.id)))
+    )
+      throw changedResponse();
+    ids.add(stay.id);
+  }
+  signal?.throwIfAborted();
+  return result;
 }

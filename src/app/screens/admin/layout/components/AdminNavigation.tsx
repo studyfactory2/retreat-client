@@ -39,7 +39,7 @@ export function AdminNavigation() {
         return (
           <Link
             key={item.to}
-            to={item.to}
+            to={item.href ?? item.to}
             className={`admin-layout__nav-link${secondary ? ' admin-layout__nav-link--secondary' : ''}${active ? ' active' : ''}`}
             aria-current={
               active ? (pathname === item.to ? 'page' : 'location') : undefined

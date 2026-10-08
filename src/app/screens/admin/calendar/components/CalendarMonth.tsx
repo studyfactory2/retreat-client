@@ -9,6 +9,8 @@ type CalendarMonthProps = {
   onSelect: (date: string) => void;
   onPrevious: () => void;
   onNext: () => void;
+  onToday: () => void;
+  onInspectSelected: () => void;
   canPrevious: boolean;
   canNext: boolean;
   state?: 'ready' | 'loading' | 'error';
@@ -25,7 +27,7 @@ const dateFormatter = new Intl.DateTimeFormat('ko-KR', {
 
 function getDayLabel(day: CalendarDay, today: string) {
   const label = dateFormatter.format(new Date(`${day.date}T00:00:00Z`));
-  return `${label}${day.date === today ? ', 오늘' : ''}, 입실 예정 ${day.arrivals}건, 퇴실 예정 ${day.departures}건, 연속 일정 ${day.continuing}건`;
+  return `${label}${day.date === today ? ', 오늘' : ''}, 일정 ${day.stays.length}건, 입실 예정 ${day.arrivals}건, 퇴실 예정 ${day.departures}건, 연속 일정 ${day.continuing}건`;
 }
 
 export function CalendarMonth({
@@ -36,6 +38,8 @@ export function CalendarMonth({
   onSelect,
   onPrevious,
   onNext,
+  onToday,
+  onInspectSelected,
   canPrevious,
   canNext,
   state = 'ready',
@@ -43,16 +47,14 @@ export function CalendarMonth({
   const [year, monthNumber] = month.split('-');
   const leadingBlanks = new Date(`${month}-01T00:00:00Z`).getUTCDay();
   const trailingBlanks = (7 - ((leadingBlanks + days.length) % 7)) % 7;
+  const selected = days.find((day) => day.date === selectedDate);
 
   return (
     <section className="calendar-month" aria-labelledby="calendar-month-title">
       <div className="calendar-month__toolbar">
-        <div>
-          <span className="calendar-month__eyebrow">MONTHLY SCHEDULE</span>
-          <h2 id="calendar-month-title">
-            {year}년 {Number(monthNumber)}월
-          </h2>
-        </div>
+        <h2 id="calendar-month-title">
+          {year}년 {Number(monthNumber)}월
+        </h2>
         <nav className="calendar-month__navigation" aria-label="달력 월 이동">
           <button
             type="button"
@@ -63,6 +65,9 @@ export function CalendarMonth({
             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="m14 6-6 6 6 6" />
             </svg>
+          </button>
+          <button type="button" onClick={onToday}>
+            오늘
           </button>
           <button
             type="button"
@@ -76,7 +81,6 @@ export function CalendarMonth({
           </button>
         </nav>
       </div>
-
       {state === 'ready' ? (
         <>
           <div className="calendar-month__weekdays" aria-hidden="true">
@@ -105,30 +109,32 @@ export function CalendarMonth({
                 aria-label={getDayLabel(day, today)}
                 aria-pressed={day.date === selectedDate}
                 aria-current={day.date === today ? 'date' : undefined}
+                aria-controls="calendar-selected-title"
               >
                 <span className="calendar-month__number" aria-hidden="true">
                   {day.day}
                 </span>
-                <span className="calendar-month__events" aria-hidden="true">
-                  {day.arrivals > 0 && (
-                    <span className="calendar-month__event calendar-month__event--arrival">
-                      입실{' '}
-                      <strong>{day.arrivals.toLocaleString('ko-KR')}</strong>
+                {day.stays.length > 0 && (
+                  <span className="calendar-month__summary" aria-hidden="true">
+                    <span className="calendar-month__count">
+                      <strong>
+                        {day.stays.length.toLocaleString('ko-KR')}
+                      </strong>
+                      건
                     </span>
-                  )}
-                  {day.departures > 0 && (
-                    <span className="calendar-month__event calendar-month__event--departure">
-                      퇴실{' '}
-                      <strong>{day.departures.toLocaleString('ko-KR')}</strong>
+                    <span className="calendar-month__markers">
+                      {day.arrivals > 0 && (
+                        <span className="calendar-month__legend-dot calendar-month__legend-dot--arrival" />
+                      )}
+                      {day.departures > 0 && (
+                        <span className="calendar-month__legend-dot calendar-month__legend-dot--departure" />
+                      )}
+                      {day.continuing > 0 && (
+                        <span className="calendar-month__legend-dot calendar-month__legend-dot--continuing" />
+                      )}
                     </span>
-                  )}
-                  {day.continuing > 0 && (
-                    <span className="calendar-month__event calendar-month__event--continuing">
-                      연속{' '}
-                      <strong>{day.continuing.toLocaleString('ko-KR')}</strong>
-                    </span>
-                  )}
-                </span>
+                  </span>
+                )}
               </button>
             ))}
             {Array.from({ length: trailingBlanks }, (_, index) => (
@@ -154,19 +160,31 @@ export function CalendarMonth({
             </li>
           </ul>
           <p className="calendar-month__note">
-            연속 일정은 입실일과 퇴실일 사이의 이용 일정입니다.
+            숫자는 해당 날짜의 일정 수입니다. 연속 일정은 입·퇴실일 사이의
+            일정입니다.
           </p>
+          <button
+            className="calendar-month__inspect"
+            type="button"
+            onClick={onInspectSelected}
+            aria-controls="calendar-selected-title"
+          >
+            선택한 날짜의 일정{' '}
+            {selected?.stays.length.toLocaleString('ko-KR') ?? '0'}건 보기{' '}
+            <span aria-hidden="true">↓</span>
+          </button>
         </>
       ) : (
-        <div className="calendar-month__state" role="status">
-          {state === 'loading' ? (
-            <>
-              <span className="calendar-month__spinner" aria-hidden="true" />
-              <p>선택한 달의 이용 일정을 불러오고 있습니다.</p>
-            </>
-          ) : (
-            <p>이용 일정을 표시할 수 없습니다. 다시 불러와 주세요.</p>
-          )}
+        <div
+          className="calendar-month__state"
+          role="status"
+          aria-busy={state === 'loading'}
+        >
+          <p>
+            {state === 'loading'
+              ? '선택한 달의 일정을 불러오고 있습니다.'
+              : '일정을 표시할 수 없습니다. 다시 불러와 주세요.'}
+          </p>
         </div>
       )}
     </section>

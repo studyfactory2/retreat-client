@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { GetAdminPropertiesInput } from '../../../../features/admin-properties/admin-property-management.types';
 import { Button } from '../../../../shared/ui/Button/Button';
+import { normalizePropertySearch } from '../model/property-list-model';
 
 export function PropertyFilters({
   input,
@@ -25,7 +26,7 @@ export function PropertyFilters({
         event.preventDefault();
         onApply({
           page: 1,
-          search: text.trim() || undefined,
+          search: normalizePropertySearch(text),
           isActive: status === 'all' ? undefined : status === 'active',
         });
       }}
@@ -36,7 +37,6 @@ export function PropertyFilters({
           id="properties-search"
           type="search"
           placeholder="휴양소 이름 또는 지역"
-          maxLength={100}
           value={text}
           onChange={(event) => setText(event.target.value)}
         />
