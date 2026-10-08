@@ -196,6 +196,10 @@
   outline: none;
 }
 
+.admin-layout__main:focus-visible {
+  outline: none;
+}
+
 .admin-layout__content {
   width: 100%;
   min-width: 0;

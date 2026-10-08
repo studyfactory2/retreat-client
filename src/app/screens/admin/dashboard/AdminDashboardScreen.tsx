@@ -7,6 +7,7 @@ import {
 import { useAdminPropertyOptions } from '../../../features/admin-properties/use-admin-property-options';
 import { Button } from '../../../shared/ui/Button/Button';
 import { PageState } from '../../../shared/ui/PageState/PageState';
+import { appliedPropertyLabel } from '../model/applied-filter-summary';
 import { DashboardFilters } from './components/DashboardFilters';
 import { DashboardOverview } from './components/DashboardOverview';
 import { dashboardLinks } from './model/dashboard-links';
@@ -44,10 +45,7 @@ function DashboardWorkspace({
   const links = dashboardLinks(selectedDate, input.propertyId);
   const propertyOptions =
     properties.resource.status === 'ready' ? properties.resource.data : [];
-  const propertyName = input.propertyId
-    ? (propertyOptions.find((property) => property.id === input.propertyId)
-        ?.name ?? '선택한 휴양소')
-    : '전체 휴양소';
+  const propertyName = appliedPropertyLabel(input.propertyId, propertyOptions);
 
   function applyFilters(date: string, propertyId: string) {
     const next = new URLSearchParams();
@@ -83,6 +81,7 @@ function DashboardWorkspace({
           propertiesError={properties.resource.status === 'error'}
           onApply={applyFilters}
           onToday={(propertyId) => applyFilters('', propertyId)}
+          onReset={() => setSearch({})}
         />
         {properties.resource.status === 'error' && (
           <div
@@ -119,7 +118,9 @@ function DashboardWorkspace({
             title="조회 조건을 확인해 주세요"
             description={filterError}
           >
-            <Button onClick={() => setSearch({})}>조회 조건 초기화</Button>
+            <Button type="reset" form="dashboard-filters">
+              조회 조건 초기화
+            </Button>
           </PageState>
         </div>
       ) : (

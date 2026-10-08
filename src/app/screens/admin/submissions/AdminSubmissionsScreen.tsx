@@ -6,10 +6,13 @@ import { Button } from '../../../shared/ui/Button/Button';
 import { PageState } from '../../../shared/ui/PageState/PageState';
 import { SubmissionListFilters } from './components/SubmissionListFilters';
 import { SubmissionRows } from './components/SubmissionRows';
+import { AdminAppliedFilters } from '../components/AdminAppliedFilters';
+import { submissionAppliedSummary } from './model/submission-filter-summary';
 import {
   readSubmissionListFilters,
   submissionFilterErrors,
   submissionListSearch,
+  submissionUrlErrors,
 } from './model/submission-list-model';
 import { useAdminSubmissions } from './hooks/use-admin-submissions';
 import './styles/submission-list.css';
@@ -36,7 +39,8 @@ function SubmissionListWorkspace({
   const [search, setSearch] = useSearchParams();
   const input = readSubmissionListFilters(search);
   const query = submissionListSearch(input);
-  const filterErrors = submissionFilterErrors(input);
+  const urlErrors = submissionUrlErrors(search);
+  const filterErrors = { ...submissionFilterErrors(input), ...urlErrors };
   const invalidFilters = Object.keys(filterErrors).length > 0;
   const { resource, refresh } = useAdminSubmissions(
     input,
@@ -60,6 +64,7 @@ function SubmissionListWorkspace({
     input.to
   );
   useEffect(() => {
+    if (invalidFilters) return;
     if (correctedPage !== null) {
       setSearch(
         submissionListSearch({
@@ -71,7 +76,7 @@ function SubmissionListWorkspace({
     } else if (search.toString() !== query.slice(1)) {
       setSearch(query, { replace: true });
     }
-  }, [correctedPage, query, search, setSearch]);
+  }, [correctedPage, query, search, setSearch, invalidFilters]);
   return (
     <div className="admin-submissions">
       <header className="submission-heading">
@@ -109,7 +114,7 @@ function SubmissionListWorkspace({
         </div>
       )}
       <SubmissionListFilters
-        key={query}
+        key={search.toString()}
         input={input}
         properties={
           properties.resource.status === 'ready'
@@ -117,10 +122,16 @@ function SubmissionListWorkspace({
             : undefined
         }
         propertiesLoading={properties.resource.status === 'loading'}
+        propertyError={properties.resource.status === 'error'}
+        urlErrors={urlErrors}
         onApply={(next) => setSearch(submissionListSearch(next))}
       />
       {properties.resource.status === 'error' && (
-        <div className="submission-banner" role="alert">
+        <div
+          className="submission-banner"
+          role="alert"
+          id="submission-properties-error"
+        >
           <p>
             휴양소 선택 목록을 불러오지 못했습니다.{' '}
             {properties.resource.message}
@@ -133,11 +144,28 @@ function SubmissionListWorkspace({
           </Button>
         </div>
       )}
+      {!invalidFilters && (
+        <AdminAppliedFilters
+          items={submissionAppliedSummary(
+            input,
+            properties.resource.status === 'ready'
+              ? properties.resource.data
+              : undefined,
+          )}
+        />
+      )}
       {invalidFilters ? (
         <div className="submission-banner" role="alert">
           <strong>기록 조회 조건을 확인해 주세요.</strong>
           <p>{Object.values(filterErrors).join(' ')}</p>
           <p>조건을 수정하고 조회하면 기록을 불러옵니다.</p>
+          <Button
+            className="admin-button-secondary"
+            type="reset"
+            form="submission-filters"
+          >
+            조회 조건 초기화
+          </Button>
         </div>
       ) : resource.status === 'loading' || correctedPage !== null ? (
         <div role="status">
@@ -181,13 +209,7 @@ function SubmissionListWorkspace({
               }
             >
               {filtered && (
-                <Button
-                  onClick={() =>
-                    setSearch(
-                      submissionListSearch({ page: 1, stayId: input.stayId }),
-                    )
-                  }
-                >
+                <Button type="reset" form="submission-filters">
                   조회 조건 초기화
                 </Button>
               )}

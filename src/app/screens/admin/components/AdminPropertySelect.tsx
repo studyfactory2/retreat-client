@@ -8,6 +8,7 @@ export function AdminPropertySelect({
   properties,
   loading = false,
   describedBy,
+  invalid,
   onChange,
   label = '휴양소',
 }: {
@@ -16,6 +17,7 @@ export function AdminPropertySelect({
   properties?: AdminPropertyOption[];
   loading?: boolean;
   describedBy?: string;
+  invalid?: boolean;
   onChange: (id: string) => void;
   label?: string;
 }) {
@@ -77,6 +79,7 @@ export function AdminPropertySelect({
         aria-controls={open ? `${id}-panel` : undefined}
         aria-labelledby={`${id}-label ${id}-value`}
         aria-describedby={describedBy}
+        aria-invalid={invalid || undefined}
         onClick={() => (open ? close() : setOpen(true))}
         onKeyDown={(event) => {
           if (!open && event.key === 'ArrowDown') {

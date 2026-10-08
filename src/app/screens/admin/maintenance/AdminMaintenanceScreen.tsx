@@ -1,10 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useAdminSession } from '../../../core/session/use-admin-session';
 import { useAdminPropertyOptions } from '../../../features/admin-properties/use-admin-property-options';
 import type { AdminMaintenanceInput } from '../../../features/admin-maintenance/admin-maintenance.types';
 import { Button } from '../../../shared/ui/Button/Button';
 import { PageState } from '../../../shared/ui/PageState/PageState';
+import { AdminAppliedFilters } from '../components/AdminAppliedFilters';
+import { maintenanceAppliedFilters } from './model/maintenance-applied-filters';
 import { MaintenanceFilters } from './components/MaintenanceFilters';
 import { MaintenanceRows } from './components/MaintenanceRows';
 import { MaintenanceRecordGuide } from './components/MaintenanceRecordGuide';
@@ -38,6 +40,7 @@ function MaintenanceWorkspace({
 }) {
   const [search, setSearch] = useSearchParams();
   const [filterReset, setFilterReset] = useState(0);
+  const resetFocus = useRef<HTMLButtonElement | null>(null);
   const filters = readMaintenanceFilters(search);
   const query = maintenanceSearch(filters);
   const invalid = Object.keys(maintenanceFilterErrors(filters)).length > 0;
@@ -63,8 +66,29 @@ function MaintenanceWorkspace({
         { replace: true },
       );
   }, [correctedPage, query, setSearch]);
+  useLayoutEffect(() => {
+    const previous = resetFocus.current;
+    // URL navigation may commit after the local reset counter. Wait for both.
+    if (!previous || query !== '') return;
+    resetFocus.current = null;
+    if (!previous.isConnected && document.activeElement === document.body)
+      document
+        .getElementById('maintenance-filter-reset')
+        ?.focus({ preventScroll: true });
+  }, [filterReset, query]);
   function apply(next: AdminMaintenanceInput) {
     setSearch(maintenanceSearch(next));
+  }
+  function reset() {
+    const active = document.activeElement;
+    resetFocus.current =
+      active instanceof HTMLButtonElement &&
+      active.type === 'reset' &&
+      active.form?.id === 'maintenance-filters'
+        ? active
+        : null;
+    setFilterReset((value) => value + 1);
+    apply({ page: 1, dateField: 'STARTED', view: 'ALL' });
   }
   return (
     <div className="admin-maintenance">
@@ -93,10 +117,16 @@ function MaintenanceWorkspace({
             : undefined
         }
         propertiesLoading={properties.resource.status === 'loading'}
+        propertyError={properties.resource.status === 'error'}
         onApply={apply}
+        onReset={reset}
       />
       {properties.resource.status === 'error' && (
-        <div className="maintenance-banner" role="alert">
+        <div
+          id="maintenance-property-error"
+          className="maintenance-banner"
+          role="alert"
+        >
           <p>
             휴양소 선택 목록을 불러오지 못했습니다.{' '}
             {properties.resource.message}
@@ -109,13 +139,31 @@ function MaintenanceWorkspace({
           </Button>
         </div>
       )}
+      {!invalid && (
+        <AdminAppliedFilters
+          items={maintenanceAppliedFilters(
+            filters,
+            properties.resource.status === 'ready'
+              ? properties.resource.data
+              : undefined,
+          )}
+        />
+      )}
       <MaintenanceRecordGuide />
       {invalid ? (
         <div role="alert">
           <PageState
             title="조회 조건을 확인해 주세요"
             description="표시된 조건을 수정한 뒤 조회해 주세요."
-          />
+          >
+            <Button
+              type="reset"
+              form="maintenance-filters"
+              className="admin-button-secondary"
+            >
+              조회 조건 초기화
+            </Button>
+          </PageState>
         </div>
       ) : resource.status === 'loading' || correctedPage !== null ? (
         <div role="status">
@@ -150,11 +198,9 @@ function MaintenanceWorkspace({
               description="다른 휴양소나 기간을 선택하거나 조회 조건을 초기화해 주세요."
             >
               <Button
+                type="reset"
+                form="maintenance-filters"
                 className="admin-button-secondary"
-                onClick={() => {
-                  setFilterReset((value) => value + 1);
-                  apply({ page: 1, dateField: 'STARTED', view: 'ALL' });
-                }}
               >
                 조회 조건 초기화
               </Button>

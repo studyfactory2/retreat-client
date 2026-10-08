@@ -3,6 +3,10 @@
   min-width: 0;
   margin-inline: auto;
 }
+.admin-maintenance .admin-property-select__trigger > span {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
 .maintenance-heading {
   display: flex;
   align-items: center;
@@ -103,8 +107,8 @@
   font-size: 12px;
   font-weight: 600;
 }
-.maintenance-field input,
-.maintenance-field select {
+.maintenance-field > input,
+.maintenance-field > select {
   width: 100%;
   min-width: 0;
   max-width: 100%;
@@ -116,14 +120,14 @@
   color: var(--color-text);
   font-size: 14px;
 }
-.maintenance-field :is(input, select):focus-visible {
+.maintenance-field > :is(input, select):focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }
 .maintenance-field [aria-invalid='true'] {
   border-color: var(--color-danger);
 }
-.maintenance-field select:disabled {
+.maintenance-field > select:disabled {
   color: var(--color-muted);
   background: var(--color-background);
   opacity: 1;
@@ -277,8 +281,12 @@
     padding: 9px 4px;
     font-size: 12px;
   }
-  .maintenance-field input,
-  .maintenance-field select {
+  .maintenance-field--property,
+  .maintenance-field--basis {
+    grid-column: 1 / -1;
+  }
+  .maintenance-field > input,
+  .maintenance-field > select {
     font-size: 16px;
   }
   .maintenance-field input[type='date'] {
@@ -296,4 +304,8 @@
   .maintenance-field:has(input[type='date']) {
     grid-column: 1 / -1;
   }
+}
+
+.admin-maintenance .admin-applied-filters {
+  margin-top: 16px;
 }

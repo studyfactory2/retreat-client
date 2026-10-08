@@ -2,7 +2,11 @@ import { useRef, useState } from 'react';
 import type { AdminIssueFilters } from '../../../../features/admin-issues/admin-issues.types';
 import type { AdminPropertyOption } from '../../../../features/admin-properties/admin-properties.types';
 import { Button } from '../../../../shared/ui/Button/Button';
-import { issueFilterErrors } from '../model/issue-filters';
+import {
+  issueFilterErrors,
+  type IssueFilterErrors,
+} from '../model/issue-filters';
+import { AdminPropertySelect } from '../../components/AdminPropertySelect';
 
 const statuses = [
   ['', '전체'],
@@ -14,25 +18,31 @@ export function IssueFilters({
   input,
   properties,
   propertiesLoading,
+  propertyError = false,
   onApply,
 }: {
   input: AdminIssueFilters;
   properties?: AdminPropertyOption[];
   propertiesLoading: boolean;
+  propertyError?: boolean;
   onApply: (value: AdminIssueFilters) => void;
 }) {
   const [draft, setDraft] = useState(input);
   const [submitted, setSubmitted] = useState(false);
   const form = useRef<HTMLFormElement>(null);
-  const errors = issueFilterErrors(draft);
+  const [dateErrors, setDateErrors] = useState<IssueFilterErrors>({});
+  const errors = { ...issueFilterErrors(draft), ...dateErrors };
   const showErrors =
     submitted || Object.keys(issueFilterErrors(input)).length > 0;
   function change(key: keyof AdminIssueFilters, value: string) {
     setDraft((current) => ({ ...current, [key]: value || undefined, page: 1 }));
+    if (key === 'from' || key === 'to')
+      setDateErrors((current) => {
+        const next = { ...current };
+        delete next[key];
+        return next;
+      });
   }
-  const missingProperty =
-    draft.propertyId &&
-    !properties?.some((property) => property.id === draft.propertyId);
   const error = (key: keyof typeof errors) =>
     showErrors && errors[key] ? (
       <span className="issue-field-error" id={`issue-${key}-error`}>
@@ -42,16 +52,40 @@ export function IssueFilters({
   return (
     <form
       ref={form}
+      id="issue-filters"
+      onReset={() => {
+        const defaults = { page: 1 };
+        setDraft(defaults);
+        setSubmitted(false);
+        setDateErrors({});
+        onApply(defaults);
+      }}
       className="issue-filters"
       aria-label="이상사항 조회 조건"
       noValidate
       onSubmit={(event) => {
         event.preventDefault();
         setSubmitted(true);
-        if (Object.keys(errors).length) {
-          form.current
-            ?.querySelector<HTMLElement>(`[name="${Object.keys(errors)[0]}"]`)
-            ?.focus();
+        const nativeErrors: IssueFilterErrors = {};
+        for (const field of ['from', 'to'] as const) {
+          if (
+            form.current?.querySelector<HTMLInputElement>(`#issue-${field}`)
+              ?.validity.badInput
+          )
+            nativeErrors[field] =
+              '접수일의 연도, 월, 일을 모두 올바르게 입력해 주세요.';
+        }
+        setDateErrors(nativeErrors);
+        if (
+          Object.values({ ...issueFilterErrors(draft), ...nativeErrors }).some(
+            Boolean,
+          )
+        ) {
+          requestAnimationFrame(() =>
+            form.current
+              ?.querySelector<HTMLElement>('[aria-invalid="true"]')
+              ?.focus(),
+          );
           return;
         }
         onApply({ ...draft, page: 1 });
@@ -83,35 +117,22 @@ export function IssueFilters({
       </fieldset>
       <div className="issue-filters__fields">
         <div className="issue-field issue-field--property">
-          <label htmlFor="issue-property">휴양소</label>
-          <select
+          <AdminPropertySelect
             id="issue-property"
-            name="propertyId"
             value={draft.propertyId ?? ''}
-            disabled={propertiesLoading}
-            onChange={(event) => change('propertyId', event.target.value)}
-            aria-invalid={showErrors && !!errors.propertyId}
-            aria-describedby={
-              showErrors && errors.propertyId
-                ? 'issue-propertyId-error'
-                : undefined
+            properties={properties}
+            loading={propertiesLoading}
+            onChange={(value) => change('propertyId', value)}
+            invalid={showErrors && !!errors.propertyId}
+            describedBy={
+              [
+                showErrors && errors.propertyId ? 'issue-propertyId-error' : '',
+                propertyError ? 'issue-properties-error' : '',
+              ]
+                .filter(Boolean)
+                .join(' ') || undefined
             }
-          >
-            <option value="">전체 휴양소</option>
-            {missingProperty && (
-              <option value={draft.propertyId}>
-                {propertiesLoading
-                  ? '선택한 휴양소 확인 중'
-                  : '선택한 휴양소 · 목록에서 확인 불가'}
-              </option>
-            )}
-            {properties?.map((property) => (
-              <option key={property.id} value={property.id}>
-                {property.name}
-                {property.isActive ? '' : ' · 비활성'}
-              </option>
-            ))}
-          </select>
+          />
           {error('propertyId')}
         </div>
         <div className="issue-field">
@@ -189,15 +210,7 @@ export function IssueFilters({
           )}
         </div>
         <div className="issue-filters__actions">
-          <Button
-            className="admin-button-secondary"
-            onClick={() => {
-              const defaults = { page: 1 };
-              setDraft(defaults);
-              setSubmitted(false);
-              onApply(defaults);
-            }}
-          >
+          <Button className="admin-button-secondary" type="reset">
             초기화
           </Button>
           <Button type="submit">조회</Button>

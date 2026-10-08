@@ -36,6 +36,10 @@
   white-space: nowrap;
 }
 
+.admin-property-select__trigger[aria-invalid='true'] {
+  border-color: var(--color-danger);
+}
+
 .admin-property-select__trigger:disabled {
   color: var(--color-muted);
   cursor: wait;

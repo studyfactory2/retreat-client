@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import type { AdminPropertyOption } from '../../../../features/admin-properties/admin-properties.types';
 import type { AdminMaintenanceInput } from '../../../../features/admin-maintenance/admin-maintenance.types';
 import { Button } from '../../../../shared/ui/Button/Button';
+import { AdminPropertySelect } from '../../components/AdminPropertySelect';
 import {
   maintenanceFilterErrors,
   type MaintenanceFilterErrors,
@@ -16,12 +17,16 @@ export function MaintenanceFilters({
   input,
   properties,
   propertiesLoading,
+  propertyError,
   onApply,
+  onReset,
 }: {
   input: AdminMaintenanceInput;
   properties?: AdminPropertyOption[];
   propertiesLoading: boolean;
+  propertyError: boolean;
   onApply: (value: AdminMaintenanceInput) => void;
+  onReset: () => void;
 }) {
   const [draft, setDraft] = useState(input);
   const [submitted, setSubmitted] = useState(false);
@@ -33,9 +38,6 @@ export function MaintenanceFilters({
   const showErrors = submitted || initialInvalid;
   const change = (key: keyof AdminMaintenanceInput, value: string) =>
     setDraft((current) => ({ ...current, [key]: value || undefined, page: 1 }));
-  const missingProperty =
-    draft.propertyId &&
-    !properties?.some((item) => item.id === draft.propertyId);
   const fieldError = (key: keyof typeof errors) =>
     showErrors && errors[key] ? (
       <span id={`maintenance-${key}-error`} className="maintenance-field-error">
@@ -45,9 +47,11 @@ export function MaintenanceFilters({
   return (
     <form
       ref={form}
+      id="maintenance-filters"
       className="maintenance-filters"
       aria-label="청소·정비 조회 조건"
       noValidate
+      onReset={onReset}
       onSubmit={(event) => {
         event.preventDefault();
         const dateErrors: MaintenanceFilterErrors = {};
@@ -65,7 +69,9 @@ export function MaintenanceFilters({
           const key = Object.keys(nextErrors)[0];
           requestAnimationFrame(() =>
             form.current
-              ?.querySelector<HTMLElement>(`[name="${key}"]`)
+              ?.querySelector<HTMLElement>(
+                `[id="maintenance-${key === 'propertyId' ? 'property' : key}"], [name="${key}"]`,
+              )
               ?.focus(),
           );
           return;
@@ -102,38 +108,31 @@ export function MaintenanceFilters({
       </fieldset>
       <div className="maintenance-filters__fields">
         <div className="maintenance-field maintenance-field--property">
-          <label htmlFor="maintenance-property">휴양소</label>
-          <select
+          <AdminPropertySelect
             id="maintenance-property"
-            name="propertyId"
             value={draft.propertyId ?? ''}
-            disabled={propertiesLoading}
-            onChange={(event) => change('propertyId', event.target.value)}
-            aria-invalid={showErrors && !!errors.propertyId}
-            aria-describedby={
-              showErrors && errors.propertyId
-                ? 'maintenance-propertyId-error'
-                : undefined
+            properties={properties}
+            loading={propertiesLoading}
+            onChange={(value) => change('propertyId', value)}
+            invalid={showErrors && !!errors.propertyId}
+            describedBy={
+              [
+                showErrors && errors.propertyId
+                  ? 'maintenance-propertyId-error'
+                  : undefined,
+                propertiesLoading
+                  ? 'maintenance-property-loading'
+                  : propertyError
+                    ? 'maintenance-property-error'
+                    : undefined,
+              ]
+                .filter(Boolean)
+                .join(' ') || undefined
             }
-          >
-            <option value="">전체 휴양소</option>
-            {missingProperty && (
-              <option value={draft.propertyId}>
-                {propertiesLoading
-                  ? '선택한 휴양소 확인 중'
-                  : '선택한 휴양소 · 목록에서 확인 불가'}
-              </option>
-            )}
-            {properties?.map((property) => (
-              <option key={property.id} value={property.id}>
-                {property.name}
-                {property.isActive ? '' : ' · 비활성'}
-              </option>
-            ))}
-          </select>
+          />
           {fieldError('propertyId')}
         </div>
-        <div className="maintenance-field">
+        <div className="maintenance-field maintenance-field--basis">
           <label htmlFor="maintenance-dateField">날짜 기준</label>
           <select
             id="maintenance-dateField"
@@ -198,20 +197,16 @@ export function MaintenanceFilters({
                 : '작성 중인 기록과 제출된 기록을 함께 표시합니다.'}
           </p>
           {propertiesLoading && (
-            <p role="status">휴양소 선택 목록을 불러오고 있습니다.</p>
+            <p id="maintenance-property-loading" role="status">
+              휴양소 선택 목록을 불러오고 있습니다.
+            </p>
           )}
         </div>
         <div className="maintenance-filters__actions">
           <Button
+            id="maintenance-filter-reset"
+            type="reset"
             className="admin-button-secondary"
-            onClick={() => {
-              const defaults = { page: 1, dateField: 'STARTED', view: 'ALL' };
-              form.current?.reset();
-              setDraft(defaults);
-              setNativeDateErrors({});
-              setSubmitted(false);
-              onApply(defaults);
-            }}
           >
             초기화
           </Button>

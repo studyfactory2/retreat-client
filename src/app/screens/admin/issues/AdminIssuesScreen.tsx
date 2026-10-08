@@ -8,6 +8,8 @@ import { Button } from '../../../shared/ui/Button/Button';
 import { PageState } from '../../../shared/ui/PageState/PageState';
 import { IssueFilters } from './components/IssueFilters';
 import { IssueRows } from './components/IssueRows';
+import { AdminAppliedFilters } from '../components/AdminAppliedFilters';
+import { issueAppliedSummary } from './model/issue-filter-summary';
 import { useAdminIssues } from './hooks/use-admin-issues';
 import {
   issueFilterErrors,
@@ -102,10 +104,15 @@ function IssuesWorkspace({
             : undefined
         }
         propertiesLoading={properties.resource.status === 'loading'}
+        propertyError={properties.resource.status === 'error'}
         onApply={apply}
       />
       {properties.resource.status === 'error' && (
-        <div role="alert" className="issue-list-banner">
+        <div
+          role="alert"
+          className="issue-list-banner"
+          id="issue-properties-error"
+        >
           <p>
             휴양소 선택 목록을 불러오지 못했습니다.{' '}
             {properties.resource.message}
@@ -117,6 +124,16 @@ function IssuesWorkspace({
             휴양소 다시 불러오기
           </Button>
         </div>
+      )}
+      {!invalid && (
+        <AdminAppliedFilters
+          items={issueAppliedSummary(
+            filters,
+            properties.resource.status === 'ready'
+              ? properties.resource.data
+              : undefined,
+          )}
+        />
       )}
       {invalid ? (
         <div role="alert">
@@ -164,7 +181,8 @@ function IssuesWorkspace({
             >
               <Button
                 className="admin-button-secondary"
-                onClick={() => apply({ page: 1 })}
+                type="reset"
+                form="issue-filters"
               >
                 조회 조건 초기화
               </Button>

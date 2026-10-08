@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import type { AdminPropertyOption } from '../../../../features/admin-properties/admin-properties.types';
 import type { AdminSubmissionListInput } from '../../../../features/admin-submissions/admin-submissions.types';
 import { Button } from '../../../../shared/ui/Button/Button';
+import { AdminPropertySelect } from '../../components/AdminPropertySelect';
 import {
   submissionFilterErrors,
   submissionTypeLabel,
@@ -12,21 +13,23 @@ export function SubmissionListFilters({
   input,
   properties,
   propertiesLoading,
+  propertyError = false,
+  urlErrors,
   onApply,
 }: {
   input: AdminSubmissionListInput;
   properties?: AdminPropertyOption[];
   propertiesLoading: boolean;
+  propertyError?: boolean;
+  urlErrors?: SubmissionFilterErrors;
   onApply: (input: AdminSubmissionListInput) => void;
 }) {
   const [values, setValues] = useState(input);
-  const [errors, setErrors] = useState<SubmissionFilterErrors>(() =>
-    submissionFilterErrors(input),
-  );
+  const [errors, setErrors] = useState<SubmissionFilterErrors>(() => ({
+    ...submissionFilterErrors(input),
+    ...urlErrors,
+  }));
   const form = useRef<HTMLFormElement>(null);
-  const missingProperty =
-    values.propertyId &&
-    !properties?.some((property) => property.id === values.propertyId);
   function apply() {
     const nextErrors = submissionFilterErrors(values);
     for (const field of ['from', 'to'] as const) {
@@ -51,6 +54,13 @@ export function SubmissionListFilters({
   return (
     <form
       className="submission-filters"
+      id="submission-filters"
+      onReset={() => {
+        const reset = { page: 1, stayId: input.stayId };
+        setValues(reset);
+        setErrors({});
+        onApply(reset);
+      }}
       noValidate
       ref={form}
       aria-label="제출 기록 조회 조건"
@@ -71,6 +81,10 @@ export function SubmissionListFilters({
                 <input
                   type="radio"
                   name="submission-type"
+                  aria-invalid={!!errors.type || undefined}
+                  aria-describedby={
+                    errors.type ? 'submission-type-error' : undefined
+                  }
                   value={type}
                   checked={(values.type ?? 'ALL') === type}
                   onChange={() =>
@@ -87,40 +101,52 @@ export function SubmissionListFilters({
             ),
           )}
         </div>
+        {errors.type && (
+          <p className="submission-field-error" id="submission-type-error">
+            {errors.type}
+          </p>
+        )}
       </fieldset>
       <div className="submission-filters__fields">
         <div className="submission-filter-field submission-filter-field--property">
-          <label htmlFor="submission-property">휴양소</label>
-          <select
+          <AdminPropertySelect
             id="submission-property"
             value={values.propertyId ?? ''}
-            disabled={propertiesLoading}
-            onChange={(event) =>
+            properties={properties}
+            loading={propertiesLoading}
+            onChange={(propertyId) =>
               setValues((current) => ({
                 ...current,
-                propertyId: event.target.value || undefined,
+                propertyId: propertyId || undefined,
               }))
             }
-          >
-            <option value="">전체 휴양소</option>
-            {missingProperty && (
-              <option value={values.propertyId}>
-                선택한 휴양소 ·{' '}
-                {propertiesLoading ? '확인 중' : '목록에서 확인 불가'}
-              </option>
-            )}
-            {properties?.map((property) => (
-              <option key={property.id} value={property.id}>
-                {property.name}
-                {property.isActive ? '' : ' · 비활성'}
-              </option>
-            ))}
-          </select>
+            invalid={!!errors.propertyId}
+            describedBy={
+              [
+                errors.propertyId ? 'submission-property-error' : '',
+                propertyError ? 'submission-properties-error' : '',
+              ]
+                .filter(Boolean)
+                .join(' ') || undefined
+            }
+          />
+          {errors.propertyId && (
+            <p
+              className="submission-field-error"
+              id="submission-property-error"
+            >
+              {errors.propertyId}
+            </p>
+          )}
         </div>
         <div className="submission-filter-field">
           <label htmlFor="submission-status">기록 상태</label>
           <select
             id="submission-status"
+            aria-invalid={!!errors.status || undefined}
+            aria-describedby={
+              errors.status ? 'submission-status-error' : undefined
+            }
             value={values.status ?? ''}
             onChange={(event) =>
               setValues((current) => ({
@@ -137,6 +163,11 @@ export function SubmissionListFilters({
             <option value="SUBMITTED">제출됨</option>
             <option value="CANCELLED">취소됨</option>
           </select>
+          {errors.status && (
+            <p className="submission-field-error" id="submission-status-error">
+              {errors.status}
+            </p>
+          )}
         </div>
         <div className="submission-filter-field">
           <label htmlFor="submission-link-status">일정 연결</label>
@@ -214,15 +245,7 @@ export function SubmissionListFilters({
         </div>
         <div className="submission-filters__actions">
           <Button type="submit">조회</Button>
-          <Button
-            className="admin-button-secondary"
-            onClick={() => {
-              const reset = { page: 1, stayId: input.stayId };
-              setValues(reset);
-              setErrors({});
-              onApply(reset);
-            }}
-          >
+          <Button className="admin-button-secondary" type="reset">
             조건 초기화
           </Button>
         </div>

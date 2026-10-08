@@ -2511,3 +2511,93 @@ existing bundle-size warning remains. These checks use synthetic component hooks
 and presentation fixtures; native browser reset dispatch and signed-in live API
 acceptance were not rerun for this follow-up. No permanent tests or dependencies
 were added.
+
+### Slice 10 — searchable property filters and applied summaries — 2026-10-08
+
+Frontend-only changes on 운영 현황, 청소·정비, 이상사항 and 제출 기록 reuse
+Slice 9's AdminPropertySelect. Name/region search uses the existing loaded options,
+including inactive properties. A selected UUID missing from the option list remains
+selected and is labeled 목록 확인 필요; it never silently becomes 전체 휴양소.
+The shared selector only gains an optional accessible invalid state. Existing
+calendar/schedule callers, shared shell, result cards/rows and guest/staff screens
+are unchanged. Wrapping rules are scoped to the four affected screens.
+
+Maintenance, issues and submissions now show a compact 적용 조건 definition list.
+The dashboard retains its existing property/date summary and timestamps. Summaries
+come from validated applied URL filters, not unsaved form inputs. They preserve
+maintenance record/date meanings, issue cancellation defaults and submission visit
+dates. 미연결 이용객 기록 accurately describes submitted arrival/departure records
+when type/status are implicit. No global property selection was introduced.
+
+조회 validates the draft and updates the URL before the existing read hook runs.
+오늘 retains the dashboard's draft property and requests today's date by omitting
+an explicit date. Native form resets clear controlled drafts and errors even when
+the applied URL stays unchanged; empty/invalid-query reset buttons target the same
+form. Submission reset retains an existing valid stayId scope, as before. Native
+partial dates are blocked rather than silently treated as an empty optional range.
+The submission screen also rejects malformed/duplicate supported URL filters before
+its existing typed parser can omit them; no default results/summary are shown for
+those invalid URLs. Existing page fallback and unrelated-query handling remain.
+
+Existing GET contracts are preserved: /admin/dashboard, /admin/maintenance,
+/admin/issues and /admin/submissions; the three lists retain limit=20 pagination.
+Property options still use /admin/properties?page=N&limit=100, reading every page
+without an isActive filter. No per-property request or new API was added. Existing
+admin credentials, response readers, cancellation/stale-response protection,
+detail-return context, ordering and status/cancellation rules are unchanged.
+
+Verification used a fresh isolated copy of current source and dependencies. Yarn
+typecheck, full non-fixing Oxlint, exact changed-source Prettier, production build
+and whitespace checks passed. The existing large-bundle warning remains. Temporary
+actual-module probes passed: shared/dashboard 84 assertions, maintenance 62,
+issues/submissions 211, and fixture API/readers 59. These cover filtering, summaries,
+invalid URLs, reset associations and repeated reset, partial dates, missing/inactive
+options, navigation, request validation and existing reader/hook behavior. No
+permanent test files or dependencies were added.
+
+Browser review used the authorized existing localhost:5175 frontend with a temporary
+fictional bundle of actual screens, hooks and readers. Transport/session are mocked,
+writes reject, and CSP connect-src none plus blocked fetch/XHR prevent live API
+traffic. Data include 60 properties, long Korean/English names, inactive/missing
+options and multiple pages of maintenance, issues and submissions. All four pages
+were visually reviewed at 320, 768 and 1440px; the dashboard was also reviewed at
+390px. No page-wide horizontal overflow was observed. At 320px an external reset
+button remained about 54px above the fixed bottom navigation after scrolling.
+
+Browser interactions covered name/region selection, unapplied versus applied
+conditions, dashboard Today, native partial-date rejection/reset, repeated reset
+and external empty/invalid resets (including submission stayId retention). Issue
+and submission page-two detail/return context worked; issue Back/Forward also
+retained context. Missing selection survived a property-list error and deliberate
+recovery; inactive labels and long names remained readable. Result loading/error
+states were inspected and an error was retried deliberately. Picker Escape returned
+focus to its trigger; Tab showed a visible 2px focus outline. No application console
+warnings/errors were observed. Temporary public fixture files were removed after
+review; fictional screenshots are outside the repository.
+
+These are synthetic probes and browser-fixture checks, not authenticated admin JWT,
+real backend/database, physical-device native picker/IME or screen-reader acceptance.
+Manual signed-in review and a document reload remain needed. No backend/schema,
+environment/deployment files, live records, migrations, staging, commits, pushes
+or service lifecycle were changed.
+
+
+### Slice 10 review follow-up — maintenance Reset focus — 2026-10-08
+
+Maintenance Reset keeps the keyed remount that clears draft filters, validation
+and partially entered native dates. It now remembers a focused reset button for
+that form and restores focus to the new top reset button only if the old control
+was removed and focus is still on the document body. A surviving external reset
+button or a control the user focused in the meantime keeps focus. Programmatic
+resets do not move unrelated focus. Restoration waits for both the local reset
+and the default URL to commit, including deferred router navigation, and uses
+preventScroll to preserve the viewport.
+
+A temporary regression probe fails against the pre-fix screen and passes 34
+assertions against the fix, including repeated resets and deferred query commits.
+It simulates DOM replacement/focus with actual component and effect logic; native
+browser and physical-device focus acceptance were not rerun. Existing maintenance
+and filter probes, typecheck, non-fixing lint, exact Prettier and the production
+build passed in the isolated source copy; the existing bundle warning remains.
+Only the maintenance screen, its reset button ID and this note changed in the
+follow-up. No permanent tests, dependencies or backend changes were added.

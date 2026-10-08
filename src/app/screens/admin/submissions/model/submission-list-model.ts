@@ -4,6 +4,10 @@ import { isStayId } from '../../../../features/admin-stays/admin-stays-validatio
 export type SubmissionDateErrors = Partial<Record<'from' | 'to', string>>;
 export type SubmissionFilterErrors = SubmissionDateErrors & {
   linkStatus?: string;
+  propertyId?: string;
+  stayId?: string;
+  type?: string;
+  status?: string;
 };
 
 export function readSubmissionListFilters(
@@ -30,6 +34,42 @@ export function readSubmissionListFilters(
     from: search.get('from') || undefined,
     to: search.get('to') || undefined,
   };
+}
+
+// Validate supported raw URL fields before the typed parser can omit a malformed
+// value. Page fallback and unrelated query parameters keep their existing rules.
+export function submissionUrlErrors(
+  search: URLSearchParams,
+): SubmissionFilterErrors {
+  const errors: SubmissionFilterErrors = {};
+  for (const field of [
+    'propertyId',
+    'stayId',
+    'type',
+    'status',
+    'linkStatus',
+    'from',
+    'to',
+  ] as const) {
+    if (search.getAll(field).length > 1)
+      errors[field] =
+        '조회 주소에 같은 조건이 중복되어 있습니다. 조건을 다시 조회하거나 초기화해 주세요.';
+  }
+  for (const field of ['propertyId', 'stayId'] as const) {
+    const value = search.get(field);
+    if (value !== null && !isStayId(value))
+      errors[field] =
+        field === 'propertyId'
+          ? '조회 주소의 휴양소 조건을 다시 선택해 주세요.'
+          : '조회 주소의 이용 일정 조건이 올바르지 않습니다. 조건을 초기화해 주세요.';
+  }
+  const type = search.get('type');
+  if (type !== null && !['CHECK_IN', 'CHECK_OUT', 'MAINTENANCE'].includes(type))
+    errors.type = '조회 주소의 기록 유형을 다시 선택해 주세요.';
+  const status = search.get('status');
+  if (status !== null && !['SUBMITTED', 'CANCELLED'].includes(status))
+    errors.status = '조회 주소의 기록 상태를 다시 선택해 주세요.';
+  return errors;
 }
 
 export function submissionListSearch(input: AdminSubmissionListInput): string {

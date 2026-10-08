@@ -433,3 +433,11 @@
     padding: 20px 16px;
   }
 }
+
+.admin-issues .admin-property-select__trigger > span {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.admin-issues .admin-applied-filters {
+  margin-bottom: 14px;
+}
