@@ -2326,3 +2326,86 @@ Backend, schema, environment, admin/staff and other guest workflows were not
 changed. No real records were mutated, and no Git staging/commits, migrations,
 deployment or server lifecycle operations were performed. This completes only
 the approved standalone reporting presentation slice.
+
+## Slice 8 — compact admin shell and property/staff directories (2026-10-08)
+
+This frontend-only slice tightens the shared administrator shell and redesigns
+only the property and staff lists. The shell now provides a centered content
+container capped at 1220px, a 64px desktop header, narrower desktop/tablet sidebars
+and compact vertical spacing. Mobile keeps the original 16px horizontal gutters,
+existing safe-area clearance and the exact 운영 · 일정 · 정비 · 이상사항 · 더보기
+navigation. ITCEN text branding, discreet OH BOK credit, session controls, skip
+link, route focus and active navigation behavior remain unchanged.
+
+The lists opt into shared `admin-directory.css` and small AdminListHeader,
+AdminActivityBadge, AdminListState and AdminListPagination components. Desktop
+and tablet use aligned semantic list rows with accessible field labels; phone
+rows stack identity/status, labeled fields and a full-width 상세 보기 action.
+Staff contact information gets more column space on tablet. Long Korean/English
+names, affiliations and contact text wrap without hiding information. Controls
+retain at least 44px height, visible focus and 16px mobile input text.
+
+Property rows show name, region, activity and assigned staff or 미배정. Staff rows
+show name, affiliation, contact, activity and the returned assignment count;
+inactive properties remain included and the footnote says so. Full assignments
+remain available in the existing staff detail screen. Missing values have clear
+labels. Search/status filters, reset, refresh, real result totals, loading,
+failed-read retry, empty/no-result states and previous/next paging share a compact
+presentation. PropertyFilters moved into its screen's components folder.
+
+Existing API contracts and behavior are preserved: GET /admin/properties and
+GET /admin/staff send page, fixed limit=12, optional search and isActive with only
+the current administrator Bearer credential. Response validation, abort/fencing,
+session rejection, URL normalization and out-of-range page correction are
+unchanged. Details still read GET /admin/properties/:id or GET /admin/staff/:id.
+Registration and detail links retain the canonical list search/status/page query;
+the property saved-notice detail link now also retains that context. Existing
+editor return handling and all create/update/assignment APIs are unchanged.
+No sorting, statistics, property-readiness model or staff accounts were added.
+
+Verification used a fresh isolated source/dependency copy, independent of the
+cancelled release/deployment work. Yarn typecheck, full non-fixing Oxlint,
+changed-source Prettier with the repository's exact configuration, production
+build with sample public HTTPS origins and whitespace checks passed. The existing
+large-bundle build warning remains. Temporary probes passed 297 actual-module
+API/model/hook/session/component assertions and 143 fictional-fixture assertions.
+They cover 12-record pagination, search/activity, invalid responses, page clamping,
+create/detail/return context, aborts, stale credentials/responses, loading/error/
+empty states, many assignments and guest/staff source isolation. No permanent
+tests or dependencies were added.
+
+Browser review used the existing authorized localhost:5175 frontend to serve a
+temporary standalone bundle of the actual shell, list/detail screens, hooks and
+response readers with mocked APIs/session. Fixtures contain 60 properties and
+36 staff, including long Korean/English text, missing contact/region, active/
+inactive and unassigned records and a staff member with 19 assignments. CSP
+connect-src none, throwing fetch/XHR and module-manifest checks exclude backend
+traffic and real credentials; write mocks reject. BrowserRouter/FragmentHistory
+are real within the fixture. Search, active filtering, multiple pages, detail and
+return context, browser Back/Forward, refresh, empty/no-result states, deliberate
+read retries and loading recovery were exercised without record mutations.
+
+The property/staff lists were inspected at 320, 390, 768 and 1440px with no page
+horizontal overflow. Keyboard Tab produced a visible 3px focus outline; list
+controls measured at least 44px. At 320px the pagination cleared the fixed bottom
+navigation by about 24px when scrolled into view. Dashboard, calendar, maintenance,
+issues, submissions, reports and More were checked through the shared shell at
+320 and 1440px; their page contents were not redesigned. The browser console had
+no warnings/errors. Review screenshots contain fictional data only and the
+temporary public fixtures were removed after review.
+
+Remaining findings outside this slice: the calendar's existing -20px mobile
+margin causes 4px horizontal overflow at 320px; an original-shell fixture and the
+final shell both measured scrollWidth=324. Mobile gutters were preserved so this
+slice does not worsen it. Existing property URL search truncation uses UTF-16
+units: 99 Korean characters followed by an emoji can split the emoji at the
+100-unit boundary. Filter validation was intentionally not changed in this design
+slice. These findings remain for separately scoped work.
+
+This is fixture/browser and synthetic evidence, not real administrator JWT,
+backend/database, physical-device/IME or full cross-tab acceptance. The fixture
+can exercise in-document Back/Forward, but a document reload uses the real app
+and still requires authenticated manual review. Property/staff forms, assignment
+rules, guest/staff screens (including Slices 7A/7B), backend/schema/environment,
+release/deployment work and services were unchanged. No staging, commits, pushes,
+migrations, deployment or server lifecycle operations were performed.

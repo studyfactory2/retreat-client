@@ -4,12 +4,14 @@ import { appRoutes } from '../../../core/router/routes';
 import { useAdminSession } from '../../../core/session/use-admin-session';
 import { isStaffId } from '../../../features/admin-staff/admin-staff-validation';
 import { Button } from '../../../shared/ui/Button/Button';
-import { PageState } from '../../../shared/ui/PageState/PageState';
+import { AdminListHeader } from '../components/AdminListHeader';
+import { AdminListPagination } from '../components/AdminListPagination';
+import { AdminListState } from '../components/AdminListState';
 import { StaffCard } from './components/StaffCard';
 import { StaffFilters } from './components/StaffFilters';
 import { useAdminStaffList } from './hooks/use-admin-staff';
 import { readStaffFilters, staffListSearch } from './model/staff-list-model';
-import './styles/staff.css';
+import '../styles/admin-directory.css';
 
 export function AdminStaffScreen() {
   const { state, rejectSession } = useAdminSession();
@@ -73,31 +75,15 @@ function StaffWorkspace({
     setSearch(next, { replace: true });
   }, [correctedPage, returnSearch, setSearch]);
   return (
-    <div className="admin-staff">
-      <header className="staff-heading">
-        <div>
-          <p className="staff-heading__eyebrow">OUR TEAM</p>
-          <h1>직원 관리</h1>
-          <p>직원 정보와 휴양소 배정 현황을 한곳에서 확인하세요.</p>
-        </div>
-        <div className="staff-actions">
-          <Link
-            className="ui-button"
-            to={appRoutes.adminStaffCreate + returnSearch}
-          >
-            직원 등록
-          </Link>
-          <Button
-            className="admin-button-secondary"
-            onClick={refresh}
-            disabled={resource.status === 'loading'}
-          >
-            새로고침
-          </Button>
-        </div>
-      </header>
+    <div className="admin-directory admin-staff-directory">
+      <AdminListHeader
+        title="직원 관리"
+        description="직원 정보와 담당 휴양소를 확인하세요."
+        createLabel="직원 등록"
+        createHref={appRoutes.adminStaffCreate + returnSearch}
+      />
       {saved && (
-        <div className="staff-banner staff-banner--success" role="status">
+        <div className="admin-directory-notice" role="status">
           <p>
             <strong>{saved.name}</strong> 님의 정보가{' '}
             {saved.created ? '등록' : '수정'}되었습니다.
@@ -112,90 +98,99 @@ function StaffWorkspace({
         input={filters}
         onApply={(next) => setSearch(staffListSearch(next))}
       />
+      <div className="admin-directory-summary">
+        <p role="status">
+          {data && correctedPage === null ? (
+            <>
+              {filtered ? '검색 결과' : '등록된 직원'}{' '}
+              <strong>{data.total.toLocaleString('ko-KR')}명</strong>
+            </>
+          ) : resource.status === 'error' ? (
+            '목록을 다시 확인해 주세요.'
+          ) : (
+            '목록을 불러오고 있습니다…'
+          )}
+        </p>
+        <Button
+          className="admin-directory-refresh"
+          onClick={refresh}
+          disabled={resource.status === 'loading' || correctedPage !== null}
+        >
+          새로고침
+        </Button>
+      </div>
       {resource.status === 'loading' || correctedPage !== null ? (
-        <PageState
+        <AdminListState
           title="직원을 불러오는 중"
           description="잠시만 기다려 주세요."
+          loading
         />
       ) : resource.status === 'error' ? (
-        <div role="alert">
-          <PageState
-            title="직원 목록을 불러오지 못했습니다"
-            description={resource.message}
-          >
-            <Button onClick={refresh}>다시 불러오기</Button>
-          </PageState>
-        </div>
+        <AdminListState
+          title="직원 목록을 불러오지 못했습니다"
+          description={resource.message}
+          error
+        >
+          <Button className="admin-button-secondary" onClick={refresh}>
+            다시 불러오기
+          </Button>
+        </AdminListState>
       ) : (
         <>
-          <div className="staff-summary" role="status">
-            <p>
-              {filtered ? '검색 결과' : '등록된 직원'}{' '}
-              <strong>{resource.data.total.toLocaleString('ko-KR')}명</strong>
-            </p>
-            <p>직원 등록 후 휴양소 설정에서 담당 직원을 배정할 수 있습니다.</p>
-          </div>
-          {!resource.data.items.length ? (
-            <PageState
+          {resource.data.items.length === 0 ? (
+            <AdminListState
               title={
                 filtered
                   ? '조건에 맞는 직원이 없습니다'
-                  : '첫 직원을 등록해 주세요'
+                  : '등록된 직원이 없습니다'
               }
               description={
                 filtered
-                  ? '검색어나 활성 상태를 변경해 다시 확인해 주세요.'
-                  : '담당 직원의 이름과 연락처를 등록해 주세요.'
+                  ? '검색어나 활성 상태를 변경해 주세요.'
+                  : '상단의 직원 등록에서 이름과 연락처를 등록해 주세요.'
               }
             >
-              {filtered ? (
-                <Button onClick={() => setSearch('')}>조회 조건 초기화</Button>
-              ) : (
-                <Link className="ui-button" to={appRoutes.adminStaffCreate}>
-                  첫 직원 등록
-                </Link>
+              {filtered && (
+                <Button
+                  className="admin-button-secondary"
+                  onClick={() => setSearch('')}
+                >
+                  조회 조건 초기화
+                </Button>
               )}
-            </PageState>
+            </AdminListState>
           ) : (
-            <div className="staff-grid" aria-label="직원 목록">
-              {resource.data.items.map((staff) => (
-                <StaffCard
-                  key={staff.id}
-                  staff={staff}
-                  href={`${appRoutes.adminStaff}/${staff.id}${returnSearch}`}
-                />
-              ))}
-            </div>
+            <section className="admin-directory-table" aria-label="직원 목록">
+              <div className="admin-directory-table-head" aria-hidden="true">
+                <span>이름 · 소속</span>
+                <div className="admin-directory-fields">
+                  <span>연락처</span>
+                  <span>담당 휴양소</span>
+                </div>
+                <span>상태</span>
+                <span>관리</span>
+              </div>
+              <ul className="admin-directory-rows" role="list">
+                {resource.data.items.map((staff) => (
+                  <li key={staff.id}>
+                    <StaffCard
+                      staff={staff}
+                      href={`${appRoutes.adminStaff}/${staff.id}${returnSearch}`}
+                    />
+                  </li>
+                ))}
+              </ul>
+            </section>
           )}
-          {resource.data.totalPages > 1 && (
-            <nav className="staff-pagination" aria-label="직원 목록 페이지">
-              <Button
-                className="admin-button-secondary"
-                disabled={filters.page <= 1}
-                onClick={() =>
-                  setSearch(
-                    staffListSearch({ ...filters, page: filters.page - 1 }),
-                  )
-                }
-              >
-                이전
-              </Button>
-              <span aria-current="page">
-                {filters.page} / {resource.data.totalPages} 페이지
-              </span>
-              <Button
-                className="admin-button-secondary"
-                disabled={filters.page >= resource.data.totalPages}
-                onClick={() =>
-                  setSearch(
-                    staffListSearch({ ...filters, page: filters.page + 1 }),
-                  )
-                }
-              >
-                다음
-              </Button>
-            </nav>
-          )}
+          <p className="admin-directory-footnote">
+            담당 휴양소 수에는 비활성 휴양소도 포함됩니다.
+          </p>
+          <AdminListPagination
+            label="직원 목록 페이지"
+            page={filters.page}
+            totalPages={resource.data.totalPages}
+            onPage={(page) => setSearch(staffListSearch({ ...filters, page }))}
+          />
         </>
       )}
     </div>

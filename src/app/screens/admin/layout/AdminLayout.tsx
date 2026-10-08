@@ -71,12 +71,14 @@ export function AdminLayout() {
       </aside>
 
       <main className="admin-layout__main" id="main-content" tabIndex={-1}>
-        {state.storageNotice && (
-          <p className="admin-layout__notice" role="status">
-            {state.storageNotice}
-          </p>
-        )}
-        <Outlet />
+        <div className="admin-layout__content">
+          {state.storageNotice && (
+            <p className="admin-layout__notice" role="status">
+              {state.storageNotice}
+            </p>
+          )}
+          <Outlet />
+        </div>
       </main>
     </div>
   );

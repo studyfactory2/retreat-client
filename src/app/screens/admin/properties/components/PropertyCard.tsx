@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import type { AdminPropertyDto } from '../../../../features/admin-properties/admin-property-management.types';
-import '../styles/properties.css';
+import { AdminActivityBadge } from '../../components/AdminActivityBadge';
 
 type PropertyCardProps = {
   property: AdminPropertyDto;
@@ -9,24 +9,16 @@ type PropertyCardProps = {
 
 export function PropertyCard({ property, detailHref }: PropertyCardProps) {
   return (
-    <article className="property-card">
-      <header className="property-card__heading">
-        <span className="property-card__label">휴양소</span>
-        <span
-          className={`property-card__status${property.isActive ? '' : ' property-card__status--inactive'}`}
-        >
-          {property.isActive ? '활성' : '비활성'}
-        </span>
-      </header>
-      <h2>{property.name}</h2>
-      <p className="property-card__region">
-        {property.region ?? '지역 미등록'}
-      </p>
-
-      <dl className="property-card__details">
+    <article className="admin-directory-row">
+      <div className="admin-directory-identity">
+        <h2>{property.name}</h2>
+      </div>
+      <dl className="admin-directory-fields">
         <div>
-          <dt>차량번호 사전 등록</dt>
-          <dd>{property.vehicleRegistrationEnabled ? '사용' : '사용 안 함'}</dd>
+          <dt>지역</dt>
+          <dd className={property.region ? undefined : 'admin-directory-muted'}>
+            {property.region || '미등록'}
+          </dd>
         </div>
         <div>
           <dt>담당 직원</dt>
@@ -35,18 +27,18 @@ export function PropertyCard({ property, detailHref }: PropertyCardProps) {
               <>
                 {property.staff.name}
                 {!property.staff.isActive && (
-                  <span className="property-card__staff-note">비활성 계정</span>
+                  <small className="admin-directory-muted">비활성 직원</small>
                 )}
               </>
             ) : (
-              <span className="property-card__unassigned">미배정</span>
+              <span className="admin-directory-muted">미배정</span>
             )}
           </dd>
         </div>
       </dl>
-
+      <AdminActivityBadge active={property.isActive} />
       <Link
-        className="property-card__detail"
+        className="admin-directory-detail"
         to={detailHref}
         aria-label={`${property.name} 상세 보기`}
       >

@@ -19,7 +19,7 @@ export function StaffFilters({
   );
   return (
     <form
-      className="staff-toolbar"
+      className="admin-directory-filters"
       aria-label="직원 조회 조건"
       onSubmit={(event) => {
         event.preventDefault();
@@ -52,10 +52,12 @@ export function StaffFilters({
           <option value="inactive">비활성</option>
         </select>
       </div>
-      <div className="staff-actions">
-        <Button type="submit">조회</Button>
+      <div className="admin-directory-filter-actions">
+        <Button type="submit" className="admin-button-secondary">
+          조회
+        </Button>
         <Button
-          className="admin-button-secondary"
+          className="admin-directory-reset"
           onClick={() => {
             setText('');
             setStatus('all');
