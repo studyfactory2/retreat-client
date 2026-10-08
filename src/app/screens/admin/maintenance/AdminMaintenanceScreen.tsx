@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useAdminSession } from '../../../core/session/use-admin-session';
 import { useAdminPropertyOptions } from '../../../features/admin-properties/use-admin-property-options';
@@ -7,6 +7,7 @@ import { Button } from '../../../shared/ui/Button/Button';
 import { PageState } from '../../../shared/ui/PageState/PageState';
 import { MaintenanceFilters } from './components/MaintenanceFilters';
 import { MaintenanceRows } from './components/MaintenanceRows';
+import { MaintenanceRecordGuide } from './components/MaintenanceRecordGuide';
 import { useAdminMaintenance } from './hooks/use-admin-maintenance';
 import {
   maintenanceFilterErrors,
@@ -36,6 +37,7 @@ function MaintenanceWorkspace({
   rejectSession: (token: string) => void;
 }) {
   const [search, setSearch] = useSearchParams();
+  const [filterReset, setFilterReset] = useState(0);
   const filters = readMaintenanceFilters(search);
   const query = maintenanceSearch(filters);
   const invalid = Object.keys(maintenanceFilterErrors(filters)).length > 0;
@@ -68,9 +70,8 @@ function MaintenanceWorkspace({
     <div className="admin-maintenance">
       <header className="maintenance-heading">
         <div>
-          <p className="maintenance-eyebrow">휴양소 운영 관리</p>
           <h1>청소·정비</h1>
-          <p>작성 중인 정비 기록부터 제출된 체크리스트까지 확인하세요.</p>
+          <p>직원의 작성 상태와 제출 기록을 확인하세요.</p>
         </div>
         <Button
           className="admin-button-secondary"
@@ -84,7 +85,7 @@ function MaintenanceWorkspace({
         </Button>
       </header>
       <MaintenanceFilters
-        key={query}
+        key={`${query}:${filterReset}`}
         input={filters}
         properties={
           properties.resource.status === 'ready'
@@ -108,18 +109,12 @@ function MaintenanceWorkspace({
           </Button>
         </div>
       )}
-      <aside className="maintenance-note">
-        <strong>기록을 기준으로 확인합니다.</strong>
-        <p>
-          작성 시작은 체크리스트를 연 시간, 마지막 저장은 기록을 저장한
-          시간입니다. 실제 작업 시작이나 실시간 접속을 의미하지 않습니다.
-        </p>
-      </aside>
+      <MaintenanceRecordGuide />
       {invalid ? (
         <div role="alert">
           <PageState
             title="조회 조건을 확인해 주세요"
-            description="표시된 항목을 수정한 뒤 조회해 주세요. 잘못된 조건으로 기록을 조회하지 않습니다."
+            description="표시된 조건을 수정한 뒤 조회해 주세요."
           />
         </div>
       ) : resource.status === 'loading' || correctedPage !== null ? (
@@ -142,23 +137,24 @@ function MaintenanceWorkspace({
         <>
           <div className="maintenance-summary" role="status">
             <p>
-              조회된 기록{' '}
+              조회 결과{' '}
               <strong>{resource.data.total.toLocaleString('ko-KR')}건</strong>
             </p>
             <span>
-              상태 확인 · {maintenanceTime(resource.data.asOf)} · 한국 시간
+              상태 기준 · {maintenanceTime(resource.data.asOf)} · 한국 시간
             </span>
           </div>
           {resource.data.items.length === 0 ? (
             <PageState
               title="조건에 맞는 정비 기록이 없습니다"
-              description="휴양소와 기간을 변경하거나, 직원이 체크리스트 작성을 시작한 후 다시 확인해 주세요."
+              description="다른 휴양소나 기간을 선택하거나 조회 조건을 초기화해 주세요."
             >
               <Button
                 className="admin-button-secondary"
-                onClick={() =>
-                  apply({ page: 1, dateField: 'STARTED', view: 'ALL' })
-                }
+                onClick={() => {
+                  setFilterReset((value) => value + 1);
+                  apply({ page: 1, dateField: 'STARTED', view: 'ALL' });
+                }}
               >
                 조회 조건 초기화
               </Button>

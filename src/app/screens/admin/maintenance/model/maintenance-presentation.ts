@@ -10,27 +10,27 @@ export const maintenanceStatuses: Record<
   UNFINISHED: {
     label: '작성 중',
     tone: 'blue',
-    description: '담당 직원이 이어서 작성할 수 있습니다.',
+    description: '직원이 이어서 작성할 수 있습니다.',
   },
   EXPIRED: {
     label: '기한 만료',
     tone: 'amber',
-    description: '작성 기한이 지나 제출되지 않은 기록입니다.',
+    description: '작성 기한이 지난 미제출 기록입니다.',
   },
   ACCESS_BLOCKED: {
     label: '접근 불가',
     tone: 'red',
-    description: '현재 담당 직원의 작성 접근을 확인해야 합니다.',
+    description: '직원이 이어서 작성할 수 없는 기록입니다.',
   },
   COMPLETED: {
-    label: '정비 완료',
+    label: '제출됨',
     tone: 'green',
-    description: '제출된 체크리스트와 사진을 확인할 수 있습니다.',
+    description: '저장된 체크리스트와 사진을 열 수 있습니다.',
   },
   NEEDS_REVIEW: {
     label: '확인 필요',
     tone: 'red',
-    description: '저장된 기록을 확인해야 합니다. 완료로 판단하지 않습니다.',
+    description: '저장된 기록을 확인해야 합니다. 상세를 열 수 없습니다.',
   },
 };
 export const maintenanceReasons: Record<MaintenanceReviewReason, string> = {

@@ -31,39 +31,56 @@ export function MaintenanceRows({
           청소·정비 기록. 날짜 기준 내림차순이며 날짜가 없는 기록은 마지막에
           표시됩니다.
         </caption>
-        <thead>
-          <tr>
-            <th scope="col">휴양소 / 기록 직원</th>
-            <th scope="col">현재 상태</th>
-            <th scope="col">작성 기록</th>
-            <th scope="col">제출 / 작성 기한</th>
-            <th scope="col">상세</th>
+        <thead role="rowgroup">
+          <tr role="row">
+            <th scope="col" role="columnheader">
+              휴양소 · 기록 직원
+            </th>
+            <th scope="col" role="columnheader">
+              현재 상태
+            </th>
+            <th scope="col" role="columnheader">
+              작성 기록
+            </th>
+            <th scope="col" role="columnheader">
+              제출 · 작성 기한
+            </th>
+            <th scope="col" role="columnheader">
+              제출 기록
+            </th>
           </tr>
         </thead>
-        <tbody>
+        <tbody role="rowgroup">
           {items.map((item) => {
             const status = maintenanceStatuses[item.status];
             return (
-              <tr key={item.id}>
-                <td>
+              <tr key={item.id} role="row">
+                <td role="cell">
                   <strong className="maintenance-property-name">
                     {item.property.name}
                   </strong>
-                  <p className="maintenance-row-muted">
-                    {item.property.region ?? '지역 미등록'}
-                    {!item.property.isActive && ' · 현재 비활성'}
-                  </p>
+                  <div className="maintenance-property-meta">
+                    <span className="maintenance-row-muted">
+                      {item.property.region ?? '지역 미등록'}
+                    </span>
+                    {!item.property.isActive && (
+                      <span className="maintenance-inactive">현재 비활성</span>
+                    )}
+                  </div>
                   <p className="maintenance-staff">
-                    <span>기록 직원</span> {item.staff.name ?? '확인 필요'}
+                    <span>기록 직원</span>
+                    <strong>{item.staff.name ?? '확인 필요'}</strong>
                   </p>
                 </td>
-                <td>
+                <td role="cell">
                   <span
                     className={`maintenance-status maintenance-status--${status.tone}`}
                   >
                     {status.label}
                   </span>
-                  <p className="maintenance-row-muted">{status.description}</p>
+                  <p className="maintenance-status-description">
+                    {status.description}
+                  </p>
                   {item.reviewReasons.length > 0 && (
                     <ul className="maintenance-reasons" aria-label="확인 사유">
                       {item.reviewReasons.map((reason) => (
@@ -72,7 +89,7 @@ export function MaintenanceRows({
                     </ul>
                   )}
                 </td>
-                <td>
+                <td role="cell">
                   <dl className="maintenance-times">
                     <div>
                       <dt>작성 시작</dt>
@@ -88,7 +105,7 @@ export function MaintenanceRows({
                     </div>
                   </dl>
                 </td>
-                <td>
+                <td role="cell">
                   <dl className="maintenance-times">
                     <div>
                       <dt>제출</dt>
@@ -96,31 +113,30 @@ export function MaintenanceRows({
                         <RecordTime value={item.submittedAt} />
                       </dd>
                     </div>
-                    {item.status !== 'COMPLETED' && (
-                      <div>
-                        <dt>작성 기한</dt>
-                        <dd>
-                          <RecordTime value={item.expiresAt} />
-                        </dd>
-                      </div>
-                    )}
+                    <div>
+                      <dt>작성 기한</dt>
+                      <dd>
+                        <RecordTime value={item.expiresAt} />
+                      </dd>
+                    </div>
                   </dl>
                 </td>
-                <td>
+                <td role="cell">
                   {item.status === 'COMPLETED' ? (
                     <Link
                       className="maintenance-detail-link"
                       to={maintenanceDetailPath(item.id, filters)}
                       aria-label={`${item.property.name} ${item.staff.name ?? ''} 체크리스트·사진 보기`}
                     >
-                      체크리스트·사진 <span aria-hidden="true">→</span>
+                      <span>체크리스트·사진</span>
+                      <span aria-hidden="true">→</span>
                     </Link>
                   ) : (
-                    <span className="maintenance-row-muted">
+                    <p className="maintenance-detail-unavailable">
                       {item.status === 'NEEDS_REVIEW'
-                        ? '기록 확인 필요'
+                        ? '상세 열람 불가'
                         : '아직 제출되지 않음'}
-                    </span>
+                    </p>
                   )}
                 </td>
               </tr>

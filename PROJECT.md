@@ -2079,3 +2079,72 @@ unassigned and busy states at 320, 390, 820 and 1440px with no horizontal overfl
 all management buttons measured 52px high, and keyboard focus was visible.
 These are fictional visual fixtures, not authenticated navigation/save or physical
 phone acceptance. Temporary public preview removed; no server or backend changes.
+
+## Slice 6C — compact administrator cleaning and maintenance monitoring
+
+The read-only /admin/maintenance screen now follows the Slice 6A/6B spacing,
+typography, cobalt actions and restrained surfaces. Compact filters lead into a
+five-column desktop table and grouped rows on tablet/phones. Recorded property
+and staff identity, current property inactivity, all five statuses, all review
+reasons and four distinct timestamps remain visible. Missing names, region and
+times keep their fallbacks. Response asOf is labeled 상태 기준 in Korean time;
+only the server's matching-record total is shown, with no derived work totals.
+
+COMPLETED is labeled 제출됨, rather than certifying physical cleaning completion.
+The 제출된 기록 filter still means database SUBMITTED and may contain 확인 필요.
+Only classifier COMPLETED retains the existing checklist/photo/history link;
+all other states explain why detail is unavailable without adding management
+writes. The detail link and existing return helper retain filters, page and the
+maintenance navigation context. A concise visible warning distinguishes submission
+from work quality/manager approval; a native keyboard-accessible disclosure
+explains recorded times and captured identity/property labels. Captured property
+labels are described specifically for valid submitted records; invalid diagnostic
+records can have current property metadata or missing evidence.
+
+Every property/view/date filter and existing validator/URL rule is retained.
+Inputs stay local until 조회. Date submission additionally checks native
+validity.badInput so a partial date with an empty value cannot broaden a query.
+The native minimum now matches the existing 1900–2100 API validator. Initializing
+from invalid/duplicate URL filters still blocks reads. Date ranges remain optional
+in pairs, Seoul-based and limited to 62 inclusive days; SUBMITTED with UNFINISHED
+remains invalid. Both reset paths clear local/applied conditions; the empty-result
+reset now also remounts controls when the applied query was already at defaults.
+Native reset clears partial date segments. Existing 20-record pagination,
+server ordering, out-of-range replace correction, explicit retries, token/request
+fencing and inactive/missing selected-property handling are unchanged.
+
+Scope: seven files within screens/admin/maintenance, including the new
+MaintenanceRecordGuide component; this reference is the only other changed file.
+Feature API/readers/hooks, shared admin shell, dashboard, submission details,
+guest/staff flows and all backend files remain unchanged. No dependencies,
+permanent test files, migrations, environment changes, Git writes or server
+lifecycle operations were performed.
+
+Verification: isolated Yarn typecheck, non-fixing Oxlint, exact changed-source
+Prettier, production build with sample HTTPS public configuration and whitespace
+checks passed. The existing large-bundle warning remains (main JS about 1,123 kB).
+247 temporary synthetic assertions cover filters/URL, readers/transport,
+request/session fencing, date/reset controls, pagination/states, rows, drilldowns
+and backend date/classifier logic (evidence parsing mocked). Separately, 1,080
+fictional fixture envelopes passed the actual maintenance response reader.
+
+The existing localhost:5175 preview served a temporary interactive React fixture
+with the real screen, components, styles, shell and MemoryRouter. Session,
+property-option and maintenance hooks were mocked; CSP and fetch/XHR guards
+blocked real API requests. Twelve scenarios at 320, 390, 820 and 1440px had no
+horizontal overflow; all inspected production controls were at least 44px high.
+Visual review covered all statuses, multiple reasons, missing data, long names,
+error/empty/loading states, expanded guide and tablet/desktop/mobile grouping.
+At 320px dates now stack to avoid text/calendar-icon crowding; wider phones keep
+the paired layout. Browser interactions confirmed local-before-apply behavior,
+native partial-date rejection/reset, paired and 62/63-day boundaries, invalid
+view/date combinations, retry, missing selection preservation, page-two detail
+return (fictional destination), same-query empty reset and keyboard disclosure.
+Mobile retry/detail controls stayed above fixed navigation; main bottom padding
+remains 97px plus the existing device safe-area behavior.
+
+This is fixture browser evidence, not live authenticated API/database acceptance.
+The real preview remained at /admin/login after the sign-in request. Actual
+maintenance data, authenticated submission detail/photos and physical phone/native
+safe-area acceptance remain unverified. No real records were modified. The public
+fixture was removed after review; screenshots/probes stay only in temporary files.

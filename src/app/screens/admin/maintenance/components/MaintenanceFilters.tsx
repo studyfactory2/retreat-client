@@ -2,7 +2,10 @@ import { useRef, useState } from 'react';
 import type { AdminPropertyOption } from '../../../../features/admin-properties/admin-properties.types';
 import type { AdminMaintenanceInput } from '../../../../features/admin-maintenance/admin-maintenance.types';
 import { Button } from '../../../../shared/ui/Button/Button';
-import { maintenanceFilterErrors } from '../model/maintenance-filters';
+import {
+  maintenanceFilterErrors,
+  type MaintenanceFilterErrors,
+} from '../model/maintenance-filters';
 
 const views = [
   ['ALL', '전체 기록'],
@@ -23,7 +26,9 @@ export function MaintenanceFilters({
   const [draft, setDraft] = useState(input);
   const [submitted, setSubmitted] = useState(false);
   const form = useRef<HTMLFormElement>(null);
-  const errors = maintenanceFilterErrors(draft);
+  const [nativeDateErrors, setNativeDateErrors] =
+    useState<MaintenanceFilterErrors>({});
+  const errors = { ...maintenanceFilterErrors(draft), ...nativeDateErrors };
   const initialInvalid = Object.keys(maintenanceFilterErrors(input)).length > 0;
   const showErrors = submitted || initialInvalid;
   const change = (key: keyof AdminMaintenanceInput, value: string) =>
@@ -45,10 +50,24 @@ export function MaintenanceFilters({
       noValidate
       onSubmit={(event) => {
         event.preventDefault();
+        const dateErrors: MaintenanceFilterErrors = {};
+        for (const field of ['from', 'to'] as const) {
+          if (
+            form.current?.querySelector<HTMLInputElement>(`[name="${field}"]`)
+              ?.validity.badInput
+          )
+            dateErrors[field] = '연도, 월, 일을 모두 올바르게 입력해 주세요.';
+        }
+        setNativeDateErrors(dateErrors);
         setSubmitted(true);
-        if (Object.keys(errors).length) {
-          const key = Object.keys(errors)[0];
-          form.current?.querySelector<HTMLElement>(`[name="${key}"]`)?.focus();
+        const nextErrors = { ...maintenanceFilterErrors(draft), ...dateErrors };
+        if (Object.keys(nextErrors).length) {
+          const key = Object.keys(nextErrors)[0];
+          requestAnimationFrame(() =>
+            form.current
+              ?.querySelector<HTMLElement>(`[name="${key}"]`)
+              ?.focus(),
+          );
           return;
         }
         onApply({ ...draft, page: 1 });
@@ -145,10 +164,20 @@ export function MaintenanceFilters({
               id={`maintenance-${key}`}
               name={key}
               type="date"
-              min={'1990-01-01'}
-              max={'2100-12-31'}
+              min="1900-01-01"
+              max="2100-12-31"
               value={draft[key] ?? ''}
-              onChange={(event) => change(key, event.target.value)}
+              onChange={(event) => {
+                change(key, event.target.value);
+                const badInput = event.target.validity.badInput;
+                setNativeDateErrors((current) => {
+                  const next = { ...current };
+                  if (badInput)
+                    next[key] = '연도, 월, 일을 모두 올바르게 입력해 주세요.';
+                  else delete next[key];
+                  return next;
+                });
+              }}
               aria-invalid={showErrors && !!errors[key]}
               aria-describedby={`maintenance-date-hint${showErrors && errors[key] ? ` maintenance-${key}-error` : ''}`}
             />
@@ -159,15 +188,14 @@ export function MaintenanceFilters({
       <div className="maintenance-filters__footer">
         <div>
           <p id="maintenance-date-hint">
-            한국 시간 기준 · 날짜를 비우면 전체 기간, 기간 조회는 최대
-            62일입니다.
+            한국 시간 · 날짜를 모두 비우면 전체 기간, 입력하면 최대 62일
           </p>
           <p>
             {draft.view === 'UNFINISHED'
-              ? '기한 만료·접근 불가·확인 필요 기록도 포함합니다. 날짜 기준은 작성 시작일을 선택해 주세요.'
+              ? '기한 만료·접근 불가·확인 필요도 포함합니다. 작성 시작일로 조회해 주세요.'
               : draft.view === 'COMPLETED'
-                ? '제출된 기록에는 정비 완료와 확인 필요 기록이 함께 표시됩니다.'
-                : '작성 중인 기록과 제출된 기록을 함께 확인합니다.'}
+                ? '제출된 기록에도 확인 필요 상태가 포함될 수 있습니다.'
+                : '작성 중인 기록과 제출된 기록을 함께 표시합니다.'}
           </p>
           {propertiesLoading && (
             <p role="status">휴양소 선택 목록을 불러오고 있습니다.</p>
@@ -178,7 +206,9 @@ export function MaintenanceFilters({
             className="admin-button-secondary"
             onClick={() => {
               const defaults = { page: 1, dateField: 'STARTED', view: 'ALL' };
+              form.current?.reset();
               setDraft(defaults);
+              setNativeDateErrors({});
               setSubmitted(false);
               onApply(defaults);
             }}
