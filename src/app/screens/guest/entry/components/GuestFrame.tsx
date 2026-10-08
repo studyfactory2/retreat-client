@@ -31,7 +31,8 @@ export function GuestFrame({
 }) {
   const homePresentation = view === 'home';
   const journeyPresentation = view === 'check-in' || view === 'check-out';
-  const clientBrand = homePresentation || journeyPresentation;
+  const clientBrand =
+    homePresentation || journeyPresentation || view === 'report';
   return (
     <div
       className={`guest-entry${homePresentation ? ' guest-entry--home' : ''}${journeyPresentation ? ' guest-entry--journey' : ''}${ready ? ' guest-entry--navigable' : ''}`}

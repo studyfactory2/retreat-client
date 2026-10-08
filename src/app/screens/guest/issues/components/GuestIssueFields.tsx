@@ -22,8 +22,7 @@ export function GuestIssueFields({
       aria-labelledby="issue-fields-title"
     >
       <div className="guest-issue-section-heading">
-        <span aria-hidden="true">01</span>
-        <h2 id="issue-fields-title">어떤 불편이 있으셨나요?</h2>
+        <h2 id="issue-fields-title">불편 내용</h2>
       </div>
       <fieldset disabled={disabled} className="guest-issue-fieldset">
         <legend>
@@ -39,7 +38,10 @@ export function GuestIssueFields({
                 edit((current) => ({ ...current, categoryId: category.id }))
               }
             >
-              {category.name}
+              <span aria-hidden="true" className="guest-issue-category-check">
+                {form.categoryId === category.id ? '✓' : ''}
+              </span>
+              <span>{category.name}</span>
             </button>
           ))}
         </div>
@@ -56,6 +58,7 @@ export function GuestIssueFields({
         </label>
         <input
           id="issue-guest-name"
+          required
           autoComplete="name"
           maxLength={100}
           disabled={disabled}
@@ -72,6 +75,7 @@ export function GuestIssueFields({
         </label>
         <input
           id="issue-title"
+          required
           maxLength={300}
           disabled={disabled}
           value={form.title}
@@ -87,7 +91,7 @@ export function GuestIssueFields({
         </label>
         <textarea
           id="issue-description"
-          rows={5}
+          rows={3}
           maxLength={2000}
           disabled={disabled}
           value={form.description}
@@ -97,7 +101,7 @@ export function GuestIssueFields({
           }
         />
         <p className="guest-issue-hint">
-          최대 2,000자 · 비밀번호 등 민감한 정보는 적지 마세요.
+          최대 2,000자 · 문제가 생긴 위치와 상황을 알려주세요.
         </p>
       </div>
       <label className="guest-issue-urgency">
@@ -111,9 +115,11 @@ export function GuestIssueFields({
           }
         />
         <span>
-          <strong>긴급한 문제예요</strong>
+          <strong>
+            긴급한 문제예요 <em>선택</em>
+          </strong>
           <small id="issue-urgency-help">
-            빠른 확인이 필요한 문제라면 선택해 주세요.
+            관리자 우선 확인 표시예요. 알림이나 전화는 자동으로 보내지 않습니다.
           </small>
         </span>
       </label>

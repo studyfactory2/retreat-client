@@ -2246,3 +2246,83 @@ a selection, and photo refresh failure after saving answers for review. Existing
 154 synthetic assertions and seven rendering cases, typecheck, non-fixing lint,
 Prettier and production build also passed. These are isolated/mock checks, not
 live BrowserRouter, backend/S3 or device acceptance. No API contracts changed.
+
+## Redesign Slice 7B — guest standalone issue journey (2026-10-08)
+
+The property-QR `불편사항 신고` screen now follows `불편 내용 작성 → 내용 확인 →
+접수 완료`, matching the compact blue/navy/white Slice 7A direction. Report-only
+ITCEN text branding and discreet OH BOK credit use the existing guest frame.
+API-provided category buttons, required name/title, optional description/urgency
+and optional photos remain in one writing step, with one primary review action.
+Long category labels and filenames wrap; mobile controls retain comfortable
+sizes and clearance above the existing bottom navigation.
+
+Zero active categories now show a focused explanation, the existing manager
+contact presentation, and `분류 다시 확인`. The form and gallery are hidden, not
+discarded, so recoverable category changes preserve in-memory work. Missing
+contact information has no inactive call link. Loading, request failure and
+rejected-access states retain their existing recovery and privacy behavior.
+
+The new screen workspace hook separates photo ownership and existing navigation
+policy from presentation. Existing report/photo business hooks, feature APIs,
+readers and validation are unchanged. A single gallery stays mounted across
+editing and review: uploaded claims, loaded previews and expanded preview state
+survive Back/Next. Review hides photo mutations without treating the stage
+change as lost access. Real access locks, uncertain submissions and expiry still
+abort or hide private previews. Pending/failed/uncertain photo work blocks review
+until resolved. Unsaved-input and document-unload protection remain in place.
+
+Review displays the normalized frozen body and ordered photo claims, with the
+existing explicit confirmation bound to that exact body. Editing requires fresh
+confirmation. The receipt shows property, original received time, urgency and
+reference number; it distinguishes receipt from repair completion and urgency
+from notifications/calling. There is no report draft/save-for-later, tracking,
+lookup, correction or receipt-retrieval API, and no browser persistence was added.
+Refreshing or reopening cannot recover this receipt. Confirmed receipt cleanup
+clears local photo ownership without sending photo deletion requests.
+
+API contracts are preserved: GET /qr/guest and GET /guest/issues/categories load
+and revalidate property access and current choices using only property guest-QR
+Bearer authorization. POST /guest/issues/photos uploads one multipart file with
+no text fields; the browser supplies its boundary. GET
+/guest/issues/photos/:id/view and POST /guest/issues/photos/:id/remove require
+that QR Bearer plus the individual X-Photo-Token. Signed image requests receive
+no API credentials. POST /guest/issues/report sends the requestKey, normalized
+fields, urgency and ordered photo claims. An uncertain response keeps that exact
+body/key/claim order locked for deliberate identical retry; it is never retried
+automatically or presented as success. Lost photo-upload credentials cannot be
+recovered from a gallery-list endpoint; the existing deliberate abandonment
+flow remains. Personal-stay links do not gain reporting authorization.
+
+Verification: Yarn typecheck, full non-fixing Oxlint, exact changed-source
+Prettier, production build with sample HTTPS public origins and whitespace
+checks passed in an isolated source/dependency copy. The existing large-bundle
+warning remains. Temporary probes passed 299 actual-hook/component/transport
+assertions and 26 fixture-isolation/contract assertions. Coverage includes
+empty/changing categories, required inputs, review/claim preservation,
+upload/removal failures and ambiguity, exact retry/duplicate locks, stale
+responses, QR rejection, expiry, navigation protection and receipt cleanup.
+No permanent test files or dependencies were added.
+
+Browser verification used the existing authorized localhost:5175 preview with a
+temporary fictional bundle of the actual screen/hooks and mocked feature APIs.
+CSP and fetch/XHR blocks prevented backend traffic. Inspected 320/390/768/1440px
+layouts, long Korean property/category/title/description/filename content,
+required-field error focus, empty categories with missing contact and refresh
+recovery, loaded/expanded photo retention through review/back, normal receipt,
+explicit identical retry after a lost submit response, uncertain upload/removal
+states, removal recovery, unsaved navigation warning, QR rejection and initial
+load retry. Inspected layouts had no horizontal overflow; 320px review actions
+cleared the fixed navigation, keyboard focus was visible, and the browser
+console reported no warnings/errors. Screenshots contain fictional information
+only. The temporary public fixture was removed after review.
+
+These checks do not establish authenticated backend/PostgreSQL/S3 acceptance,
+real signed-image delivery, native photo picking, physical-phone keyboard/IME
+behavior or actual cross-tab/network races. Fixture navigation used a MemoryRouter;
+real browser Back/Forward, document-close prompts and QR reopen require manual
+acceptance (lifetime callbacks and stale ownership were exercised synthetically).
+Backend, schema, environment, admin/staff and other guest workflows were not
+changed. No real records were mutated, and no Git staging/commits, migrations,
+deployment or server lifecycle operations were performed. This completes only
+the approved standalone reporting presentation slice.

@@ -7,8 +7,10 @@ import '../styles/guest-issue-photos.css';
 
 export function GuestIssuePhotos({
   controller,
+  readOnly = false,
 }: {
   controller: GuestIssuePhotosController;
+  readOnly?: boolean;
 }) {
   const inputId = useId();
   const [abandonId, setAbandonId] = useState<number | null>(null);
@@ -28,15 +30,18 @@ export function GuestIssuePhotos({
     >
       <div className="guest-issue-photos__heading">
         <h2 id={`${inputId}-title`}>
-          사진 첨부 <span>선택</span>
+          {readOnly ? '첨부 사진' : '사진 첨부'}
+          {!readOnly && <span>선택</span>}
         </h2>
         <span>
           {photos.length} / {maxPhotos}장
         </span>
       </div>
-      <p className="guest-issue-photos__intro">
-        불편한 부분을 사진으로 남겨 주세요. 사진 없이도 신고할 수 있습니다.
-      </p>
+      {!readOnly && (
+        <p className="guest-issue-photos__intro">
+          불편한 부분을 보여 주세요. 사진 없이도 신고할 수 있어요.
+        </p>
+      )}
       {photos.length ? (
         <div className="guest-issue-photos__grid">
           {photos.map((entry, index) => (
@@ -44,6 +49,7 @@ export function GuestIssuePhotos({
               key={entry.photo.id}
               entry={entry}
               index={index}
+              readOnly={readOnly}
               disabled={
                 disabled ||
                 busy ||
@@ -61,43 +67,51 @@ export function GuestIssuePhotos({
         </div>
       ) : (
         <div className="guest-issue-photos__empty">
-          <span aria-hidden="true">＋</span>
-          <p>아직 첨부한 사진이 없습니다.</p>
+          <p>{readOnly ? '첨부한 사진 없음' : '아직 첨부한 사진이 없어요.'}</p>
         </div>
       )}
-      <label
-        className="guest-issue-photos__picker"
-        htmlFor={inputId}
-        aria-disabled={disabled || blocked || selected >= maxPhotos}
-      >
-        <span>＋ 사진 추가</span>
-        <input
-          id={inputId}
-          type="file"
-          multiple
-          accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
-          disabled={disabled || blocked || selected >= maxPhotos}
-          onChange={(event) => {
-            if (event.currentTarget.files)
-              controller.uploadFiles(event.currentTarget.files);
-            event.currentTarget.value = '';
-          }}
-        />
-      </label>
-      <p className="guest-issue-photos__help">
-        한 장당 최대 10MiB · JPEG, PNG, WebP · 최대 {maxPhotos}장<br />
-        HEIC·HEIF 사진은 JPEG로 변환한 뒤 선택해 주세요.
-      </p>
-      <p className="guest-issue-photos__privacy">
-        사진 선택은 이 창에서만 유지됩니다. 새로고침하거나 창을 닫으면 다시
-        첨부해야 합니다. 올린 사진은 24시간 안에 신고에 사용해 주세요.
-      </p>
+      {readOnly && photos.some((entry) => entry.status !== 'ready') && (
+        <p className="guest-issue-photos__help">
+          사용할 수 없는 사진은 작성 화면으로 돌아가 확인해 주세요.
+        </p>
+      )}
+      {!readOnly && (
+        <>
+          <label
+            className="guest-issue-photos__picker"
+            htmlFor={inputId}
+            aria-disabled={disabled || blocked || selected >= maxPhotos}
+          >
+            <span>＋ 사진 추가</span>
+            <input
+              id={inputId}
+              type="file"
+              multiple
+              accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
+              disabled={disabled || blocked || selected >= maxPhotos}
+              onChange={(event) => {
+                if (event.currentTarget.files)
+                  controller.uploadFiles(event.currentTarget.files);
+                event.currentTarget.value = '';
+              }}
+            />
+          </label>
+          <p className="guest-issue-photos__help">
+            한 장당 최대 10MiB · JPEG, PNG, WebP · 최대 {maxPhotos}장<br />
+            HEIC·HEIF 사진은 JPEG로 변환한 뒤 선택해 주세요.
+          </p>
+          <p className="guest-issue-photos__privacy">
+            새로고침하거나 창을 닫으면 사진을 다시 첨부해야 해요. 올린 사진은
+            24시간 안에 신고에 사용해 주세요.
+          </p>
+        </>
+      )}
       {controller.notice && (
         <p className="guest-issue-photos__notice" role="status">
           {controller.notice}
         </p>
       )}
-      {queue.length > 0 && (
+      {!readOnly && queue.length > 0 && (
         <div
           className="guest-issue-photos__queue"
           aria-label="선택한 사진의 업로드 상태"

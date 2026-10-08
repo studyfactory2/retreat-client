@@ -15,6 +15,7 @@ type Props = {
   entry: GuestIssueManagedPhoto;
   index: number;
   disabled: boolean;
+  readOnly?: boolean;
   getPreview: GuestIssuePhotosController['getPreview'];
   onRemove: GuestIssuePhotosController['remove'];
   onDiscard: GuestIssuePhotosController['discardUnavailable'];
@@ -24,6 +25,7 @@ export function GuestIssuePhotoCard({
   entry,
   index,
   disabled,
+  readOnly = false,
   getPreview,
   onRemove,
   onDiscard,
@@ -41,6 +43,7 @@ export function GuestIssuePhotoCard({
     preview: Preview;
   } | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [expanded, setExpanded] = useState(false);
   const visible: Preview =
     !previewDisabled && result?.owner === owner
       ? result.preview
@@ -106,24 +109,35 @@ export function GuestIssuePhotoCard({
       className="guest-issue-photo"
       aria-label={`첨부 사진 ${index + 1}`}
     >
-      <div className="guest-issue-photo__preview">
+      <div
+        className={`guest-issue-photo__preview${expanded && visible.status === 'ready' ? ' guest-issue-photo__preview--expanded' : ''}`}
+      >
         {visible.status === 'ready' ? (
-          <img
-            src={visible.url}
-            alt={`첨부 사진 ${index + 1}`}
-            referrerPolicy="no-referrer"
-            onError={() => {
-              if (scope.current === owner)
-                setResult({
-                  owner,
-                  preview: {
-                    status: 'error',
-                    message:
-                      '사진을 표시하지 못했습니다. 미리보기를 다시 열어 주세요.',
-                  },
-                });
-            }}
-          />
+          <button
+            type="button"
+            className="guest-issue-photo__image-button"
+            aria-label={`${index + 1}번 사진 ${expanded ? '작게' : '크게'} 보기`}
+            aria-expanded={expanded}
+            onClick={() => setExpanded((value) => !value)}
+          >
+            <img
+              src={visible.url}
+              alt={`첨부 사진 ${index + 1}`}
+              referrerPolicy="no-referrer"
+              onError={() => {
+                if (scope.current === owner)
+                  setResult({
+                    owner,
+                    preview: {
+                      status: 'error',
+                      message:
+                        '사진을 표시하지 못했습니다. 미리보기를 다시 열어 주세요.',
+                    },
+                  });
+              }}
+            />
+            <span>{expanded ? '작게 보기' : '크게 보기'}</span>
+          </button>
         ) : (
           <div className="guest-issue-photo__placeholder">
             <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -167,57 +181,58 @@ export function GuestIssuePhotoCard({
             {entry.message}
           </p>
         )}
-        {entry.status === 'remove-uncertain' ? (
-          <Button
-            className="guest-issue-photo-secondary"
-            disabled={disabled}
-            onClick={() => {
-              void onRemove(photo.id);
-            }}
-          >
-            같은 사진 삭제 재확인
-          </Button>
-        ) : entry.status === 'expired' || entry.status === 'unavailable' ? (
-          <Button
-            className="guest-issue-photo-secondary"
-            disabled={disabled}
-            onClick={() => onDiscard(photo.id)}
-          >
-            신고 목록에서 제외
-          </Button>
-        ) : confirmDelete ? (
-          <div className="guest-issue-photo__confirm">
-            <p>이 사진을 삭제할까요?</p>
-            <div>
-              <Button
-                disabled={disabled}
-                className="guest-issue-photo-delete"
-                onClick={() => {
-                  setConfirmDelete(false);
-                  void onRemove(photo.id);
-                }}
-              >
-                사진 삭제
-              </Button>
-              <Button
-                className="guest-issue-photo-secondary"
-                onClick={() => setConfirmDelete(false)}
-              >
-                취소
-              </Button>
+        {!readOnly &&
+          (entry.status === 'remove-uncertain' ? (
+            <Button
+              className="guest-issue-photo-secondary"
+              disabled={disabled}
+              onClick={() => {
+                void onRemove(photo.id);
+              }}
+            >
+              같은 사진 삭제 재확인
+            </Button>
+          ) : entry.status === 'expired' || entry.status === 'unavailable' ? (
+            <Button
+              className="guest-issue-photo-secondary"
+              disabled={disabled}
+              onClick={() => onDiscard(photo.id)}
+            >
+              신고 목록에서 제외
+            </Button>
+          ) : confirmDelete ? (
+            <div className="guest-issue-photo__confirm">
+              <p>이 사진을 삭제할까요?</p>
+              <div>
+                <Button
+                  disabled={disabled}
+                  className="guest-issue-photo-delete"
+                  onClick={() => {
+                    setConfirmDelete(false);
+                    void onRemove(photo.id);
+                  }}
+                >
+                  사진 삭제
+                </Button>
+                <Button
+                  className="guest-issue-photo-secondary"
+                  onClick={() => setConfirmDelete(false)}
+                >
+                  취소
+                </Button>
+              </div>
             </div>
-          </div>
-        ) : (
-          <button
-            type="button"
-            className="guest-issue-photo__remove"
-            disabled={disabled}
-            aria-label={`${index + 1}번 사진 삭제`}
-            onClick={() => setConfirmDelete(true)}
-          >
-            사진 삭제
-          </button>
-        )}
+          ) : (
+            <button
+              type="button"
+              className="guest-issue-photo__remove"
+              disabled={disabled}
+              aria-label={`${index + 1}번 사진 삭제`}
+              onClick={() => setConfirmDelete(true)}
+            >
+              사진 삭제
+            </button>
+          ))}
       </div>
     </article>
   );
