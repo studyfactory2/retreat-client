@@ -2648,3 +2648,44 @@ rendered responsive acceptance remains pending. Browser policy blocked the local
 HTML fixture, and the existing localhost app required administrator login in the
 review browser. No browser workaround or live data mutation was attempted. Manual
 signed-in navigation, visual, keyboard and physical-device acceptance remain.
+
+### Slice 12 — compact report download flow — 2026-10-12
+
+The report form now reuses AdminPropertySelect for name/region search instead of
+a native property dropdown. The existing all-page property loader includes inactive
+properties. A disabled fieldset protects the form during generation and property
+selection while options are unavailable; loading text is only used for actual
+property loading. A missing selected property remains visible and blocks export
+until deliberately corrected. Property-list errors retain their explicit retry.
+
+A compact summary shows the period and property for the next download, including
+full long property names and inactive status. It describes the current form, not
+applied list filters or a preview of report rows. The existing month shortcuts keep
+the chosen property. Native incomplete date segments clear any previous download
+receipt, display a field error and block submission. Presets remount only date
+inputs, clearing incomplete native segments even when dates match prior state.
+The shared selector prevents its search Enter key from submitting the report form.
+
+The page has smaller headings/padding, responsive date/property columns and three
+compact sheet-description rows. Submission-date versus reported-date meaning and
+current issue status remain visible. Secondary exclusions and the 5,000-row/16 MiB
+limits are under a native expandable section. Mobile fields stack and long labels
+wrap. Download status retains generating, requested and error states; requested
+means the browser download was initiated, not that saving the file was verified.
+
+The existing GET /admin/reports/excel contract remains unchanged: administrator
+Bearer token, required valid 1900–2100 dates, Seoul boundaries, inclusive maximum
+62 days, optional propertyId and a 60-second request timeout. Authenticated Blob
+handling, JSON errors, MIME/size/ZIP-header checks, request snapshots, stale-session
+and scope cancellation, duplicate prevention and object-URL cleanup remain intact.
+No backend/schema/dependency changes or permanent tests were added.
+
+Verification: isolated Yarn typecheck, non-fixing Oxlint, changed-source exact
+Prettier and production build passed; the existing large-bundle warning remains.
+Disposable actual-module probes passed 207 assertions covering date contracts,
+authenticated transport/Blob checks, hook ownership and cancellation, selector and
+form states, native partial-date handling and preset/receipt behavior. The probes
+simulate DOM/hooks/transport and do not verify a real Excel download. Responsive
+CSS was reviewed for desktop/tablet/phone constraints. Computer-use permission was
+unavailable for the signed-in app, so rendered/browser/native date-picker and live
+API acceptance remain pending. No credentials, live records or services were changed.
