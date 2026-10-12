@@ -18,17 +18,16 @@
   font-weight: 500;
 }
 .maintenance-table th:nth-child(1) {
-  width: 25%;
+  width: 30%;
 }
 .maintenance-table th:nth-child(2) {
-  width: 26%;
+  width: 28%;
 }
-.maintenance-table th:nth-child(3),
+.maintenance-table th:nth-child(3) {
+  width: 24%;
+}
 .maintenance-table th:nth-child(4) {
   width: 18%;
-}
-.maintenance-table th:nth-child(5) {
-  width: 13%;
 }
 .maintenance-table td {
   padding: 14px;
@@ -111,19 +110,46 @@
   color: #a72e42;
   font-size: 12px;
 }
+.maintenance-latest-time,
 .maintenance-times {
   display: grid;
   gap: 8px;
   margin: 0;
 }
+.maintenance-latest-time dt,
 .maintenance-times dt {
   color: var(--color-muted);
   font-size: 12px;
 }
+.maintenance-latest-time dd,
 .maintenance-times dd {
   margin: 2px 0 0;
   color: var(--color-text);
   font-variant-numeric: tabular-nums;
+}
+.maintenance-record-details {
+  margin-top: 2px;
+}
+.maintenance-record-details > summary {
+  display: list-item;
+  width: fit-content;
+  min-height: 44px;
+  padding-block: 11px;
+  border-radius: 4px;
+  color: var(--color-primary);
+  font-size: 12px;
+  cursor: pointer;
+}
+.maintenance-record-details > summary:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 3px;
+}
+.maintenance-record-details[open] {
+  padding-bottom: 3px;
+}
+.maintenance-record-details .maintenance-times {
+  padding-top: 4px;
+  border-top: 1px solid var(--color-border);
 }
 .maintenance-detail-link {
   display: inline-flex;
@@ -183,8 +209,12 @@
     border: 0;
   }
   .maintenance-table td:last-child {
-    grid-column: 1 / -1;
+    align-self: start;
     text-align: right;
+  }
+  .maintenance-record-details .maintenance-times {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px 12px;
   }
   .maintenance-detail-link {
     padding-inline: 5px;
@@ -195,8 +225,7 @@
     gap: 10px 14px;
     padding: 14px;
   }
-  .maintenance-table td:nth-child(1),
-  .maintenance-table td:nth-child(2) {
+  .maintenance-table td {
     grid-column: 1 / -1;
   }
   .maintenance-table td:nth-child(2) {
@@ -205,6 +234,18 @@
   }
   .maintenance-status-description {
     margin-top: 4px;
+  }
+  .maintenance-latest-time > div {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2px 8px;
+  }
+  .maintenance-latest-time dd {
+    margin: 0;
+  }
+  .maintenance-record-details {
+    margin-bottom: -8px;
   }
   .maintenance-detail-link {
     width: 100%;

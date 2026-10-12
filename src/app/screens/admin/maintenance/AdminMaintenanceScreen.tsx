@@ -95,7 +95,7 @@ function MaintenanceWorkspace({
       <header className="maintenance-heading">
         <div>
           <h1>청소·정비</h1>
-          <p>직원의 작성 상태와 제출 기록을 확인하세요.</p>
+          <p>직원이 시작한 체크리스트마다 기록이 하나씩 표시됩니다.</p>
         </div>
         <Button
           className="admin-button-secondary"

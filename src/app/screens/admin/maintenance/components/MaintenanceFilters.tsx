@@ -36,8 +36,22 @@ export function MaintenanceFilters({
   const errors = { ...maintenanceFilterErrors(draft), ...nativeDateErrors };
   const initialInvalid = Object.keys(maintenanceFilterErrors(input)).length > 0;
   const showErrors = submitted || initialInvalid;
+  const hasChanges =
+    (['propertyId', 'view', 'dateField', 'from', 'to'] as const).some(
+      (key) => draft[key] !== input[key],
+    ) || Object.keys(nativeDateErrors).length > 0;
   const change = (key: keyof AdminMaintenanceInput, value: string) =>
     setDraft((current) => ({ ...current, [key]: value || undefined, page: 1 }));
+  const changeDate = (key: 'from' | 'to', element: HTMLInputElement) => {
+    change(key, element.value);
+    const badInput = element.validity.badInput;
+    setNativeDateErrors((current) => {
+      const next = { ...current };
+      if (badInput) next[key] = '연도, 월, 일을 모두 올바르게 입력해 주세요.';
+      else delete next[key];
+      return next;
+    });
+  };
   const fieldError = (key: keyof typeof errors) =>
     showErrors && errors[key] ? (
       <span id={`maintenance-${key}-error`} className="maintenance-field-error">
@@ -166,17 +180,8 @@ export function MaintenanceFilters({
               min="1900-01-01"
               max="2100-12-31"
               value={draft[key] ?? ''}
-              onChange={(event) => {
-                change(key, event.target.value);
-                const badInput = event.target.validity.badInput;
-                setNativeDateErrors((current) => {
-                  const next = { ...current };
-                  if (badInput)
-                    next[key] = '연도, 월, 일을 모두 올바르게 입력해 주세요.';
-                  else delete next[key];
-                  return next;
-                });
-              }}
+              onChange={(event) => changeDate(key, event.currentTarget)}
+              onInput={(event) => changeDate(key, event.currentTarget)}
               aria-invalid={showErrors && !!errors[key]}
               aria-describedby={`maintenance-date-hint${showErrors && errors[key] ? ` maintenance-${key}-error` : ''}`}
             />
@@ -184,6 +189,12 @@ export function MaintenanceFilters({
           </div>
         ))}
       </div>
+      {hasChanges && (
+        <div className="maintenance-filters__pending" role="status">
+          <strong>조회 버튼을 눌러 적용하세요.</strong>
+          <span>아래 결과는 이전 조회 조건입니다.</span>
+        </div>
+      )}
       <div className="maintenance-filters__footer">
         <div>
           <p id="maintenance-date-hint">

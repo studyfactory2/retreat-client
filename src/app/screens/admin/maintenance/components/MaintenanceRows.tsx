@@ -40,13 +40,10 @@ export function MaintenanceRows({
               현재 상태
             </th>
             <th scope="col" role="columnheader">
-              작성 기록
+              최근 기록
             </th>
             <th scope="col" role="columnheader">
-              제출 · 작성 기한
-            </th>
-            <th scope="col" role="columnheader">
-              제출 기록
+              제출 내용
             </th>
           </tr>
         </thead>
@@ -90,45 +87,60 @@ export function MaintenanceRows({
                   )}
                 </td>
                 <td role="cell">
-                  <dl className="maintenance-times">
+                  <dl className="maintenance-latest-time">
                     <div>
-                      <dt>작성 시작</dt>
+                      <dt>
+                        {item.status === 'COMPLETED' ? '제출' : '마지막 저장'}
+                      </dt>
                       <dd>
-                        <RecordTime value={item.startedAt} />
-                      </dd>
-                    </div>
-                    <div>
-                      <dt>마지막 저장</dt>
-                      <dd>
-                        <RecordTime value={item.updatedAt} />
-                      </dd>
-                    </div>
-                  </dl>
-                </td>
-                <td role="cell">
-                  <dl className="maintenance-times">
-                    <div>
-                      <dt>제출</dt>
-                      <dd>
-                        <RecordTime value={item.submittedAt} />
-                      </dd>
-                    </div>
-                    <div>
-                      <dt>작성 기한</dt>
-                      <dd>
-                        <RecordTime value={item.expiresAt} />
+                        <RecordTime
+                          value={
+                            item.status === 'COMPLETED'
+                              ? item.submittedAt
+                              : item.updatedAt
+                          }
+                        />
                       </dd>
                     </div>
                   </dl>
+                  <details className="maintenance-record-details">
+                    <summary>상세 정보</summary>
+                    <dl className="maintenance-times">
+                      <div>
+                        <dt>작성 시작</dt>
+                        <dd>
+                          <RecordTime value={item.startedAt} />
+                        </dd>
+                      </div>
+                      <div>
+                        <dt>마지막 저장</dt>
+                        <dd>
+                          <RecordTime value={item.updatedAt} />
+                        </dd>
+                      </div>
+                      <div>
+                        <dt>제출</dt>
+                        <dd>
+                          <RecordTime value={item.submittedAt} />
+                        </dd>
+                      </div>
+                      <div>
+                        <dt>작성 기한</dt>
+                        <dd>
+                          <RecordTime value={item.expiresAt} />
+                        </dd>
+                      </div>
+                    </dl>
+                  </details>
                 </td>
                 <td role="cell">
                   {item.status === 'COMPLETED' ? (
                     <Link
                       className="maintenance-detail-link"
                       to={maintenanceDetailPath(item.id, filters)}
-                      aria-label={`${item.property.name} ${item.staff.name ?? ''} 체크리스트·사진 보기`}
+                      aria-label={`${item.property.name} ${item.staff.name ?? ''} 제출 내용 보기`}
                     >
-                      <span>체크리스트·사진</span>
+                      <span>제출 내용 보기</span>
                       <span aria-hidden="true">→</span>
                     </Link>
                   ) : (

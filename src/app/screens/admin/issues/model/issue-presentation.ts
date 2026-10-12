@@ -35,6 +35,18 @@ export function issueTime(value: string | null): string {
   }).format(new Date(value));
 }
 
+export function issueListTime(value: string): string {
+  return new Intl.DateTimeFormat('ko-KR', {
+    timeZone: 'Asia/Seoul',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+  }).format(new Date(value));
+}
+
 export function issueEventLabel(type: IssueEventType): string {
   return {
     REPORTED: '최초 신고',

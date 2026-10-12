@@ -147,6 +147,26 @@
   gap: 12px;
   margin-top: 12px;
 }
+.maintenance-filters__pending {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 8px;
+  margin-top: 12px;
+  padding: 9px 11px;
+  border-left: 3px solid var(--color-primary);
+  border-radius: 4px;
+  background: var(--color-soft);
+  color: var(--color-heading);
+  font-size: 12px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.maintenance-filters__pending strong {
+  font-weight: 650;
+}
+.maintenance-filters__pending span {
+  color: var(--color-muted);
+}
 .maintenance-filters__footer > div:first-child {
   min-width: 0;
 }

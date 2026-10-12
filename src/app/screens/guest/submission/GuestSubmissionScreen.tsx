@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigationGuard } from '../../../core/router/navigation/use-navigation-guard';
 import { Button } from '../../../shared/ui/Button/Button';
 import { readGuestAccess } from '../entry/model/guest-entry-model';
 import { useGuestSubmission } from './hooks/use-guest-submission';
@@ -13,6 +14,7 @@ export function GuestSubmissionScreen() {
   const access = readGuestAccess(location.hash);
   const token = access.status === 'ready' ? access.token : null;
   const controller = useGuestSubmission(token);
+  useNavigationGuard(controller.hasPendingWork);
   const { resource } = controller;
   const main = useRef<HTMLElement>(null);
   const mode = resource.status === 'ready' ? resource.mode : resource.status;

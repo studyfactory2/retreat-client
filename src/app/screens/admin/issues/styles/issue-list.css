@@ -215,19 +215,19 @@
   font-weight: 500;
 }
 .issue-table th:nth-child(1) {
-  width: 34%;
+  width: 24%;
 }
 .issue-table th:nth-child(2) {
-  width: 22%;
+  width: 18%;
 }
 .issue-table th:nth-child(3) {
-  width: 17%;
+  width: 30%;
 }
 .issue-table th:nth-child(4) {
-  width: 17%;
+  width: 16%;
 }
 .issue-table th:nth-child(5) {
-  width: 10%;
+  width: 12%;
 }
 .issue-table td {
   padding: 14px;
@@ -242,7 +242,7 @@
 .issue-row-title {
   display: block;
   width: fit-content;
-  margin-block: 4px;
+  margin: 0 0 5px;
   color: var(--color-heading);
   font-size: 15px;
   font-weight: 650;
@@ -256,6 +256,39 @@
 .issue-list-muted {
   color: var(--color-muted);
   font-size: 12px;
+}
+.issue-row-property > strong {
+  display: block;
+  font-size: 14px;
+}
+.issue-row-property > p,
+.issue-row-resolved {
+  margin-top: 4px;
+}
+.issue-row-context {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px 12px;
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 12px;
+}
+.issue-row-context > div {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  min-width: 0;
+  max-width: 100%;
+}
+.issue-row-context dt {
+  flex-shrink: 0;
+}
+.issue-row-context dd {
+  min-width: 0;
+  margin: 0;
+}
+.issue-row-reported {
+  font-variant-numeric: tabular-nums;
 }
 .issue-row-labels {
   display: flex;
@@ -294,9 +327,6 @@
   color: #875711;
   background: #fff1d9;
 }
-.issue-list-status + p {
-  margin-top: 5px;
-}
 .issue-list-link {
   display: inline-flex;
   align-items: center;
@@ -306,6 +336,18 @@
   font-size: 12px;
   font-weight: 650;
   text-decoration: none;
+}
+.issue-list-link > span:first-child {
+  min-width: 0;
+}
+.issue-list-link > span:last-child {
+  flex-shrink: 0;
+}
+.issue-list-link:focus-visible,
+.issue-row-title:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 3px;
+  border-radius: 4px;
 }
 .issue-list-link:hover {
   text-decoration: underline;
@@ -360,6 +402,10 @@
   .issue-table tr {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-areas:
+      'property status'
+      'content content'
+      'reported action';
     gap: 10px 14px;
     min-width: 0;
     padding: 16px;
@@ -373,16 +419,35 @@
     padding: 0;
     border: 0;
   }
-  .issue-table td:first-child {
-    grid-column: 1 / -1;
+  .issue-row-property {
+    grid-area: property;
   }
-  .issue-table td:last-child {
+  .issue-row-property > strong {
+    font-size: 15px;
+  }
+  .issue-row-state {
+    grid-area: status;
+  }
+  .issue-row-content {
+    grid-area: content;
+  }
+  .issue-table .issue-row-reported {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 3px 7px;
+    grid-area: reported;
+    align-self: center;
+    color: var(--color-muted);
+    font-size: 12px;
+  }
+  .issue-row-action {
+    grid-area: action;
     align-self: end;
     text-align: right;
   }
   .issue-list-mobile-label {
-    display: block;
-    margin-bottom: 3px;
+    display: inline;
     color: var(--color-muted);
     font-size: 12px;
   }
@@ -427,7 +492,26 @@
     margin-left: auto;
   }
   .issue-table tr {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      'property'
+      'status'
+      'content'
+      'reported'
+      'action';
     padding: 14px;
+  }
+  .issue-row-title {
+    font-size: 16px;
+  }
+  .issue-list-link {
+    width: 100%;
+    justify-content: space-between;
+    padding: 9px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    background: var(--color-soft);
+    font-size: 13px;
   }
   .admin-issues .page-state {
     padding: 20px 16px;

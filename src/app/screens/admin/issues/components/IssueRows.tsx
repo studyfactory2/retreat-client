@@ -6,9 +6,9 @@ import type {
 } from '../../../../features/admin-issues/admin-issues.types';
 import { issueSearch } from '../model/issue-filters';
 import {
+  issueListTime,
   issueStatusLabel,
   issueStatusTone,
-  issueTime,
 } from '../model/issue-presentation';
 
 export function IssueRows({
@@ -27,13 +27,13 @@ export function IssueRows({
         <thead>
           <tr role="row">
             <th role="columnheader" scope="col">
-              신고 내용
-            </th>
-            <th role="columnheader" scope="col">
               휴양소
             </th>
             <th role="columnheader" scope="col">
               처리 상태
+            </th>
+            <th role="columnheader" scope="col">
+              신고 내용
             </th>
             <th role="columnheader" scope="col">
               접수일
@@ -50,62 +50,72 @@ export function IssueRows({
               key={issue.id}
               className={issue.cancelledAt ? 'issue-row--cancelled' : undefined}
             >
-              <td role="cell">
-                <div className="issue-row-labels">
-                  {issue.cancelledAt && (
-                    <span className="issue-list-cancelled">취소됨</span>
-                  )}
+              <td role="cell" className="issue-row-property">
+                <strong>{issue.property.name}</strong>
+                {issue.property.region && (
+                  <p className="issue-list-muted">{issue.property.region}</p>
+                )}
+              </td>
+              <td role="cell" className="issue-row-state">
+                <div
+                  className="issue-row-labels"
+                  aria-label="긴급도와 처리 상태"
+                >
                   {issue.isUrgent && (
                     <span className="issue-list-urgent">긴급</span>
                   )}
-                  <span>{issue.category.name}</span>
+                  <span
+                    className={`issue-list-status issue-list-status--${issueStatusTone(issue.status)}`}
+                  >
+                    {issueStatusLabel(issue.status)}
+                  </span>
+                  {issue.cancelledAt && (
+                    <span className="issue-list-cancelled">취소됨</span>
+                  )}
                 </div>
+                {issue.resolvedAt && (
+                  <p className="issue-list-muted issue-row-resolved">
+                    해결{' '}
+                    <time dateTime={issue.resolvedAt}>
+                      {issueListTime(issue.resolvedAt)}
+                    </time>
+                  </p>
+                )}
+              </td>
+              <td role="cell" className="issue-row-content">
                 <Link
                   className="issue-row-title"
                   to={`${appRoutes.adminIssues}/${issue.id}${issueSearch(filters)}`}
                 >
                   {issue.title}
                 </Link>
-                {issue.areaLabel && (
-                  <p className="issue-list-muted">{issue.areaLabel}</p>
-                )}
+                <dl className="issue-row-context">
+                  {issue.areaLabel && (
+                    <div>
+                      <dt>위치</dt>
+                      <dd>{issue.areaLabel}</dd>
+                    </div>
+                  )}
+                  <div>
+                    <dt>분류</dt>
+                    <dd>{issue.category.name}</dd>
+                  </div>
+                </dl>
               </td>
-              <td role="cell">
-                <span className="issue-list-mobile-label">휴양소</span>
-                <strong>{issue.property.name}</strong>
-                {issue.property.region && (
-                  <p className="issue-list-muted">{issue.property.region}</p>
-                )}
-              </td>
-              <td role="cell">
-                <span className="issue-list-mobile-label">처리 상태</span>
-                <span
-                  className={`issue-list-status issue-list-status--${issueStatusTone(issue.status)}`}
-                >
-                  {issueStatusLabel(issue.status)}
-                </span>
-                {issue.resolvedAt && (
-                  <p className="issue-list-muted">
-                    해결{' '}
-                    <time dateTime={issue.resolvedAt}>
-                      {issueTime(issue.resolvedAt)}
-                    </time>
-                  </p>
-                )}
-              </td>
-              <td role="cell">
-                <span className="issue-list-mobile-label">접수일</span>
+              <td role="cell" className="issue-row-reported">
+                <span className="issue-list-mobile-label">접수</span>
                 <time dateTime={issue.reportedAt}>
-                  {issueTime(issue.reportedAt)}
+                  {issueListTime(issue.reportedAt)}
                 </time>
               </td>
-              <td role="cell">
+              <td role="cell" className="issue-row-action">
                 <Link
                   className="issue-list-link"
                   to={`${appRoutes.adminIssues}/${issue.id}${issueSearch(filters)}`}
-                  aria-label={`${issue.property.name} · ${issue.title} 상세 보기`}
+                  aria-label={`${issue.property.name} · ${issue.title} 신고 내용 보기`}
                 >
-                  상세 보기<span aria-hidden="true">→</span>
+                  <span>신고 내용 보기</span>
+                  <span aria-hidden="true">→</span>
                 </Link>
               </td>
             </tr>

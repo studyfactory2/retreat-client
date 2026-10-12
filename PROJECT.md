@@ -2689,3 +2689,104 @@ simulate DOM/hooks/transport and do not verify a real Excel download. Responsive
 CSS was reviewed for desktop/tablet/phone constraints. Computer-use permission was
 unavailable for the signed-in app, so rendered/browser/native date-picker and live
 API acceptance remain pending. No credentials, live records or services were changed.
+
+
+### Slice 13 — final flow review and guest navigation protection — 2026-10-12
+
+A bounded cross-role review covered administrator property/staff setup, schedules
+and imports, private guest links/vehicle context, submission and issue history,
+report integration, guest entry/drafts/corrections/issues and staff maintenance.
+No additional admin/staff contract defect was confirmed by that review. This is
+source and simulated-contract evidence, not a completed live release walkthrough.
+MANUAL_ACCEPTANCE.md records the remaining signed-in and physical-device checks.
+
+Guest start/vehicle entry and submitted-checklist correction now register with
+the existing NavigationBoundary. Previously their native beforeunload or local
+link-click checks did not protect same-document browser Back/Forward. The guards
+read current owner-scoped refs, so unsaved input and pending/unresolved mutations
+are protected even before a subsequent render. Keeping the accepted route mounted
+preserves input when the guest chooses to continue editing. Clean states remain
+navigable. Native unload protection remains, and the entry-only click confirmation
+was removed to avoid duplicate warnings; shared GuestFrame behavior is unchanged.
+
+A verified start receipt is retained only in memory for its current access scope.
+Normal successful starting still opens the private draft. If starting completes
+while a leave dialog is already open and the guest stays, the entry form offers
+an explicit continuation action for that same draft. It does not send another
+start request. Navigation protection is released only for the matching verified
+private draft destination; returning to the entry view protects the retained link.
+Credentials are not added to storage, logs or backend payloads by this change.
+
+API contracts are unchanged. QR start uses POST /submission-drafts/guest/start;
+private-stay start uses POST /guest/stays/drafts/start. Validated start responses
+supply the scoped draft credential. Existing vehicle save and submission-correction
+calls keep their version/revision and uncertainty handling. No backend, schema,
+dependency, service, Git staging/commit or deployment operations were performed.
+
+Verification: isolated frontend Yarn typecheck, non-fixing Oxlint, exact
+changed-source Prettier and production build passed. The existing main-bundle
+size warning remains (about 1.16 MB minified / 301 KB gzip). Backend read-only
+TypeScript compilation also passed. Disposable actual-module probes passed 236
+assertions: 87 entry/navigation/recovery, 47 correction/navigation, 59 cross-repo
+private-link contracts and 43 staff/submission contracts. They use simulated
+React/events/transport or in-memory database dependencies, with no live writes.
+No permanent test/spec files were added. Review also covered the pending leave
+plus successful start race and stale-token/session cleanup.
+
+Live signed-in browser, QR/camera/clipboard, PostgreSQL/S3, responsive rendering,
+native picker and device acceptance remain pending in MANUAL_ACCEPTANCE.md.
+Existing admin sidebar/brand/logout and SPA Back/Forward do not have universal
+unsaved-form/one-time-link protection; this boundary remains explicitly noted.
+The review did not modify actual records, credentials, running services or either
+repository's Git history.
+
+
+### Maintenance list clarity follow-up — 2026-10-12
+
+The maintenance list now explains that each started staff checklist is a separate
+record. Rows prioritize the property, recorded staff, existing status and one
+timestamp: submission for COMPLETED, last saved otherwise. Native collapsed
+상세 정보 sections retain started/saved/submitted/expiry dates. Submitted links
+are labelled 제출 내용 보기 and retain the existing detail URL/filter return
+context. Expired/blocked/review-needed explanations and review reasons remain
+visible; only valid COMPLETED records offer the detail link. Desktop uses four
+columns; tablet/mobile stack compactly with wrapping names and 44px controls.
+
+Editing property, record scope, date basis or period displays 조회 버튼을 눌러
+적용하세요 with a reminder that results still use the previous conditions.
+The notice compares local controls with the applied URL input and ignores page
+number. Reverting controls or the existing URL/reset remount clears it. Native
+partial date input also triggers the notice and remains blocked by date validation.
+No request is sent until the existing 조회 flow validates and applies filters;
+the applied summary still describes URL state. No API or status semantics changed.
+
+Verification: isolated Yarn typecheck, non-fixing Oxlint, changed-source exact
+Prettier and production build passed, retaining the existing large-bundle warning.
+Disposable actual-component rendering and filter interactions passed 59 assertions
+covering all five statuses, collapsed dates, detail-link eligibility/context,
+unapplied/reverted/reset conditions and invalid/native-partial date inputs. These
+use fictional records and synthetic events; responsive CSS was reviewed, but live
+browser/device rendering remains unverified. No permanent tests, backend changes,
+live records, service operations or Git staging/commit were included. Earlier
+uncommitted Slice 13 changes and MANUAL_ACCEPTANCE.md are preserved.
+
+
+### Issue card clarity follow-up — 2026-10-12
+
+Issue list rows now put the property first, group urgency/processing/cancellation
+badges, and label location and category beneath the issue title. The compact
+desktop table follows the same reading order. Tablet uses a two-column layout;
+phone cards stack with a full-width 신고 내용 보기 action and 44px minimum target.
+Reported and resolved dates display Korean time to the minute in this list;
+precise dateTime values and the shared detail/history formatter remain unchanged.
+
+Both detail links retain the applied filter query. Filters, API requests, status
+semantics and issue actions are unchanged. Optional region/location remain
+conditional, and long names/content wrap. Existing guest and maintenance changes
+are preserved. No backend, live records, services or Git history were changed.
+
+Verification: isolated Yarn typecheck, non-fixing Oxlint, exact changed-source
+Prettier and production build passed. The existing large-bundle warning remains
+(about 1.16 MB minified / 302 KB gzip). Independent source/CSS review found no
+concrete regression. Live browser/device rendering remains unverified because
+the signed-in browser is unavailable to computer use.

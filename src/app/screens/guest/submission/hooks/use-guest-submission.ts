@@ -515,7 +515,19 @@ export function useGuestSubmission(token: string | null) {
     rejectAccess,
   });
 
+  const hasPendingWork = useCallback(() => {
+    const local = readCurrent();
+    return (
+      scope.current === owner &&
+      local?.status === 'ready' &&
+      (dirtySubmission(local) ||
+        local.attempt !== null ||
+        writeRequest.current !== null)
+    );
+  }, [owner, readCurrent]);
+
   return {
+    hasPendingWork,
     resource,
     dirty,
     hasChanges:

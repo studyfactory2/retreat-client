@@ -1,4 +1,11 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ApiRequestError } from '../../../../core/api/api-error';
 import { startGuestDraft } from '../../../../features/guest-drafts/guest-drafts-api';
@@ -16,7 +23,8 @@ import {
   type GuestStartFields,
 } from '../model/guest-start-model';
 
-type StartStatus = 'idle' | 'checking' | 'starting' | 'uncertain' | 'denied';
+type StartStatus =
+  'idle' | 'checking' | 'starting' | 'opening' | 'uncertain' | 'denied';
 
 type StartState = {
   fields: GuestStartFields;
@@ -47,9 +55,9 @@ export function useGuestStart(
     }),
     [kind, token, type],
   );
-  const baseline = owner.initialState.fields;
   const scope = useRef<typeof owner | null>(owner);
   const request = useRef<AbortController | null>(null);
+  const issued = useRef<string | null>(null);
   const attempt = useRef<{ owner: typeof owner; requestKey: string } | null>(
     null,
   );
@@ -64,18 +72,44 @@ export function useGuestStart(
     stateRef.current = state;
   }, [state]);
   const pending = state.status === 'checking' || state.status === 'starting';
+  const hasPendingWork = useCallback(() => {
+    if (scope.current !== owner || !owner.type) return false;
+    if (issued.current) {
+      // A pending leave dialog may retain this form after successful creation.
+      // Release only navigation to its verified draft; staying keeps it protected.
+      return !(
+        window.location.pathname === '/draft' &&
+        window.location.search === '' &&
+        window.location.hash === `#token=${issued.current}`
+      );
+    }
+    const latest = stateRef.current;
+    return (
+      request.current !== null ||
+      latest.status === 'checking' ||
+      latest.status === 'starting' ||
+      latest.status === 'uncertain' ||
+      Object.keys(owner.initialState.fields).some(
+        (key) =>
+          latest.fields[key as keyof GuestStartFields] !==
+          owner.initialState.fields[key as keyof GuestStartFields],
+      )
+    );
+  }, [owner]);
   const dirty =
     type !== null &&
     (pending ||
+      state.status === 'opening' ||
       state.status === 'uncertain' ||
-      Object.keys(baseline).some(
+      Object.keys(owner.initialState.fields).some(
         (key) =>
           state.fields[key as keyof GuestStartFields] !==
-          baseline[key as keyof GuestStartFields],
+          owner.initialState.fields[key as keyof GuestStartFields],
       ));
 
   useLayoutEffect(() => {
     scope.current = owner;
+    issued.current = null;
     return () => {
       scope.current = null;
       request.current?.abort();
@@ -84,14 +118,14 @@ export function useGuestStart(
   }, [owner]);
 
   useEffect(() => {
-    if (!dirty) return;
     const warn = (event: BeforeUnloadEvent) => {
+      if (!hasPendingWork()) return;
       event.preventDefault();
       event.returnValue = '';
     };
     window.addEventListener('beforeunload', warn);
     return () => window.removeEventListener('beforeunload', warn);
-  }, [dirty]);
+  }, [hasPendingWork]);
 
   function patch(update: Partial<StartState>) {
     if (scope.current !== owner) return;
@@ -101,7 +135,12 @@ export function useGuestStart(
   }
 
   function setField(field: keyof GuestStartFields, value: string) {
-    if (request.current || stateRef.current.status === 'uncertain') return;
+    if (
+      issued.current !== null ||
+      request.current ||
+      stateRef.current.status === 'uncertain'
+    )
+      return;
     const errors = { ...stateRef.current.errors };
     delete errors[field];
     patch({
@@ -111,8 +150,35 @@ export function useGuestStart(
     });
   }
 
+  function openIssued() {
+    if (scope.current !== owner || !issued.current) return;
+    patch({
+      status: 'opening',
+      message:
+        '체크리스트를 만들었습니다. 시설 확인을 계속해 주세요. 새 체크리스트는 만들지 않습니다.',
+    });
+    try {
+      navigate(
+        { pathname: '/draft', hash: `#token=${issued.current}` },
+        { replace: true },
+      );
+    } catch {
+      patch({
+        message:
+          '작성 화면을 열지 못했습니다. 아래 버튼으로 만든 체크리스트를 다시 열어 주세요.',
+      });
+    }
+  }
+
   async function act(fresh: boolean) {
-    if (!token || !type || !entry || request.current || scope.current !== owner)
+    if (
+      !token ||
+      !type ||
+      !entry ||
+      request.current ||
+      issued.current !== null ||
+      scope.current !== owner
+    )
       return;
     if (
       !fresh &&
@@ -193,11 +259,9 @@ export function useGuestStart(
         controller.signal,
       );
       if (!current()) return;
-      // The receipt has already validated the public origin, draft path and matching token.
-      navigate(
-        { pathname: '/draft', hash: `#token=${saved.accessToken}` },
-        { replace: true },
-      );
+      // Keep the validated capability if a pending leave dialog retains this form.
+      issued.current = saved.accessToken;
+      openIssued();
     } catch (error: unknown) {
       if (!current()) return;
       const failure = error instanceof ApiRequestError ? error : null;
@@ -238,24 +302,14 @@ export function useGuestStart(
     }
   }
 
-  function confirmLeave() {
-    if (!dirty) return true;
-    return window.confirm(
-      pending
-        ? '시작 결과를 확인 중입니다. 지금 나가면 이어쓰기 링크를 받지 못할 수 있습니다. 나갈까요?'
-        : state.status === 'uncertain'
-          ? '체크리스트 시작 결과를 아직 확인하지 못했습니다. 이 화면에서 나갈까요?'
-          : '입력한 이용객 정보가 저장되지 않았습니다. 나갈까요?',
-    );
-  }
-
   return {
     state,
     pending,
     dirty,
+    hasPendingWork,
+    openIssued,
     setField,
     start: () => act(false),
     prepareFresh: () => act(true),
-    confirmLeave,
   };
 }

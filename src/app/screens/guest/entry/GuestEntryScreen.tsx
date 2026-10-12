@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
+import { useNavigationGuard } from '../../../core/router/navigation/use-navigation-guard';
 import type { GuestAccessKind } from '../../../features/guest-entry/guest-entry.types';
 import { GuestIssueScreen } from '../issues';
 import { GuestFrame } from './components/GuestFrame';
@@ -64,6 +65,8 @@ function GuestEntrySessionScreen({ kind }: { kind: GuestAccessKind }) {
     resource.status === 'ready' ? resource.data.entry : null,
     refresh,
   );
+  useNavigationGuard(startForm.hasPendingWork);
+  useNavigationGuard(vehicleForm.hasPendingWork);
   const main = useRef<HTMLElement>(null);
   const denied = startType !== null && startForm.state.status === 'denied';
   const status =
@@ -103,9 +106,6 @@ function GuestEntrySessionScreen({ kind }: { kind: GuestAccessKind }) {
         access.status === 'ready' && !denied && !startForm.pending
           ? refresh
           : undefined
-      }
-      confirmNavigation={() =>
-        startForm.confirmLeave() && vehicleForm.confirmLeave()
       }
     >
       {access.status !== 'ready' ? (

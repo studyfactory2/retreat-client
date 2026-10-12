@@ -37,8 +37,12 @@ export function GuestStartForm({
   const optionalHasErrors = optionalFields.some(
     (field) => state.errors[field.name],
   );
+  const opening = state.status === 'opening';
   const locked =
-    pending || state.status === 'uncertain' || state.status === 'denied';
+    pending ||
+    opening ||
+    state.status === 'uncertain' ||
+    state.status === 'denied';
   const error = (field: keyof GuestStartFields) =>
     state.errors[field] ? (
       <span className="guest-start-error" id={`guest-start-${field}-error`}>
@@ -75,7 +79,7 @@ export function GuestStartForm({
           </li>
         ))}
       </ol>
-      {!checklist ? (
+      {!checklist && !opening ? (
         <section className="guest-card guest-empty">
           <h2>체크리스트를 준비하고 있습니다</h2>
           <p>현재 {title}를 시작할 수 없습니다. 관리자에게 문의해 주세요.</p>
@@ -86,7 +90,8 @@ export function GuestStartForm({
           noValidate
           onSubmit={(event) => {
             event.preventDefault();
-            void form.start();
+            if (opening) form.openIssued();
+            else void form.start();
           }}
         >
           <div className="guest-card__heading">
@@ -215,13 +220,15 @@ export function GuestStartForm({
             type="submit"
             className="guest-start-submit"
             loading={pending}
-            disabled={locked}
+            disabled={locked && !opening}
           >
-            {state.status === 'checking'
-              ? '이용 정보 확인 중'
-              : state.status === 'starting'
-                ? '체크리스트 시작 중'
-                : '다음: 시설 확인'}
+            {opening
+              ? '시설 확인 계속하기'
+              : state.status === 'checking'
+                ? '이용 정보 확인 중'
+                : state.status === 'starting'
+                  ? '체크리스트 시작 중'
+                  : '다음: 시설 확인'}
           </Button>
         </form>
       )}

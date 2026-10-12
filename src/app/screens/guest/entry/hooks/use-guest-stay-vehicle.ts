@@ -415,7 +415,7 @@ export function useGuestStayVehicle(
     });
   }
 
-  const mustWarn = useCallback(() => {
+  const hasPendingWork = useCallback(() => {
     if (scope.current !== owner || !token) return false;
     const latest = stateRef.current;
     return (
@@ -426,13 +426,13 @@ export function useGuestStayVehicle(
   }, [owner, token]);
   useEffect(() => {
     const warn = (event: BeforeUnloadEvent) => {
-      if (!mustWarn()) return;
+      if (!hasPendingWork()) return;
       event.preventDefault();
       event.returnValue = '';
     };
     window.addEventListener('beforeunload', warn);
     return () => window.removeEventListener('beforeunload', warn);
-  }, [mustWarn]);
+  }, [hasPendingWork]);
 
   useEffect(() => {
     if (state.expiresAt === null || state.phase === 'denied') return;
@@ -482,6 +482,7 @@ export function useGuestStayVehicle(
         : ''),
     pending,
     dirty,
+    hasPendingWork,
     canEdit,
     canClear:
       canWrite &&
@@ -493,12 +494,5 @@ export function useGuestStayVehicle(
     clear: () => write(null),
     reload,
     acknowledgeReview,
-    confirmLeave: () =>
-      !mustWarn() ||
-      window.confirm(
-        request.current?.mode === 'write' || stateRef.current.uncertain
-          ? '차량 정보 저장 결과가 확인되지 않았습니다. 지금 나가면 입력 내용과 확인 중인 결과를 잃을 수 있습니다. 나갈까요?'
-          : '차량 정보에 저장하지 않았거나 다시 확인해야 할 내용이 있습니다. 이 화면에서 나갈까요?',
-      ),
   };
 }
