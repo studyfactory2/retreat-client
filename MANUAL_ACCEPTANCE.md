@@ -89,10 +89,36 @@ invitation or draft tokens into screenshots or bug reports.
       displayed recovery state and current server result before deliberate retry.
       Do not infer that an interrupted request failed on the server.
 
+## 7. Administrator navigation protection
+
+- [ ] Change a property or staff field without saving. Try the sidebar, brand,
+      mobile menu and browser Back/Forward. 계속 작성 restores the source URL and
+      retains input. 이동하기 opens the chosen destination. Repeat with a clean
+      form: it should leave without a warning.
+- [ ] Verify the same behavior for guide/checklist/category edits, stay and import
+      edits, issue notes and submission corrections. Confirmed page-local exits
+      should not produce a second warning. In-place reload/close confirmations
+      must not allow a later unrelated navigation to skip its warning.
+- [ ] Save a valid property, staff member or stay. The normal success destination
+      opens without another discard warning. Failed or uncertain saves keep their
+      existing recovery message and warn before leaving.
+- [ ] Issue a QR or private stay link on test records. Navigation warns while its
+      one-time receipt is present, including after copying. Staying retains the
+      link; leaving discards the in-memory receipt. Reopening status must not reveal
+      the old raw link. A failed status refresh must not silently lose the receipt.
+- [ ] With unsaved admin input, press 로그아웃. 계속 작성 keeps the session and
+      input; confirming logout clears the session. A clean screen logs out directly.
+- [ ] Verify expiry/rejection takes precedence over an open leave dialog and sends
+      the administrator to login. An old confirmation must not log out a new session.
+- [ ] Check native reload/tab-close warnings on supported browsers. These are
+      browser-controlled dialogs and cannot preserve data after a confirmed unload.
+
 ## Known boundaries
 
-- Admin page-local exit checks are not universal sidebar/brand/logout or SPA
-  Back/Forward guards. Save edits and copy one-time links before those exits.
+- Navigation guards keep mounted inputs and in-memory links during a voluntary
+  leave decision; they do not save them automatically. Confirmed leaving, reload,
+  forced session expiry or authentication rejection can discard unsaved work.
+- Leaving or logging out does not roll back a server request already accepted.
 - Physical QR/camera/clipboard behavior, real JWT/PostgreSQL/S3, browser history
   dialogs and native date inputs require the live checks above.
 - Deployment, production origins/TLS, backups and server operations are handled

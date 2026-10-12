@@ -1,11 +1,12 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
+import { useAdminNavigationGuard } from '../../hooks/use-admin-navigation-guard';
 
 export interface StayLinkNavigationGuard {
   isBusy: () => boolean;
   hasReceipt: () => boolean;
+  hasPendingChanges: () => boolean;
 }
 
-// Page-local controls only, consistent with the existing stay form guards.
 export function useStayLinkNavigation() {
   const guard = useRef<StayLinkNavigationGuard | null>(null);
   const trigger = useRef<HTMLElement | null>(null);
@@ -16,15 +17,9 @@ export function useStayLinkNavigation() {
     setBusy(next?.isBusy() ?? false);
   }, []);
 
-  useEffect(() => {
-    const warn = (event: BeforeUnloadEvent) => {
-      if (!guard.current?.isBusy() && !guard.current?.hasReceipt()) return;
-      event.preventDefault();
-      event.returnValue = '';
-    };
-    window.addEventListener('beforeunload', warn);
-    return () => window.removeEventListener('beforeunload', warn);
-  }, []);
+  const runConfirmed = useAdminNavigationGuard(
+    () => guard.current?.hasPendingChanges() ?? false,
+  );
 
   return {
     busy,
@@ -36,8 +31,10 @@ export function useStayLinkNavigation() {
         setPending(null);
         return run();
       }
-      trigger.current = document.activeElement instanceof HTMLElement
-        ? document.activeElement : null;
+      trigger.current =
+        document.activeElement instanceof HTMLElement
+          ? document.activeElement
+          : null;
       setPending(() => run);
     },
     keep: () => {
@@ -49,7 +46,7 @@ export function useStayLinkNavigation() {
     proceed: () => {
       if (guard.current?.isBusy()) return;
       setPending(null);
-      pending?.();
+      if (pending) runConfirmed(pending);
     },
   };
 }

@@ -2,6 +2,7 @@ import {
   useCallback,
   useContext,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
   type ReactNode,
@@ -14,6 +15,7 @@ import {
 } from 'react-router-dom';
 import { NavigationLeaveDialog } from './NavigationLeaveDialog';
 import {
+  NavigationActionsContext,
   NavigationGuardContext,
   NavigationHistoryContext,
 } from './use-navigation-guard';
@@ -35,6 +37,50 @@ export function NavigationBoundary({ children }: { children: ReactNode }) {
     restoring: false,
   }));
   const guards = useRef(new Set<() => boolean>());
+  const approved = useRef<{ url: string; key: unknown } | null>(null);
+  const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
+  const current = useRef(state);
+  useLayoutEffect(() => {
+    current.current = state;
+  }, [state]);
+  const runConfirmed = useCallback((operation: () => void) => {
+    approved.current = null;
+    const before =
+      window.location.pathname + window.location.search + window.location.hash;
+    const previousEntry: unknown = window.history.state;
+    const previousKey =
+      typeof previousEntry === 'object' &&
+      previousEntry !== null &&
+      'key' in previousEntry
+        ? previousEntry.key
+        : null;
+    operation();
+    const after =
+      window.location.pathname + window.location.search + window.location.hash;
+    // Only this synchronous navigation is approved. An in-place reload or editor
+    // switch must never leave an allowance for an unrelated future navigation.
+    const entry: unknown = window.history.state;
+    const key =
+      typeof entry === 'object' && entry !== null && 'key' in entry
+        ? entry.key
+        : null;
+    if (before !== after || previousKey !== key)
+      approved.current = { url: after, key };
+  }, []);
+  const requestAction = useCallback((operation: () => void) => {
+    if (current.current.pending || current.current.restoring) return () => {};
+    if (![...guards.current].some((check) => check())) {
+      operation();
+      return () => {};
+    }
+    setPendingAction(() => operation);
+    return () =>
+      setPendingAction((pending) => (pending === operation ? null : pending));
+  }, []);
+  const actions = useMemo(
+    () => ({ runConfirmed, requestAction }),
+    [runConfirmed, requestAction],
+  );
   const register = useCallback((check: () => boolean) => {
     guards.current.add(check);
     return () => {
@@ -47,8 +93,18 @@ export function NavigationBoundary({ children }: { children: ReactNode }) {
     if (!history.matches(location)) return;
     history.sync(action);
     const next = { location, index: history.index };
+    const allowed =
+      approved.current?.url ===
+        location.pathname + location.search + location.hash &&
+      approved.current.key === location.key;
+    approved.current = null;
     const blocked = [...guards.current].some((check) => check());
-    setState((current) => reviewNavigation(current, next, blocked));
+    setState((current) =>
+      allowed
+        ? { accepted: next, pending: null, restoring: false }
+        : reviewNavigation(current, next, blocked),
+    );
+    setPendingAction(null);
   }, [action, history, location]);
 
   useLayoutEffect(() => {
@@ -74,25 +130,39 @@ export function NavigationBoundary({ children }: { children: ReactNode }) {
   }, [history, location, navigate, state.accepted, state.restoring]);
 
   return (
-    <NavigationGuardContext.Provider value={register}>
-      <Routes location={state.accepted.location}>{children}</Routes>
-      {state.pending && (
-        <NavigationLeaveDialog
-          restoring={state.restoring}
-          onStay={() =>
-            setState((current) => ({ ...current, restoring: true }))
-          }
-          onLeave={() =>
-            setState((current) =>
-              current.pending &&
-              !current.restoring &&
-              history.matches(current.pending.location)
-                ? { accepted: current.pending, pending: null, restoring: false }
-                : current,
-            )
-          }
-        />
-      )}
-    </NavigationGuardContext.Provider>
+    <NavigationActionsContext.Provider value={actions}>
+      <NavigationGuardContext.Provider value={register}>
+        <Routes location={state.accepted.location}>{children}</Routes>
+        {(state.pending || pendingAction) && (
+          <NavigationLeaveDialog
+            restoring={state.restoring}
+            admin={state.accepted.location.pathname.startsWith('/admin')}
+            loggingOut={!!pendingAction}
+            onStay={() => {
+              if (pendingAction) setPendingAction(null);
+              else setState((current) => ({ ...current, restoring: true }));
+            }}
+            onLeave={() => {
+              if (pendingAction) {
+                setPendingAction(null);
+                pendingAction();
+                return;
+              }
+              setState((current) =>
+                current.pending &&
+                !current.restoring &&
+                history.matches(current.pending.location)
+                  ? {
+                      accepted: current.pending,
+                      pending: null,
+                      restoring: false,
+                    }
+                  : current,
+              );
+            }}
+          />
+        )}
+      </NavigationGuardContext.Provider>
+    </NavigationActionsContext.Provider>
   );
 }

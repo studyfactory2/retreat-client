@@ -158,6 +158,7 @@ export function useImportMutation(
   return {
     state: result?.token === token ? result.state : initial,
     run,
+    hasPendingChanges: () => pending.current !== null || blocked.current,
     reset: () => {
       if (pending.current) return;
       blocked.current = false;

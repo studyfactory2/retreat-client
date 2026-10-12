@@ -77,6 +77,8 @@ export function useGuideSave(
       setResult(undefined);
   }
   return {
+    hasPendingWork: () =>
+      owner.current === token && (!!request.current || locked.current),
     state:
       result?.owner === token ? result.state : ({ busy: false } as SaveState),
     save,

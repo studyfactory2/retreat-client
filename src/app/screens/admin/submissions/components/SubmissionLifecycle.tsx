@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, useState } from 'react';
+import { useAdminNavigationGuard } from '../../hooks/use-admin-navigation-guard';
 import { ApiRequestError } from '../../../../core/api/api-error';
 import type { AdminSubmissionDetail } from '../../../../features/admin-submissions/admin-submissions.types';
 import type {
@@ -49,6 +50,7 @@ export function SubmissionLifecycle({
   const mutation = useSubmissionLifecycle(detail, action, token, rejectSession);
   const { busy, blocked, message } = mutation.state;
   const dirty = reason.length > 0;
+  useAdminNavigationGuard(dirty || busy || blocked);
   useEffect(() => {
     onEditStateChange({ dirty, busy, blocked });
     return () =>

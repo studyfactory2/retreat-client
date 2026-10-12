@@ -1,25 +1,27 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
+import { useAdminNavigationGuard } from '../../hooks/use-admin-navigation-guard';
 
-export function useQrNavigation(hasReceipts: boolean, busy: boolean) {
+export function useQrNavigation({
+  isBusy,
+  hasReceipts,
+  hasPendingChanges,
+}: {
+  isBusy: () => boolean;
+  hasReceipts: () => boolean;
+  hasPendingChanges: () => boolean;
+}) {
   const [pending, setPending] = useState<{
     action: 'return' | 'refresh';
     run: () => void;
   } | null>(null);
   const trigger = useRef<HTMLElement | null>(null);
-  useEffect(() => {
-    if (!hasReceipts && !busy) return;
-    const warn = (event: BeforeUnloadEvent) => {
-      event.preventDefault();
-      event.returnValue = '';
-    };
-    window.addEventListener('beforeunload', warn);
-    return () => window.removeEventListener('beforeunload', warn);
-  }, [hasReceipts, busy]);
+  const runConfirmed = useAdminNavigationGuard(hasPendingChanges);
+
   return {
     pending: pending?.action ?? null,
     request: (action: 'return' | 'refresh', run: () => void) => {
-      if (busy) return;
-      if (!hasReceipts) return run();
+      if (isBusy()) return;
+      if (!hasReceipts()) return run();
       trigger.current =
         document.activeElement instanceof HTMLElement
           ? document.activeElement
@@ -33,9 +35,9 @@ export function useQrNavigation(hasReceipts: boolean, busy: boolean) {
       });
     },
     proceed: () => {
-      if (busy) return;
+      if (isBusy()) return;
       setPending(null);
-      pending?.run();
+      if (pending) runConfirmed(pending.run);
     },
   };
 }

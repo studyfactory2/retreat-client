@@ -12,7 +12,10 @@ import {
   validateStayForm,
   type StayFormValues,
 } from './model/stay-form-model';
-import { getSavedStayCalendar, getStayNavigation } from './model/stay-navigation';
+import {
+  getSavedStayCalendar,
+  getStayNavigation,
+} from './model/stay-navigation';
 import { useStaySave } from './hooks/use-stay-save';
 import { useUnsavedStay } from './hooks/use-unsaved-stay';
 import { UnsavedStayNotice } from './components/UnsavedStayNotice';
@@ -51,7 +54,9 @@ function CreateWorkspace({
   const properties = useAdminPropertyOptions(token, rejectSession);
   const mutation = useStaySave(token, rejectSession);
   const leave = useUnsavedStay(
-    JSON.stringify(values) !== JSON.stringify(initial),
+    () =>
+      JSON.stringify(values) !== JSON.stringify(initial) ||
+      mutation.hasPendingChanges(),
   );
   useStayScreenFocus(mutation.state.message);
   const options =
@@ -80,14 +85,16 @@ function CreateWorkspace({
     void mutation.save(
       (signal) => createAdminStay(input, token, signal),
       (stay) => {
-        navigate(
-          navigation.isList
-            ? `/admin/stays/${stay.id}${navigation.detailSearch}`
-            : getSavedStayCalendar(stay, navigation.date),
-          {
-            replace: true,
-            state: { stayNotice: 'created' },
-          },
+        leave.runConfirmed(() =>
+          navigate(
+            navigation.isList
+              ? `/admin/stays/${stay.id}${navigation.detailSearch}`
+              : getSavedStayCalendar(stay, navigation.date),
+            {
+              replace: true,
+              state: { stayNotice: 'created' },
+            },
+          ),
         );
       },
     );

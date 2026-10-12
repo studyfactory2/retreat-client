@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useAdminNavigationGuard } from '../../hooks/use-admin-navigation-guard';
 import { ApiRequestError } from '../../../../core/api/api-error';
 import { correctAdminSubmission } from '../../../../features/admin-submissions/admin-submission-correction.api';
 import type {
@@ -22,6 +23,7 @@ export function useSubmissionCorrection(
   const scope = `${detail.id}:${detail.currentRevision}`;
   const pending = useRef<AbortController | null>(null);
   const blocked = useRef(false);
+  useAdminNavigationGuard(() => pending.current !== null || blocked.current);
   const [result, setResult] = useState<{
     owner: string;
     scope: string;

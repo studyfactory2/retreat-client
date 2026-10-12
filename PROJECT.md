@@ -2790,3 +2790,48 @@ Prettier and production build passed. The existing large-bundle warning remains
 (about 1.16 MB minified / 302 KB gzip). Independent source/CSS review found no
 concrete regression. Live browser/device rendering remains unverified because
 the signed-in browser is unavailable to computer use.
+
+
+### Administrator navigation protection — 2026-10-12
+
+Administrator edit screens now register current pending work with the existing
+NavigationBoundary. Sidebar, brand, mobile menu and same-document Back/Forward
+keep the accepted editor mounted until the user chooses 계속 작성 or 이동하기.
+Native reload/tab-close warnings use the same current checks. Covered workflows
+include property/staff forms and assignment, guides, checklists, categories, stay
+create/edit/status changes, import files/mappings/row review, issue actions and
+submission corrections/lifecycle/stay association. Request refs protect the time
+between starting a mutation and React rendering its busy state. Existing mutation
+ownership, validation, conflict and uncertain-result behavior is unchanged.
+
+QR and private-stay issuance keep one-time receipt protection after copying and
+through failed status reads. Initial read errors alone do not manufacture pending
+private-link changes. Receipts stay in memory; no token is added to storage, logs,
+query keys or history.state. Existing private-link expiry/scope checks remain.
+
+Already-confirmed local exits and verified successful save redirects approve only
+the exact synchronous destination and router key. An in-place refresh/editor
+switch grants no future navigation allowance. This prevents duplicate dialogs
+while keeping later unsaved work protected. The existing guest/staff history and
+fragment handling remains in use, with its public dialog copy unchanged.
+
+User-triggered admin logout now asks before clearing the current session when
+work is pending. Staying preserves both session and editor. The confirmation is
+scoped to the initiating token and is cancelled on session change/unmount. Forced
+expiry or server authentication rejection still clears access immediately and
+redirects to login, even if an edit dialog was already open. Leaving a pending
+request does not undo a write already accepted by the backend.
+
+No API contract, backend, schema, dependency, service or deployment change. Existing
+GET reads and authenticated POST mutations are unchanged; the new decision occurs
+locally before voluntary navigation or logout. MANUAL_ACCEPTANCE.md includes the
+remaining signed-in navigation and phone checks.
+
+Verification: isolated Yarn typecheck, non-fixing Oxlint, exact changed-source
+Prettier and production build passed. The existing large-bundle warning remains.
+Disposable actual-module probes passed 187 assertions: 42 shared navigation, logout
+ownership and forced-auth redirects; 74 property/staff/configuration guards and
+saves; 71 stay/import/QR/private-link guards. React, history, events, API outcomes
+and clipboard were simulated. Independent source review checked the shared guard
+and domain integrations. No permanent test/spec files or live record writes were
+added. Signed-in browser, native dialog and real-device acceptance remain pending.

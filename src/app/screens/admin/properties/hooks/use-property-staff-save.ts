@@ -74,6 +74,7 @@ export function usePropertyStaffSave(
     }
   }
   return {
+    hasPendingWork: () => !!pending.current || locked.current,
     state:
       result?.owner === token ? result.state : { busy: false, blocked: false },
     save,

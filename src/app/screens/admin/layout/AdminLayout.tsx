@@ -2,11 +2,13 @@ import { useEffect } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { appRoutes } from '../../../core/router/routes';
 import { useAdminSession } from '../../../core/session/use-admin-session';
+import { useAdminLogout } from '../hooks/use-admin-logout';
 import { AdminNavigation } from './components/AdminNavigation';
 import './styles/admin-layout.css';
 
 export function AdminLayout() {
-  const { state, logout } = useAdminSession();
+  const { state } = useAdminSession();
+  const logout = useAdminLogout();
   const { pathname } = useLocation();
 
   useEffect(() => {

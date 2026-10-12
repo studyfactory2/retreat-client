@@ -89,6 +89,7 @@ export function useStaffSave(
     }
   }
   return {
+    hasPendingWork: () => !!pending.current || locked.current,
     state:
       result?.owner === token ? result.state : ({ busy: false } as SaveState),
     save,

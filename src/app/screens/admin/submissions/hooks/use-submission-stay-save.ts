@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useAdminNavigationGuard } from '../../hooks/use-admin-navigation-guard';
 import { ApiRequestError } from '../../../../core/api/api-error';
 import { linkSubmissionStay } from '../../../../features/admin-submissions/admin-submission-stays-api';
 import type {
@@ -18,6 +19,7 @@ export function useSubmissionStaySave(
 ) {
   const pending = useRef<AbortController | null>(null);
   const blocked = useRef(false);
+  useAdminNavigationGuard(() => pending.current !== null || blocked.current);
   const [result, setResult] = useState<{ owner: string; state: SaveState }>();
   useEffect(() => {
     blocked.current = false;

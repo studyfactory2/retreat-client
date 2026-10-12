@@ -53,12 +53,21 @@ export function ChecklistEditor({
   const navigate = useNavigate();
   const [initial] = useState(() => createChecklistValues(type, original));
   const [values, setValues] = useState(initial);
+  const currentValues = useRef(initial);
   const [errors, setErrors] = useState<ChecklistFormErrors>({});
   const [reviewing, setReviewing] = useState(false);
   const [unchanged, setUnchanged] = useState(false);
   const mutation = useChecklistSave(token, rejectSession);
   const dirty = JSON.stringify(values) !== JSON.stringify(initial);
-  const navigation = useChecklistNavigation(dirty, mutation.state.busy);
+  const navigation = useChecklistNavigation(
+    dirty,
+    mutation.state.busy,
+    () =>
+      JSON.stringify(currentValues.current) !== JSON.stringify(initial) ||
+      mutation.hasPendingWork() ||
+      mutation.state.busy ||
+      !!mutation.state.blocked,
+  );
   const notice = useRef<HTMLDivElement>(null);
   const active =
     data.property.isActive && (!original || original.property.isActive);
@@ -78,6 +87,7 @@ export function ChecklistEditor({
   function change(next: ChecklistFormValues) {
     if (blocked || reviewing) return;
     onEditing();
+    currentValues.current = next;
     setValues(next);
     setErrors({});
     setUnchanged(false);

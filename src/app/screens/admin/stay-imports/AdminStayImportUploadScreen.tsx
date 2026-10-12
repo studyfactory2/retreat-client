@@ -8,6 +8,7 @@ import {
   STAY_IMPORT_MAX_FILE_BYTES,
 } from '../../../features/admin-stay-imports/admin-stay-imports-api';
 import { Button } from '../../../shared/ui/Button/Button';
+import { useAdminNavigationGuard } from '../hooks/use-admin-navigation-guard';
 import {
   validateImportFile,
   validateImportMappings,
@@ -59,6 +60,13 @@ function UploadWorkspace({
   const notice = useRef<HTMLDivElement>(null);
   const state: UploadState =
     result?.owner === token ? result.state : { busy: false };
+  const runConfirmed = useAdminNavigationGuard(
+    () =>
+      file !== null ||
+      mappings.length > 0 ||
+      pending.current !== null ||
+      retryRequired.current,
+  );
   const activeProperties =
     properties.resource.status === 'ready'
       ? properties.resource.data.filter((property) => property.isActive)
@@ -131,7 +139,11 @@ function UploadWorkspace({
         controller.signal,
       );
       if (!controller.signal.aborted)
-        navigate(`/admin/stays/imports/${preview.batch.id}`, { replace: true });
+        runConfirmed(() =>
+          navigate(`/admin/stays/imports/${preview.batch.id}`, {
+            replace: true,
+          }),
+        );
     } catch (error: unknown) {
       if (controller.signal.aborted) return;
       if (

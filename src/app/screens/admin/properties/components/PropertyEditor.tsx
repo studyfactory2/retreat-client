@@ -6,6 +6,7 @@ import {
 } from '../../../../features/admin-properties/admin-property-management-api';
 import type { AdminPropertyDto } from '../../../../features/admin-properties/admin-property-management.types';
 import { Button } from '../../../../shared/ui/Button/Button';
+import { useAdminNavigationGuard } from '../../hooks/use-admin-navigation-guard';
 import { PropertyForm } from './PropertyForm';
 import { PropertyManagementCard } from './PropertyManagementCard';
 import {
@@ -35,6 +36,7 @@ export function PropertyEditor({
   const navigate = useNavigate();
   const [initial] = useState(() => createPropertyFormValues(original));
   const [values, setValues] = useState(initial);
+  const currentValues = useRef(initial);
   const [errors, setErrors] = useState<PropertyFormErrors>({});
   const [unchanged, setUnchanged] = useState(false);
   const [discarding, setDiscarding] = useState(false);
@@ -44,6 +46,13 @@ export function PropertyEditor({
   const destination = useRef(returnUrl);
   const leaveOrigin = useRef<HTMLElement | null>(null);
   const dirty = JSON.stringify(values) !== JSON.stringify(initial);
+  const runConfirmed = useAdminNavigationGuard(
+    () =>
+      JSON.stringify(currentValues.current) !== JSON.stringify(initial) ||
+      mutation.hasPendingWork() ||
+      mutation.state.busy ||
+      !!mutation.state.uncertain,
+  );
 
   useEffect(() => {
     document.getElementById('main-content')?.focus({ preventScroll: true });
@@ -55,17 +64,9 @@ export function PropertyEditor({
   useEffect(() => {
     if (discarding) discard.current?.focus();
   }, [discarding]);
-  useEffect(() => {
-    if (!dirty) return;
-    const warn = (event: BeforeUnloadEvent) => {
-      event.preventDefault();
-      event.returnValue = '';
-    };
-    window.addEventListener('beforeunload', warn);
-    return () => window.removeEventListener('beforeunload', warn);
-  }, [dirty]);
 
   function change(next: PropertyFormValues) {
+    currentValues.current = next;
     setValues(next);
     setErrors((current) => {
       const remaining = { ...mutation.state.errors, ...current };
@@ -124,14 +125,16 @@ export function PropertyEditor({
               signal,
             ),
       (saved) =>
-        navigate(returnUrl, {
-          replace: true,
-          state: {
-            propertyNotice: original ? 'updated' : 'created',
-            propertyName: saved.name,
-            propertyId: saved.id,
-          },
-        }),
+        runConfirmed(() =>
+          navigate(returnUrl, {
+            replace: true,
+            state: {
+              propertyNotice: original ? 'updated' : 'created',
+              propertyName: saved.name,
+              propertyId: saved.id,
+            },
+          }),
+        ),
     );
   }
 
@@ -217,7 +220,7 @@ export function PropertyEditor({
             </Button>
             <Button
               className="admin-button-secondary"
-              onClick={() => navigate(destination.current)}
+              onClick={() => runConfirmed(() => navigate(destination.current))}
             >
               입력 버리기
             </Button>

@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, useState } from 'react';
+import { useAdminNavigationGuard } from '../../hooks/use-admin-navigation-guard';
 import { ApiRequestError } from '../../../../core/api/api-error';
 import type { AdminIssueRecordDto } from '../../../../features/admin-issues/admin-issues.types';
 import type { IssueLifecycleAction } from '../../../../features/admin-issues/admin-issue-lifecycle.types';
@@ -51,6 +52,7 @@ export function IssueLifecycleEditor({
   const blocked =
     mutation.status === 'conflict' || mutation.status === 'unknown';
   const dirty = reason.length > 0;
+  useAdminNavigationGuard(dirty || busy || blocked);
   useEffect(() => {
     onDirtyChange(dirty);
     return () => onDirtyChange(false);

@@ -1,17 +1,15 @@
-import { useEffect, useRef, useState } from 'react';
-export function useStaffNavigation(dirty: boolean, busy: boolean) {
+import { useRef, useState } from 'react';
+import { useAdminNavigationGuard } from '../../hooks/use-admin-navigation-guard';
+export function useStaffNavigation(
+  dirty: boolean,
+  busy: boolean,
+  hasPendingWork: () => boolean,
+) {
+  const runConfirmed = useAdminNavigationGuard(hasPendingWork);
   const [pending, setPending] = useState<(() => void) | null>(null);
   const trigger = useRef<HTMLElement | null>(null);
-  useEffect(() => {
-    if (!dirty && !busy) return;
-    const warn = (event: BeforeUnloadEvent) => {
-      event.preventDefault();
-      event.returnValue = '';
-    };
-    window.addEventListener('beforeunload', warn);
-    return () => window.removeEventListener('beforeunload', warn);
-  }, [dirty, busy]);
   return {
+    runConfirmed,
     pending: pending !== null,
     request: (operation: () => void) => {
       if (busy) return;
@@ -31,7 +29,7 @@ export function useStaffNavigation(dirty: boolean, busy: boolean) {
     discard: () => {
       if (busy) return;
       setPending(null);
-      pending?.();
+      if (pending) runConfirmed(pending);
     },
   };
 }

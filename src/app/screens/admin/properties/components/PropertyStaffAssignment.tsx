@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type MouseEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { AdminPropertyDto } from '../../../../features/admin-properties/admin-property-management.types';
 import { Button } from '../../../../shared/ui/Button/Button';
+import { useAdminNavigationGuard } from '../../hooks/use-admin-navigation-guard';
 import { usePropertyStaffSave } from '../hooks/use-property-staff-save';
 import {
   PropertyStaffCandidates,
@@ -29,6 +30,7 @@ export function PropertyStaffAssignment({
       ? { id: property.staff.id, name: property.staff.name }
       : null,
   );
+  const currentSelection = useRef(selected);
   const [confirming, setConfirming] = useState(false);
   const [leaving, setLeaving] = useState<'return' | 'reload' | null>(null);
   const confirmation = useRef<HTMLDivElement>(null);
@@ -43,6 +45,13 @@ export function PropertyStaffAssignment({
     onSaved,
   );
   const dirty = (selected?.id ?? null) !== property.staffUserId;
+  const runConfirmed = useAdminNavigationGuard(
+    () =>
+      (currentSelection.current?.id ?? null) !== property.staffUserId ||
+      mutation.hasPendingWork() ||
+      mutation.state.busy ||
+      mutation.state.blocked,
+  );
   const disabled =
     mutation.state.busy ||
     mutation.state.blocked ||
@@ -62,15 +71,11 @@ export function PropertyStaffAssignment({
   useEffect(() => {
     if (mutation.state.message) notice.current?.focus();
   }, [mutation.state.message]);
-  useEffect(() => {
-    if (!dirty && !mutation.state.busy) return;
-    const warn = (event: BeforeUnloadEvent) => {
-      event.preventDefault();
-      event.returnValue = '';
-    };
-    window.addEventListener('beforeunload', warn);
-    return () => window.removeEventListener('beforeunload', warn);
-  }, [dirty, mutation.state.busy]);
+
+  function select(next: StaffSelection) {
+    currentSelection.current = next;
+    setSelected(next);
+  }
 
   function review(event: MouseEvent<HTMLButtonElement>) {
     if (disabled || !dirty) return;
@@ -174,7 +179,7 @@ export function PropertyStaffAssignment({
             </Button>
             <Button
               className="admin-button-secondary"
-              onClick={() => perform(leaving)}
+              onClick={() => runConfirmed(() => perform(leaving))}
             >
               선택 비우고 계속
             </Button>
@@ -220,7 +225,7 @@ export function PropertyStaffAssignment({
               <Button
                 className="admin-button-secondary"
                 disabled={disabled || selected === null}
-                onClick={() => setSelected(null)}
+                onClick={() => select(null)}
               >
                 배정 해제 선택
               </Button>
@@ -285,7 +290,7 @@ export function PropertyStaffAssignment({
             disabled={disabled}
             selected={selected}
             currentStaffId={property.staffUserId}
-            onSelect={setSelected}
+            onSelect={select}
             onReview={review}
           />
         )}

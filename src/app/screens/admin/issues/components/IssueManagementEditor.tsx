@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, useState } from 'react';
+import { useAdminNavigationGuard } from '../../hooks/use-admin-navigation-guard';
 import type {
   AdminIssueRecordDto,
   AdminIssueSummaryDto,
@@ -76,6 +77,7 @@ export function IssueManagementEditor({
       selected !== null &&
       candidates.status !== 'ready');
   const dirty = note.length > 0 || selected !== undefined;
+  useAdminNavigationGuard(dirty || busy || blocked || staleCandidates);
   const count = [...note.trim()].length;
   const label =
     kind === 'urgency'

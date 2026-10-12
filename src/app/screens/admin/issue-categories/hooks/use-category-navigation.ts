@@ -1,21 +1,19 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
+import { useAdminNavigationGuard } from '../../hooks/use-admin-navigation-guard';
 
-export function useCategoryNavigation(dirty: boolean, busy: boolean) {
+export function useCategoryNavigation(
+  dirty: boolean,
+  busy: boolean,
+  hasPendingWork: () => boolean,
+) {
+  const runConfirmed = useAdminNavigationGuard(hasPendingWork);
   const [pending, setPending] = useState<{
     kind: 'return' | 'reload';
     run: () => void;
   } | null>(null);
   const trigger = useRef<HTMLElement | null>(null);
-  useEffect(() => {
-    if (!dirty && !busy) return;
-    const warn = (event: BeforeUnloadEvent) => {
-      event.preventDefault();
-      event.returnValue = '';
-    };
-    window.addEventListener('beforeunload', warn);
-    return () => window.removeEventListener('beforeunload', warn);
-  }, [dirty, busy]);
   return {
+    runConfirmed,
     pending: pending?.kind ?? null,
     request: (kind: 'return' | 'reload', run: () => void) => {
       if (busy) return;
@@ -35,7 +33,7 @@ export function useCategoryNavigation(dirty: boolean, busy: boolean) {
     proceed: () => {
       if (busy) return;
       setPending(null);
-      pending?.run();
+      if (pending) runConfirmed(pending.run);
     },
   };
 }

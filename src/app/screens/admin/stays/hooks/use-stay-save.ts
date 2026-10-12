@@ -99,5 +99,6 @@ export function useStaySave(
     state:
       result?.owner === token ? result.state : ({ busy: false } as SaveState),
     save,
+    hasPendingChanges: () => pending.current !== null || blocked.current,
   };
 }

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useAdminNavigationGuard } from '../../hooks/use-admin-navigation-guard';
 import { Link } from 'react-router-dom';
 import type { AdminSubmissionDetail } from '../../../../features/admin-submissions/admin-submissions.types';
 import type {
@@ -56,6 +57,7 @@ export function SubmissionStayLink({
   const blocked = !!mutation.state.blocked || candidateBlocked;
   const busy = mutation.state.busy;
   const dirty = !!selected || reason.length > 0 || mode === 'unlink';
+  useAdminNavigationGuard(dirty || busy || blocked);
   useEffect(() => {
     onEditStateChange({ dirty, busy, blocked });
     return () => onEditStateChange({ dirty: false, busy: false });

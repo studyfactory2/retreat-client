@@ -273,5 +273,27 @@ export function usePropertyQr(
     receipts: visible?.receipts ?? {},
     refresh,
     rotate,
+    isBusy: () => ownsScope() && writeRequest.current !== null,
+    hasReceipts: () => {
+      const latest = current.current;
+      return Boolean(
+        ownsScope() &&
+        latest?.propertyId === propertyId &&
+        latest.owner === token &&
+        (latest.receipts.GUEST || latest.receipts.STAFF),
+      );
+    },
+    hasPendingChanges: () => {
+      const latest = current.current;
+      return Boolean(
+        ownsScope() &&
+        (writeRequest.current !== null ||
+          (latest?.propertyId === propertyId &&
+            latest.owner === token &&
+            (latest.mutation.blocked ||
+              latest.receipts.GUEST ||
+              latest.receipts.STAFF))),
+      );
+    },
   };
 }

@@ -30,7 +30,9 @@ export function StayStatusAction({
   const [reason, setReason] = useState('');
   const [error, setError] = useState<string>();
   const mutation = useStaySave(token, rejectSession);
-  const leave = useUnsavedStay(reason.length > 0);
+  const leave = useUnsavedStay(
+    () => reason.length > 0 || mutation.hasPendingChanges(),
+  );
   const input = useRef<HTMLTextAreaElement>(null);
   const notice = useRef<HTMLDivElement>(null);
   const locked =

@@ -13,10 +13,14 @@ import type {
 import { isStayRevision } from '../../../features/admin-stays/admin-stays-validation';
 import { Button } from '../../../shared/ui/Button/Button';
 import { PageState } from '../../../shared/ui/PageState/PageState';
+import { useAdminNavigationGuard } from '../hooks/use-admin-navigation-guard';
 import { ImportRowEditor } from './components/ImportRowEditor';
 import { ImportRows } from './components/ImportRows';
 import { ImportMutationNotice } from './components/ImportMutationNotice';
-import { readImportFilters, importFilterSearch } from './model/import-review-model';
+import {
+  readImportFilters,
+  importFilterSearch,
+} from './model/import-review-model';
 import { useStayImport, useImportMutation } from './hooks/use-stay-import';
 import { ImportBatchSummary } from './components/ImportBatchSummary';
 import { ImportRowFilters } from './components/ImportRowFilters';
@@ -67,6 +71,9 @@ function ImportWorkspace({
   } | null>(null);
   const [confirming, setConfirming] = useState(false);
   const [notice, setNotice] = useState('');
+  useAdminNavigationGuard(
+    () => mutation.hasPendingChanges() || skip !== null || confirming,
+  );
   const confirmation = useRef<HTMLDivElement>(null);
   const properties =
     options.resource.status === 'ready' ? options.resource.data : [];

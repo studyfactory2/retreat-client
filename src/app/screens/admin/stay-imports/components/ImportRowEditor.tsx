@@ -42,7 +42,7 @@ export function ImportRowEditor({
   const form = useRef<HTMLFormElement>(null);
   const heading = useRef<HTMLHeadingElement>(null);
   const dirty = JSON.stringify(values) !== JSON.stringify(initial);
-  const leave = useUnsavedStay(dirty);
+  const leave = useUnsavedStay(dirty || state.busy || state.blocked);
   const locked = state.busy || state.blocked || leave.pending;
   useEffect(() => {
     heading.current?.focus();

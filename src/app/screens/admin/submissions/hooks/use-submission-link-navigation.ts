@@ -1,16 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { useAdminNavigationGuard } from '../../hooks/use-admin-navigation-guard';
 
 export function useSubmissionLinkNavigation(dirty: boolean, busy: boolean) {
   const [pending, setPending] = useState<(() => void) | null>(null);
-  useEffect(() => {
-    if (!dirty && !busy) return;
-    const warn = (event: BeforeUnloadEvent) => {
-      event.preventDefault();
-      event.returnValue = '';
-    };
-    window.addEventListener('beforeunload', warn);
-    return () => window.removeEventListener('beforeunload', warn);
-  }, [dirty, busy]);
+  const runConfirmed = useAdminNavigationGuard(false);
   return {
     pending: pending !== null,
     request: (operation: () => void) => {
@@ -22,7 +15,7 @@ export function useSubmissionLinkNavigation(dirty: boolean, busy: boolean) {
     discard: () => {
       if (!busy) {
         setPending(null);
-        pending?.();
+        if (pending) runConfirmed(pending);
       }
     },
   };

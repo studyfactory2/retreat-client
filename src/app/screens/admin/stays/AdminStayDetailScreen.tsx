@@ -298,7 +298,9 @@ function StayEditor({
   const [unchanged, setUnchanged] = useState(false);
   const mutation = useStaySave(token, rejectSession);
   const leave = useUnsavedStay(
-    JSON.stringify(values) !== JSON.stringify(initial),
+    () =>
+      JSON.stringify(values) !== JSON.stringify(initial) ||
+      mutation.hasPendingChanges(),
   );
   useStayScreenFocus(mutation.state.message);
 
@@ -331,10 +333,12 @@ function StayEditor({
           onReload();
           return;
         }
-        navigate(destination, {
-          replace: true,
-          state: { stayNotice: 'updated' },
-        });
+        leave.runConfirmed(() =>
+          navigate(destination, {
+            replace: true,
+            state: { stayNotice: 'updated' },
+          }),
+        );
       },
     );
   }

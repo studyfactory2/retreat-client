@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, useState } from 'react';
+import { useAdminNavigationGuard } from '../../hooks/use-admin-navigation-guard';
 import type { AdminIssueRecordDto } from '../../../../features/admin-issues/admin-issues.types';
 import { Button } from '../../../../shared/ui/Button/Button';
 import {
@@ -52,6 +53,7 @@ export function IssueActions({
   const unavailable =
     issue.cancelledAt !== null || issue.currentVersion > 2_147_483_646;
   const locked = busy || blocked || unavailable;
+  useAdminNavigationGuard(dirty || busy || blocked);
   const noteRequired = issueActionNoteRequired(issue.status, selection);
   const noteLabel = issueActionNoteLabel(issue.status, selection);
   const count = [...note.trim()].length;

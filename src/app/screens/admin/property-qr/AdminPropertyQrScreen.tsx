@@ -37,21 +37,15 @@ function PropertyQrWorkspace({
   rejectSession: (token: string) => void;
 }) {
   const navigate = useNavigate();
-  const { resource, mutation, receipts, refresh, rotate } = usePropertyQr(
-    id,
-    token,
-    rejectSession,
-  );
+  const qr = usePropertyQr(id, token, rejectSession);
+  const { resource, mutation, receipts, refresh, rotate } = qr;
   const [confirmation, setConfirmation] = useState<{
     flow: QrFlow;
     expectedRotatedAt: string | null;
   } | null>(null);
   const notice = useRef<HTMLDivElement>(null);
   const busy = mutation.busyFlow !== null;
-  const navigation = useQrNavigation(
-    !!receipts.GUEST || !!receipts.STAFF,
-    busy,
-  );
+  const navigation = useQrNavigation(qr);
   const disabled =
     busy ||
     mutation.blocked ||

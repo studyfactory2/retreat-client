@@ -1,26 +1,21 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { useAdminNavigationGuard } from '../../hooks/use-admin-navigation-guard';
 
-export function useUnsavedStay(dirty: boolean) {
+export function useUnsavedStay(dirty: boolean | (() => boolean)) {
   const [pending, setPending] = useState<(() => void) | null>(null);
-  useEffect(() => {
-    if (!dirty) return;
-    const warn = (event: BeforeUnloadEvent) => {
-      event.preventDefault();
-      event.returnValue = '';
-    };
-    window.addEventListener('beforeunload', warn);
-    return () => window.removeEventListener('beforeunload', warn);
-  }, [dirty]);
+  const runConfirmed = useAdminNavigationGuard(dirty);
   return {
     pending: pending !== null,
+    runConfirmed,
     askToLeave: (proceed: () => void) => {
-      if (dirty) setPending(() => proceed);
+      if (typeof dirty === 'function' ? dirty() : dirty)
+        setPending(() => proceed);
       else proceed();
     },
     keepEditing: () => setPending(null),
     discard: () => {
       setPending(null);
-      pending?.();
+      if (pending) runConfirmed(pending);
     },
   };
 }

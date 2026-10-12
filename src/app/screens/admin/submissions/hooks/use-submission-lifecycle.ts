@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useAdminNavigationGuard } from '../../hooks/use-admin-navigation-guard';
 import { ApiRequestError } from '../../../../core/api/api-error';
 import { changeAdminSubmissionLifecycle } from '../../../../features/admin-submissions/admin-submission-lifecycle.api';
 import type {
@@ -24,6 +25,7 @@ export function useSubmissionLifecycle(
   const scope = `${detail.id}:${detail.currentRevision}:${detail.status}:${action}`;
   const pending = useRef<AbortController | null>(null);
   const blocked = useRef(false);
+  useAdminNavigationGuard(() => pending.current !== null || blocked.current);
   const [result, setResult] = useState<{
     owner: string;
     scope: string;

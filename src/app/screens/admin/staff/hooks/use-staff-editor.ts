@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   createAdminStaff,
@@ -30,18 +30,28 @@ export function useStaffEditor({
   const navigate = useNavigate();
   const [initial] = useState(() => createStaffFormValues(original));
   const [values, setValues] = useState(initial);
+  const currentValues = useRef(initial);
   const [errors, setErrors] = useState<StaffFormErrors>({});
   const [unchanged, setUnchanged] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const mutation = useStaffSave(token, rejectSession);
   const dirty = JSON.stringify(values) !== JSON.stringify(initial);
-  const navigation = useStaffNavigation(dirty, mutation.state.busy);
+  const navigation = useStaffNavigation(
+    dirty,
+    mutation.state.busy,
+    () =>
+      JSON.stringify(currentValues.current) !== JSON.stringify(initial) ||
+      mutation.hasPendingWork() ||
+      mutation.state.busy ||
+      !!mutation.state.blocked,
+  );
   useEffect(() => {
     document.getElementById('main-content')?.focus({ preventScroll: true });
     window.scrollTo({ top: 0, left: 0 });
   }, []);
 
   function change(next: StaffFormValues) {
+    currentValues.current = next;
     setValues(next);
     setErrors((current) => {
       const remaining = { ...mutation.state.errors, ...current };
@@ -73,14 +83,16 @@ export function useStaffEditor({
           ? updateAdminStaff(original.id, update, token, signal)
           : createAdminStaff(buildCreateStaffInput(values), token, signal),
       (saved) =>
-        navigate(returnUrl, {
-          replace: true,
-          state: {
-            staffNotice: original ? 'updated' : 'created',
-            staffId: saved.id,
-            staffName: saved.name,
-          },
-        }),
+        navigation.runConfirmed(() =>
+          navigate(returnUrl, {
+            replace: true,
+            state: {
+              staffNotice: original ? 'updated' : 'created',
+              staffId: saved.id,
+              staffName: saved.name,
+            },
+          }),
+        ),
     );
   }
   function submit() {

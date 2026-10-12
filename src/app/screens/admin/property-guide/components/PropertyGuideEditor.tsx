@@ -43,6 +43,7 @@ export function PropertyGuideEditor({
   const navigate = useNavigate();
   const [initial] = useState(() => createGuideValues(data));
   const [values, setValues] = useState(initial);
+  const currentValues = useRef(initial);
   const [errors, setErrors] = useState<GuideFormErrors>({});
   const [reviewing, setReviewing] = useState(false);
   const [unchanged, setUnchanged] = useState(false);
@@ -51,7 +52,17 @@ export function PropertyGuideEditor({
     values.title !== initial.title ||
     values.content !== initial.content ||
     values.isPublished !== initial.isPublished;
-  const navigation = useGuideNavigation(dirty, mutation.state.busy);
+  const navigation = useGuideNavigation(
+    dirty,
+    mutation.state.busy,
+    () =>
+      currentValues.current.title !== initial.title ||
+      currentValues.current.content !== initial.content ||
+      currentValues.current.isPublished !== initial.isPublished ||
+      mutation.hasPendingWork() ||
+      mutation.state.busy ||
+      !!mutation.state.blocked,
+  );
   const blocked =
     mutation.state.busy || !!mutation.state.blocked || !!navigation.pending;
   const versionLimit = (data.guide?.version ?? 0) > MAX_WRITABLE_GUIDE_VERSION;
@@ -65,6 +76,7 @@ export function PropertyGuideEditor({
     if (blocked || reviewing || versionLimit) return;
     onEditing();
     mutation.clearError();
+    currentValues.current = next;
     setValues(next);
     setErrors({});
     setUnchanged(false);

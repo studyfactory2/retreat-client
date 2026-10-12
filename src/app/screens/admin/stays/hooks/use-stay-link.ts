@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
 import { ApiRequestError } from '../../../../core/api/api-error';
 import {
   getAdminStayLink,
@@ -70,7 +76,9 @@ function expiresLocally(status: AdminStayLinkStatus): AdminStayLinkStatus {
     stayId: status.stayId,
     issued: status.issued,
     enabled: Boolean(
-      status.enabled && status.expiresAt && Date.parse(status.expiresAt) > Date.now(),
+      status.enabled &&
+      status.expiresAt &&
+      Date.parse(status.expiresAt) > Date.now(),
     ),
     version: status.version,
     stayRevision: status.stayRevision,
@@ -92,9 +100,11 @@ export function useStayLink(
   const readRequest = useRef<AbortController | null>(null);
   const writeRequest = useRef<AbortController | null>(null);
   const locked = useRef(false);
+  const unresolvedMutation = useRef(false);
 
   useLayoutEffect(() => {
     scope.current = { key, token };
+    unresolvedMutation.current = false;
     return () => {
       scope.current = null;
       readRequest.current?.abort();
@@ -159,6 +169,7 @@ export function useStayLink(
       const [stayResult, linkResult] = results;
       if (stayResult.status === 'rejected') throw stayResult.reason;
       if (linkResult.status === 'rejected') throw linkResult.reason;
+      unresolvedMutation.current = false;
       if (
         stayScope(stayResult.value) !== key ||
         linkResult.value.stayRevision !== stay.currentRevision
@@ -169,7 +180,8 @@ export function useStayLink(
           owner: token,
           resource: {
             status: 'error',
-            message: '이용 일정이 변경되었습니다. 일정 전체를 새로고침한 뒤 개인 이용 링크를 확인해 주세요.',
+            message:
+              '이용 일정이 변경되었습니다. 일정 전체를 새로고침한 뒤 개인 이용 링크를 확인해 주세요.',
             needsStayRefresh: true,
           },
           mutation: { busy: false, blocked: true },
@@ -199,7 +211,8 @@ export function useStayLink(
         owner: token,
         resource: {
           status: 'error',
-          message: '이용 일정과 개인 이용 링크 상태를 확인하지 못했습니다. 다시 불러와 주세요.',
+          message:
+            '이용 일정과 개인 이용 링크 상태를 확인하지 못했습니다. 다시 불러와 주세요.',
         },
         mutation: { busy: false, blocked: true },
         // A failed GET cannot prove the invitation changed. Keep its one-time
@@ -214,7 +227,15 @@ export function useStayLink(
     } finally {
       if (readRequest.current === controller) readRequest.current = null;
     }
-  }, [key, stay.id, stay.currentRevision, token, ownsScope, publish, rejectSession]);
+  }, [
+    key,
+    stay.id,
+    stay.currentRevision,
+    token,
+    ownsScope,
+    publish,
+    rejectSession,
+  ]);
 
   useEffect(() => {
     locked.current = false;
@@ -252,13 +273,19 @@ export function useStayLink(
     }
     function schedule() {
       clearTimeout(timer);
-      const future = [deadline, Date.parse(expiry ?? ''), Date.parse(receiptExpiry ?? '')]
-        .filter((value) => Number.isFinite(value) && value > Date.now());
+      const future = [
+        deadline,
+        Date.parse(expiry ?? ''),
+        Date.parse(receiptExpiry ?? ''),
+      ].filter((value) => Number.isFinite(value) && value > Date.now());
       if (!future.length) return;
-      timer = setTimeout(() => {
-        expire();
-        schedule();
-      }, Math.min(Math.max(1, Math.min(...future) - Date.now()), 2_147_483_647));
+      timer = setTimeout(
+        () => {
+          expire();
+          schedule();
+        },
+        Math.min(Math.max(1, Math.min(...future) - Date.now()), 2_147_483_647),
+      );
     }
     function checkAfterFocus() {
       expire();
@@ -278,7 +305,10 @@ export function useStayLink(
     };
   }, [deadline, expiry, receiptExpiry, key, token, ownsScope, publish]);
 
-  async function mutate(action: StayLinkAction, confirmed: AdminStayLinkStatus) {
+  async function mutate(
+    action: StayLinkAction,
+    confirmed: AdminStayLinkStatus,
+  ) {
     const previous = current.current;
     if (
       !ownsScope() ||
@@ -305,10 +335,21 @@ export function useStayLink(
       let issue: AdminStayLinkIssue | null = null;
       let result: AdminStayLinkStatus;
       if (action === 'issue') {
-        issue = await issueAdminStayLink(stay.id, status, stay.checkOutAt, token, controller.signal);
+        issue = await issueAdminStayLink(
+          stay.id,
+          status,
+          stay.checkOutAt,
+          token,
+          controller.signal,
+        );
         result = issue;
       } else {
-        result = await revokeAdminStayLink(stay.id, status, token, controller.signal);
+        result = await revokeAdminStayLink(
+          stay.id,
+          status,
+          token,
+          controller.signal,
+        );
       }
       if (
         controller.signal.aborted ||
@@ -316,6 +357,7 @@ export function useStayLink(
         writeRequest.current !== controller
       )
         return;
+      unresolvedMutation.current = false;
       const nextStatus = expiresLocally(result);
       publish({
         ...previous,
@@ -346,18 +388,26 @@ export function useStayLink(
         publish({
           ...previous,
           receipt: null,
-          mutation: { busy: false, blocked: true, tone: 'error', message: '다시 로그인해 주세요.' },
+          mutation: {
+            busy: false,
+            blocked: true,
+            tone: 'error',
+            message: '다시 로그인해 주세요.',
+          },
         });
         rejectSession(token);
         return;
       }
       const failure = stayLinkMutationFailure(error, action);
+      unresolvedMutation.current = failure.blocked;
       locked.current = failure.blocked;
       const nextStatus = expiresLocally(status);
       publish({
         ...previous,
         resource: { status: 'ready', data: nextStatus },
-        receipt: failure.blocked ? null : retainReceipt(previous.receipt, nextStatus),
+        receipt: failure.blocked
+          ? null
+          : retainReceipt(previous.receipt, nextStatus),
         mutation: { busy: false, tone: 'error', ...failure },
       });
     } finally {
@@ -365,7 +415,8 @@ export function useStayLink(
     }
   }
 
-  const visible = state?.key === key && state.owner === token ? state : undefined;
+  const visible =
+    state?.key === key && state.owner === token ? state : undefined;
   return {
     resource: visible?.resource ?? { status: 'loading' as const },
     mutation: visible?.mutation ?? idleMutation,
@@ -376,6 +427,18 @@ export function useStayLink(
     refresh,
     mutate,
     isBusy: () => ownsScope() && writeRequest.current !== null,
+    hasPendingChanges: () => {
+      const latest = current.current;
+      return Boolean(
+        ownsScope() &&
+        (writeRequest.current !== null ||
+          unresolvedMutation.current ||
+          (latest?.key === key &&
+            latest.owner === token &&
+            latest.receipt?.expiresAt &&
+            Date.parse(latest.receipt.expiresAt) > Date.now())),
+      );
+    },
     hasReceipt: () => {
       const latest = current.current;
       return Boolean(

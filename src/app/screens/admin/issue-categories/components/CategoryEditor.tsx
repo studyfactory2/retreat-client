@@ -37,6 +37,7 @@ export function CategoryEditor({
 }) {
   const [initial] = useState(() => createCategoryValues(original));
   const [values, setValues] = useState(initial);
+  const currentValues = useRef(initial);
   const [errors, setErrors] = useState<CategoryFormErrors>({});
   const [reviewing, setReviewing] = useState(false);
   const [unchanged, setUnchanged] = useState(false);
@@ -45,7 +46,17 @@ export function CategoryEditor({
     values.name !== initial.name ||
     values.sortOrder !== initial.sortOrder ||
     values.isActive !== initial.isActive;
-  const navigation = useCategoryNavigation(dirty, mutation.state.busy);
+  const navigation = useCategoryNavigation(
+    dirty,
+    mutation.state.busy,
+    () =>
+      currentValues.current.name !== initial.name ||
+      currentValues.current.sortOrder !== initial.sortOrder ||
+      currentValues.current.isActive !== initial.isActive ||
+      mutation.hasPendingWork() ||
+      mutation.state.busy ||
+      !!mutation.state.blocked,
+  );
   const blocked =
     mutation.state.busy || !!mutation.state.blocked || !!navigation.pending;
   const notice = useRef<HTMLDivElement>(null);
@@ -58,6 +69,7 @@ export function CategoryEditor({
 
   function change(next: CategoryFormValues) {
     if (blocked || reviewing) return;
+    currentValues.current = next;
     setValues(next);
     setErrors({});
     setUnchanged(false);
