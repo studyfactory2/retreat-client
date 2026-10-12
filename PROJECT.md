@@ -60,7 +60,9 @@ Oxlint. Router is React Router 7. Native fetch follows the Study Factory transpo
 pattern, adapted to Retreat. No authentication library or global state package is
 needed for this foundation.
 
-Client: 5175, API: 3100 locally. GET/POST only, no `/api` prefix, no cookies.
+Client: 5175, API: 3100 locally. GET/POST only, no backend `/api` prefix, no cookies.
+The production Nginx gateway accepts public `/api/...` and strips `/api` before
+forwarding to those unchanged backend routes.
 Use `.env` (ignored), never `.env.example`. `VITE_` variables are public.
 `VITE_FRONTEND_URL` defines the canonical public frontend origin and must match
 backend `FRONTEND_URL`; it is independent of the administrator tab's origin.
@@ -2861,3 +2863,34 @@ build, and sudo operations were mocked. Checks covered URL/config changes, clean
 branch guards, sudo handling and build/start failures. Independent design review
 found no blocker. Linux Docker/Nginx runtime, HTTPS and application acceptance are
 still pending. No operational Git, service, database or deployment action ran.
+
+## Single CloudFront distribution gateway — 2026-10-12
+
+The production frontend and API share one HTTPS CloudFront origin. API base URLs
+accept an optional exact `/api` prefix; transport preserves it while checking
+origin/prefix boundaries and existing per-call credential rules. Browser paths
+and backend controllers are unchanged. Nginx strips `/api` and forwards to the
+API through the backend-owned retreat-proxy network, resolving replacement
+containers through Docker DNS. SPA fallback does not consume API errors.
+
+The gateway accepts a runtime-only 64-hex origin verification secret shared with
+CloudFront, forwards viewer IP information unchanged for one-hop backend trust,
+and supports uploads with a 12 MiB body limit and 90-second upstream timeouts.
+Requests/responses are streamed without upstream retries. Internal health runs
+on an unpublished loopback listener. Safe access logs omit queries; the raw
+Nginx error log is suppressed. This deployment uses HTTP from CloudFront to EC2
+and HTTPS for viewers. deployment/README.md records required CloudFront settings.
+
+Vite configuration now uses an explicit .ts extension required by the existing
+NodeNext typecheck. No schema, migration, UI, dependency or business API changes.
+The user owns Git, server configuration, migrations and deployment.
+
+Verification: isolated frontend typecheck, lint, production build with fictional
+HTTPS /api configuration, and 128 transport assertions passed. Official Compose
+configuration checks and Bash/entrypoint syntax passed. A temporary official
+Nginx build passed 30 actual runtime probes covering routing, secret enforcement,
+health isolation, header forwarding, uploads/body limits, cache controls and no
+retries. That test caught and verified a fix to the upstream-variable directive
+order. Host paths, ports and DNS were adapted for the probe; actual Docker, EC2,
+CloudFront, database, S3 and browser workflow acceptance remain pending. The
+existing frontend bundle-size warning remains. No permanent tests were added.

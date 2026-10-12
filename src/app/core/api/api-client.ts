@@ -23,7 +23,12 @@ async function request<T>(
     !path.startsWith('/') ||
     path.startsWith('//') ||
     path.includes('\\') ||
-    path.includes('#')
+    path.includes('#') ||
+    Array.from(path).some((character) => {
+      const code = character.charCodeAt(0);
+      return code <= 32 || code === 127;
+    }) ||
+    /%(?:2f|5c)/i.test(path.split('?')[0] ?? '')
   ) {
     throw new ApiRequestError(
       '요청 주소를 확인해 주세요.',
@@ -31,8 +36,12 @@ async function request<T>(
       'INVALID_API_PATH',
     );
   }
-  const url = new URL(path, appConfig.apiBaseUrl);
-  if (url.origin !== appConfig.apiBaseUrl) {
+  const baseUrl = new URL(appConfig.apiBaseUrl);
+  const prefix = baseUrl.pathname === '/' ? '' : baseUrl.pathname;
+  // Concatenation preserves the deployment prefix; URL resolution with a leading
+  // slash would discard it. Reject dot segments that resolve outside that prefix.
+  const url = new URL(appConfig.apiBaseUrl + path);
+  if (url.origin !== baseUrl.origin || !url.pathname.startsWith(`${prefix}/`)) {
     throw new ApiRequestError(
       '요청 주소를 확인해 주세요.',
       null,

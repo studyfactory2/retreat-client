@@ -7,9 +7,14 @@ services:
       context: .
       args:
         VITE_FRONTEND_URL: ${VITE_FRONTEND_URL:?Set the public frontend HTTPS origin}
-        VITE_API_BASE_URL: ${VITE_API_BASE_URL:?Set the public API HTTPS origin}
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:?Set the public API HTTPS URL ending in /api}
       labels:
         org.opencontainers.image.revision: ${GIT_COMMIT:?Run bash deploy.sh prepare first}
+    environment:
+      CLOUDFRONT_ORIGIN_SECRET: ${CLOUDFRONT_ORIGIN_SECRET:?Set the CloudFront origin verification secret}
+    networks:
+      - default
+      - proxy
     restart: unless-stopped
     ports:
       - "${ORIGIN_BIND_IP:-127.0.0.1}:8080:8080"
@@ -27,3 +32,8 @@ services:
       options:
         max-size: 10m
         max-file: "3"
+
+networks:
+  proxy:
+    external: true
+    name: retreat-proxy

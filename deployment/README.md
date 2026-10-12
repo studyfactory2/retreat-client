@@ -1,8 +1,9 @@
 # Frontend containers: production setup
 
-The frontend runs as a static site in an Nginx container. This guide covers the
-frontend checkout only. The backend has its own Compose stack, database, and
-deployment commands. The user runs all Git updates and server operations.
+Nginx serves the frontend and proxies `/api/...` to the separate backend container,
+removing only the `/api` prefix. Browser routes such as `/admin/login` remain SPA
+routes. Both use one CloudFront Free-plan HTTPS address. The user runs all Git
+updates and server operations. Start the backend before the frontend.
 
 ## Server configuration
 
@@ -17,23 +18,54 @@ with `chmod 600 .env`. Enter the actual public HTTPS origins once they are known
 
 ```dotenv
 VITE_FRONTEND_URL=https://REPLACE_WITH_ACTUAL_FRONTEND_HOST
-VITE_API_BASE_URL=https://REPLACE_WITH_ACTUAL_API_HOST
+VITE_API_BASE_URL=https://REPLACE_WITH_ACTUAL_FRONTEND_HOST/api
+ORIGIN_BIND_IP=0.0.0.0
+CLOUDFRONT_ORIGIN_SECRET=REPLACE_WITH_A_RANDOM_64_CHARACTER_HEX_VALUE
 ```
 
-These values are public and embedded in the JavaScript sent to browsers. Never
+Only the two `VITE_` values are public and embedded in browser JavaScript. The
+origin verification secret is private and supplied only to the Nginx runtime. Never
 put passwords, JWT signing secrets, or AWS credentials in `VITE_` variables.
 There are no frontend S3 keys; authenticated photo requests go through the API.
 Keep development configuration separate from these production values.
 
 `VITE_FRONTEND_URL` must match the backend's `FRONTEND_URL` and CORS origin.
-`VITE_API_BASE_URL` is the public API origin, without an `/api` prefix or other
-path. Use the actual public HTTPS origins for both. URL validation stays in the
-existing TypeScript/Vite build inside Docker. It does not verify DNS, certificates,
+`VITE_API_BASE_URL` uses the same origin followed by `/api` in this deployment.
+An origin without a prefix remains supported for separate API deployments.
+URL validation stays in the existing TypeScript/Vite build inside Docker. It does not verify DNS, certificates,
 reachability, or matching backend configuration.
 
-The default host binding is `127.0.0.1:8080`. Leave `ORIGIN_BIND_IP` unset for this
-step. A different binding belongs to the later HTTPS/origin networking setup;
-changing it alone does not configure TLS or restrict network access.
+The default host binding remains `127.0.0.1:8080`; this EC2 public-origin setup
+explicitly uses `ORIGIN_BIND_IP=0.0.0.0`. Restrict EC2 TCP 8080 to the AWS-managed
+CloudFront IPv4 origin-facing prefix list. Keep SSH restricted to your IP.
+Do not expose the backend or PostgreSQL publicly.
+
+Generate a separate secret with `openssl rand -hex 32`, save it only in the
+frontend server `.env`, and configure the same value as the CloudFront origin
+custom header **X-Retreat-Origin-Verify**. Do not send it in chat or put it in a
+VITE variable, build argument, Git, or shell command history. The entrypoint
+requires exactly 64 hexadecimal characters and renders a mode-600 configuration
+inside `/tmp`; missing or invalid secrets prevent startup. Never run `nginx -T`
+or print resolved Compose configuration because those include the secret.
+
+CloudFront settings: HTTP-only origin port 8080, origin response timeout 90 seconds,
+viewer HTTP-to-HTTPS redirect, all HTTP methods, CachingDisabled, AllViewer.
+The CloudFront-to-EC2 connection is HTTP; only browser-to-CloudFront uses HTTPS.
+CloudFront overwrites the verification header before forwarding it to the origin.
+Its prefix list and the matching secret together guard the gateway.
+
+The backend owns `retreat-proxy`; frontend Compose joins that external network.
+Only API and frontend join it, with API DNS alias `retreat-api`. Docker DNS is
+resolved again after container replacement. API requests stream with a 12 MiB
+gateway body limit (backend retains its own 10 MiB file limit), 90-second upstream
+timeouts, and no automatic upstream retry or disk buffering. API errors never
+fall back to the SPA. Nginx passes CloudFront X-Forwarded-For unchanged and strips
+the verification secret before forwarding; backend trusts exactly one proxy hop.
+
+Nginx access logs omit query strings, Referer and credentials. Its unredacted error
+log is suppressed because it can contain request query strings; use HTTP status,
+container health and the backend safe logs for diagnostics. The container-local
+health listener is `127.0.0.1:8082` and is not published.
 
 ## Commands, one step at a time
 
@@ -41,7 +73,7 @@ Run `bash deploy.sh help` to see the commands. Run the script as the checkout
 owner, without `sudo`; it uses `sudo` for Docker when necessary. It resolves its
 own checkout directory, so it also works when invoked by an absolute path.
 Compose parses `.env` as data; the script never executes it as shell code.
-Inherited public URL/bind settings are cleared so the server file supplies them.
+Inherited public URL, bind and origin-secret settings are cleared so the server file supplies them.
 
 Fetch an update when there is new committed code:
 
@@ -69,7 +101,7 @@ Start or update the prepared frontend:
 
 ```sh
 bash deploy.sh up
-curl --fail http://127.0.0.1:8080/healthz
+bash deploy.sh status
 ```
 
 `up` requires an existing image that matches both the current commit and resolved
@@ -81,8 +113,8 @@ can reuse cached build layers where inputs have not changed.
 
 The script starts only the frontend, without rebuilding or pulling an image, and
 waits up to 120 seconds for its health check. A failure returns an error without
-automatic rollback. The health endpoint returns `ok`; this only proves that Nginx
-responds locally. Public HTTPS, API calls, login, QR links, and photo handling need
+automatic rollback. The internal health endpoint returns `ok`; this only proves that Nginx
+responds locally. The public port rejects requests without the origin header. Public HTTPS, API calls, login, QR links, and photo handling need
 separate acceptance checks before users can use the deployment.
 
 Inspect status and logs:
@@ -97,8 +129,11 @@ files. The ignored `.env` is preserved. Status and logs remain available with lo
 Git changes. No command resets, stashes, commits, starts a database, or applies
 migrations. On later updates, use `pull`, `prepare`, then `up`.
 
-Public HTTPS/origin configuration is the next infrastructure step. Do not use
-placeholder hostnames for the actual build; wait until the real origins are known.
+After CloudFront finishes deployment, open the HTTPS website and `/api/health`,
+then test `/admin/login`, a BrowserRouter refresh, and a real authorized S3 upload.
+Review WAF monitor-mode matches and enable blocking before public launch. Do not
+use placeholder hostnames for the actual build. These checks do not replace the
+remaining workflow/device acceptance.
 
 ## References
 

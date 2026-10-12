@@ -14,7 +14,7 @@ Run from your EC2 checkout as its owner. Each command is a separate step:
   help      Show this help without accessing Docker or configuration
 
 Prepare never starts services. Changing deployment configuration requires another build.
-See deployment/README.md for server setup and the remaining HTTPS step.
+See deployment/README.md for the CloudFront gateway and server setup.
 HELP
 }
 
@@ -42,7 +42,7 @@ compose() {
   # Parse .env with Compose, never source it. Set release identity after sudo,
   # and clear inherited values so the server file controls public configuration.
   docker_access env -u VITE_FRONTEND_URL -u VITE_API_BASE_URL \
-    -u ORIGIN_BIND_IP -u COMPOSE_PROFILES \
+    -u ORIGIN_BIND_IP -u CLOUDFRONT_ORIGIN_SECRET -u COMPOSE_PROFILES \
     RELEASE_TAG="$release_tag" GIT_COMMIT="$git_commit" docker compose \
     --project-name retreat-client --env-file "$repo_dir/.env" \
     --file "$repo_dir/compose.production.yml" "$@"
@@ -110,6 +110,8 @@ main() {
     up)
       docker_access docker image inspect "retreat-client:$release_tag" >/dev/null 2>&1 ||
         fail 'No prepared image matches this commit and this configuration. Run bash deploy.sh prepare first.'
+      docker_access docker network inspect retreat-proxy >/dev/null 2>&1 ||
+        fail 'Start the backend stack first to create the retreat-proxy network.'
       compose up -d --no-deps --no-build --pull never --wait --wait-timeout 120 frontend
       printf 'Frontend health check passed. Public HTTPS and login acceptance are separate steps.\n'
       ;;

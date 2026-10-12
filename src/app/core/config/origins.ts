@@ -14,11 +14,13 @@ function resolveOrigin(
     throw new Error(`${name} must be an HTTP(S) origin.`);
   }
   const local = ['localhost', '127.0.0.1', '[::1]'].includes(url.hostname);
+  const apiPrefix =
+    name === 'VITE_API_BASE_URL' && url.pathname === '/api' ? '/api' : '';
   if (
     !['http:', 'https:'].includes(url.protocol) ||
     url.username ||
     url.password ||
-    url.pathname !== '/' ||
+    (url.pathname !== '/' && !apiPrefix) ||
     url.search ||
     url.hash ||
     url.hostname.includes('*') ||
@@ -27,10 +29,10 @@ function resolveOrigin(
       url.protocol !== 'https:')
   ) {
     throw new Error(
-      `${name} must be an origin without a path, credentials, query, fragment, or wildcard; production requires HTTPS.`,
+      `${name} must be an origin${name === 'VITE_API_BASE_URL' ? ' optionally ending in /api' : ' without a path'}, without credentials, query, fragment, or wildcard; production requires HTTPS.`,
     );
   }
-  return url.origin;
+  return url.origin + apiPrefix;
 }
 
 export function resolveApiBaseUrl(
@@ -56,4 +58,3 @@ export function resolveFrontendOrigin(
     'http://localhost:5175',
   );
 }
-

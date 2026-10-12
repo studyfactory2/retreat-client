@@ -10,10 +10,10 @@ ARG VITE_API_BASE_URL
 RUN VITE_FRONTEND_URL="$VITE_FRONTEND_URL" VITE_API_BASE_URL="$VITE_API_BASE_URL" yarn build
 
 FROM nginx:stable-alpine AS runtime
-COPY deployment/nginx.conf /etc/nginx/nginx.conf
+COPY deployment/nginx.conf /etc/nginx/nginx.conf.template
+COPY deployment/entrypoint.sh /usr/local/bin/retreat-entrypoint.sh
 COPY --from=build /app/dist /usr/share/nginx/html
 USER nginx
 EXPOSE 8080
-HEALTHCHECK --interval=15s --timeout=3s --start-period=10s --retries=3   CMD wget -q -O /dev/null http://127.0.0.1:8080/healthz || exit 1
-ENTRYPOINT ["nginx"]
-CMD ["-g", "daemon off;"]
+HEALTHCHECK --interval=15s --timeout=3s --start-period=10s --retries=3   CMD wget -q -O /dev/null http://127.0.0.1:8082/healthz || exit 1
+ENTRYPOINT ["/bin/sh", "/usr/local/bin/retreat-entrypoint.sh"]

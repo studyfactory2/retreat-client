@@ -3,7 +3,7 @@ import { defineConfig, loadEnv } from 'vite';
 import {
   resolveApiBaseUrl,
   resolveFrontendOrigin,
-} from './src/app/core/config/origins';
+} from './src/app/core/config/origins.ts';
 
 export default defineConfig(({ command, mode }) => {
   if (command === 'build') {
