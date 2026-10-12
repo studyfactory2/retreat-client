@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { appRoutes } from '../../../core/router/routes';
 import { useAdminSession } from '../../../core/session/use-admin-session';
 import type { AdminPropertyDto } from '../../../features/admin-properties/admin-property-management.types';
@@ -7,17 +7,24 @@ import { Button } from '../../../shared/ui/Button/Button';
 import { PageState } from '../../../shared/ui/PageState/PageState';
 import { PropertyStaffAssignment } from './components/PropertyStaffAssignment';
 import { useAdminProperty } from './hooks/use-admin-properties';
+import {
+  propertyListSearch,
+  readPropertyFilters,
+} from './model/property-list-model';
 import './styles/properties.css';
 import './styles/property-staff.css';
 
 export function AdminPropertyStaffScreen() {
   const { id = '' } = useParams();
+  const [search] = useSearchParams();
+  const returnSearch = propertyListSearch(readPropertyFilters(search));
   const { state, rejectSession } = useAdminSession();
   if (state.status !== 'authenticated') return null;
   return (
     <AssignmentWorkspace
       key={`${id}:${state.user.id}:${state.expiresAt}`}
       id={id}
+      returnSearch={returnSearch}
       token={state.token}
       rejectSession={rejectSession}
     />
@@ -26,10 +33,12 @@ export function AdminPropertyStaffScreen() {
 
 function AssignmentWorkspace({
   id,
+  returnSearch,
   token,
   rejectSession,
 }: {
   id: string;
+  returnSearch: string;
   token: string;
   rejectSession: (token: string) => void;
 }) {
@@ -70,7 +79,7 @@ function AssignmentWorkspace({
             )}
             <Link
               className="ui-button admin-button-secondary"
-              to={appRoutes.adminProperties}
+              to={appRoutes.adminProperties + returnSearch}
             >
               휴양소 목록으로 돌아가기
             </Link>
@@ -91,6 +100,10 @@ function AssignmentWorkspace({
           <PropertyStaffAssignment
             key={`${property.updatedAt}:${property.staffUserId}:${saveCount}`}
             property={property}
+            returnUrl={
+              appRoutes.adminPropertyDetail.replace(':id', property.id) +
+              returnSearch
+            }
             token={token}
             rejectSession={rejectSession}
             onSaved={(saved) => {

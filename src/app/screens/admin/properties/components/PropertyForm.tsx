@@ -15,6 +15,7 @@ type PropertyFormProps = {
   onSubmit: () => void;
   onCancel: () => void;
   editing: boolean;
+  dirty: boolean;
   errors?: PropertyFormErrors;
   busy: boolean;
   blocked?: boolean;
@@ -26,6 +27,7 @@ export function PropertyForm({
   onSubmit,
   onCancel,
   editing,
+  dirty,
   errors = {},
   busy,
   blocked = false,
@@ -60,7 +62,7 @@ export function PropertyForm({
         <legend className="property-form__legend">휴양소 정보</legend>
 
         <section
-          className="property-form__section"
+          className="property-form__section property-form__section--basic"
           aria-labelledby="property-basic-title"
         >
           <div className="property-form__section-heading">
@@ -236,17 +238,30 @@ export function PropertyForm({
         </section>
       </fieldset>
 
-      <div className="property-form__actions">
-        <Button
-          className="admin-button-secondary"
-          onClick={onCancel}
-          disabled={busy}
-        >
-          취소
-        </Button>
-        <Button type="submit" loading={busy} disabled={blocked}>
-          {busy ? '저장 중' : editing ? '변경 내용 저장' : '휴양소 등록'}
-        </Button>
+      <div className="property-form__footer">
+        <p role="status">
+          {busy
+            ? '변경 내용을 저장하고 있습니다.'
+            : blocked
+              ? '안내를 확인한 뒤 계속해 주세요.'
+              : dirty
+                ? '아직 저장하지 않은 변경 사항이 있습니다.'
+                : editing
+                  ? '저장된 정보입니다.'
+                  : '정보를 입력한 뒤 휴양소를 등록해 주세요.'}
+        </p>
+        <div className="property-form__actions">
+          <Button
+            className="admin-button-secondary"
+            onClick={onCancel}
+            disabled={busy}
+          >
+            취소
+          </Button>
+          <Button type="submit" loading={busy} disabled={blocked}>
+            {busy ? '저장 중' : editing ? '변경 내용 저장' : '휴양소 등록'}
+          </Button>
+        </div>
       </div>
     </form>
   );

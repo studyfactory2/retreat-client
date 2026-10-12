@@ -1,0 +1,135 @@
+.admin-properties .properties-editor {
+  max-width: 1100px;
+  min-width: 0;
+  margin-inline: auto;
+}
+
+.properties-editor .properties-heading {
+  align-items: flex-start;
+  gap: 12px 20px;
+  margin-bottom: 20px;
+}
+
+.properties-editor .properties-heading > div {
+  min-width: 0;
+}
+
+.properties-editor .properties-heading h1 {
+  font-size: clamp(23px, 2.5vw, 28px);
+  letter-spacing: -0.6px;
+  overflow-wrap: anywhere;
+}
+
+.properties-editor .properties-heading__eyebrow {
+  margin-bottom: 6px;
+  font-size: 12px;
+  letter-spacing: 0;
+}
+
+.properties-editor .property-management-card {
+  margin-bottom: 16px;
+  padding: 16px 20px;
+  box-shadow: none;
+}
+
+.properties-editor .property-form__fields {
+  gap: 16px;
+}
+
+.properties-editor .property-form__section {
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: none;
+}
+
+.properties-editor .property-form__section-heading {
+  margin-bottom: 16px;
+}
+
+.properties-editor .property-form__section-heading h2 {
+  font-size: 16px;
+}
+
+.properties-editor .property-form__section-heading p {
+  margin-top: 4px;
+  line-height: 1.7;
+}
+
+.properties-editor .property-form__grid {
+  gap: 16px;
+}
+
+.properties-editor .property-field {
+  gap: 6px;
+}
+
+.properties-editor .property-field input {
+  min-height: 44px;
+  padding: 9px 12px;
+}
+
+.properties-editor .property-setting + .property-setting {
+  margin-top: 16px;
+  padding-top: 16px;
+}
+
+.properties-editor .property-setting__notice {
+  margin-top: 6px;
+  padding: 10px 12px;
+}
+
+.properties-editor .property-form__footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 20px;
+  margin-top: 16px;
+  padding: 16px 0;
+}
+
+.properties-editor .property-form__footer > p {
+  color: var(--color-muted);
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.properties-editor .property-form__actions {
+  margin-top: 0;
+}
+
+.properties-editor .property-form__actions .ui-button {
+  min-height: 44px;
+  padding: 10px 16px;
+  font-size: 13px;
+}
+
+@media (min-width: 1100px) {
+  .properties-editor .property-form__fields {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+
+  .properties-editor .property-form__section--basic {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 650px) {
+  .properties-editor .property-form__section,
+  .properties-editor .property-management-card {
+    padding: 16px;
+  }
+
+  .properties-editor .property-form__footer {
+    align-items: stretch;
+  }
+
+  .properties-editor .property-form__actions {
+    width: 100%;
+  }
+
+  .properties-editor .property-form__actions .ui-button {
+    overflow-wrap: anywhere;
+  }
+}

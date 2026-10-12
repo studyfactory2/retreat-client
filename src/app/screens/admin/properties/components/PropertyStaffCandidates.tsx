@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, type MouseEvent } from 'react';
 import { usePropertyStaffCandidates } from '../hooks/use-property-staff-candidates';
 import { Button } from '../../../../shared/ui/Button/Button';
 
@@ -10,12 +10,16 @@ export function PropertyStaffCandidates({
   disabled,
   selected,
   onSelect,
+  currentStaffId,
+  onReview,
 }: {
   token: string;
   rejectSession: (token: string) => void;
   disabled: boolean;
   selected: StaffSelection;
   onSelect: (staff: StaffSelection) => void;
+  currentStaffId: string | null;
+  onReview: (event: MouseEvent<HTMLButtonElement>) => void;
 }) {
   const [draftSearch, setDraftSearch] = useState('');
   const [search, setSearch] = useState('');
@@ -37,8 +41,11 @@ export function PropertyStaffCandidates({
       className="property-staff__candidates"
       aria-labelledby="assignment-candidates-title"
     >
-      <h2 id="assignment-candidates-title">배정할 직원 선택</h2>
-      <p>활성 직원만 표시됩니다. 한 직원이 여러 휴양소를 담당할 수 있습니다.</p>
+      <h2 id="assignment-candidates-title">직원 검색·선택</h2>
+      <p>
+        활성 직원만 표시됩니다. 한 직원이 여러 휴양소를 담당할 수 있습니다.
+        검색하거나 페이지를 바꿔도 선택은 유지됩니다.
+      </p>
       <form
         className="property-staff__search"
         onSubmit={(event) => {
@@ -94,6 +101,9 @@ export function PropertyStaffCandidates({
           </p>
         )}
       </form>
+      <p className="property-staff__applied-search">
+        적용된 검색: <strong>{search || '전체 활성 직원'}</strong>
+      </p>
       {resource.status === 'loading' && (
         <p role="status">직원 목록을 불러오는 중입니다.</p>
       )}
@@ -115,8 +125,9 @@ export function PropertyStaffCandidates({
         <>
           {resource.data.total === 0 ? (
             <p role="status">
-              조건에 맞는 활성 직원이 없습니다. 직원 관리에서 등록 또는 활성화해
-              주세요.
+              {search
+                ? '검색 결과가 없습니다. 검색어를 바꾸거나 초기화해 주세요.'
+                : '배정할 활성 직원이 없습니다. 직원 관리에서 직원을 등록하거나 활성화해 주세요.'}
             </p>
           ) : (
             <>
@@ -125,7 +136,7 @@ export function PropertyStaffCandidates({
               </p>
               <ul className="property-staff__options">
                 {resource.data.items.map((staff) => (
-                  <li key={staff.id}>
+                  <li key={staff.id} className="property-staff__option">
                     <button
                       type="button"
                       disabled={disabled}
@@ -135,7 +146,14 @@ export function PropertyStaffCandidates({
                       }
                     >
                       <span>
-                        <strong>{staff.name}</strong>
+                        <strong>
+                          {staff.name}
+                          {currentStaffId === staff.id && (
+                            <small className="property-staff__current-label">
+                              현재 담당
+                            </small>
+                          )}
+                        </strong>
                         <span>
                           {[staff.company, staff.department]
                             .filter(Boolean)
@@ -147,6 +165,15 @@ export function PropertyStaffCandidates({
                         {selected?.id === staff.id ? '선택됨' : '선택'}
                       </span>
                     </button>
+                    {selected?.id === staff.id &&
+                      selected.id !== currentStaffId && (
+                        <div className="property-staff__inline-review">
+                          <span>선택됨 · 아직 저장 전</span>
+                          <Button disabled={disabled} onClick={onReview}>
+                            배정 변경 확인
+                          </Button>
+                        </div>
+                      )}
                   </li>
                 ))}
               </ul>

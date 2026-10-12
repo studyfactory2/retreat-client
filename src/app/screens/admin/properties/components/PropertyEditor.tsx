@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { appRoutes } from '../../../../core/router/routes';
 import {
   createAdminProperty,
   updateAdminProperty,
@@ -18,6 +17,7 @@ import {
   type PropertyFormValues,
 } from '../model/property-form-model';
 import { usePropertySave } from '../hooks/use-property-save';
+import '../styles/property-editor.css';
 
 type Props = {
   token: string;
@@ -124,7 +124,7 @@ export function PropertyEditor({
               signal,
             ),
       (saved) =>
-        navigate(appRoutes.adminProperties, {
+        navigate(returnUrl, {
           replace: true,
           state: {
             propertyNotice: original ? 'updated' : 'created',
@@ -140,19 +140,29 @@ export function PropertyEditor({
       <header className="properties-heading">
         <div>
           <p className="properties-heading__eyebrow">
-            {original ? 'PROPERTY SETTINGS' : 'NEW PROPERTY'}
+            {original ? '휴양소 설정' : '새 휴양소'}
           </p>
-          <h1>{original ? '휴양소 정보 수정' : '휴양소 등록'}</h1>
+          <h1>{original ? original.name : '휴양소 등록'}</h1>
           <p>
             {original
-              ? `${original.name}의 운영 정보를 관리하세요.`
+              ? `${original.region || '지역 미등록'} · ${original.isActive ? '활성' : '비활성'}`
               : '휴양소를 등록하면 이용 일정에 연결할 수 있습니다.'}
           </p>
+        </div>
+        <div className="properties-heading__actions">
+          <Button
+            className="admin-button-secondary"
+            disabled={mutation.state.busy || discarding}
+            onClick={() => leave(returnUrl)}
+          >
+            휴양소 목록으로
+          </Button>
         </div>
       </header>
       {original && (
         <PropertyManagementCard
           property={original}
+          returnUrl={returnUrl}
           disabled={mutation.state.busy || discarding}
           onNavigate={leave}
         />
@@ -168,7 +178,7 @@ export function PropertyEditor({
           {mutation.state.uncertain && (
             <Button
               className="admin-button-secondary"
-              onClick={() => navigate(appRoutes.adminProperties)}
+              onClick={() => navigate(returnUrl)}
             >
               목록에서 저장 결과 확인
             </Button>
@@ -220,6 +230,7 @@ export function PropertyEditor({
         onSubmit={submit}
         onCancel={() => leave(returnUrl)}
         editing={!!original}
+        dirty={dirty}
         errors={{ ...mutation.state.errors, ...errors }}
         busy={mutation.state.busy}
         blocked={mutation.state.uncertain || discarding}

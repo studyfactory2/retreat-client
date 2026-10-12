@@ -1,6 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type MouseEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { appRoutes } from '../../../../core/router/routes';
 import type { AdminPropertyDto } from '../../../../features/admin-properties/admin-property-management.types';
 import { Button } from '../../../../shared/ui/Button/Button';
 import { usePropertyStaffSave } from '../hooks/use-property-staff-save';
@@ -15,12 +14,14 @@ export function PropertyStaffAssignment({
   rejectSession,
   onSaved,
   onReload,
+  returnUrl,
 }: {
   property: AdminPropertyDto;
   token: string;
   rejectSession: (token: string) => void;
   onSaved: (property: AdminPropertyDto) => void;
   onReload: () => void;
+  returnUrl: string;
 }) {
   const navigate = useNavigate();
   const [selected, setSelected] = useState<StaffSelection>(
@@ -34,6 +35,7 @@ export function PropertyStaffAssignment({
   const discard = useRef<HTMLDivElement>(null);
   const notice = useRef<HTMLDivElement>(null);
   const returnFocus = useRef<HTMLElement | null>(null);
+  const reviewFocus = useRef<HTMLButtonElement | null>(null);
   const mutation = usePropertyStaffSave(
     property.id,
     token,
@@ -70,6 +72,12 @@ export function PropertyStaffAssignment({
     return () => window.removeEventListener('beforeunload', warn);
   }, [dirty, mutation.state.busy]);
 
+  function review(event: MouseEvent<HTMLButtonElement>) {
+    if (disabled || !dirty) return;
+    reviewFocus.current = event.currentTarget;
+    setConfirming(true);
+  }
+
   function leave(action: 'return' | 'reload') {
     if (mutation.state.busy || confirming) return;
     if (dirty) {
@@ -82,7 +90,7 @@ export function PropertyStaffAssignment({
   }
   function perform(action: 'return' | 'reload') {
     if (action === 'reload') onReload();
-    else navigate(appRoutes.adminPropertyDetail.replace(':id', property.id));
+    else navigate(returnUrl);
   }
 
   return (
@@ -91,7 +99,10 @@ export function PropertyStaffAssignment({
         <div>
           <p className="properties-heading__eyebrow">담당 직원 관리</p>
           <h1>{property.name}</h1>
-          <p>휴양소의 정비 담당 직원을 배정하거나 변경하세요.</p>
+          <p>
+            {property.region || '지역 미등록'} ·{' '}
+            {property.isActive ? '활성 휴양소' : '비활성 휴양소'}
+          </p>
         </div>
         <div className="properties-heading__actions">
           <Button
@@ -110,21 +121,6 @@ export function PropertyStaffAssignment({
           </Button>
         </div>
       </header>
-      <section className="properties-summary" aria-label="현재 담당 직원">
-        <dl>
-          <div>
-            <dt>현재 담당 직원</dt>
-            <dd>
-              {property.staff?.name ?? '미배정'}
-              {property.staff && !property.staff.isActive ? ' · 비활성' : ''}
-            </dd>
-          </div>
-          <div>
-            <dt>휴양소 상태</dt>
-            <dd>{property.isActive ? '활성' : '비활성'}</dd>
-          </div>
-        </dl>
-      </section>
       {!property.isActive && (
         <p className="properties-banner">
           비활성 휴양소는 기존 배정만 해제할 수 있습니다. 새 직원을 배정하려면
@@ -185,93 +181,115 @@ export function PropertyStaffAssignment({
           </div>
         </div>
       )}
-      {property.isActive && (
-        <PropertyStaffCandidates
-          token={token}
-          rejectSession={rejectSession}
-          disabled={disabled}
-          selected={selected}
-          onSelect={setSelected}
-        />
-      )}
-      <section
-        className="property-staff__selection"
-        aria-labelledby="assignment-selection-title"
-      >
-        <h2 id="assignment-selection-title">변경할 담당 직원</h2>
-        <p className="property-staff__selected-name" aria-live="polite">
-          {selected?.name ?? '미배정'}
-        </p>
-        <p>
-          {dirty
-            ? '아래에서 변경 내용을 확인한 뒤 저장해 주세요.'
-            : '현재 배정과 동일합니다.'}
-        </p>
-        <div className="properties-heading__actions">
-          <Button
-            className="admin-button-secondary"
-            disabled={disabled || selected === null}
-            onClick={() => setSelected(null)}
+      <div className="property-staff__workspace">
+        <div className="property-staff__review">
+          <section
+            className="property-staff__selection"
+            aria-labelledby="assignment-selection-title"
           >
-            배정 해제 선택
-          </Button>
-          <Button
-            id="assignment-review"
-            disabled={disabled || !dirty}
-            loading={mutation.state.busy}
-            onClick={() => setConfirming(true)}
-          >
-            배정 변경 확인
-          </Button>
-        </div>
-      </section>
-      {confirming && (
-        <div
-          className="properties-banner"
-          ref={confirmation}
-          tabIndex={-1}
-          role="alertdialog"
-          aria-labelledby="assignment-confirm-title"
-          aria-describedby="assignment-confirm-description"
-        >
-          <h2 id="assignment-confirm-title">
-            {selected
-              ? '담당 직원을 변경할까요?'
-              : '담당 직원 배정을 해제할까요?'}
-          </h2>
-          <p>
-            <strong>{property.name}</strong> ·{' '}
-            {property.staff?.name ?? '미배정'} → {selected?.name ?? '미배정'}
-          </p>
-          <p id="assignment-confirm-description">
-            변경하면 이전 담당자가 작성 중이던 정비 기록에 계속 접근할 수 없을
-            수 있습니다. 제출된 기록은 유지됩니다.
-          </p>
-          <div className="properties-heading__actions">
-            <Button
-              className="admin-button-secondary"
-              onClick={() => {
-                setConfirming(false);
-                requestAnimationFrame(() =>
-                  document.getElementById('assignment-review')?.focus(),
-                );
-              }}
+            <h2 id="assignment-selection-title">배정 내용 확인</h2>
+            <dl className="property-staff__comparison">
+              <div>
+                <dt>현재 저장된 담당 직원</dt>
+                <dd>
+                  {property.staff?.name ?? '미배정'}
+                  {property.staff && !property.staff.isActive
+                    ? ' · 비활성'
+                    : ''}
+                </dd>
+              </div>
+              <div className={dirty ? 'property-staff__changed' : undefined}>
+                <dt>선택한 담당 직원</dt>
+                <dd aria-live="polite">{selected?.name ?? '미배정'}</dd>
+              </div>
+            </dl>
+            <p className="property-staff__save-status" role="status">
+              {dirty
+                ? '아직 저장하지 않았습니다. 변경 내용을 확인해 주세요.'
+                : '현재 저장된 배정과 같습니다.'}
+            </p>
+            <div className="property-staff__review-actions">
+              <Button
+                id="assignment-review"
+                disabled={disabled || !dirty}
+                loading={mutation.state.busy}
+                onClick={review}
+              >
+                배정 변경 확인
+              </Button>
+              <Button
+                className="admin-button-secondary"
+                disabled={disabled || selected === null}
+                onClick={() => setSelected(null)}
+              >
+                배정 해제 선택
+              </Button>
+            </div>
+          </section>
+          {confirming && (
+            <div
+              className="properties-banner"
+              ref={confirmation}
+              tabIndex={-1}
+              role="alertdialog"
+              aria-labelledby="assignment-confirm-title"
+              aria-describedby="assignment-confirm-description"
             >
-              선택으로 돌아가기
-            </Button>
-            <Button
-              onClick={() => {
-                if (!dirty || mutation.state.busy || mutation.state.blocked)
-                  return;
-                setConfirming(false);
-                void mutation.save(selected?.id ?? null);
-              }}
-            >
-              변경 저장
-            </Button>
-          </div>
+              <h2 id="assignment-confirm-title">
+                {selected
+                  ? '담당 직원을 변경할까요?'
+                  : '담당 직원 배정을 해제할까요?'}
+              </h2>
+              <p>
+                <strong>{property.name}</strong> ·{' '}
+                {property.staff?.name ?? '미배정'} →{' '}
+                {selected?.name ?? '미배정'}
+              </p>
+              <p id="assignment-confirm-description">
+                변경하면 이전 담당자가 작성 중이던 정비 기록에 계속 접근할 수
+                없을 수 있습니다. 제출된 기록은 유지됩니다.
+              </p>
+              <div className="properties-heading__actions">
+                <Button
+                  className="admin-button-secondary"
+                  onClick={() => {
+                    setConfirming(false);
+                    requestAnimationFrame(() => {
+                      if (reviewFocus.current?.isConnected)
+                        reviewFocus.current.focus();
+                      else
+                        document.getElementById('assignment-review')?.focus();
+                    });
+                  }}
+                >
+                  선택으로 돌아가기
+                </Button>
+                <Button
+                  onClick={() => {
+                    if (!dirty || mutation.state.busy || mutation.state.blocked)
+                      return;
+                    setConfirming(false);
+                    void mutation.save(selected?.id ?? null);
+                  }}
+                >
+                  변경 저장
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
-      )}
+        {property.isActive && (
+          <PropertyStaffCandidates
+            token={token}
+            rejectSession={rejectSession}
+            disabled={disabled}
+            selected={selected}
+            currentStaffId={property.staffUserId}
+            onSelect={setSelected}
+            onReview={review}
+          />
+        )}
+      </div>
     </>
   );
 }

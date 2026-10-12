@@ -2601,3 +2601,50 @@ and filter probes, typecheck, non-fixing lint, exact Prettier and the production
 build passed in the isolated source copy; the existing bundle warning remains.
 Only the maintenance screen, its reset button ID and this note changed in the
 follow-up. No permanent tests, dependencies or backend changes were added.
+
+### Slice 11 — property settings and staff assignment — 2026-10-12
+
+Property create/edit now uses a compact, scoped layout with the saved property
+name, region and activity in its heading, a guarded return-to-directory action,
+and an explicit unsaved/saving status beside the form actions. On wider screens,
+public contact and operating settings sit beside each other; narrow screens keep
+one column. Public contact guidance, name/contact validation, nullable clears,
+create defaults and the existing dirty/uncertain-save protections remain.
+
+Successful create/edit and uncertain-result reconciliation preserve the canonical
+property directory search/status/page. The staff-management link carries that
+same context through assignment, return to settings, and loading/error fallback.
+Only known directory query fields are retained by the existing filter parser;
+there is no arbitrary return URL parameter. A save can remove a property from the
+current filter; the directory still shows its saved-result link and clamps an
+out-of-range page using its existing behavior. QR/checklist/guide editors retain
+their existing navigation and content.
+
+Assignment compares the currently saved and selected staff member before saving.
+Compact candidate rows show the current assignee, selected state, and a review
+button beside a changed selection. The comparison precedes the candidate list on
+mobile and occupies a side column on desktop. Applied search is distinct from
+unsaved search text; searching, resetting or paging retains the selected staff.
+Empty search results and no active staff have different explanations. Confirmation
+retains its draft-access warning, and cancelling returns focus to the initiating
+review button. Inactive properties still permit unassignment only. Success still
+focuses the saved receipt and remounts the assignment state.
+
+Existing API flow is unchanged: GET /admin/properties/:id reads settings;
+POST /admin/properties creates and POST /admin/properties/:id/update saves changed
+fields. GET /admin/staff with isActive=true searches candidates in existing
+12-item pages; POST /admin/properties/:id/staff assigns a staff UUID or null.
+The administrator session supplies the Bearer token, readers validate unknown
+responses, and existing abort/ownership/duplicate/uncertainty/conflict guards apply.
+No backend, schema, dependencies, credentials or service operations changed.
+
+Verification: isolated Yarn typecheck, non-fixing Oxlint, production build and exact
+changed-source Prettier passed. The existing large-bundle warning remains. Focused
+disposable probes passed 85 navigation/state/mutation assertions and 30 staff UI
+interactions; 18 additional assertions checked fictional fixture transport through
+actual readers. These simulate React hooks/DOM/API responses, not live writes.
+No permanent tests were added. Responsive CSS was reviewed for 320/768/1440px;
+rendered responsive acceptance remains pending. Browser policy blocked the local
+HTML fixture, and the existing localhost app required administrator login in the
+review browser. No browser workaround or live data mutation was attempted. Manual
+signed-in navigation, visual, keyboard and physical-device acceptance remain.

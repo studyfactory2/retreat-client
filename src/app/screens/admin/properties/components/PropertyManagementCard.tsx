@@ -5,6 +5,7 @@ import '../styles/property-management-card.css';
 
 type Props = {
   property: AdminPropertyDto;
+  returnUrl: string;
   disabled: boolean;
   onNavigate: (url: string) => void;
 };
@@ -18,6 +19,7 @@ const actions = [
 
 export function PropertyManagementCard({
   property,
+  returnUrl,
   disabled,
   onNavigate,
 }: Props) {
@@ -38,7 +40,14 @@ export function PropertyManagementCard({
             key={route}
             className="admin-button-secondary property-management-card__action"
             disabled={disabled}
-            onClick={() => onNavigate(route.replace(':id', property.id))}
+            onClick={() =>
+              onNavigate(
+                route.replace(':id', property.id) +
+                  (route === appRoutes.adminPropertyStaff
+                    ? returnUrl.slice(appRoutes.adminProperties.length)
+                    : ''),
+              )
+            }
           >
             {label}
           </Button>
