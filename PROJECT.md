@@ -2841,7 +2841,7 @@ added. Signed-in browser, native dialog and real-device acceptance remain pendin
 ## Frontend deployment commands — 2026-10-12
 
 `bash deploy.sh` provides separate pull, prepare, up, status and logs commands for
-the user's EC2 checkout. Pull fast-forwards a clean `develop` branch only.
+the user's EC2 checkout. Pull fast-forwards a clean `master` branch only.
 Preparation validates Compose configuration and builds the frontend without
 starting services. Existing TypeScript/Vite origin validation runs inside the
 Docker build; there is no separate URL-validation language or server runtime.

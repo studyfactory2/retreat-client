@@ -6,7 +6,7 @@ usage() {
 Usage: bash deploy.sh COMMAND
 
 Run from your EC2 checkout as its owner. Each command is a separate step:
-  pull      Fast-forward the clean develop checkout from origin/develop
+  pull      Fast-forward the clean master checkout from origin/master
   prepare   Validate configuration and build the frontend image
   up        Start/update only the matching prepared frontend image
   status    Show frontend container status
@@ -24,8 +24,8 @@ fail() {
 }
 
 require_clean_checkout() {
-  [[ "$(git branch --show-current)" == develop ]] ||
-    fail 'Switch to develop before preparing or deploying a release.'
+  [[ "$(git branch --show-current)" == master ]] ||
+    fail 'Switch to master before preparing or deploying a release.'
   [[ -z "$(git status --porcelain --untracked-files=normal)" ]] ||
     fail 'Commit or move local changes first. This script never resets or stashes files.'
 }
@@ -67,7 +67,7 @@ main() {
   esac
   if [[ "$action" == pull ]]; then
     # A pull may replace this script; run the next command in a fresh process.
-    exec git pull --ff-only origin develop
+    exec git pull --ff-only origin master
   fi
 
   [[ -f .env ]] || fail 'Create the server .env first; see deployment/README.md.'

@@ -7,7 +7,7 @@ updates and server operations. Start the backend before the frontend.
 
 ## Server configuration
 
-Use the committed `develop` checkout on EC2. Docker, the Compose plugin, Git, and
+Use the committed `master` checkout on EC2. Docker, the Compose plugin, Git, and
 Bash must be available. The script uses the standard `sha256sum` command (or
 `shasum` where available) to identify its configuration. The small EC2 server needs its memory/swap preparation
 before builds; build the frontend and backend sequentially. Node and Yarn run
@@ -81,7 +81,7 @@ Fetch an update when there is new committed code:
 bash deploy.sh pull
 ```
 
-This only runs `git pull --ff-only origin develop`. It uses your existing GitHub
+This only runs `git pull --ff-only origin master`. It uses your existing GitHub
 authentication and stops on divergence/conflicts. It does not build or restart
 anything. Run the next command separately so it reads any newly pulled script.
 
@@ -124,7 +124,7 @@ bash deploy.sh status
 bash deploy.sh logs
 ```
 
-`pull`, `prepare`, and `up` require a clean `develop` checkout, including untracked
+`pull`, `prepare`, and `up` require a clean `master` checkout, including untracked
 files. The ignored `.env` is preserved. Status and logs remain available with local
 Git changes. No command resets, stashes, commits, starts a database, or applies
 migrations. On later updates, use `pull`, `prepare`, then `up`.
