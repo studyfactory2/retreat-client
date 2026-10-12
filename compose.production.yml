@@ -9,7 +9,7 @@ services:
         VITE_FRONTEND_URL: ${VITE_FRONTEND_URL:?Set the public frontend HTTPS origin}
         VITE_API_BASE_URL: ${VITE_API_BASE_URL:?Set the public API HTTPS origin}
       labels:
-        org.opencontainers.image.revision: ${RELEASE_TAG}
+        org.opencontainers.image.revision: ${GIT_COMMIT:?Run bash deploy.sh prepare first}
     restart: unless-stopped
     ports:
       - "${ORIGIN_BIND_IP:-127.0.0.1}:8080:8080"

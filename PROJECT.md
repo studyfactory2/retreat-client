@@ -2835,3 +2835,29 @@ saves; 71 stay/import/QR/private-link guards. React, history, events, API outcom
 and clipboard were simulated. Independent source review checked the shared guard
 and domain integrations. No permanent test/spec files or live record writes were
 added. Signed-in browser, native dialog and real-device acceptance remain pending.
+
+## Frontend deployment commands — 2026-10-12
+
+`bash deploy.sh` provides separate pull, prepare, up, status and logs commands for
+the user's EC2 checkout. Pull fast-forwards a clean `develop` branch only.
+Preparation validates Compose configuration and builds the frontend without
+starting services. Existing TypeScript/Vite origin validation runs inside the
+Docker build; there is no separate URL-validation language or server runtime.
+
+The Bash script uses standard sha256sum (or shasum) to fingerprint resolved Compose
+configuration. Images use the full Git commit ID plus that fingerprint; the OCI
+revision label is the plain commit ID. Up requires a matching prepared image and
+waits for frontend health. URL, host-binding, checkout-path or Compose changes can
+require preparation again. Existing Docker build layers can still be reused.
+
+Compose parses the server .env as data. Inherited public URL/bind variables are
+cleared; release identity is supplied after optional Docker sudo. Git runs as the
+checkout owner. The setup guide is deployment/README.md. Runtime routes, UI,
+backend, credentials and developer environment are unchanged; UI remains Korean.
+
+Validation: Bash syntax/help and 23 disposable command-flow checks passed using
+real Compose v5.6.0 parsing and standard shell hashing. Git, Docker daemon/image/
+build, and sudo operations were mocked. Checks covered URL/config changes, clean
+branch guards, sudo handling and build/start failures. Independent design review
+found no blocker. Linux Docker/Nginx runtime, HTTPS and application acceptance are
+still pending. No operational Git, service, database or deployment action ran.
