@@ -123,3 +123,73 @@ invitation or draft tokens into screenshots or bug reports.
   dialogs and native date inputs require the live checks above.
 - Deployment, production origins/TLS, backups and server operations are handled
   separately by the project owner. This walkthrough does not certify deployment.
+
+## Local live run evidence: 2026-10-12
+
+The checks below were performed in the running local application with a signed-in
+administrator and fictional data. Existing checklist boxes remain unchanged:
+several boxes combine verified behavior with cases still awaiting acceptance.
+
+- Property: **검증용 휴양소 1012** (`ce7e420a-6976-441c-8e1b-1bd3f8b8ccdd`).
+  Staff **검증직원1012** (`8b39cd85-fcdc-4ebc-bf26-2fba9b0f13b8`) was assigned;
+  the guest guide and three active checklists were configured.
+- Manual stay `313f7db4-15f1-45be-ac00-110bb3b0aa51` covered October 12–13.
+  Fictional vehicle `999테1014` persisted after refresh and appeared in admin.
+- A genuine fictional `.xls` produced preview
+  `ec61eb04-92a9-4674-8090-acba173e9698`. Explicit confirmation imported **1 stay**,
+  `8b94435b-6030-4105-9bb9-4636dbc7ae98`, for 가상민수 on October 20–21;
+  the resulting schedule was checked in the calendar.
+- Guest arrival `a7c37ea1-8a07-4535-8116-36defe374691` saved/submitted one abnormal
+  answer and one photo. Partial draft save/reload, required-answer and photo-
+  association blockers, and final review confirmation were exercised. A guest
+  correction produced revision 2; later admin cancellation/restoration produced
+  revisions 3/4 while preserving the original 13:13:41 submission time, memo,
+  abnormal answer and photo. Public departure by 가상퇴실자 submitted one normal
+  answer, no photos and no stay link.
+- Maintenance `cb1d8bdb-6e4c-48a5-af2a-ee4ad972da32` submitted one abnormal answer,
+  one photo and a repair claim. Its issue remained NEW for administrator handling.
+  Arrival issue `4a0b65e2-f7ac-47f9-a006-c2a9565a1cb9` passed note, start handling,
+  resolve, cancel and restore actions; revision 6 retained its resolved state and
+  photo. The direct urgent report **검증용 직접 신고 1012**
+  (`4eebac55-10ac-49e3-bc83-ac9ff1872724`) submitted with one photo and a receipt.
+- Editing the manual stay blocked its old private link. A replacement worked;
+  revoking it blocked access. Vehicle confirmation and submission review-needed
+  indicators reflected the stay edit. QR and stay-link receipt leave warnings
+  still appeared after copying their links. No private links are recorded here.
+- Admin property dirty-form checks covered sidebar, mobile menu and logout
+  cancellation. Browser Back cancellation retained the URL and input; confirmed
+  Back left the form, and Forward showed the original saved region.
+- The actual downloaded report
+  `/Users/john/Downloads/retreat-report-2026-10-01-2026-10-31 (2).xlsx` was opened
+  and inspected with a workbook reader: **입퇴실 제출 2 / 정비 제출 1 / 이상사항 3**,
+  **6 combined records**, all scoped to the test property and October 1–31.
+  Arrival was revision 2 with one abnormal answer/photo; departure had no abnormal
+  answers/photos; maintenance had one abnormal answer/photo. Issues were resolved
+  arrival, new maintenance, and urgent/new direct report. This export preceded
+  the later stay edit and arrival cancellation/restoration to revision 4; it is
+  not evidence of the later record state. Memo and repair-claim details are not
+  included in this summary report. File integrity and all three table filters
+  were verified.
+- Responsive verification is **partial**. Selected guest screens were checked at
+  425px/768px and admin screens at 386px/931px. A fresh 425px admin issues check
+  confirmed matching viewport/document/body/scroll widths, scale 1, and a fully
+  visible header, filters and actions. Its screenshot below supersedes the earlier
+  cropped capture; this does not establish responsive acceptance for all pages.
+- Property QR guidance now describes the guest checklist and staff maintenance
+  configuration each flow needs; the stale "screens are being prepared" notice
+  was removed and the corrected Korean wording verified in the real UI.
+- The private stay-link card's stale "guest screen is being prepared" notice was
+  removed and the real UI checked. Targeted Prettier and `git diff --check` passed
+  for both copy fixes.
+
+Saved screenshots (local evidence, no private token URLs):
+
+- `/private/tmp/retreat-live-acceptance-1012/admin-submission-restored.jpg`
+- `/private/tmp/retreat-live-acceptance-1012/guest-receipt-mobile.jpg`
+- `/private/tmp/retreat-live-acceptance-1012/admin-issues-mobile-425.jpg`
+
+Still unverified: native reload/tab-close dialogs; authentication expiry/rejection
+and stale-session races; interrupted requests/network recovery; concurrent edits
+or submissions; physical phones, QR scanning, camera and system clipboard behavior;
+full responsive/browser coverage; and deployment/production configuration. This
+run does not certify those cases or deployment readiness.

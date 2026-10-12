@@ -1,0 +1,14 @@
+.git
+.env*
+.deployment
+node_modules
+dist
+dist-ssr
+coverage
+*.log
+*.pem
+*.key
+.DS_Store
+.aws
+.ssh
+.npmrc

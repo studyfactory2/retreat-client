@@ -155,8 +155,9 @@ function PropertyQrWorkspace({
               </p>
             </div>
             <p className="property-qr-overview__scope">
-              점검표를 작성하려면 휴양소의 점검표와 담당 직원 설정이 필요합니다.
-              이용객·직원용 입력 화면은 준비 중입니다.
+              이용객이 입실·퇴실 점검표를 작성하려면 해당 점검표 설정이
+              필요합니다. 직원이 정비 점검표를 작성하려면 정비 점검표와 담당
+              직원 설정이 필요합니다.
             </p>
           </section>
           {!resource.data.qr.propertyIsActive && (
