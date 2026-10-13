@@ -62,6 +62,15 @@ credentials stay in their matching fragment/request state and never enter the
 administrator session or browser storage. See PROJECT.md for the implemented
 scope and remaining verification boundaries.
 
+## Public landing page
+
+The homepage explains how guests begin through a received personal link or an
+on-site guest QR. It includes three usage steps, native expandable help answers,
+staff QR guidance and a discreet administrator login link. It does not send
+visitors to guest/staff routes without their required credentials. Its original
+retreat illustration is decorative and does not represent a specific property.
+The homepage reads no protected data and makes no API requests.
+
 ## Branding
 
 `src/app/core/config/brand.ts` owns the shared ITCEN name and OH BOK operator credit.

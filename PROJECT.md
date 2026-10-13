@@ -2916,3 +2916,23 @@ actual-source fixtures passed 114 branding/asset assertions across 16 variants;
 public, guest guide and staff headers were visually checked at 320px. All six
 icon assets survive the build. These are synthetic checks, not authenticated
 workflow, physical-device, production or PWA acceptance. No permanent tests added.
+
+## Slice 2 — guest-first public landing — 2026-10-13
+
+The homepage now introduces ITCEN retreat guidance with an original decorative
+SVG scene, a focused introduction, three usage steps, native FAQ disclosures and
+a staff QR reminder. The primary action focuses the on-page guidance; the small
+header link opens existing administrator login. Tokenless guest/staff links and
+stale coming-soon cards were removed from the homepage.
+
+AppShell changes are scoped to the home pathname. Login, not-found and developer
+shells retain their existing presentation; shared error-screen link CSS remains.
+Guest/staff access routes, private links, tokens, API contracts and business flows
+are unchanged. No new dependency, backend work, installation or offline behavior.
+
+Verification: isolated Yarn typecheck, lint and production build passed with fake
+HTTPS origins; the existing bundle warning remains. Browser checks covered the
+actual local page at desktop, 390px and 320px, including no horizontal overflow at
+320px, guidance-anchor focus, opening a FAQ answer, and admin-login navigation.
+Independent source review found no blocking regression. No authenticated writes,
+real-device or production acceptance, new permanent tests, commits or deployment.

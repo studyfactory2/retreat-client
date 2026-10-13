@@ -99,3 +99,32 @@
     gap: 8px;
   }
 }
+
+/* The public landing is the only shell surface with this presentation. */
+.app-shell--landing {
+  background: var(--color-surface);
+}
+.app-shell--landing .app-shell__header {
+  border-bottom: 0;
+}
+.app-shell--landing .app-shell__main {
+  padding-block: 24px 56px;
+}
+.app-shell__admin-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  color: var(--color-muted);
+  font-size: 12px;
+  text-decoration: none;
+}
+.app-shell__admin-link:hover {
+  color: var(--color-primary);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+@media (max-width: 600px) {
+  .app-shell--landing .app-shell__header { gap: 12px; }
+  .app-shell--landing .app-shell__main { padding-block: 16px 32px; }
+}
