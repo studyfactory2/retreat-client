@@ -1,3 +1,4 @@
+import { InstallApp } from '../../shared/pwa/InstallApp';
 import { APP_BRAND } from '../../core/config/brand';
 import { RetreatScene } from './components/RetreatScene';
 import './entry.css';
@@ -87,6 +88,8 @@ export function EntryScreen() {
           ))}
         </div>
       </section>
+
+      <InstallApp />
 
       <aside className="entry-staff" aria-labelledby="entry-staff-title">
         <div>

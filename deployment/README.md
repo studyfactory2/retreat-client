@@ -67,6 +67,28 @@ log is suppressed because it can contain request query strings; use HTTP status,
 container health and the backend safe logs for diagnostics. The container-local
 health listener is `127.0.0.1:8082` and is not published.
 
+## Installed app and offline page
+
+Production builds include `/manifest.webmanifest`, `/service-worker.js`, and a
+self-contained Korean `/offline.html`. These exact Nginx routes return `no-store`;
+missing files return 404 instead of the SPA. Keep CloudFront caching disabled for
+these paths. The manifest launches `/` and contains no guest or staff credentials.
+No extra environment variables, backend changes, or PWA dependencies are required.
+
+The worker stores only the fixed public offline document. App pages, private
+links, API responses, photos, and submissions are never placed in its cache.
+Navigation still uses the network; only a network failure shows the offline page.
+HTTP errors pass through unchanged. The retry button reloads the existing address,
+including its fragment, only when the person chooses to retry. This release does
+not add offline submission, background syncing, or push notifications.
+
+Each frontend build gives its JavaScript and worker the same unique release ID.
+The app can compare a waiting worker's ID with its own. Worker installation never
+forces activation, reloads a page, or takes over an open checklist. A waiting worker
+activates after the old worker's app windows have closed; its activation removes
+only older `retreat-public-offline-` caches. Check installation, reopening, updates,
+and offline recovery on real iPhone and Android devices after HTTPS deployment.
+
 ## Commands, one step at a time
 
 Run `bash deploy.sh help` to see the commands. Run the script as the checkout

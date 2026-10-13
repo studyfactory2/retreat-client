@@ -13,6 +13,7 @@ import {
   useNavigate,
   useNavigationType,
 } from 'react-router-dom';
+import { PwaStatus } from '../../../shared/pwa/PwaStatus';
 import { NavigationLeaveDialog } from './NavigationLeaveDialog';
 import {
   NavigationActionsContext,
@@ -132,6 +133,10 @@ export function NavigationBoundary({ children }: { children: ReactNode }) {
   return (
     <NavigationActionsContext.Provider value={actions}>
       <NavigationGuardContext.Provider value={register}>
+        <PwaStatus
+          allowReload={state.accepted.location.pathname === '/' || state.accepted.location.pathname === '/admin/more'}
+          canReload={() => !current.current.pending && !current.current.restoring && !pendingAction && ![...guards.current].some((check) => check())}
+        />
         <Routes location={state.accepted.location}>{children}</Routes>
         {(state.pending || pendingAction) && (
           <NavigationLeaveDialog

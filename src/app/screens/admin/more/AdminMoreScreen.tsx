@@ -1,3 +1,4 @@
+import { InstallApp } from '../../../shared/pwa/InstallApp';
 import { Link } from 'react-router-dom';
 import { AdminMenuIcon } from '../layout/components/AdminMenuIcon';
 import { adminSecondaryMenu } from '../layout/model/admin-menu';
@@ -33,6 +34,7 @@ export function AdminMoreScreen() {
           ))}
         </ul>
       </nav>
+      <InstallApp compact />
     </div>
   );
 }

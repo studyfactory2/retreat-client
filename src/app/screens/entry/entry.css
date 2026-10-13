@@ -143,6 +143,7 @@
 .entry-question[open] summary span { transform: rotate(45deg); }
 .entry-question p { padding: 0 28px 24px 0; color: var(--color-muted); font-size: 14px; line-height: 1.9; }
 .entry-staff {
+  margin-top: 28px;
   display: flex;
   justify-content: space-between;
   align-items: center;

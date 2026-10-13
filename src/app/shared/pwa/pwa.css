@@ -1,0 +1,208 @@
+.pwa-install {
+  margin-top: 32px;
+  padding: 40px;
+  border: 1px solid #dfe7f6;
+  border-radius: 24px;
+  background: #f3f6fc;
+  scroll-margin-top: 24px;
+}
+.pwa-install__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 0.85fr);
+  align-items: center;
+  gap: 32px 64px;
+}
+.pwa-install__identity {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+}
+.pwa-install__identity img {
+  flex-shrink: 0;
+  border-radius: 13px;
+}
+.pwa-install__identity p {
+  color: var(--color-heading);
+  font-size: 14px;
+  font-weight: 650;
+}
+.pwa-install__identity span {
+  display: block;
+  margin-top: 3px;
+  color: var(--color-muted);
+  font-size: 12px;
+  font-weight: 400;
+}
+.pwa-install__intro h2 {
+  margin-top: 24px;
+  color: var(--color-heading);
+  font-size: clamp(26px, 3vw, 34px);
+  font-weight: 700;
+  line-height: 1.35;
+  letter-spacing: -1px;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+.pwa-install__description {
+  max-width: 35ch;
+  margin-top: 14px;
+  color: var(--color-muted);
+  font-size: 14px;
+  line-height: 1.8;
+  word-break: keep-all;
+}
+.pwa-install__actions {
+  min-width: 0;
+  padding: 26px;
+  border: 1px solid #e4eaf4;
+  border-radius: 18px;
+  background: var(--color-surface);
+}
+.pwa-install__actions h3 {
+  color: var(--color-heading);
+  font-size: 15px;
+  font-weight: 650;
+}
+.pwa-install__button {
+  width: 100%;
+  min-height: 50px;
+  margin-top: 18px;
+  font-size: 14px;
+}
+.pwa-install__button svg { flex-shrink: 0; }
+.pwa-install__hint,
+.pwa-install__notice,
+.pwa-install__complete p {
+  margin-top: 10px;
+  color: var(--color-muted);
+  font-size: 13px;
+  line-height: 1.8;
+  word-break: keep-all;
+}
+.pwa-install__instructions {
+  margin-top: 16px;
+  border-top: 1px solid var(--color-border);
+}
+.pwa-install summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 48px;
+  color: var(--color-primary);
+  font-size: 13px;
+  font-weight: 600;
+  list-style: none;
+  cursor: pointer;
+}
+.pwa-install summary::-webkit-details-marker { display: none; }
+.pwa-install__instructions > summary { padding-top: 8px; }
+.pwa-install__chevron {
+  width: 7px;
+  height: 7px;
+  margin-right: 3px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(45deg);
+  flex-shrink: 0;
+}
+.pwa-install details[open] > summary .pwa-install__chevron,
+.pwa-install--compact[open] > summary .pwa-install__chevron {
+  transform: rotate(225deg);
+}
+.pwa-install__steps {
+  display: grid;
+  gap: 20px;
+  padding-top: 18px;
+}
+.pwa-install__steps h4 {
+  color: var(--color-heading);
+  font-size: 13px;
+  font-weight: 650;
+}
+.pwa-install__steps p {
+  margin-top: 6px;
+  color: var(--color-muted);
+  font-size: 13px;
+  line-height: 1.8;
+  word-break: keep-all;
+}
+.pwa-install__steps > p {
+  margin-top: 0;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border);
+  font-size: 12px;
+}
+.pwa-install__footnote {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 28px;
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid #dfe7f6;
+  color: var(--color-muted);
+  font-size: 12px;
+  line-height: 1.8;
+  word-break: keep-all;
+}
+.pwa-install__check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  margin-bottom: 14px;
+  border-radius: 50%;
+  background: var(--color-soft);
+  color: var(--color-primary);
+  font-size: 18px;
+}
+.pwa-install--compact {
+  padding: 10px 24px;
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+.pwa-install--compact > summary {
+  color: var(--color-heading);
+  font-size: 14px;
+}
+.pwa-install__body { padding-block: 14px; }
+.pwa-install--compact .pwa-install__layout { gap: 28px; }
+.pwa-install--compact .pwa-install__intro h2 { margin-top: 18px; font-size: 22px; }
+.pwa-install--compact .pwa-install__actions { padding: 20px; background: #f8faff; }
+.pwa-install--compact .pwa-install__footnote { margin-top: 24px; }
+@media (max-width: 800px) {
+  .pwa-install { padding: 30px; }
+  .pwa-install__layout { grid-template-columns: minmax(0, 1fr); gap: 26px; }
+  .pwa-install__description { max-width: none; }
+  .pwa-install__actions { padding: 22px; }
+  .pwa-install--compact { padding: 8px 22px; }
+}
+@media (max-width: 600px) {
+  .pwa-install { padding: 24px 20px; border-radius: 20px; }
+  .pwa-install__layout,
+  .pwa-install--compact .pwa-install__layout { gap: 20px; }
+  .pwa-install__identity { gap: 11px; }
+  .pwa-install__identity img { width: 40px; height: 40px; border-radius: 11px; }
+  .pwa-install__intro h2,
+  .pwa-install--compact .pwa-install__intro h2 {
+    margin-top: 16px;
+    font-size: 21px;
+    line-height: 1.4;
+    letter-spacing: -0.5px;
+  }
+  .pwa-install__description { margin-top: 10px; font-size: 13px; line-height: 1.7; }
+  .pwa-install__actions { padding: 20px 18px; border-radius: 14px; }
+  .pwa-install__button { min-height: 48px; margin-top: 14px; }
+  .pwa-install__instructions { margin-top: 12px; }
+  .pwa-install__footnote,
+  .pwa-install--compact .pwa-install__footnote { margin-top: 20px; padding-top: 16px; }
+  .pwa-install--compact { padding: 8px 18px; border-radius: var(--radius-md); }
+}
+.pwa-status { padding: 12px max(20px, env(safe-area-inset-right, 0px)) 12px max(20px, env(safe-area-inset-left, 0px)); background: var(--color-soft); color: var(--color-heading); border-bottom: 1px solid var(--color-border); font-size: 13px; }
+.pwa-status > p, .pwa-status__update { max-width: var(--content-width); margin-inline: auto; }
+.pwa-status__update { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 20px; }
+.pwa-status__actions { display: flex; gap: 12px; }
+.pwa-status button { min-height: 44px; padding: 8px 12px; border: 1px solid var(--color-primary); border-radius: 8px; background: var(--color-surface); color: var(--color-primary); cursor: pointer; font-weight: 600; }
+.pwa-status button:disabled { opacity: 0.55; cursor: not-allowed; }
+.pwa-status button:last-child { border-color: transparent; background: transparent; }

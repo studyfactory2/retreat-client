@@ -81,8 +81,38 @@ encoded destination or downloaded filename.
 `public/icons/retreat-symbol.svg` is an original retreat symbol, not an official
 ITCEN corporate logo. The browser favicon lives at `public/favicon.svg`, with a
 32px PNG fallback and a 180px Apple touch icon. The opaque 192px and 512px PNGs are
-prepared for the later PWA slice. These assets alone do not enable installation,
-service-worker updates, or offline support.
+used by the PWA manifest. The app remains online for operational workflows;
+offline navigation shows only a public connection-help page.
+
+## PWA installation and updates
+
+The landing page includes **앱으로 이용하기** below its help answers. Administrators
+can open **더보기 → 앱 설치 안내**. Supporting browsers can show a native install
+button; other browsers receive Korean installation guidance. Existing guest/staff
+QR and personal-link access is unchanged. Installation launches `/` and does not
+store a private link or replace administrator authentication.
+
+`public/manifest.webmanifest` provides the name, icons and standalone display.
+Production registers `/service-worker.js`; development does not register it. Each
+production build gives the app and worker the same release ID. Updates show a
+notice; manual refresh is available only on the landing and admin More screens,
+subject to existing pending-work/navigation checks. No automatic reload or forced
+worker activation occurs. Other open windows keep running; workers activate
+naturally after older clients close. A refreshed page already using the new build
+does not repeatedly prompt about the same waiting worker.
+
+The worker explicitly caches only `/offline.html`. It never caches API responses,
+private pages, photos or credentials and never queues submissions. Navigation uses
+the network with a static offline fallback; APIs and other requests bypass the
+worker. Offline readiness requires a successful online visit and worker control;
+first-ever offline visits cannot be recovered. Live connection notices do not
+prove whether an earlier request reached the server; reconnect and reconcile
+through the existing workflow before retrying a submission.
+
+See deployment/README.md for HTTPS, worker MIME/cache headers and release checks.
+Physical-device installation and update acceptance remain in MANUAL_ACCEPTANCE.md.
+Installation guidance follows the [MDN PWA installation guide](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Making_PWAs_installable)
+and [Apple Home Screen guidance](https://support.apple.com/guide/iphone/iph42ab2f3a7/ios).
 
 ## Administrator access
 

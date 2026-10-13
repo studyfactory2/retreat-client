@@ -193,3 +193,30 @@ and stale-session races; interrupted requests/network recovery; concurrent edits
 or submissions; physical phones, QR scanning, camera and system clipboard behavior;
 full responsive/browser coverage; and deployment/production configuration. This
 run does not certify those cases or deployment readiness.
+
+## PWA device acceptance — 2026-10-13
+
+Pending on physical iPhone/Safari and Android/Chrome after the user deploys:
+
+- Install from the landing page guidance or native prompt. Confirm the ITCEN icon,
+  name and standalone display. Reopening starts at `/` with no private link/token.
+- Sign in as an administrator inside the installed app; verify session restoration
+  and logout there. Do not assume its storage is shared with another browser.
+- Open real guest/staff QR and personal links; confirm their original scoped flow.
+  OS/browser handling may open links in the browser rather than the installed app.
+- On an online visit, allow the worker to install. Close and reopen the app, then
+  disconnect and reopen: confirm the public connection-help page. Reconnect and
+  use 다시 시도; verify the original route/link can be recovered. First-ever offline
+  visits without worker control are outside this fallback.
+- Disconnect while a checklist is open: confirm the connection notice, no forced
+  reload and no claim of successful offline saving, submission or upload. Reconnect
+  and check the actual result through the existing flow before repeating writes.
+- With checklist work open, deploy a new version: update notice must not refresh
+  the page or show a refresh action there. Finish/save work; use landing/admin More
+  to refresh. Confirm another open working tab remains untouched.
+- Confirm the same waiting release stops prompting after refresh; close all app
+  tabs/windows and reopen to let the new worker activate naturally.
+- Inspect Cache Storage: only the public offline document belongs in the
+  `retreat-public-offline-*` caches. No API, private page, photo or token URL.
+
+These are pending device/production checks, not automated acceptance claims.

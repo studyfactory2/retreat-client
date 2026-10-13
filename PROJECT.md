@@ -2936,3 +2936,56 @@ actual local page at desktop, 390px and 320px, including no horizontal overflow 
 320px, guidance-anchor focus, opening a FAQ answer, and admin-login navigation.
 Independent source review found no blocking regression. No authenticated writes,
 real-device or production acceptance, new permanent tests, commits or deployment.
+
+
+## Slice 3 — PWA installation and safe updates — 2026-10-13
+
+Added the branded web manifest, standalone launch metadata, and production-only
+service-worker registration. Install guidance appears below the landing FAQ and
+as a compact disclosure in administrator More. A native install action is shown
+only when the browser offers it; Korean device instructions remain available.
+Installation starts at `/` and does not add credentials to the manifest or
+change guest/staff link authorization or administrator session behavior.
+
+Operational workflows remain online. The worker caches only the fixed public
+`/offline.html` connection-help page, bypasses API/write/asset requests, and never
+stores navigation URLs, application responses, photos or private tokens. Retry
+reloads the same address without displaying or recording its fragment. There is
+no offline submission queue. A first-ever offline visit cannot use the fallback
+until a worker has previously installed and controls the navigation.
+
+New builds carry matching app/worker release IDs. Updates remain waiting without
+skipWaiting or clients.claim; existing pages are never automatically refreshed.
+The notice offers manual refresh only on the accepted landing or admin More
+route, checks existing pending-navigation and dirty guards, and retains native
+unload guards. Other routes instruct the user to finish and save work first.
+Nginx serves worker/manifest/offline files through exact no-store locations.
+
+Verification: isolated Yarn typecheck, non-fixing lint and production builds
+passed with fictional HTTPS origins; the existing bundle-size warning remains.
+Disposable worker/controller/component probes covered cache ownership, request
+bypass, failure fallback, release comparison, lifecycle cleanup, install states
+and refresh eligibility. An actual browser against an isolated production build
+verified a network-failure fallback, manual recovery preserving a fictional hash,
+public-offline-only cache contents, a new-release notice without a forced reload,
+and explicit refresh without a repeated notice. The install guide was visually
+checked at 390px and 320px with no horizontal overflow at 320px. Test workers,
+caches and tabs were cleaned up. Physical iPhone/Android installation, production
+HTTPS/Nginx/CloudFront behavior and authenticated PWA workflow acceptance remain
+pending in MANUAL_ACCEPTANCE.md. No backend changes, new dependencies, permanent
+tests, commits, server configuration or deployment actions were made.
+
+
+### PWA installation card design refinement — 2026-10-13
+
+Reworked the shared installation presentation into a pale-blue section with a
+stronger heading and a separate white action/instructions panel. Desktop uses
+two balanced columns; phone layouts stack them. The admin More disclosure stays
+compact. Install event handling, service worker, update policy and API flows are
+unchanged. The footer keeps the private-link and internet requirements visible.
+
+Verification: isolated typecheck, lint and production build passed (existing
+bundle-size warning only). Actual local landing/disclosure layouts were checked
+at desktop, 390px and 320px; no horizontal overflow at 320px. Independent source
+review covered native install/loading/installed states and compact admin markup.
+No device-installation, authenticated admin or new deployment acceptance claimed.
