@@ -1,3 +1,4 @@
+import { APP_BRAND } from '../../../core/config/brand';
 import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useNavigationGuard } from '../../../core/router/navigation/use-navigation-guard';
@@ -47,7 +48,7 @@ function GuestDraftSessionScreen() {
       <header className="guest-draft-header">
         <div>
           <div className="guest-draft-brand">
-            ITCEN<span>휴양소 이용 안내</span>
+            {APP_BRAND.name}<span>휴양소 이용 안내</span>
           </div>
           <span>이용객 체크리스트</span>
         </div>
@@ -100,7 +101,7 @@ function GuestDraftSessionScreen() {
           />
         )}
       </main>
-      <footer className="guest-draft-footer">운영 OH BOK</footer>
+      <footer className="guest-draft-footer">{APP_BRAND.operatorCredit}</footer>
     </div>
   );
 }

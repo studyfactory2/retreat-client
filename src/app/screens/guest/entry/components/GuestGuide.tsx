@@ -1,3 +1,4 @@
+import { APP_BRAND } from '../../../../core/config/brand';
 import { Link, type To } from 'react-router-dom';
 import type { GuestPropertyGuideDto } from '../../../../features/guest-entry/guest-entry.types';
 import { Button } from '../../../../shared/ui/Button/Button';
@@ -20,7 +21,7 @@ export function GuestGuide({
       </Link>
       <div className="guest-guide-property">
         <p className="guest-eyebrow">
-          {data.property.region || 'OH BOK RETREAT'}
+          {data.property.region || APP_BRAND.appName}
         </p>
         <p>{data.property.name}</p>
       </div>

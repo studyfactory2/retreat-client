@@ -1,3 +1,4 @@
+import { APP_BRAND } from '../../../core/config/brand';
 import { useLocation } from 'react-router-dom';
 import { Button } from '../../../shared/ui/Button/Button';
 import { GuestDraftScreen } from '../../guest/draft';
@@ -26,7 +27,7 @@ function PrivateDraftEntry() {
     <div className="draft-entry">
       <header className="draft-entry-header">
         <strong>
-          OH BOK <span>RETREAT</span>
+          {APP_BRAND.name}<span>휴양소</span>
         </strong>
         <span>체크리스트 작성</span>
       </header>
@@ -51,6 +52,7 @@ function PrivateDraftEntry() {
           )}
         </section>
       </main>
+      <footer className="draft-entry-footer">{APP_BRAND.operatorCredit}</footer>
     </div>
   );
 }

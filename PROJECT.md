@@ -46,10 +46,11 @@ tokens. Screen-local code remains with its screen. Avoid empty scaffolding and
 one growing file containing every DTO. The visual direction follows the approved
 blue/navy/white references: cobalt primary actions, deep navy headings, white
 surfaces, cool pale backgrounds, restrained shadows and generous spacing. Keep
-ITCEN as the primary text brand on the redesigned admin dashboard and guest home,
-with OH BOK credited discreetly as the operator. Other screens keep their current
-branding until their approved redesign slice. No approved official logo asset is
-present; do not fabricate one. Reference mockups do not define extra scope. Use
+ITCEN as the primary text brand across public, admin, guest and staff screens,
+with OH BOK credited discreetly as the operator. Shared identity is defined in
+`core/config/brand.ts`; keep static document metadata aligned. No approved official
+logo asset is present; the app icon is an original neutral retreat symbol, not a
+corporate logo. Reference mockups do not define extra scope. Use
 semantic HTML, keyboard focus, readable contrast, and phone-first guest/staff
 layouts. Administrator pages also support desktop/tablet.
 
@@ -2894,3 +2895,24 @@ retries. That test caught and verified a fix to the upstream-variable directive
 order. Host paths, ports and DNS were adapted for the probe; actual Docker, EC2,
 CloudFront, database, S3 and browser workflow acceptance remain pending. The
 existing frontend bundle-size warning remains. No permanent tests were added.
+
+## Slice 1 — consistent ITCEN branding — 2026-10-13
+
+ITCEN is now the primary text identity across the public shell, login, admin,
+guest/staff entry, drafts, submitted detail and invalid-link screens. Shared
+identity lives in `core/config/brand.ts`; OH BOK remains the discreet operator
+credit. QR poster footers and browser title/metadata use the same identity.
+Existing layout, navigation, credential handling and QR encoding are unchanged.
+
+Added an original neutral retreat symbol as an SVG favicon, 32px PNG fallback,
+180px Apple touch icon, and opaque 192px/512px app icons. This is not an official
+corporate logo. Landing-page redesign and PWA manifest, installation and offline
+behavior remain later slices. No backend, schema, dependency or server changes.
+The pre-existing Dockerfile COPY permission fix remains separate from this slice.
+
+Verification: isolated Yarn typecheck, non-fixing lint and production build passed
+with fictional HTTPS origins. Existing large-bundle warning remains. Disposable
+actual-source fixtures passed 114 branding/asset assertions across 16 variants;
+public, guest guide and staff headers were visually checked at 320px. All six
+icon assets survive the build. These are synthetic checks, not authenticated
+workflow, physical-device, production or PWA acceptance. No permanent tests added.

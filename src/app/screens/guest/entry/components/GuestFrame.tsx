@@ -1,3 +1,4 @@
+import { APP_BRAND } from '../../../../core/config/brand';
 import type { ReactNode, RefObject } from 'react';
 import { Link, type To } from 'react-router-dom';
 import type { GuestView } from '../model/guest-entry-model';
@@ -31,8 +32,6 @@ export function GuestFrame({
 }) {
   const homePresentation = view === 'home';
   const journeyPresentation = view === 'check-in' || view === 'check-out';
-  const clientBrand =
-    homePresentation || journeyPresentation || view === 'report';
   return (
     <div
       className={`guest-entry${homePresentation ? ' guest-entry--home' : ''}${journeyPresentation ? ' guest-entry--journey' : ''}${ready ? ' guest-entry--navigable' : ''}`}
@@ -68,17 +67,13 @@ export function GuestFrame({
             <Link
               className="guest-brand"
               to={home}
-              aria-label={
-                clientBrand ? '아이티센 이용 안내 홈' : '오복 이용 안내 홈'
-              }
+              aria-label={`${APP_BRAND.appName} 이용 안내 홈`}
             >
-              {clientBrand ? 'ITCEN' : 'OH BOK'}
-              <span>{clientBrand ? '휴양소 이용 안내' : 'RETREAT'}</span>
+              {APP_BRAND.name}<span>휴양소 이용 안내</span>
             </Link>
           ) : (
             <div className="guest-brand">
-              {clientBrand ? 'ITCEN' : 'OH BOK'}
-              <span>{clientBrand ? '휴양소 이용 안내' : 'RETREAT'}</span>
+              {APP_BRAND.name}<span>휴양소 이용 안내</span>
             </div>
           )}
           <div className="guest-header__tools">
@@ -107,13 +102,7 @@ export function GuestFrame({
         {children}
       </main>
       <footer className="guest-footer">
-        {clientBrand ? (
-          <>
-            운영 <strong>OH BOK</strong>
-          </>
-        ) : (
-          '머무는 모든 순간에, 오복이 함께합니다.'
-        )}
+        {APP_BRAND.operatorCredit}
       </footer>
       {ready && (
         <nav

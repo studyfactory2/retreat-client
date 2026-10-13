@@ -38,7 +38,7 @@
   color: var(--color-muted);
   font-size: 10px;
   font-weight: 600;
-  letter-spacing: 2.3px;
+  letter-spacing: 0.4px;
 }
 
 .admin-login__signature span {

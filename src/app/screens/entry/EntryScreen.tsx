@@ -1,3 +1,4 @@
+import { APP_BRAND } from '../../core/config/brand';
 import { Link } from 'react-router-dom'
 import './entry.css'
 
@@ -43,7 +44,7 @@ export function EntryScreen() {
         <p className="entry-screen__description">
           머무는 사람도, 돌보는 사람도 편안하도록.
           <br />
-          오복과 함께하는 휴양소 관리.
+          {APP_BRAND.appName} 이용 및 관리 서비스.
         </p>
       </section>
 

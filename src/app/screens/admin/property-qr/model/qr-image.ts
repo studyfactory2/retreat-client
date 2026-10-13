@@ -1,3 +1,4 @@
+import { APP_BRAND } from '../../../../core/config/brand';
 import type { QrIssue } from '../../../../features/admin-property-qr/admin-property-qr.types';
 
 export function qrImageFilename(issue: QrIssue): string {
@@ -54,6 +55,10 @@ export async function createQrImage(
   context.drawImage(qr, 0, headingHeight);
   context.font = '24px sans-serif';
   context.fillStyle = '#536178';
-  context.fillText('OH BOK · RETREAT', 512, poster.height - 30);
+  context.fillText(
+    `${APP_BRAND.appName} · ${APP_BRAND.operatorCredit}`,
+    512,
+    poster.height - 30,
+  );
   return poster.toDataURL('image/png');
 }

@@ -1,6 +1,6 @@
 # Retreat client
 
-OH BOK retreat operations frontend: React, TypeScript, Vite, and Yarn.
+ITCEN retreat operations frontend, operated by OH BOK: React, TypeScript, Vite, and Yarn.
 
 ## Local development
 
@@ -38,7 +38,8 @@ settings aligned. Rebuild the frontend after changing either public URL.
 ## Current slice
 
 - Study Factory-style `src/app/core`, `features`, `screens`, `shared`, and `styles`.
-- OH BOK welcome screen, shared shell/button/state components, and responsive CSS.
+- ITCEN identity across public, admin, guest and staff screens, with a discreet
+  OH BOK operator credit; shared shell/button/state components and responsive CSS.
 - Browser routing, strict TypeScript, and fixed development/preview port 5175.
 - GET/POST request helper with explicit per-request credentials, Korean errors,
   cancellation/timeout, JSON/FormData support, and binary downloads.
@@ -60,6 +61,19 @@ the same private link reopens the original completion receipt. Staff and guest
 credentials stay in their matching fragment/request state and never enter the
 administrator session or browser storage. See PROJECT.md for the implemented
 scope and remaining verification boundaries.
+
+## Branding
+
+`src/app/core/config/brand.ts` owns the shared ITCEN name and OH BOK operator credit.
+The document title and public metadata live in `index.html`; keep them aligned
+when the identity changes. QR posters use the same credit without changing their
+encoded destination or downloaded filename.
+
+`public/icons/retreat-symbol.svg` is an original retreat symbol, not an official
+ITCEN corporate logo. The browser favicon lives at `public/favicon.svg`, with a
+32px PNG fallback and a 180px Apple touch icon. The opaque 192px and 512px PNGs are
+prepared for the later PWA slice. These assets alone do not enable installation,
+service-worker updates, or offline support.
 
 ## Administrator access
 

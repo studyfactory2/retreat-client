@@ -1,3 +1,4 @@
+import { APP_BRAND } from '../../../core/config/brand';
 import { Navigate } from 'react-router-dom'
 import { useAdminSession } from '../../../core/session/use-admin-session'
 import { Button } from '../../../shared/ui/Button/Button'
@@ -42,11 +43,11 @@ export function AdminLoginScreen() {
         <p className="admin-login__description">
           머무는 사람도, 돌보는 사람도 편안하도록.
           <br />
-          오복 휴양소의 관리자 공간입니다.
+          {APP_BRAND.appName}의 관리자 공간입니다.
         </p>
         <div className="admin-login__signature" aria-hidden="true">
           <span />
-          OH BOK RETREAT
+          {APP_BRAND.appName}
         </div>
       </section>
 

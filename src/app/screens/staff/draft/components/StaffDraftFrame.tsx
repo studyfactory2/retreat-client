@@ -1,3 +1,4 @@
+import { APP_BRAND } from '../../../../core/config/brand';
 import type { ReactNode, RefObject } from 'react';
 
 export function StaffDraftFrame({
@@ -21,7 +22,7 @@ export function StaffDraftFrame({
       <header className="staff-draft-header">
         <div>
           <strong className="staff-draft-brand">
-            OH BOK<span>RETREAT</span>
+            {APP_BRAND.name}<span>휴양소 정비 안내</span>
           </strong>
           <span>직원</span>
         </div>
@@ -35,7 +36,7 @@ export function StaffDraftFrame({
         {children}
       </main>
       <footer className="staff-draft-footer">
-        좋은 머무름을 함께 준비하는, 오복.
+        {APP_BRAND.operatorCredit}
       </footer>
     </div>
   );

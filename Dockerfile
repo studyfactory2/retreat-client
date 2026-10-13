@@ -10,8 +10,8 @@ ARG VITE_API_BASE_URL
 RUN VITE_FRONTEND_URL="$VITE_FRONTEND_URL" VITE_API_BASE_URL="$VITE_API_BASE_URL" yarn build
 
 FROM nginx:stable-alpine AS runtime
-COPY deployment/nginx.conf /etc/nginx/nginx.conf.template
-COPY deployment/entrypoint.sh /usr/local/bin/retreat-entrypoint.sh
+COPY --chmod=0644 deployment/nginx.conf /etc/nginx/nginx.conf.template
+COPY --chmod=0755 deployment/entrypoint.sh /usr/local/bin/retreat-entrypoint.sh
 COPY --from=build /app/dist /usr/share/nginx/html
 USER nginx
 EXPOSE 8080

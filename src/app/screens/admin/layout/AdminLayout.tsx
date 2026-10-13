@@ -1,3 +1,4 @@
+import { APP_BRAND } from '../../../core/config/brand';
 import { useEffect } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { appRoutes } from '../../../core/router/routes';
@@ -37,9 +38,9 @@ export function AdminLayout() {
         <NavLink
           className="admin-layout__brand"
           to={appRoutes.admin}
-          aria-label="ITCEN 휴양소 관리 홈"
+          aria-label={`${APP_BRAND.appName} 관리 홈`}
         >
-          ITCEN<span>휴양소 관리</span>
+          {APP_BRAND.name}<span>휴양소 관리</span>
         </NavLink>
         <div className="admin-layout__account">
           <span className="admin-layout__avatar" aria-hidden="true">
@@ -68,7 +69,7 @@ export function AdminLayout() {
           <AdminNavigation />
         </div>
         <div className="admin-layout__signature">
-          <small>운영 · OH BOK</small>
+          <small>{APP_BRAND.operatorCredit}</small>
         </div>
       </aside>
 

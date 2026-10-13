@@ -38,7 +38,7 @@
 .app-shell__motto {
   font-size: 10px;
   font-weight: 600;
-  letter-spacing: 2.4px;
+  letter-spacing: 0;
 }
 
 .app-shell__brand span {
@@ -92,7 +92,7 @@
   }
   .app-shell__brand span {
     padding-left: 12px;
-    font-size: 9px;
+    font-size: 11px;
   }
   .app-shell__footer {
     flex-direction: column;

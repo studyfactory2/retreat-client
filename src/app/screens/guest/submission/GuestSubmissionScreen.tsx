@@ -1,3 +1,4 @@
+import { APP_BRAND } from '../../../core/config/brand';
 import { useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useNavigationGuard } from '../../../core/router/navigation/use-navigation-guard';
@@ -33,7 +34,7 @@ export function GuestSubmissionScreen() {
       <header className="guest-draft-header">
         <div>
           <div className="guest-draft-brand">
-            OH BOK<span>RETREAT</span>
+            {APP_BRAND.name}<span>휴양소 이용 안내</span>
           </div>
           <span>제출한 체크리스트</span>
         </div>
@@ -84,7 +85,7 @@ export function GuestSubmissionScreen() {
         )}
       </main>
       <footer className="guest-draft-footer">
-        머무는 모든 순간에, 오복이 함께합니다.
+        {APP_BRAND.operatorCredit}
       </footer>
     </div>
   );

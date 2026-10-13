@@ -1,3 +1,4 @@
+import { APP_BRAND } from '../../../core/config/brand';
 import { useSearchParams } from 'react-router-dom';
 import { useAdminSession } from '../../../core/session/use-admin-session';
 import {
@@ -172,7 +173,7 @@ function DashboardWorkspace({
           )}
         </section>
       )}
-      <footer className="dashboard-footer">운영 · OH BOK</footer>
+      <footer className="dashboard-footer">{APP_BRAND.operatorCredit}</footer>
     </div>
   );
 }
