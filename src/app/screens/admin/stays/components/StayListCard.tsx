@@ -23,6 +23,9 @@ export function StayListCard({
       <div className="admin-directory-identity">
         <h2>{stay.property.name}</h2>
         <p className="stay-list-guest">{stay.guestName}</p>
+        {(stay.company || stay.department) && (
+          <p className="stay-list-affiliation">{[stay.company, stay.department].filter(Boolean).join(' · ')}</p>
+        )}
         {!stay.property.isActive && (
           <p className="admin-directory-muted">비활성 휴양소</p>
         )}

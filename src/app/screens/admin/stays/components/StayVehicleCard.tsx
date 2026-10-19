@@ -31,13 +31,13 @@ export function StayVehicleCard({
         <h2 id={title}>차량 정보</h2>
         <Button
           className="admin-button-secondary"
+          aria-label="차량 정보 새로고침"
           disabled={actionsDisabled || resource.status === 'loading'}
           onClick={() => refresh()}
         >
-          차량 정보 새로고침
+          새로고침
         </Button>
       </div>
-      <p>이 이용 일정에 저장된 차량번호를 확인합니다.</p>
 
       {resource.status === 'loading' && (
         <p className="stay-vehicle__message" role="status">

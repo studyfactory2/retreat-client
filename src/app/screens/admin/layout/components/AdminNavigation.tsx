@@ -85,7 +85,7 @@ export function AdminNavigation({
           <AdminMenuIcon name="menu" />
           <span>메뉴</span>
         </button>
-      ) : (
+      ) : presentation === 'drawer' ? (
         <Link
           className={`admin-layout__nav-link admin-layout__nav-link--more${morePage ? ' active' : ''}`}
           to={appRoutes.adminMore}
@@ -95,7 +95,7 @@ export function AdminNavigation({
           <AdminMenuIcon name="more" />
           <span>더보기</span>
         </Link>
-      )}
+      ) : null}
     </nav>
   );
 }

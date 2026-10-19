@@ -252,3 +252,23 @@
     flex-wrap: wrap;
   }
 }
+
+.admin-stay .stay-history { margin-top: 32px; }
+.admin-stay .stay-history__heading { align-items: center; gap: 16px; margin-bottom: 18px; }
+.admin-stay .stay-history__heading h2 { margin-bottom: 4px; font-size: 21px; font-weight: 650; letter-spacing: -0.035em; }
+.admin-stay .stay-history__heading p { font-size: 12px; }
+.admin-stay .stay-history__heading .ui-button { min-height: 44px; padding: 10px 14px; font-size: 13px; }
+.admin-stay .stay-history__count { font-size: 12px; }
+.admin-stay .stay-history__card { padding: 24px 28px; border-radius: 18px; box-shadow: none; }
+.admin-stay .stay-history__action { font-size: 12px; font-weight: 600; }
+.admin-stay .stay-history__actor { font-size: 13px; }
+.admin-stay .stay-history__initial { font-size: 13px; }
+.admin-stay .stay-history__snapshot { margin-top: 18px; padding-top: 10px; }
+.admin-stay .stay-history__snapshot summary { min-height: 44px; padding-block: 10px; font-size: 13px; }
+@media (max-width: 650px) {
+  .admin-stay .stay-history__heading { flex-direction: row; align-items: center; }
+  .admin-stay .stay-history__heading .ui-button { align-self: center; }
+  .admin-stay .stay-history__heading h2 { font-size: 19px; }
+  .admin-stay .stay-history__card { padding: 20px 18px; border-radius: 16px; }
+  .admin-stay .stay-history__card-heading { align-items: flex-start; }
+}

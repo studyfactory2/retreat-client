@@ -22,20 +22,20 @@ export function ImportRows({
 }) {
   return (
     <div className="stay-import-table-wrap">
-      <table className="stay-import-table">
+      <table className="stay-import-table" role="table">
         <caption className="stay-import-sr-only">명단 행별 검토 결과</caption>
-        <thead>
-          <tr>
-            <th scope="col">원본 / 이용객</th>
-            <th scope="col">휴양소 / 이용 기간</th>
-            <th scope="col">검토 결과</th>
-            <th scope="col">처리</th>
+        <thead role="rowgroup">
+          <tr role="row">
+            <th scope="col" role="columnheader">원본 · 이용객</th>
+            <th scope="col" role="columnheader">휴양소 · 이용 기간</th>
+            <th scope="col" role="columnheader">검토 결과</th>
+            <th scope="col" role="columnheader">처리</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody role="rowgroup">
           {rows.map((row) => (
-            <tr key={row.id}>
-              <td>
+            <tr key={row.id} role="row">
+              <td className="stay-import-row__guest" role="cell">
                 <p className="stay-import-row-source">
                   {row.sheetName} · {row.rowNumber}행
                 </p>
@@ -50,7 +50,7 @@ export function ImportRows({
                 </p>
                 <ImportSourceCells row={row} />
               </td>
-              <td>
+              <td className="stay-import-row__stay" role="cell">
                 <strong>
                   {row.propertyId
                     ? (properties.find(
@@ -81,7 +81,7 @@ export function ImportRows({
                   </dl>
                 )}
               </td>
-              <td>
+              <td className="stay-import-row__result" role="cell">
                 <span
                   className={`stay-import-badge stay-import-badge--${row.action === 'SKIP' ? 'skip' : row.validationStatus.toLowerCase()}`}
                 >
@@ -104,7 +104,7 @@ export function ImportRows({
                   </p>
                 )}
               </td>
-              <td>
+              <td className="stay-import-row__actions" role="cell">
                 <div className="stay-import-row-actions">
                   {row.stayId ? (
                     <Link

@@ -29,7 +29,7 @@ export function StayViewNavigation({
           to={recordsHref}
           aria-current={view === 'records' ? 'page' : undefined}
         >
-          전체·취소 기록
+          전체 기록
         </Link>
       )}
     </nav>

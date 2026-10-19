@@ -17,6 +17,7 @@ import {
 } from './model/import-upload-model';
 import { ImportPropertyMappings } from './components/ImportPropertyMappings';
 import { UploadFileField } from './components/UploadFileField';
+import { ImportSteps } from './components/ImportSteps';
 import './styles/import-upload.css';
 
 type UploadState = {
@@ -185,25 +186,23 @@ function UploadWorkspace({
     <div className="import-upload">
       <header className="import-upload__heading">
         <div>
-          <p className="import-upload__eyebrow">이용 일정 가져오기</p>
-          <h1>명단 파일 업로드</h1>
-          <p>이용자 명단을 올리고, 미리보기에서 등록할 내용을 검토하세요.</p>
+          <h1>엑셀 가져오기</h1>
+          <p>명단을 올리고 이용 일정을 등록하세요.</p>
         </div>
         <Button
           className="admin-button-secondary"
           disabled={state.busy}
           onClick={() => navigate('/admin/stays')}
         >
-          목록으로 돌아가기
+          일정 목록
         </Button>
       </header>
 
+      <ImportSteps current={0} />
+
       <div className="import-upload__guide">
-        <strong>업로드 후 바로 일정이 등록되지는 않습니다.</strong>
-        <p>
-          미리보기에서 휴양소와 이용객 정보를 검토하고 등록을 확정해야 실제 이용
-          일정에 반영됩니다.
-        </p>
+        <strong>명단 검토 후 등록을 확정합니다.</strong>
+        <p>파일 업로드만으로 이용 일정이 등록되지는 않습니다.</p>
       </div>
 
       {state.message && (
@@ -300,10 +299,10 @@ function UploadWorkspace({
           <p>
             {state.busy
               ? '미리보기를 만들고 있습니다. 업로드가 끝날 때까지 화면을 유지해 주세요.'
-              : '업로드한 내용은 다음 단계에서 검토합니다.'}
+              : '다음 단계에서 휴양소와 이용객 정보를 검토합니다.'}
           </p>
           <Button type="submit" loading={state.busy} disabled={state.uncertain}>
-            {state.busy ? '미리보기 만드는 중' : '미리보기 만들기'}
+            {state.busy ? '미리보기 만드는 중' : '명단 검토하기'}
           </Button>
         </div>
       </form>

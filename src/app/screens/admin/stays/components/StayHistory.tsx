@@ -31,11 +31,9 @@ export function StayHistory({
     <section className="stay-history" aria-labelledby="stay-history-title">
       <header className="stay-history__heading">
         <div>
-          <p className="stay-history__eyebrow">CHANGE HISTORY</p>
           <h2 id="stay-history-title">변경 이력</h2>
           <p>
-            누가 언제 무엇을 변경했는지 확인하세요. 모든 시간은 한국 시간
-            기준입니다.
+            한국 시간 기준
           </p>
         </div>
         <Button

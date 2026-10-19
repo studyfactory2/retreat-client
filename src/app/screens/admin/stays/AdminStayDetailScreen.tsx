@@ -129,11 +129,10 @@ function DetailWorkspace({
     );
 
   return (
-    <div className="admin-stay">
+    <div className="admin-stay admin-stay--detail">
       <header className="stay-heading">
         <div>
-          <p className="stay-heading__eyebrow">STAY DETAILS</p>
-          <h1>이용 일정 상세</h1>
+          <h1>{stay.status === 'CANCELLED' ? '취소된 이용 일정' : '이용 일정 상세'}</h1>
           <p>
             {stay.property.name} · {stay.guestName}
           </p>
@@ -234,33 +233,33 @@ function DetailWorkspace({
       )}
       <StayDetails stay={stay} />
       {!changingStatus && (
-        <StayLinkCard
-          stay={stay}
-          token={token}
-          rejectSession={rejectSession}
-          registerGuard={linkNavigation.register}
-          navigationPending={linkNavigation.pending}
-          onReloadStay={() =>
-            linkNavigation.request(() => {
-              setNotice(null);
-              refresh();
-            })
-          }
-        />
-      )}
-      {!changingStatus && (
-        <StayVehicleCard
-          stay={stay}
-          token={token}
-          rejectSession={rejectSession}
-          actionsDisabled={linkNavigation.busy || linkNavigation.pending}
-          onReloadStay={() =>
-            linkNavigation.request(() => {
-              setNotice(null);
-              refresh();
-            })
-          }
-        />
+        <div className="stay-support-grid">
+          <StayLinkCard
+            stay={stay}
+            token={token}
+            rejectSession={rejectSession}
+            registerGuard={linkNavigation.register}
+            navigationPending={linkNavigation.pending}
+            onReloadStay={() =>
+              linkNavigation.request(() => {
+                setNotice(null);
+                refresh();
+              })
+            }
+          />
+          <StayVehicleCard
+            stay={stay}
+            token={token}
+            rejectSession={rejectSession}
+            actionsDisabled={linkNavigation.busy || linkNavigation.pending}
+            onReloadStay={() =>
+              linkNavigation.request(() => {
+                setNotice(null);
+                refresh();
+              })
+            }
+          />
+        </div>
       )}
       <StayHistory
         stayId={stay.id}
@@ -344,12 +343,10 @@ function StayEditor({
   }
 
   return (
-    <div className="admin-stay">
+    <div className="admin-stay admin-stay--form">
       <header className="stay-heading">
         <div>
-          <p className="stay-heading__eyebrow">EDIT STAY</p>
           <h1>이용 일정 수정</h1>
-          <p>변경할 이용 정보만 수정해 주세요.</p>
         </div>
       </header>
       <p className="stay-banner">

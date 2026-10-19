@@ -116,8 +116,7 @@ function CalendarWorkspace({
     <div className="admin-calendar">
       <header className="calendar-heading">
         <div>
-          <h1>이용 일정</h1>
-          <p>예정 일정과 체크리스트 제출 현황을 확인하세요.</p>
+          <h1>이용 달력</h1>
         </div>
         <div className="calendar-heading__actions">
           <Link
@@ -276,11 +275,14 @@ function CalendarWorkspace({
               />
             )}
           </div>
-          <p className="calendar-footnote">
+          <details className="calendar-footnote">
+            <summary>일정 표시 안내</summary>
+            <p>
             취소되지 않은 예정 일정이며 비활성 휴양소도 포함됩니다. 체크리스트
             제출은 실제 입·퇴실이나 정비 완료를 뜻하지 않습니다. 과거 날짜도
             현재 제출 내역을 반영합니다.
-          </p>
+            </p>
+          </details>
         </>
       )}
     </div>

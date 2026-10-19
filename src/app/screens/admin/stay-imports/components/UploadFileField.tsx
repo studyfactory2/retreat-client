@@ -13,10 +13,9 @@ export function UploadFileField({
       aria-labelledby="import-upload-file-title"
     >
       <div className="import-upload__section-heading">
-        <span aria-hidden="true">01</span>
         <div>
-          <h2 id="import-upload-file-title">명단 파일 선택</h2>
-          <p>전달받은 이용자 명단과 같은 양식의 .xls 파일을 선택해 주세요.</p>
+          <h2 id="import-upload-file-title">명단 파일</h2>
+          <p>이용자 명단 양식의 .xls 파일을 선택해 주세요.</p>
         </div>
       </div>
       <div className="import-upload__file-field">

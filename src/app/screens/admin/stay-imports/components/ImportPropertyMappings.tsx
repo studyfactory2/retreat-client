@@ -36,22 +36,19 @@ export function ImportPropertyMappings({
       aria-labelledby="import-upload-mappings-title"
     >
       <div className="import-upload__section-heading">
-        <span aria-hidden="true">02</span>
         <div>
           <h2 id="import-upload-mappings-title">
-            시트와 휴양소 연결 <small>선택</small>
+            시트 연결 <small>선택</small>
           </h2>
-          <p>파일의 시트 이름을 실제 휴양소와 연결할 수 있습니다.</p>
+          <p>엑셀 시트를 등록된 휴양소와 연결해 주세요.</p>
         </div>
       </div>
       <div className="import-upload__mapping-guide">
         <p>
-          연결 없이 업로드할 수도 있습니다. 연결하지 않은 시트의 이용 일정은
-          미리보기에서 휴양소를 선택하고 검토해야 합니다.
+          연결하지 않은 시트는 다음 단계에서 휴양소를 선택해 검토합니다.
         </p>
         <p id="import-upload-sheet-hint">
-          시트 이름은 파일에 적힌 공백까지 그대로 입력해 주세요. 추천 이름과
-          다르면 직접 입력할 수 있습니다.
+          시트 이름은 공백까지 원본과 같아야 합니다. 추천 이름 외에도 직접 입력할 수 있습니다.
         </p>
       </div>
 

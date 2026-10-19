@@ -21,7 +21,7 @@ export function PwaStatus({ allowReload, canReload }: {
           <p role="status">
             새 버전이 준비되었어요. {allowReload
               ? '작업을 마친 뒤 새로고침해 주세요.'
-              : '작업을 저장한 뒤 홈 화면이나 관리자 더보기에서 새로고침해 주세요.'}
+              : '작업을 저장한 뒤 홈 화면에서 새로고침해 주세요.'}
           </p>
           <div className="pwa-status__actions">
             {allowReload && (

@@ -56,9 +56,6 @@ export function SelectedDayStays({
         <>
           <div
             className="calendar-selected__scroll"
-            role="region"
-            aria-label={`선택일 이용 일정 전체 ${stays.length}건`}
-            tabIndex={0}
           >
             <ol className="calendar-selected__stays">
               {stays.map((stay) => (
@@ -72,10 +69,7 @@ export function SelectedDayStays({
               ))}
             </ol>
           </div>
-          <p className="calendar-selected__note">
-            전체 {stays.length.toLocaleString('ko-KR')}건 · 아래로 이동해 모든
-            일정을 확인할 수 있습니다.
-          </p>
+
         </>
       ) : (
         <div className="calendar-selected__empty">

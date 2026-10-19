@@ -22,3 +22,8 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+.admin-stay .stay-status-action { border-color: #e9d5d8; }
+.admin-stay .stay-status-action h2 { margin-bottom: 10px; }
+.admin-stay .stay-status-action .stay-actions { gap: 10px; }
+.admin-stay .stay-status-action .stay-field__hint { margin-top: 2px; }

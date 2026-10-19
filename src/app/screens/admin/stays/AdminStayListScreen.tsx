@@ -71,8 +71,7 @@ function StayListWorkspace({
     <div className="admin-stay-list admin-directory">
       <header className="stay-list-heading">
         <div>
-          <h1>전체·취소 기록</h1>
-          <p>이용객으로 검색하거나 취소된 일정을 확인하세요.</p>
+          <h1>전체 일정</h1>
         </div>
         <div className="stay-list-heading__actions">
           <Link
@@ -149,7 +148,7 @@ function StayListWorkspace({
         <>
           <div className="stay-list-summary" role="status">
             <p>
-              {filtered ? '조회 결과' : '전체·취소 기록'}{' '}
+              {filtered ? '조회 결과' : '전체 일정'}{' '}
               <strong>{resource.data.total.toLocaleString('ko-KR')}건</strong>
             </p>
             <span>등록된 일정과 실제 입·퇴실 여부는 다릅니다.</span>
@@ -184,10 +183,7 @@ function StayListWorkspace({
             >
               <div className="admin-directory-table-head" aria-hidden="true">
                 <span>휴양소 · 이용객</span>
-                <div className="admin-directory-fields">
-                  <span>입실 예정</span>
-                  <span>퇴실 예정</span>
-                </div>
+                <span>이용 기간</span>
                 <span>일정 상태</span>
                 <span>관리</span>
               </div>

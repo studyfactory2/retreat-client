@@ -25,6 +25,7 @@ import { useStayImport, useImportMutation } from './hooks/use-stay-import';
 import { ImportBatchSummary } from './components/ImportBatchSummary';
 import { ImportRowFilters } from './components/ImportRowFilters';
 import { ImportConfirmation } from './components/ImportConfirmation';
+import { ImportSteps } from './components/ImportSteps';
 import './styles/stay-import.css';
 
 export function AdminStayImportReviewScreen() {
@@ -162,9 +163,8 @@ function ImportWorkspace({
     <div className="stay-import">
       <header className="stay-import-heading">
         <div>
-          <p className="stay-import-eyebrow">ROSTER IMPORT</p>
-          <h1>엑셀 명단 검토</h1>
-          <p>원본과 검토 결과를 확인한 뒤 이용 일정을 등록하세요.</p>
+          <h1>{resource.status === 'ready' && resource.data.batch.status === 'CONFIRMED' ? '엑셀 가져오기 완료' : '엑셀 명단 검토'}</h1>
+          <p>{resource.status === 'ready' && resource.data.batch.status === 'CONFIRMED' ? '등록된 이용 일정을 확인해 주세요.' : '휴양소와 이용 정보를 확인해 주세요.'}</p>
         </div>
         <div className="stay-import-actions">
           <Link className="ui-button admin-button-secondary" to="/admin/stays">
@@ -179,6 +179,10 @@ function ImportWorkspace({
           </Button>
         </div>
       </header>
+      <ImportSteps
+        current={confirming || (resource.status === 'ready' && resource.data.batch.status === 'CONFIRMED') ? 2 : 1}
+        complete={resource.status === 'ready' && resource.data.batch.status === 'CONFIRMED'}
+      />
       {notice && (
         <p
           className="stay-import-notice stay-import-notice--success"

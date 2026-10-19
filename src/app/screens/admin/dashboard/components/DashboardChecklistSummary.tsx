@@ -29,7 +29,6 @@ export function DashboardChecklistSummary({
           <span aria-hidden="true">↗</span>
         </span>
       </Link>
-      <p className="dashboard-checklist__label">체크리스트 제출 현황</p>
       <dl className="dashboard-checklist__counts">
         {statuses.map(({ label, count, tone }) => (
           <div key={label} className={`dashboard-checklist__status--${tone}`}>

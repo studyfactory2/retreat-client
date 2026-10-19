@@ -1,6 +1,6 @@
 import { APP_BRAND } from '../../../core/config/brand';
 import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
-import { NavLink, Outlet, useLocation } from 'react-router-dom';
+import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { appRoutes } from '../../../core/router/routes';
 import { useAdminSession } from '../../../core/session/use-admin-session';
 import { BrandLogo } from '../../../shared/ui/BrandLogo/BrandLogo';
@@ -108,6 +108,9 @@ export function AdminLayout() {
 
       <aside className="admin-layout__sidebar">
         <AdminNavigation />
+        <Link className="admin-layout__app-guide" to={appRoutes.home}>
+          앱 안내 <span aria-hidden="true">↗</span>
+        </Link>
       </aside>
 
       <main className="admin-layout__main" id="main-content" tabIndex={-1}>

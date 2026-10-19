@@ -24,7 +24,7 @@ export function ImportConfirmation({
   return (
     <section className="stay-import-confirm">
       <div>
-        <h2>검토한 명단을 이용 일정으로</h2>
+        <h2>이용 일정 등록</h2>
         <p>
           {summary.ready}건 등록 준비 · {summary.skipped}건 제외
         </p>
@@ -61,7 +61,7 @@ export function ImportConfirmation({
               계속 검토
             </Button>
             <Button loading={busy} disabled={!canConfirm} onClick={onConfirm}>
-              가져오기 확정
+              {summary.ready > 0 ? '이용 일정 등록' : '가져오기 마치기'}
             </Button>
           </div>
         </div>

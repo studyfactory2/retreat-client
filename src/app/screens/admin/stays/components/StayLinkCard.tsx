@@ -82,6 +82,7 @@ export function StayLinkCard({
         </h2>
         <Button
           className="admin-button-secondary"
+          aria-label="링크 상태 새로고침"
           disabled={
             navigationPending ||
             mutation.busy ||
@@ -93,10 +94,10 @@ export function StayLinkCard({
             void link.refresh();
           }}
         >
-          링크 상태 새로고침
+          새로고침
         </Button>
       </div>
-      <p>이 이용 일정에만 접근할 수 있는 개인 링크입니다.</p>
+      <p>이 일정 전용 링크입니다.</p>
       {resource.status === 'loading' && (
         <p role="status">개인 이용 링크 상태를 불러오는 중입니다.</p>
       )}

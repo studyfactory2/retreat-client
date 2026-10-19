@@ -101,12 +101,10 @@ function CreateWorkspace({
   }
 
   return (
-    <div className="admin-stay">
+    <div className="admin-stay admin-stay--form">
       <header className="stay-heading">
         <div>
-          <p className="stay-heading__eyebrow">NEW STAY</p>
           <h1>이용 일정 등록</h1>
-          <p>휴양소와 이용객 정보를 입력해 새 일정을 등록하세요.</p>
         </div>
       </header>
       {properties.resource.status === 'loading' ? (

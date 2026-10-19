@@ -58,11 +58,14 @@ function ChecklistStatus({
         </Link>
       )}
       {checklist.reviewReasons.length > 0 && (
-        <ul className="calendar-stay__review-reasons">
+        <details className="calendar-stay__review">
+          <summary>확인 사유</summary>
+          <ul className="calendar-stay__review-reasons">
           {checklist.reviewReasons.map((reason) => (
             <li key={reason}>{reviewReasonLabels[reason]}</li>
           ))}
-        </ul>
+          </ul>
+        </details>
       )}
     </div>
   );

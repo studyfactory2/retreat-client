@@ -70,9 +70,7 @@ export function StayForm({
           <div className="stay-form__section-heading">
             <div>
               <h2 id="stay-schedule-title">휴양소와 이용 일정</h2>
-              <p>이용할 휴양소와 입·퇴실 예정 시간을 입력해 주세요.</p>
             </div>
-            <span className="stay-form__required-guide">필수 항목 표시</span>
           </div>
           <div className="stay-form__grid">
             <div className="stay-field stay-field--wide">
@@ -135,7 +133,7 @@ export function StayForm({
               {fieldError('propertyId')}
             </div>
 
-            <div className="stay-field">
+            <div className="stay-field stay-field--date">
               <label htmlFor="stay-checkInAt">
                 입실 예정 <span className="stay-field__required">필수</span>
               </label>
@@ -156,7 +154,7 @@ export function StayForm({
               />
               {fieldError('checkInAt')}
             </div>
-            <div className="stay-field">
+            <div className="stay-field stay-field--date">
               <label htmlFor="stay-checkOutAt">
                 퇴실 예정 <span className="stay-field__required">필수</span>
               </label>
@@ -201,7 +199,6 @@ export function StayForm({
           <div className="stay-form__section-heading">
             <div>
               <h2 id="stay-guest-title">이용객 정보</h2>
-              <p>이용객을 확인할 수 있는 정보를 입력해 주세요.</p>
             </div>
           </div>
           <div className="stay-form__grid">
@@ -284,7 +281,6 @@ export function StayForm({
           <div className="stay-form__section-heading">
             <div>
               <h2 id="stay-notes-title">관리 메모</h2>
-              <p>일정 관리에 필요한 내용을 남겨 주세요.</p>
             </div>
           </div>
           <div className="stay-field">

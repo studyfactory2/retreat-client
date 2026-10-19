@@ -9,6 +9,7 @@ import { useUnsavedStay } from '../../stays/hooks/use-unsaved-stay';
 import { UnsavedStayNotice } from '../../stays/components/UnsavedStayNotice';
 import { ImportSourceCells } from './ImportSourceCells';
 import { ImportMutationNotice } from './ImportMutationNotice';
+import { ImportSteps } from './ImportSteps';
 import {
   importRowValues,
   importRowInput,
@@ -85,7 +86,6 @@ export function ImportRowEditor({
     <section className="stay-import-editor">
       <header className="stay-import-heading">
         <div>
-          <p className="stay-import-eyebrow">ROW REVIEW</p>
           <h1 tabIndex={-1} ref={heading}>
             이용 정보 검토
           </h1>
@@ -94,6 +94,7 @@ export function ImportRowEditor({
           </p>
         </div>
       </header>
+      <ImportSteps current={1} />
       <ImportMutationNotice
         state={state}
         rows={[row]}
@@ -128,9 +129,8 @@ export function ImportRowEditor({
         <fieldset disabled={locked} className="stay-import-fields">
           <legend>검토한 이용 정보</legend>
           <p>
-            내용을 저장하면 원본의 확인 사항을 검토한 것으로 처리됩니다.
-            연락처를 알 수 없으면 비워 둘 수 있습니다. 이용 일정은 최종 확정 후
-            등록됩니다.
+            저장하면 원본의 확인 사항을 검토한 것으로 처리됩니다. 연락처는
+            선택 사항이며, 이용 일정은 최종 확정 후 등록됩니다.
           </p>
           <div className="stay-import-form-grid">
             <div className="stay-field stay-import-wide">
@@ -198,7 +198,7 @@ export function ImportRowEditor({
               ),
             )}
             {(['checkInAt', 'checkOutAt'] as const).map((field) => (
-              <div className="stay-field" key={field}>
+              <div className="stay-field stay-import-date-field" key={field}>
                 <label htmlFor={`import-${field}`}>
                   {field === 'checkInAt'
                     ? '입실 예정 · 필수'
