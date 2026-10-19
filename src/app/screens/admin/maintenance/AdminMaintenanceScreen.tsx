@@ -133,7 +133,10 @@ function MaintenanceWorkspace({
           </Button>
         </div>
       )}
-      <section className="maintenance-panel" aria-labelledby="maintenance-results-title">
+      <section
+        className={`maintenance-panel${!invalid && !busy && resource.status === 'ready' && resource.data.items.length > 0 ? ' maintenance-panel--workspace' : ''}`}
+        aria-labelledby="maintenance-results-title"
+      >
         <h2 id="maintenance-results-title" className="maintenance-sr-only">청소·정비 기록</h2>
         {invalid ? (
           <AdminListState
@@ -171,7 +174,7 @@ function MaintenanceWorkspace({
                 </Button>
               </AdminListState>
             ) : (
-              <MaintenanceRows items={resource.data.items} filters={filters} />
+              <MaintenanceRows key={query} items={resource.data.items} filters={filters} />
             )}
             {resource.data.totalPages > 1 && (
               <nav className="maintenance-pagination" aria-label="청소·정비 목록 페이지">
