@@ -4,9 +4,13 @@ import { SubmissionMetadata } from './SubmissionMetadata';
 export function SubmissionRecord({
   record,
   historical = false,
+  presentation,
+  includeMetadata = true,
 }: {
   record: AdminSubmissionRecord;
   historical?: boolean;
+  presentation?: 'maintenance';
+  includeMetadata?: boolean;
 }) {
   const answers = new Map(
     record.answers.items.map((answer) => [answer.itemId, answer]),
@@ -17,16 +21,28 @@ export function SubmissionRecord({
   );
   return (
     <div className="submission-record">
-      <section className="submission-detail-card">
-        <div className="submission-detail-section-heading">
-          <h3>{historical ? '이 버전의 체크 내용' : '현재 체크 내용'}</h3>
-          <p>
-            {record.answers.items.length} / {itemCount}항목 응답
-          </p>
-        </div>
-        {record.template.definition.sections.map((section) => (
+      <section
+        className="submission-detail-card"
+        aria-label={presentation === 'maintenance' ? '점검 내용' : undefined}
+      >
+        {presentation !== 'maintenance' && (
+          <div className="submission-detail-section-heading">
+            <h3>{historical ? '이 버전의 체크 내용' : '현재 체크 내용'}</h3>
+            <p>
+              {record.answers.items.length} / {itemCount}항목 응답
+            </p>
+          </div>
+        )}
+        {record.template.definition.sections.map((section, index) => (
           <section className="submission-check-section" key={section.id}>
-            <h4>{section.title}</h4>
+            {presentation === 'maintenance' ? (
+              <div className="maintenance-check-section-heading">
+                <h3>{section.title}</h3>
+                {index === 0 && (
+                  <p>{record.answers.items.length} / {itemCount}항목 응답</p>
+                )}
+              </div>
+            ) : <h4>{section.title}</h4>}
             <ul className="submission-check-items">
               {section.items.map((item) => {
                 const answer = answers.get(item.id);
@@ -44,7 +60,9 @@ export function SubmissionRecord({
                           {answer
                             ? answer.value === 'NORMAL'
                               ? '정상'
-                              : '이상'
+                              : presentation === 'maintenance'
+                                ? '이상 응답'
+                                : '이상'
                             : '미응답'}
                         </span>
                         {!item.required && (
@@ -59,7 +77,9 @@ export function SubmissionRecord({
                         )}
                         {answer?.repairReported && (
                           <span className="submission-detail-badge">
-                            현장 조치 기록
+                            {presentation === 'maintenance'
+                              ? '조치 기록'
+                              : '현장 조치 기록'}
                           </span>
                         )}
                       </div>
@@ -71,7 +91,11 @@ export function SubmissionRecord({
                     )}
                     {answer?.repairReported && (
                       <div className="submission-repair-note">
-                        <strong>직원 조치 내용</strong>
+                        <strong>
+                          {presentation === 'maintenance'
+                            ? '직원 조치 기록'
+                            : '직원 조치 내용'}
+                        </strong>
                         <p className="submission-detail-text">
                           {answer.repairNote || '조치 내용 미입력'}
                         </p>
@@ -85,17 +109,21 @@ export function SubmissionRecord({
         ))}
         {record.answers.items.some((answer) => answer.repairReported) && (
           <p className="submission-detail-caption">
-            현장 조치는 직원이 남긴 기록이며, 이상사항의 처리 상태와 별개입니다.
+            {presentation === 'maintenance'
+              ? '직원 조치 기록과 이상사항 처리 상태는 별도로 관리됩니다.'
+              : '현장 조치는 직원이 남긴 기록이며, 이상사항의 처리 상태와 별개입니다.'}
           </p>
         )}
       </section>
       <section className="submission-detail-card submission-general-note">
-        <h3>전체 메모</h3>
+        <h3>{presentation === 'maintenance' ? '메모' : '전체 메모'}</h3>
         <p className="submission-detail-text">
           {record.answers.generalNote || '작성된 메모가 없습니다.'}
         </p>
       </section>
-      <SubmissionMetadata record={record} historical={historical} />
+      {includeMetadata && (
+        <SubmissionMetadata record={record} historical={historical} />
+      )}
     </div>
   );
 }

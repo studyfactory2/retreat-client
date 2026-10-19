@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import type { AdminSubmissionRecord } from '../../../../features/admin-submissions/admin-submissions.types';
 import {
@@ -10,16 +11,20 @@ import {
 export function SubmissionMetadata({
   record,
   historical = false,
+  title,
+  children,
 }: {
   record: AdminSubmissionRecord;
   historical?: boolean;
+  title?: string;
+  children?: ReactNode;
 }) {
   return (
     <details className="submission-detail-disclosure submission-metadata">
       <summary>
         <span>
           <strong>
-            {historical ? '당시 저장된 기본 정보' : '제출 기본 정보'}
+            {title ?? (historical ? '당시 저장된 기본 정보' : '제출 기본 정보')}
           </strong>
           <span className="submission-detail-caption">
             작성자 · 연락처 · 출처 · 체크리스트
@@ -90,7 +95,7 @@ export function SubmissionMetadata({
           </div>
           {record.type === 'MAINTENANCE' && (
             <div>
-              <dt>정비 시작</dt>
+              <dt>작성 시작</dt>
               <dd>{submissionTime(record.startedAt)}</dd>
             </div>
           )}
@@ -117,6 +122,7 @@ export function SubmissionMetadata({
           한국 시간 기준 · 휴양소·작성자·체크리스트 문구는 이 기록에 저장된
           내용입니다.
         </p>
+        {children}
         {record.authorSource === 'STAFF_QR' && (
           <p className="submission-detail-caption">
             직원 QR에서 확인한 담당자 정보입니다.

@@ -15,10 +15,12 @@ export function SubmissionPhotos({
   revision,
   token,
   rejectSession,
+  compact = false,
 }: {
   revision: AdminSubmissionRevision;
   token: string;
   rejectSession: (token: string) => void;
+  compact?: boolean;
 }) {
   const [selected, setSelected] = useState<string | null>(null);
   const photo = revision.photos.find((candidate) => candidate.id === selected);
@@ -30,10 +32,10 @@ export function SubmissionPhotos({
   return (
     <section className="submission-detail-card submission-photos">
       <div className="submission-detail-section-heading">
-        <h3>첨부 사진</h3>
-        <p>
-          {revision.photos.length}장 · 버전 {revision.version}
-        </p>
+        <h3>{compact ? `첨부 사진 ${revision.photos.length}장` : '첨부 사진'}</h3>
+        {!compact && (
+          <p>{revision.photos.length}장 · 버전 {revision.version}</p>
+        )}
       </div>
       {revision.photos.length === 0 ? (
         <p className="submission-detail-muted">첨부된 사진이 없습니다.</p>
