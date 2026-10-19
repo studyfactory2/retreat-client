@@ -4,6 +4,7 @@ import type {
   CalendarChecklistStatus,
   CalendarReviewReason,
 } from '../../../../features/admin-calendar/admin-calendar.types';
+import { ScheduleIcon } from './ScheduleIcon';
 
 const statusLabels: Record<CalendarChecklistStatus, string> = {
   SCHEDULED: '작성 예정',
@@ -28,32 +29,54 @@ export function ScheduleChecklist({
   checklist: CalendarChecklistDto;
   stayId: string;
 }) {
-  return (
-    <div className="schedule-checklist">
+  const hasDetails =
+    checklist.reviewReasons.length > 0 || checklist.submissionCount > 0;
+  const status = (
+    <>
       <span className="schedule-checklist__label">{label}</span>
       <span
         className={`schedule-checklist__badge schedule-checklist__badge--${checklist.status.toLowerCase()}`}
       >
         {statusLabels[checklist.status]}
       </span>
-      {checklist.reviewReasons.length > 0 && (
-        <details className="schedule-checklist__review">
-          <summary>{label} 확인 사유</summary>
-          <ul>
+    </>
+  );
+
+  if (!hasDetails) {
+    return (
+      <div className="schedule-checklist schedule-checklist__summary">
+        {status}
+      </div>
+    );
+  }
+
+  return (
+    <details className="schedule-checklist">
+      <summary
+        className="schedule-checklist__summary"
+        aria-label={`${label} ${statusLabels[checklist.status]}, 상세 확인`}
+      >
+        {status}
+        <ScheduleIcon name="chevron" />
+      </summary>
+      <div className="schedule-checklist__body">
+        {checklist.reviewReasons.length > 0 && (
+          <ul className="schedule-checklist__reasons">
             {checklist.reviewReasons.map((reason) => (
               <li key={reason}>{reasonLabels[reason]}</li>
             ))}
           </ul>
-        </details>
-      )}
-      {checklist.submissionCount > 0 && (
-        <Link
-          className="schedule-checklist__records"
-          to={`/admin/submissions?${new URLSearchParams({ stayId, type: checklist.type, status: 'SUBMITTED' })}`}
-        >
-          {label} 기록 {checklist.submissionCount.toLocaleString('ko-KR')}건
-        </Link>
-      )}
-    </div>
+        )}
+        {checklist.submissionCount > 0 && (
+          <Link
+            className="schedule-checklist__records"
+            to={`/admin/submissions?${new URLSearchParams({ stayId, type: checklist.type, status: 'SUBMITTED' })}`}
+          >
+            {label} 기록 {checklist.submissionCount.toLocaleString('ko-KR')}건 보기
+            <ScheduleIcon name="arrow" />
+          </Link>
+        )}
+      </div>
+    </details>
   );
 }

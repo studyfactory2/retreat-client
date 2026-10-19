@@ -5,11 +5,12 @@ import type {
   CalendarChecklistStatus,
   CalendarReviewReason,
 } from '../../../../features/admin-calendar/admin-calendar.types';
+import { getPropertyColor } from '../model/calendar-lanes';
 
 const checklistLabels: Record<CalendarChecklistStatus, string> = {
-  SCHEDULED: '작성 예정',
+  SCHEDULED: '예정',
   NOT_SUBMITTED: '미제출',
-  SUBMITTED: '제출 완료',
+  SUBMITTED: '제출됨',
   NEEDS_REVIEW: '확인 필요',
 };
 const reviewReasonLabels: Record<CalendarReviewReason, string> = {
@@ -27,6 +28,11 @@ const stayDateFormatter = new Intl.DateTimeFormat('ko-KR', {
   hour: '2-digit',
   minute: '2-digit',
   hourCycle: 'h23',
+});
+const periodFormatter = new Intl.DateTimeFormat('ko-KR', {
+  timeZone: 'UTC',
+  month: 'numeric',
+  day: 'numeric',
 });
 
 function ChecklistStatus({
@@ -58,14 +64,11 @@ function ChecklistStatus({
         </Link>
       )}
       {checklist.reviewReasons.length > 0 && (
-        <details className="calendar-stay__review">
-          <summary>확인 사유</summary>
-          <ul className="calendar-stay__review-reasons">
+        <ul className="calendar-stay__review-reasons">
           {checklist.reviewReasons.map((reason) => (
             <li key={reason}>{reviewReasonLabels[reason]}</li>
           ))}
-          </ul>
-        </details>
+        </ul>
       )}
     </div>
   );
@@ -82,60 +85,98 @@ export function CalendarStayRow({
 }) {
   const isArrival = stay.checkIn.expectedDate === date;
   const isDeparture = stay.checkOut.expectedDate === date;
+  const crossYear =
+    stay.checkIn.expectedDate.slice(0, 4) !==
+    stay.checkOut.expectedDate.slice(0, 4);
+  function formatPeriodDay(value: string) {
+    const label = periodFormatter.format(new Date(`${value}T00:00:00Z`));
+    return crossYear ? `${value.slice(0, 4)}. ${label}` : label;
+  }
   return (
     <article className="calendar-stay">
-      <div className="calendar-stay__topline">
+      <div className="calendar-stay__main">
+        <span
+          className="calendar-stay__property-dot"
+          style={{ background: getPropertyColor(stay.property.id) }}
+          aria-hidden="true"
+        />
+        <div className="calendar-stay__identity">
+          <h3>{stay.property.name}</h3>
+          <p className="calendar-stay__guest">{stay.guestName}</p>
+          <p className="calendar-stay__dates">
+            <time dateTime={stay.checkIn.expectedDate}>
+              {formatPeriodDay(stay.checkIn.expectedDate)}
+            </time>
+            <span aria-hidden="true">–</span>
+            <time dateTime={stay.checkOut.expectedDate}>
+              {formatPeriodDay(stay.checkOut.expectedDate)}
+            </time>
+          </p>
+        </div>
         <div className="calendar-stay__events">
           {isArrival && <span>입실 예정</span>}
           {isDeparture && <span>퇴실 예정</span>}
           {!isArrival && !isDeparture && <span>연속 일정</span>}
+          {!stay.property.isActive && (
+            <span className="calendar-stay__inactive">비활성</span>
+          )}
         </div>
-        {!stay.property.isActive && (
-          <span className="calendar-stay__inactive">비활성 휴양소</span>
-        )}
+        <Link
+          className="calendar-stay__detail"
+          to={`/admin/stays/${stay.id}${returnSearch}`}
+          aria-label={`${stay.property.name}, ${stay.guestName} 이용 일정 상세 보기`}
+        >
+          <span>상세</span>
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M5 12h14m-6-6 6 6-6 6" />
+          </svg>
+        </Link>
       </div>
-      <h3>{stay.property.name}</h3>
-      <p className="calendar-stay__guest">
-        <span>이용객</span>
-        <strong>{stay.guestName}</strong>
-      </p>
-      <dl className="calendar-stay__period">
-        <div>
-          <dt>입실 예정</dt>
-          <dd>
-            <time dateTime={stay.checkInAt}>
-              {stayDateFormatter.format(new Date(stay.checkInAt))}
-            </time>
-          </dd>
+      <details className="calendar-stay__details">
+        <summary>
+          <span>체크리스트 · 시간</span>
+          {([stay.checkIn, stay.checkOut] as const).some(
+            (checklist) => checklist.status === 'NEEDS_REVIEW',
+          ) && (
+            <span className="calendar-stay__review-alert">확인 필요</span>
+          )}
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="m7 10 5 5 5-5" />
+          </svg>
+        </summary>
+        <div className="calendar-stay__details-body">
+          <dl className="calendar-stay__period">
+            <div>
+              <dt>입실 예정</dt>
+              <dd>
+                <time dateTime={stay.checkInAt}>
+                  {stayDateFormatter.format(new Date(stay.checkInAt))}
+                </time>
+              </dd>
+            </div>
+            <div>
+              <dt>퇴실 예정</dt>
+              <dd>
+                <time dateTime={stay.checkOutAt}>
+                  {stayDateFormatter.format(new Date(stay.checkOutAt))}
+                </time>
+              </dd>
+            </div>
+          </dl>
+          <div className="calendar-stay__checklists">
+            <ChecklistStatus
+              label="입실 체크"
+              checklist={stay.checkIn}
+              stayId={stay.id}
+            />
+            <ChecklistStatus
+              label="퇴실 체크"
+              checklist={stay.checkOut}
+              stayId={stay.id}
+            />
+          </div>
         </div>
-        <div>
-          <dt>퇴실 예정</dt>
-          <dd>
-            <time dateTime={stay.checkOutAt}>
-              {stayDateFormatter.format(new Date(stay.checkOutAt))}
-            </time>
-          </dd>
-        </div>
-      </dl>
-      <div className="calendar-stay__checklists">
-        <ChecklistStatus
-          label="입실 체크"
-          checklist={stay.checkIn}
-          stayId={stay.id}
-        />
-        <ChecklistStatus
-          label="퇴실 체크"
-          checklist={stay.checkOut}
-          stayId={stay.id}
-        />
-      </div>
-      <Link
-        className="calendar-stay__detail"
-        to={`/admin/stays/${stay.id}${returnSearch}`}
-        aria-label={`${stay.property.name}, ${stay.guestName} 이용 일정 상세 보기`}
-      >
-        상세 보기 <span aria-hidden="true">→</span>
-      </Link>
+      </details>
     </article>
   );
 }

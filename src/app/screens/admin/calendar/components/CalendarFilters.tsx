@@ -24,21 +24,25 @@ export function CalendarFilters({
   const [selectedDate, setSelectedDate] = useState(date);
   const [selectedProperty, setSelectedProperty] = useState(propertyId ?? '');
   const [error, setError] = useState('');
+  const [dateOptionsOpen, setDateOptionsOpen] = useState(false);
   return (
     <form
       id="calendar-filters"
       className="calendar-filters__row"
       aria-label="이용 일정 조회 조건"
+      noValidate
       onReset={(event) => {
         event.preventDefault();
         const nextDate = onReset();
         setSelectedDate(nextDate);
         setSelectedProperty('');
         setError('');
+        setDateOptionsOpen(false);
       }}
       onSubmit={(event) => {
         event.preventDefault();
         if (!isCalendarDate(selectedDate)) {
+          setDateOptionsOpen(true);
           setError('1900년부터 2100년 사이의 올바른 날짜를 선택해 주세요.');
           return;
         }
@@ -53,43 +57,61 @@ export function CalendarFilters({
           properties={properties}
           loading={propertiesLoading}
           describedBy={propertyError ? 'calendar-property-error' : undefined}
-          onChange={setSelectedProperty}
-        />
-      </div>
-      <div className="calendar-filters__date">
-        <label htmlFor="calendar-date">선택 날짜</label>
-        <input
-          id="calendar-date"
-          type="date"
-          min="1900-01-01"
-          max="2100-12-31"
-          required
-          value={selectedDate}
-          onChange={(event) => {
-            setSelectedDate(event.target.value);
+          onChange={(nextProperty) => {
+            setSelectedProperty(nextProperty);
             setError('');
+            onApply(date, nextProperty);
           }}
-          aria-invalid={!!error || undefined}
-          aria-describedby={error ? 'calendar-date-error' : undefined}
         />
       </div>
-      <div className="calendar-filters__actions">
-        <Button type="submit" className="admin-button-secondary">
-          조회
-        </Button>
-        <Button type="reset" className="calendar-reset">
-          초기화
-        </Button>
-      </div>
-      {error && (
-        <p
-          id="calendar-date-error"
-          className="calendar-filters__validation"
-          role="alert"
-        >
-          {error}
-        </p>
-      )}
+      <details
+        className="calendar-filters__advanced"
+        open={dateOptionsOpen}
+        onToggle={(event) => setDateOptionsOpen(event.currentTarget.open)}
+      >
+        <summary>
+          날짜 이동
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="m7 10 5 5 5-5" />
+          </svg>
+        </summary>
+        <div className="calendar-filters__advanced-body">
+          <div className="calendar-filters__date">
+            <label htmlFor="calendar-date">선택 날짜</label>
+            <input
+              id="calendar-date"
+              type="date"
+              min="1900-01-01"
+              max="2100-12-31"
+              required
+              value={selectedDate}
+              onChange={(event) => {
+                setSelectedDate(event.target.value);
+                setError('');
+              }}
+              aria-invalid={!!error || undefined}
+              aria-describedby={error ? 'calendar-date-error' : undefined}
+            />
+          </div>
+          <div className="calendar-filters__actions">
+            <Button type="submit" className="admin-button-secondary">
+              조회
+            </Button>
+            <Button type="reset" className="calendar-reset">
+              초기화
+            </Button>
+          </div>
+          {error && (
+            <p
+              id="calendar-date-error"
+              className="calendar-filters__validation"
+              role="alert"
+            >
+              {error}
+            </p>
+          )}
+        </div>
+      </details>
     </form>
   );
 }

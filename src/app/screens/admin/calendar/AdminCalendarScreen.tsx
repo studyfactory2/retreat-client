@@ -123,12 +123,16 @@ function CalendarWorkspace({
             className="ui-button admin-button-secondary"
             to={appRoutes.adminStayImportCreate}
           >
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M12 16V4m-4 4 4-4 4 4M4 14v6h16v-6" />
+            </svg>
             엑셀 가져오기
           </Link>
           <Link
             className="ui-button"
             to={`${appRoutes.adminStayCreate}?${returnQuery}`}
           >
+            <span aria-hidden="true">＋</span>
             일정 등록
           </Link>
         </div>
@@ -149,34 +153,6 @@ function CalendarWorkspace({
             : '이용 일정이 수정되었습니다.'}
         </p>
       )}
-      <section className="calendar-filters" aria-label="달력 조회">
-        <CalendarFilters
-          key={returnQuery.toString()}
-          date={date}
-          propertyId={propertyId}
-          properties={
-            properties.resource.status === 'ready' ? options : undefined
-          }
-          propertiesLoading={properties.resource.status === 'loading'}
-          propertyError={properties.resource.status === 'error'}
-          onApply={select}
-          onReset={reset}
-        />
-        {properties.resource.status === 'error' && (
-          <div
-            className="calendar-error"
-            id="calendar-property-error"
-            role="alert"
-          >
-            <p>
-              휴양소 목록을 불러오지 못했습니다. {properties.resource.message}
-            </p>
-            <button type="button" onClick={properties.refresh}>
-              목록 다시 불러오기
-            </button>
-          </div>
-        )}
-      </section>
       <p
         className="calendar-announcement"
         role="status"
@@ -190,65 +166,57 @@ function CalendarWorkspace({
               ? '이용 일정을 불러오고 있습니다.'
               : '')}
       </p>
-      {error ? (
-        <section className="calendar-state" role="alert">
-          <h2>조회 조건을 확인해 주세요</h2>
-          <p>{error}</p>
-          <Button
-            type="reset"
-            form="calendar-filters"
-            className="admin-button-secondary"
-          >
-            조회 조건 초기화
-          </Button>
-        </section>
-      ) : (
-        <>
-          <div className="calendar-meta">
-            <div>
-              <p className="calendar-meta__scope">
-                <strong>
-                  {selectedProperty?.name ??
-                    (propertyId ? '선택한 휴양소' : '전체 휴양소')}
-                </strong>
-                <span>선택일 {date.replaceAll('-', '.')} · 한국 시간</span>
-              </p>
-              <p>
-                {data
-                  ? `이 달과 겹치는 이용 일정 ${data.total.toLocaleString('ko-KR')}건`
-                  : calendar.resource.status === 'loading'
-                    ? '일정을 불러오고 있습니다…'
-                    : '일정 조회를 다시 시도해 주세요.'}
-                {data && (
-                  <>
-                    {' '}
-                    · 최근 조회{' '}
-                    <time dateTime={data.asOf}>
-                      {formatSeoulUpdatedAt(data.asOf)}
-                    </time>
-                  </>
-                )}
-              </p>
-            </div>
-            <Button
-              className="calendar-refresh"
-              onClick={calendar.refresh}
-              disabled={calendar.resource.status === 'loading'}
+      <section className="calendar-main" aria-label="달력 조회">
+        <div className="calendar-filters">
+          <CalendarFilters
+            key={returnQuery.toString()}
+            date={date}
+            propertyId={propertyId}
+            properties={
+              properties.resource.status === 'ready' ? options : undefined
+            }
+            propertiesLoading={properties.resource.status === 'loading'}
+            propertyError={properties.resource.status === 'error'}
+            onApply={select}
+            onReset={reset}
+          />
+          {properties.resource.status === 'error' && (
+            <div
+              className="calendar-error"
+              id="calendar-property-error"
+              role="alert"
             >
-              새로고침
-            </Button>
-          </div>
-          {calendar.resource.status === 'error' && (
-            <div className="calendar-error" role="alert">
-              <p>{calendar.resource.message}</p>
-              <button type="button" onClick={calendar.refresh}>
-                일정 다시 불러오기
+              <p>
+                휴양소 목록을 불러오지 못했습니다. {properties.resource.message}
+              </p>
+              <button type="button" onClick={properties.refresh}>
+                목록 다시 불러오기
               </button>
             </div>
           )}
-          <div
-            className={`calendar-workspace${data ? '' : ' calendar-workspace--pending'}`}
-          >
+        </div>
+        {error ? (
+          <div className="calendar-state" role="alert">
+            <h2>조회 조건을 확인해 주세요</h2>
+            <p>{error}</p>
+            <Button
+              type="reset"
+              form="calendar-filters"
+              className="admin-button-secondary"
+            >
+              조회 조건 초기화
+            </Button>
+          </div>
+        ) : (
+          <>
+            {calendar.resource.status === 'error' && (
+              <div className="calendar-error" role="alert">
+                <p>{calendar.resource.message}</p>
+                <button type="button" onClick={calendar.refresh}>
+                  일정 다시 불러오기
+                </button>
+              </div>
+            )}
             <CalendarMonth
               month={month}
               days={days}
@@ -267,24 +235,49 @@ function CalendarWorkspace({
               canPrevious={previous !== null}
               canNext={next !== null}
             />
-            {data && (
-              <SelectedDayStays
-                date={date}
-                stays={selectedDay?.stays ?? []}
-                returnSearch={`?${returnQuery}`}
-              />
-            )}
-          </div>
-          <details className="calendar-footnote">
-            <summary>일정 표시 안내</summary>
-            <p>
-            취소되지 않은 예정 일정이며 비활성 휴양소도 포함됩니다. 체크리스트
-            제출은 실제 입·퇴실이나 정비 완료를 뜻하지 않습니다. 과거 날짜도
-            현재 제출 내역을 반영합니다.
-            </p>
-          </details>
-        </>
+            <div className="calendar-meta">
+              <p>
+                {data
+                  ? `이 달의 일정 ${data.total.toLocaleString('ko-KR')}건`
+                  : calendar.resource.status === 'loading'
+                    ? '일정을 불러오고 있습니다…'
+                    : '일정을 다시 불러와 주세요.'}
+                {data && (
+                  <time dateTime={data.asOf}>
+                    최근 조회 {formatSeoulUpdatedAt(data.asOf)}
+                  </time>
+                )}
+              </p>
+              <Button
+                className="calendar-refresh"
+                onClick={calendar.refresh}
+                disabled={calendar.resource.status === 'loading'}
+                aria-label="이용 달력 새로고침"
+              >
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M20 7v5h-5M4 17v-5h5M6 7a7 7 0 0 1 12-1l2 3M4 15l2 3a7 7 0 0 0 12-1" />
+                </svg>
+                새로고침
+              </Button>
+            </div>
+          </>
+        )}
+      </section>
+      {!error && data && (
+        <SelectedDayStays
+          date={date}
+          stays={selectedDay?.stays ?? []}
+          returnSearch={`?${returnQuery}`}
+        />
       )}
+      <details className="calendar-footnote">
+        <summary>일정 표시 안내</summary>
+        <p>
+          취소되지 않은 예정 일정이며 비활성 휴양소도 포함됩니다. 체크리스트
+          제출은 실제 입·퇴실이나 정비 완료를 뜻하지 않습니다. 과거 날짜도
+          현재 제출 내역을 반영합니다.
+        </p>
+      </details>
     </div>
   );
 }

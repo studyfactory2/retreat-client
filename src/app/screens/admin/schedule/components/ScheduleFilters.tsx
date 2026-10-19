@@ -102,7 +102,7 @@ export function ScheduleFilters({
         />
       </div>
       <div className="schedule-filters__actions">
-        <Button type="submit" className="admin-button-secondary">
+        <Button type="submit">
           조회
         </Button>
         <Button type="reset" className="schedule-button-quiet">

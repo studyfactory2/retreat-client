@@ -11,7 +11,7 @@ const selectedDateFormatter = new Intl.DateTimeFormat('ko-KR', {
   timeZone: 'UTC',
   month: 'long',
   day: 'numeric',
-  weekday: 'long',
+  weekday: 'short',
 });
 
 export function SelectedDayStays({
@@ -28,10 +28,6 @@ export function SelectedDayStays({
   const departures = stays.filter(
     (stay) => stay.checkOut.expectedDate === date,
   ).length;
-  const continuing = stays.filter(
-    (stay) =>
-      stay.checkIn.expectedDate < date && stay.checkOut.expectedDate > date,
-  ).length;
   return (
     <section
       className="calendar-selected"
@@ -43,38 +39,36 @@ export function SelectedDayStays({
             <time dateTime={date}>{selectedDate}</time>
           </h2>
           <span className="calendar-selected__count">
-            일정 {stays.length.toLocaleString('ko-KR')}건
+            {stays.length.toLocaleString('ko-KR')}건
           </span>
         </div>
-        <p>
-          입실 예정 {arrivals.toLocaleString('ko-KR')} · 퇴실 예정{' '}
-          {departures.toLocaleString('ko-KR')} · 연속 일정{' '}
-          {continuing.toLocaleString('ko-KR')}
-        </p>
+        {stays.length > 0 && (
+          <p>
+            입실 예정 {arrivals.toLocaleString('ko-KR')} · 퇴실 예정{' '}
+            {departures.toLocaleString('ko-KR')}
+          </p>
+        )}
       </header>
       {stays.length > 0 ? (
-        <>
-          <div
-            className="calendar-selected__scroll"
-          >
-            <ol className="calendar-selected__stays">
-              {stays.map((stay) => (
-                <li key={stay.id}>
-                  <CalendarStayRow
-                    stay={stay}
-                    date={date}
-                    returnSearch={returnSearch}
-                  />
-                </li>
-              ))}
-            </ol>
-          </div>
-
-        </>
+        <ol className="calendar-selected__stays">
+          {stays.map((stay) => (
+            <li key={stay.id}>
+              <CalendarStayRow
+                stay={stay}
+                date={date}
+                returnSearch={returnSearch}
+              />
+            </li>
+          ))}
+        </ol>
       ) : (
         <div className="calendar-selected__empty">
-          <h3>선택한 날짜의 일정이 없습니다</h3>
-          <p>다른 날짜를 선택해 주세요.</p>
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <rect x="4" y="5" width="16" height="16" rx="3" />
+            <path d="M8 3v4m8-4v4M4 11h16m-10 5h4" />
+          </svg>
+          <h3>등록된 일정이 없어요</h3>
+          <p>다른 날짜나 휴양소를 선택해 주세요.</p>
         </div>
       )}
     </section>
