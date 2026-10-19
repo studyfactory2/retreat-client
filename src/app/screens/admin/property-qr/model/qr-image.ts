@@ -56,7 +56,7 @@ export async function createQrImage(
   context.font = '24px sans-serif';
   context.fillStyle = '#536178';
   context.fillText(
-    `${APP_BRAND.appName} · ${APP_BRAND.operatorCredit}`,
+    APP_BRAND.appName,
     512,
     poster.height - 30,
   );

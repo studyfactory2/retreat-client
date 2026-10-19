@@ -1,85 +1,34 @@
-.admin-eyebrow {
-  margin-bottom: 20px;
-  color: var(--color-primary);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 1.5px;
-}
-
 .admin-login {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 450px);
-  align-items: center;
-  gap: clamp(40px, 7vw, 100px);
-  max-width: 1020px;
+  width: 100%;
+  max-width: 440px;
   margin-inline: auto;
 }
 
-.admin-login__intro h1 {
-  color: var(--color-heading);
-  font-size: clamp(32px, 3.8vw, 46px);
-  font-weight: 650;
-  line-height: 1.4;
-  letter-spacing: -1.6px;
-}
-
-.admin-login__description {
-  margin-top: 24px;
-  color: var(--color-muted);
-  font-size: 14px;
-  line-height: 1.9;
-}
-
-.admin-login__signature {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-top: 52px;
-  color: var(--color-muted);
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.4px;
-}
-
-.admin-login__signature span {
-  width: 36px;
-  height: 1px;
-  background: var(--color-primary);
-}
-
 .admin-login__card {
-  padding: clamp(24px, 3.5vw, 42px);
+  padding: 32px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   background: var(--color-surface);
   box-shadow: var(--shadow-card);
 }
 
-.admin-login__accent {
-  display: block;
-  width: 32px;
-  height: 3px;
-  margin-bottom: 24px;
-  border-radius: 2px;
-  background: var(--color-primary);
-}
-
-.admin-login__card-heading h2 {
+.admin-login__card-heading h1 {
   color: var(--color-heading);
-  font-size: 27px;
-  font-weight: 650;
-  letter-spacing: -0.8px;
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.35;
+  letter-spacing: -0.7px;
 }
 
 .admin-login__card-heading p {
-  margin-top: 10px;
+  margin-top: 8px;
   color: var(--color-muted);
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .admin-login__form {
   display: grid;
-  gap: 22px;
+  gap: 24px;
   margin-top: 32px;
 }
 
@@ -191,7 +140,6 @@
 
 .admin-login__submit {
   width: 100%;
-  margin-top: 2px;
 }
 
 .admin-notice {
@@ -222,29 +170,8 @@
   padding: clamp(24px, 8vw, 100px) 24px;
 }
 
-@media (max-width: 800px) {
-  .admin-login {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 32px;
-    max-width: 480px;
-  }
-
-  .admin-login__intro h1 {
-    font-size: 32px;
-    letter-spacing: -1px;
-  }
-
-  .admin-login__description {
-    margin-top: 16px;
-  }
-
-  .admin-login__signature {
-    display: none;
-  }
-}
-
 @media (max-width: 600px) {
-  .admin-login__card-heading h2 {
-    font-size: 25px;
+  .admin-login__card {
+    padding: 24px;
   }
 }

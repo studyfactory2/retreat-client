@@ -1,3 +1,4 @@
+import { BrandLogo } from '../../../shared/ui/BrandLogo/BrandLogo';
 import { APP_BRAND } from '../../../core/config/brand';
 import { useLocation } from 'react-router-dom';
 import { Button } from '../../../shared/ui/Button/Button';
@@ -27,7 +28,7 @@ function PrivateDraftEntry() {
     <div className="draft-entry">
       <header className="draft-entry-header">
         <strong>
-          {APP_BRAND.name}<span>휴양소</span>
+          <BrandLogo /><span>휴양소</span>
         </strong>
         <span>체크리스트 작성</span>
       </header>
@@ -52,7 +53,7 @@ function PrivateDraftEntry() {
           )}
         </section>
       </main>
-      <footer className="draft-entry-footer">{APP_BRAND.operatorCredit}</footer>
+      <footer className="draft-entry-footer">{APP_BRAND.appName}</footer>
     </div>
   );
 }

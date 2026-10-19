@@ -1,16 +1,16 @@
 :root {
   color-scheme: light;
-  --color-primary: #1755d1;
-  --color-primary-hover: #1144ad;
-  --color-background: #f5f7fb;
-  --color-heading: #132448;
+  --color-primary: #275fee;
+  --color-primary-hover: #174dcc;
+  --color-background: #f6f8fb;
+  --color-heading: #182b49;
   --color-surface: #ffffff;
   --color-on-primary: #ffffff;
   --color-text: #263650;
-  --color-muted: #536178;
-  --color-border: #dfe5ef;
+  --color-muted: #596b85;
+  --color-border: #e1e7f0;
   --color-input-border: #8491a6;
-  --color-soft: #eaf1ff;
+  --color-soft: #edf3ff;
   --color-danger: #b53643;
   --shadow-card: 0 2px 4px rgb(19 36 72 / 2%), 0 12px 32px rgb(19 36 72 / 3%);
   --shadow-card-hover:
@@ -18,8 +18,20 @@
   --font-body:
     -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic',
     'Segoe UI', sans-serif;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  --text-caption: 12px;
+  --text-label: 14px;
+  --text-body: 16px;
+  --text-title: clamp(26px, 3vw, 32px);
+  --control-height: 48px;
   --radius-sm: 10px;
   --radius-md: 16px;
   --radius-lg: 20px;
-  --content-width: 1160px;
+  --content-width: 1200px;
 }

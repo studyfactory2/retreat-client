@@ -1,4 +1,3 @@
-import { APP_BRAND } from '../../../core/config/brand';
 import { Navigate } from 'react-router-dom'
 import { useAdminSession } from '../../../core/session/use-admin-session'
 import { Button } from '../../../shared/ui/Button/Button'
@@ -31,34 +30,12 @@ export function AdminLoginScreen() {
   return (
     <div className="admin-login">
       <section
-        className="admin-login__intro"
-        aria-labelledby="admin-intro-title"
-      >
-        <p className="admin-eyebrow">관리자 전용 공간</p>
-        <h1 id="admin-intro-title">
-          편안한 머무름을
-          <br />
-          함께 준비합니다.
-        </h1>
-        <p className="admin-login__description">
-          머무는 사람도, 돌보는 사람도 편안하도록.
-          <br />
-          {APP_BRAND.appName}의 관리자 공간입니다.
-        </p>
-        <div className="admin-login__signature" aria-hidden="true">
-          <span />
-          {APP_BRAND.appName}
-        </div>
-      </section>
-
-      <section
         className="admin-login__card"
         aria-labelledby="admin-login-title"
       >
         <div className="admin-login__card-heading">
-          <span className="admin-login__accent" aria-hidden="true" />
-          <h2 id="admin-login-title">관리자 로그인</h2>
-          <p>발급받은 관리자 계정으로 로그인해 주세요.</p>
+          <h1 id="admin-login-title">관리자 로그인</h1>
+          <p>관리자 계정으로 로그인해 주세요.</p>
         </div>
 
         {state.reason === 'expired' && (

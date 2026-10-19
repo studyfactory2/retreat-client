@@ -1,0 +1,22 @@
+.retreat-scene { width: 100%; margin: 0; }
+.retreat-scene__viewport { position: relative; width: 100%; height: 450px; isolation: isolate; }
+.retreat-scene__glow {
+  position: absolute; inset: 11% 4% 7%; z-index: -1;
+  border-radius: 48% 52% 43% 57% / 45% 44% 56% 55%;
+  background: radial-gradient(ellipse at 52% 48%, #edf4ff 0%, #f4f8fe 59%, #ffffff00 76%);
+}
+.retreat-scene__poster, .retreat-scene__mount { position: absolute; inset: 0; width: 100%; height: 100%; }
+.retreat-scene__poster { display: block; object-fit: contain; }
+.retreat-scene[data-state="ready"] .retreat-scene__poster { visibility: hidden; }
+.retreat-scene:not([data-state="ready"]) .retreat-scene__mount { visibility: hidden; }
+.retreat-scene__mount { cursor: grab; touch-action: pan-y; }
+.retreat-scene__mount:active { cursor: grabbing; }
+.retreat-scene__caption { display: flex; align-items: center; justify-content: center; gap: 18px; margin-top: -4px; color: #606e87; font-size: 11px; }
+.retreat-scene__controls { display: flex; align-items: center; padding: 3px; border: 1px solid #e6ebf1; border-radius: 28px; background: #fff; }
+.retreat-scene__controls button { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; padding: 0; border: 0; border-radius: 50%; color: #51627f; background: transparent; cursor: pointer; }
+.retreat-scene__controls button:hover:not(:disabled) { color: var(--color-primary); background: #edf3ff; }
+.retreat-scene__controls button:disabled { cursor: default; opacity: .38; }
+.retreat-scene__controls svg { flex: none; width: 18px; height: 18px; }
+@media (max-width: 1000px) { .retreat-scene__viewport { height: 350px; } .retreat-scene__caption { flex-direction: column; gap: 8px; } }
+@media (max-width: 650px) { .retreat-scene__viewport { height: clamp(260px, 77vw, 360px); } .retreat-scene__caption { flex-direction: row; gap: 16px; margin-top: -8px; } }
+@media (max-width: 350px) { .retreat-scene__caption { gap: 9px; font-size: 10px; } }

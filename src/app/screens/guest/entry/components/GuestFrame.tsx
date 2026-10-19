@@ -1,3 +1,4 @@
+import { BrandLogo } from '../../../../shared/ui/BrandLogo/BrandLogo';
 import { APP_BRAND } from '../../../../core/config/brand';
 import type { ReactNode, RefObject } from 'react';
 import { Link, type To } from 'react-router-dom';
@@ -69,11 +70,11 @@ export function GuestFrame({
               to={home}
               aria-label={`${APP_BRAND.appName} 이용 안내 홈`}
             >
-              {APP_BRAND.name}<span>휴양소 이용 안내</span>
+              <BrandLogo /><span>휴양소 이용 안내</span>
             </Link>
           ) : (
             <div className="guest-brand">
-              {APP_BRAND.name}<span>휴양소 이용 안내</span>
+              <BrandLogo /><span>휴양소 이용 안내</span>
             </div>
           )}
           <div className="guest-header__tools">
@@ -102,7 +103,7 @@ export function GuestFrame({
         {children}
       </main>
       <footer className="guest-footer">
-        {APP_BRAND.operatorCredit}
+        {APP_BRAND.appName}
       </footer>
       {ready && (
         <nav

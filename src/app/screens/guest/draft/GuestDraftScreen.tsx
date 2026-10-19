@@ -1,3 +1,4 @@
+import { BrandLogo } from '../../../shared/ui/BrandLogo/BrandLogo';
 import { APP_BRAND } from '../../../core/config/brand';
 import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
@@ -48,7 +49,7 @@ function GuestDraftSessionScreen() {
       <header className="guest-draft-header">
         <div>
           <div className="guest-draft-brand">
-            {APP_BRAND.name}<span>휴양소 이용 안내</span>
+            <BrandLogo /><span>휴양소 이용 안내</span>
           </div>
           <span>이용객 체크리스트</span>
         </div>
@@ -101,7 +102,7 @@ function GuestDraftSessionScreen() {
           />
         )}
       </main>
-      <footer className="guest-draft-footer">{APP_BRAND.operatorCredit}</footer>
+      <footer className="guest-draft-footer">{APP_BRAND.appName}</footer>
     </div>
   );
 }

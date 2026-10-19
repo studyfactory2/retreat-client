@@ -1,3 +1,4 @@
+import { BrandLogo } from '../../../../shared/ui/BrandLogo/BrandLogo';
 import { APP_BRAND } from '../../../../core/config/brand';
 import type { ReactNode, RefObject } from 'react';
 
@@ -22,7 +23,7 @@ export function StaffDraftFrame({
       <header className="staff-draft-header">
         <div>
           <strong className="staff-draft-brand">
-            {APP_BRAND.name}<span>휴양소 정비 안내</span>
+            <BrandLogo /><span>휴양소 정비 안내</span>
           </strong>
           <span>직원</span>
         </div>
@@ -36,7 +37,7 @@ export function StaffDraftFrame({
         {children}
       </main>
       <footer className="staff-draft-footer">
-        {APP_BRAND.operatorCredit}
+        {APP_BRAND.appName}
       </footer>
     </div>
   );

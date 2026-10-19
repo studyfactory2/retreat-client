@@ -1,28 +1,100 @@
-/** Decorative retreat illustration; not a photograph of a particular property. */
+import { useEffect, useRef, useState } from 'react'
+import type { RetreatSceneController } from '../scene/createRetreatScene'
+import './retreat-scene.css'
+
+type SceneState = 'loading' | 'ready' | 'fallback'
+type SceneMount = HTMLDivElement & { __retreatScene?: RetreatSceneController }
+type ControlIconName = 'left' | 'right' | 'pause' | 'play' | 'reset'
+
+function ControlIcon({ name }: { name: ControlIconName }) {
+  const paths: Record<ControlIconName, string> = {
+    left: 'm14 6-6 6 6 6',
+    right: 'm10 6 6 6-6 6',
+    pause: 'M9 6v12M15 6v12',
+    play: 'm9 5 11 7-11 7Z',
+    reset: 'M3 10a9 9 0 1 1 2 8M3 4v6h6',
+  }
+  return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={paths[name]} /></svg>
+}
+
 export function RetreatScene() {
+  const mountRef = useRef<SceneMount>(null)
+  const controllerRef = useRef<RetreatSceneController | null>(null)
+  const [sceneState, setSceneState] = useState<SceneState>('loading')
+  const [paused, setPaused] = useState(false)
+  const [reducedMotion, setReducedMotion] = useState(false)
+  const pausedRef = useRef(false)
+
+  useEffect(() => {
+    const mount = mountRef.current
+    if (!mount) return
+    let alive = true
+    let controller: RetreatSceneController | null = null
+    const mobileQuery = window.matchMedia('(max-width: 650px)')
+    const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
+    setReducedMotion(motionQuery.matches)
+
+    const onMobileChange = () => controller?.setMobile(mobileQuery.matches)
+    const onMotionChange = () => {
+      setReducedMotion(motionQuery.matches)
+      controller?.setReducedMotion(motionQuery.matches)
+    }
+    mobileQuery.addEventListener('change', onMobileChange)
+    motionQuery.addEventListener('change', onMotionChange)
+
+    // The rest of the application never needs to load the 3D engine.
+    void import('../scene/createRetreatScene').then(({ createRetreatScene }) => {
+      if (!alive) return
+      controller = createRetreatScene(mount, {
+        mobile: mobileQuery.matches,
+        reducedMotion: motionQuery.matches,
+        onReady: () => { if (alive) setSceneState('ready') },
+        onError: () => { if (alive) setSceneState('fallback') },
+      })
+      controller.setPaused(pausedRef.current)
+      controllerRef.current = controller
+      if (import.meta.env.DEV) mount.__retreatScene = controller
+    }).catch(() => {
+      if (!alive) return
+      controller?.dispose()
+      setSceneState('fallback')
+    })
+
+    return () => {
+      alive = false
+      mobileQuery.removeEventListener('change', onMobileChange)
+      motionQuery.removeEventListener('change', onMotionChange)
+      controller?.dispose()
+      controllerRef.current = null
+      delete mount.__retreatScene
+    }
+  }, [])
+
+  function togglePaused() {
+    const next = !pausedRef.current
+    pausedRef.current = next
+    setPaused(next)
+    controllerRef.current?.setPaused(next)
+  }
+
+  const ready = sceneState === 'ready'
+  const motionLabel = reducedMotion ? '동작 줄이기 설정 사용 중' : paused ? '자동 회전 시작' : '자동 회전 멈추기'
   return (
-    <svg viewBox="0 0 560 520" preserveAspectRatio="xMidYMid slice" fill="none" aria-hidden="true" focusable="false">
-      <rect width="560" height="520" rx="28" fill="#E8EFF7" />
-      <circle cx="428" cy="102" r="43" fill="#FFF8E9" />
-      <path d="M0 239C85 192 158 204 240 243C354 299 453 201 560 212V520H0V239Z" fill="#C6D8E5" />
-      <path d="M0 324C143 270 282 282 560 333V520H0V324Z" fill="#9DBBC7" />
-      <path d="M0 413C144 341 365 355 560 405V520H0V413Z" fill="#D6E0D4" />
-      <path d="M283 377L368 377L477 520H250L283 377Z" fill="#F6F3E8" />
-      <path d="M126 264L286 150L444 264V382H126V264Z" fill="#FFFDF8" />
-      <path d="M107 268L286 137L464 268" stroke="#243F5C" strokeWidth="18" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M286 151L443 265V382H286V151Z" fill="#E6E7DC" />
-      <path d="M276 277H343V382H276V277Z" fill="#23435D" />
-      <path d="M170 276H234V337H170V276Z" fill="#A9CADA" />
-      <path d="M202 276V337M170 306H234" stroke="#FFFDF8" strokeWidth="5" />
-      <path d="M370 277H410V319H370V277Z" fill="#9FBECE" />
-      <path d="M124 382H445" stroke="#243F5C" strokeWidth="8" strokeLinecap="round" />
-      <path d="M75 338V410M487 316V399" stroke="#526D61" strokeWidth="9" strokeLinecap="round" />
-      <path d="M74 211L29 347H119L74 211Z" fill="#638C80" />
-      <path d="M487 203L447 331H527L487 203Z" fill="#50776D" />
-      <path d="M74 274L38 374H110L74 274Z" fill="#71998A" />
-      <path d="M487 264L454 357H520L487 264Z" fill="#638C80" />
-      <path d="M132 112C140 103 148 103 156 112M163 91C170 84 177 84 184 91" stroke="#7894AB" strokeWidth="3" strokeLinecap="round" />
-      <path d="M58 451H121M411 459H451M103 472H156" stroke="#AFBFAD" strokeWidth="4" strokeLinecap="round" />
-    </svg>
-  );
+    <figure className="retreat-scene" data-state={sceneState} aria-label="정원이 있는 휴양소와 가족의 3D 미리보기">
+      <div className="retreat-scene__viewport">
+        <div className="retreat-scene__glow" aria-hidden="true" />
+        <img className="retreat-scene__poster" src="/landing/retreat-poster.png" alt="" width="900" height="760" aria-hidden="true" />
+        <div className="retreat-scene__mount" ref={mountRef} />
+      </div>
+      <figcaption className="retreat-scene__caption">
+        <span>{sceneState === 'fallback' ? '휴양소 미리보기' : '휴양소 둘러보기'}</span>
+        <div className="retreat-scene__controls" role="group" aria-label="휴양소 회전 조절">
+          <button type="button" aria-label="왼쪽으로 회전" disabled={!ready} onClick={() => controllerRef.current?.rotate(-0.24)}><ControlIcon name="left" /></button>
+          <button type="button" aria-label={motionLabel} title={motionLabel} disabled={!ready || reducedMotion} onClick={togglePaused}><ControlIcon name={paused || reducedMotion ? 'play' : 'pause'} /></button>
+          <button type="button" aria-label="처음 방향으로" disabled={!ready} onClick={() => controllerRef.current?.reset()}><ControlIcon name="reset" /></button>
+          <button type="button" aria-label="오른쪽으로 회전" disabled={!ready} onClick={() => controllerRef.current?.rotate(0.24)}><ControlIcon name="right" /></button>
+        </div>
+      </figcaption>
+    </figure>
+  )
 }

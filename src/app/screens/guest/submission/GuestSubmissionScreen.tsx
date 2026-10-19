@@ -1,3 +1,4 @@
+import { BrandLogo } from '../../../shared/ui/BrandLogo/BrandLogo';
 import { APP_BRAND } from '../../../core/config/brand';
 import { useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -34,7 +35,7 @@ export function GuestSubmissionScreen() {
       <header className="guest-draft-header">
         <div>
           <div className="guest-draft-brand">
-            {APP_BRAND.name}<span>휴양소 이용 안내</span>
+            <BrandLogo /><span>휴양소 이용 안내</span>
           </div>
           <span>제출한 체크리스트</span>
         </div>
@@ -85,7 +86,7 @@ export function GuestSubmissionScreen() {
         )}
       </main>
       <footer className="guest-draft-footer">
-        {APP_BRAND.operatorCredit}
+        {APP_BRAND.appName}
       </footer>
     </div>
   );

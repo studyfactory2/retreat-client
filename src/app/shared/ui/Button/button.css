@@ -1,15 +1,17 @@
 .ui-button {
-  min-height: 48px;
+  min-height: var(--control-height);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  padding: 12px 22px;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-6);
   border: 1px solid transparent;
   border-radius: var(--radius-sm);
   background: var(--color-primary);
   color: var(--color-on-primary);
   font-weight: 600;
+  font-size: var(--text-label);
+  line-height: 1.5;
   cursor: pointer;
   transition: background 160ms ease;
 }
