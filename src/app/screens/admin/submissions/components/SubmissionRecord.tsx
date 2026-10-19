@@ -23,7 +23,7 @@ export function SubmissionRecord({
     <div className="submission-record">
       <section
         className="submission-detail-card"
-        aria-label={presentation === 'maintenance' ? '점검 내용' : undefined}
+        aria-label={presentation === 'maintenance' ? '체크 내용' : undefined}
       >
         {presentation !== 'maintenance' && (
           <div className="submission-detail-section-heading">
@@ -43,7 +43,7 @@ export function SubmissionRecord({
                 )}
               </div>
             ) : <h4>{section.title}</h4>}
-            <ul className="submission-check-items">
+            <ul className="submission-check-items" role="list">
               {section.items.map((item) => {
                 const answer = answers.get(item.id);
                 return (

@@ -41,10 +41,12 @@ export function SubmissionLifecycleConfirmation({
       className="submission-lifecycle-confirmation"
       aria-labelledby={headingId}
     >
-      <h3 id={headingId} ref={heading} tabIndex={-1}>
-        {copy.title} 내용을 확인해 주세요
-      </h3>
-      <p className="submission-lifecycle-transition">{copy.transition}</p>
+      <div className="submission-lifecycle-review-heading">
+        <h3 id={headingId} ref={heading} tabIndex={-1}>
+          {copy.title} 내용을 확인해 주세요
+        </h3>
+        <p className="submission-lifecycle-transition">{copy.transition}</p>
+      </div>
       <dl className="submission-lifecycle-summary">
         <div>
           <dt>제출 기록</dt>
@@ -62,33 +64,46 @@ export function SubmissionLifecycleConfirmation({
           <dd className="submission-detail-text">{input.reason}</dd>
         </div>
       </dl>
+      <p className="submission-lifecycle-effect">{copy.operationalEffect}</p>
       <div className="submission-lifecycle-consequences">
-        <p>{copy.operationalEffect}</p>
-        <p>
-          답변·사진·원래 작성자·이용 일정 연결과 이전 이력은 유지됩니다. 첨부
-          파일은 삭제되지 않습니다.
-        </p>
-        <p>
-          <strong>연결된 이상사항은 변경되지 않습니다.</strong> 긴급도·처리
-          상태·해결 정보·이전 이상사항 연결과 원래 증거를 유지하며, 자동으로
-          취소하거나 해결하지 않습니다.
-        </p>
-        {action === 'cancel' ? (
-          <p>
-            취소된 체크리스트를 출처로 한 이상사항도 계속 처리할 수 있습니다.
-          </p>
-        ) : (
-          <>
-            <p>
-              이전 정정에서 제외한 사진이나 직원 조치 정보는 복구되지 않습니다.
-              현재 저장된 답변과 사진만 유지합니다.
-            </p>
-            <p>
-              원래 제출 시각은 유지됩니다. 이용 일정의 상태를 바꾸거나 접속
-              링크의 유효기간을 늘리지 않습니다.
-            </p>
-          </>
-        )}
+        <h4>처리 범위</h4>
+        <dl>
+          <div>
+            <dt>기록·사진</dt>
+            <dd>
+              답변·사진·원래 작성자·이용 일정 연결과 이전 이력은 유지됩니다.
+              첨부 파일은 삭제되지 않습니다.
+            </dd>
+          </div>
+          <div>
+            <dt>이상사항</dt>
+            <dd>
+              긴급도·처리 상태·해결 정보·이전 이상사항 연결과 원래 증거는 그대로입니다.
+              <strong> 자동으로 취소하거나 해결하지 않습니다.</strong>
+              {action === 'cancel' && (
+                <p>취소된 체크리스트를 출처로 한 이상사항도 계속 처리할 수 있습니다.</p>
+              )}
+            </dd>
+          </div>
+          {action === 'restore' && (
+            <>
+              <div>
+                <dt>복원 범위</dt>
+                <dd>
+                  현재 저장된 답변과 사진만 유지합니다. 이전 정정에서 제외한
+                  사진이나 직원 조치 정보는 복구되지 않습니다.
+                </dd>
+              </div>
+              <div>
+                <dt>일정·링크</dt>
+                <dd>
+                  원래 제출 시각을 유지하며, 이용 일정 상태와 접속 링크
+                  유효기간은 바뀌지 않습니다.
+                </dd>
+              </div>
+            </>
+          )}
+        </dl>
       </div>
       {!blocked && (
         <>

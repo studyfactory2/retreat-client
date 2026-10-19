@@ -11,17 +11,12 @@ import { PageState } from '../../../shared/ui/PageState/PageState';
 import { SubmissionLifecycle } from './components/SubmissionLifecycle';
 import { submissionLifecycleSavedMessage } from './model/submission-lifecycle-model';
 import { SubmissionCorrection } from './components/SubmissionCorrection';
-import { SubmissionRecord } from './components/SubmissionRecord';
 import { MaintenanceSubmissionReport } from './components/MaintenanceSubmissionReport';
-import { SubmissionCurrentSummary } from './components/SubmissionCurrentSummary';
-import { SubmissionPhotos } from './components/SubmissionPhotos';
-import { SubmissionHistory } from './components/SubmissionHistory';
 import {
   SubmissionStayLink,
   type SubmissionLinkEditState,
 } from './components/SubmissionStayLink';
 import { useSubmissionLinkNavigation } from './hooks/use-submission-link-navigation';
-import { submissionTypeLabel } from './model/submission-detail-model';
 import {
   readSubmissionListFilters,
   submissionListSearch,
@@ -30,6 +25,7 @@ import { useSubmissionDetail } from './hooks/use-submission-detail';
 import { maintenanceReturnPath } from '../maintenance/model/maintenance-navigation';
 import './styles/submission-detail.css';
 import './styles/maintenance-detail.css';
+import './styles/submission-workspace.css';
 
 export function AdminSubmissionDetailScreen() {
   const { state, rejectSession } = useAdminSession();
@@ -86,6 +82,7 @@ function SubmissionWorkspace({
       setNotice(undefined);
       setEditState({ dirty: false, busy: false });
       setActiveEditor('stay');
+      setManagementOpen(false);
       refresh();
     });
   function changeEditor(next: 'stay' | 'correction' | 'cancel' | 'restore') {
@@ -140,7 +137,9 @@ function SubmissionWorkspace({
     );
   const detail = resource.data;
   const revision = detail.revision;
-  const isMaintenance = revision.record.type === 'MAINTENANCE';
+  const recordKind = revision.record.type === 'CHECK_IN' ? '입실'
+    : revision.record.type === 'CHECK_OUT' ? '퇴실' : '정비';
+  const recordLabel = `${recordKind} 기록`;
   const managementVisible =
     managementOpen ||
     activeEditor !== 'stay' ||
@@ -150,70 +149,53 @@ function SubmissionWorkspace({
     navigation.pending;
   return (
     <div
-      className={`submission-detail${isMaintenance ? ' maintenance-submission-detail' : ''}`}
+      className="submission-detail maintenance-submission-detail submission-detail-workspace"
     >
       <header className="submission-detail-heading">
-        <div>
-          {isMaintenance ? (
-            <div className="maintenance-detail-breadcrumb">
-              <Link
-                to={returnTo}
-                aria-disabled={editState.busy || undefined}
-                onClick={(event) => {
-                  event.preventDefault();
-                  navigation.request(() => navigate(returnTo));
-                }}
-              >
-                <span aria-hidden="true">←</span> 목록
-              </Link>
-              <h1>점검 기록</h1>
-            </div>
-          ) : (
-            <h1>{submissionTypeLabel(revision.record.type)} 상세</h1>
-          )}
+        <div className="maintenance-detail-breadcrumb">
+          <Link
+            to={returnTo}
+            aria-label={returnLabel}
+            aria-disabled={editState.busy || undefined}
+            onClick={(event) => {
+              event.preventDefault();
+              navigation.request(() => navigate(returnTo));
+            }}
+          >
+            <span aria-hidden="true">←</span> 목록
+          </Link>
+          <h1>{recordLabel}</h1>
         </div>
         <div className="submission-detail-actions">
           {(detail.currentRevision < 2_147_483_647 ||
             revision.record.type !== 'MAINTENANCE') && (
             <Button
               className="admin-button-secondary"
-              aria-expanded={isMaintenance ? managementVisible : undefined}
-              aria-controls={
-                isMaintenance ? 'maintenance-record-management' : undefined
-              }
+              id="submission-management-trigger"
+              aria-expanded={managementVisible}
+              aria-controls="submission-record-management"
               onClick={() => {
                 const revealManagement = () => {
                   management.current?.focus({ preventScroll: true });
                   management.current?.scrollIntoView({ block: 'start' });
                 };
-                if (isMaintenance) {
-                  setManagementOpen(true);
-                  requestAnimationFrame(revealManagement);
-                } else revealManagement();
+                setManagementOpen(true);
+                requestAnimationFrame(revealManagement);
               }}
             >
               기록 관리
             </Button>
           )}
-          {!isMaintenance && (
-            <Link
-              className="ui-button admin-button-secondary"
-              to={returnTo}
-              aria-disabled={editState.busy || undefined}
-              onClick={(event) => {
-                event.preventDefault();
-                navigation.request(() => navigate(returnTo));
-              }}
-            >
-              {returnLabel}
-            </Link>
-          )}
           <Button
-            className="admin-button-secondary"
+            className="admin-button-secondary submission-workspace-refresh"
             disabled={editState.busy}
+            aria-label="기록 새로고침"
+            title="새로고침"
             onClick={refreshRecord}
           >
-            새로고침
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M20 7v5h-5M4 17v-5h5M6.1 7a7 7 0 0 1 11.6-1.5L20 8M4 16l2.3 2.5A7 7 0 0 0 17.9 17" />
+            </svg>
           </Button>
         </div>
       </header>
@@ -248,53 +230,51 @@ function SubmissionWorkspace({
           </div>
         </section>
       )}
-      {isMaintenance ? (
+      <div className="submission-report-view" hidden={managementVisible}>
         <MaintenanceSubmissionReport
           detail={detail}
           token={token}
           rejectSession={rejectSession}
           onRefreshDetail={refreshRecord}
         />
-      ) : (
-        <>
-          <SubmissionCurrentSummary detail={detail} />
-          <div className="submission-detail-evidence">
-            <SubmissionRecord record={revision.record} />
-            <SubmissionPhotos
-              key={revision.id}
-              revision={revision}
-              token={token}
-              rejectSession={rejectSession}
-            />
-          </div>
-        </>
-      )}
+      </div>
       <section
         className="submission-management"
-        id={isMaintenance ? 'maintenance-record-management' : undefined}
-        hidden={isMaintenance && !managementVisible}
+        id="submission-record-management"
+        hidden={!managementVisible}
         aria-label="제출 기록 관리"
         ref={management}
         tabIndex={-1}
       >
-        {isMaintenance && (
-          <div className="maintenance-management-heading">
-            <h2>기록 관리</h2>
-            <Button
-              className="admin-button-secondary"
-              disabled={
-                activeEditor !== 'stay' ||
-                editState.dirty ||
-                editState.busy ||
-                !!editState.blocked ||
-                navigation.pending
-              }
-              onClick={() => setManagementOpen(false)}
-            >
-              닫기
-            </Button>
+        <div className="maintenance-management-heading">
+          <div>
+            <p className="submission-management-eyebrow">{recordKind} · 기록 관리</p>
+            <h2>{revision.record.property.name}</h2>
+            <p className="submission-management-context">
+              방문일 {revision.record.visitDate.replaceAll('-', '.')} · {revision.record.author.name}
+            </p>
           </div>
-        )}
+          <Button
+            className="admin-button-secondary"
+            disabled={
+              activeEditor !== 'stay' ||
+              editState.dirty ||
+              editState.busy ||
+              !!editState.blocked ||
+              navigation.pending
+            }
+            onClick={() => {
+              setManagementOpen(false);
+              requestAnimationFrame(() => {
+                const target = document.getElementById('submission-management-trigger')
+                  ?? document.getElementById('main-content');
+                target?.focus();
+              });
+            }}
+          >
+            관리 닫기
+          </Button>
+        </div>
         {detail.currentRevision < 2_147_483_647 && (
           <div
             className="submission-detail-actions submission-management-toolbar"
@@ -381,6 +361,7 @@ function SubmissionWorkspace({
                 navigation.keep();
                 setEditState({ dirty: false, busy: false });
                 setActiveEditor('stay');
+                setManagementOpen(false);
                 setNotice(
                   submissionLifecycleSavedMessage(
                     activeEditor,
@@ -403,6 +384,7 @@ function SubmissionWorkspace({
                 navigation.keep();
                 setEditState({ dirty: false, busy: false });
                 setActiveEditor('stay');
+                setManagementOpen(false);
                 setNotice(
                   receipt.changed
                     ? `정정 내용을 버전 ${receipt.revision}으로 저장했습니다. 현재 내용과 처리 이력을 확인해 주세요.`
@@ -430,6 +412,7 @@ function SubmissionWorkspace({
                 onSaved={(receipt) => {
                   navigation.keep();
                   setEditState({ dirty: false, busy: false });
+                  setManagementOpen(false);
                   setNotice(
                     receipt.changed
                       ? '이용 일정 연결 변경이 저장되었습니다. 아래는 최신 제출 기록입니다.'
@@ -442,35 +425,6 @@ function SubmissionWorkspace({
           )}
         </fieldset>
       </section>
-      {!isMaintenance && (
-        <details className="submission-detail-disclosure submission-history-disclosure">
-        <summary>
-          <span>
-            <strong>
-              제출 이력{' '}
-              <span className="submission-disclosure-version">
-                버전 {detail.currentRevision}
-              </span>
-            </strong>
-            <span className="submission-detail-caption">
-              이전 저장 내용 · 변경 사유 · 당시 사진
-            </span>
-          </span>
-          <span className="submission-disclosure-indicator" aria-hidden="true">
-            +
-          </span>
-        </summary>
-        <div className="submission-disclosure-body">
-          <SubmissionHistory
-            submissionId={detail.id}
-            currentRevision={detail.currentRevision}
-            token={token}
-            rejectSession={rejectSession}
-            onRefreshDetail={refreshRecord}
-          />
-        </div>
-        </details>
-      )}
     </div>
   );
 }

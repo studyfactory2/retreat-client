@@ -33,6 +33,7 @@ export function SubmissionCorrectionAnswer({
       >
         <button
           type="button"
+          className="submission-correction-choice--normal"
           aria-pressed={answer?.value === 'NORMAL'}
           onClick={() => onValue('NORMAL')}
         >
@@ -40,6 +41,7 @@ export function SubmissionCorrectionAnswer({
         </button>
         <button
           type="button"
+          className="submission-correction-choice--abnormal"
           aria-pressed={answer?.value === 'ABNORMAL'}
           onClick={() => onValue('ABNORMAL')}
         >
@@ -48,6 +50,7 @@ export function SubmissionCorrectionAnswer({
         {!item.required && (
           <button
             type="button"
+            className="submission-correction-choice--clear"
             disabled={!answer}
             onClick={() => onValue(null)}
           >
@@ -57,23 +60,21 @@ export function SubmissionCorrectionAnswer({
       </div>
       {answer?.value === 'ABNORMAL' && (
         <div className="submission-correction-answer-details">
-          <label htmlFor={descriptionId}>이상 내용 · 선택</label>
+          <div className="submission-correction-field-heading">
+            <label htmlFor={descriptionId}>이상 내용 <span>선택</span></label>
+            <span id={hintId}>
+              {[...(answer.description ?? '').trim()].length.toLocaleString('ko-KR')} / 2,000자
+            </span>
+          </div>
           <textarea
             id={descriptionId}
             value={answer.description ?? ''}
-            rows={3}
+            rows={2}
             aria-describedby={hintId}
             onChange={(event) =>
               onDetails({ description: event.target.value || null })
             }
           />
-          <p className="submission-detail-caption" id={hintId}>
-            최대 2000자 ·{' '}
-            {[...(answer.description ?? '').trim()].length.toLocaleString(
-              'ko-KR',
-            )}
-            자
-          </p>
           <label className="submission-correction-check">
             <input
               type="checkbox"

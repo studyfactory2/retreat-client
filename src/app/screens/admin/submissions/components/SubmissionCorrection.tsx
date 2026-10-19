@@ -87,7 +87,7 @@ export function SubmissionCorrection({
       <div className="submission-detail-section-heading">
         <div>
           <h2 ref={heading} id={headingId} tabIndex={-1}>
-            제출 내용 정정
+            {review ? '정정 내용 확인' : '내용 정정'}
           </h2>
         </div>
         <span className="submission-detail-badge">
@@ -102,15 +102,17 @@ export function SubmissionCorrection({
             prepareReview();
           }}
         >
-          <p className="submission-detail-caption">
-            제출 당시 체크리스트의 답변과 전체 메모를 정정합니다. 원래
-            작성자·이용 일정·제출 시각은 유지되고 관리자와 정정 사유가 이력에
-            남습니다.
-          </p>
-          <p className="submission-detail-caption">
-            사진을 추가하거나 직접 옮길 수 없습니다. 정상·미응답으로 바꿀 때
-            제외되는 사진과 직원 조치 정보는 저장 전에 확인합니다.
-          </p>
+          <details className="submission-correction-guide">
+            <summary>정정 안내</summary>
+            <p>
+              제출 당시 답변과 메모를 수정합니다. 원래 작성자·이용 일정·제출
+              시각은 유지되고, 관리자와 정정 사유는 이력에 남습니다.
+            </p>
+            <p>
+              사진 추가·이동은 지원하지 않습니다. 정상·미응답으로 변경할 때
+              제외되는 사진과 직원 조치 정보는 저장 전에 확인합니다.
+            </p>
+          </details>
           <SubmissionCorrectionFields
             detail={detail}
             form={form}

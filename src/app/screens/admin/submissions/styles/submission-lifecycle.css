@@ -1,111 +1,68 @@
-.submission-lifecycle {
-  padding: 18px;
+.submission-detail .submission-lifecycle.submission-detail-card {
+  min-width: 0;
+  padding: 20px;
   font-size: 14px;
 }
-.submission-lifecycle--cancel {
-  border-color: #dfb8bf;
-}
-.submission-lifecycle-danger.ui-button {
-  color: #a22b3e;
-  background: #fff;
-  border: 1px solid #d9a4ae;
-}
-.submission-lifecycle-danger.ui-button:not(:disabled):hover {
-  background: #fff1f3;
-}
-.submission-lifecycle form,
-.submission-lifecycle-confirmation {
-  display: grid;
-  gap: 12px;
-  min-width: 0;
-}
-.submission-lifecycle p {
-  margin: 0;
-  line-height: 1.7;
-  overflow-wrap: anywhere;
-}
-.submission-lifecycle textarea {
+.submission-detail .submission-lifecycle--cancel { border-color: #dfb8bf; }
+.submission-detail .submission-lifecycle-danger.ui-button { color: #a22b3e; background: #fff; border: 1px solid #d9a4ae; }
+.submission-detail .submission-lifecycle-danger.ui-button:not(:disabled):hover { background: #fff1f3; }
+.submission-detail .submission-lifecycle .submission-detail-section-heading { align-items: center; gap: 12px; margin-bottom: 16px; }
+.submission-detail .submission-lifecycle form,
+.submission-detail .submission-lifecycle-confirmation { display: grid; gap: 12px; min-width: 0; }
+.submission-detail .submission-lifecycle p { margin: 0; font-size: 13px; line-height: 1.7; overflow-wrap: anywhere; }
+.submission-detail .submission-lifecycle .submission-detail-caption { color: var(--color-muted); font-size: 12px; }
+.submission-detail .submission-lifecycle-introduction { display: grid; gap: 4px; margin-bottom: 4px; }
+.submission-detail .submission-lifecycle-reason-heading { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 12px; }
+.submission-detail .submission-lifecycle-reason-heading label { color: var(--color-heading); font-size: 13px; font-weight: 600; }
+.submission-detail .submission-lifecycle-reason-heading label span { margin-left: 5px; color: var(--color-muted); font-size: 12px; font-weight: 400; }
+.submission-detail .submission-lifecycle-reason-heading > span { color: var(--color-muted); font-size: 12px; }
+.submission-detail .submission-lifecycle textarea {
   width: 100%;
+  min-width: 0;
+  min-height: 86px;
   padding: 10px 12px;
-  min-height: 90px;
   resize: vertical;
-  font: inherit;
-  line-height: 1.6;
-  color: var(--color-text);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 7px;
-}
-.submission-lifecycle textarea:disabled {
-  background: #f2f5f9;
-}
-.submission-lifecycle textarea:focus-visible {
-  outline: 3px solid #adc7f6;
-  outline-offset: 2px;
-}
-.submission-lifecycle form > label {
-  font-weight: 650;
-}
-.submission-lifecycle .submission-lifecycle-confirmation h3 {
-  margin: 0;
-}
-.submission-lifecycle-transition {
-  color: var(--color-primary);
-  font-weight: 700;
-}
-.submission-lifecycle-summary {
-  margin: 0;
-  display: grid;
-  gap: 12px;
-}
-.submission-lifecycle-summary dt {
-  color: var(--color-muted);
-  font-size: 0.8rem;
-  margin-bottom: 4px;
-}
-.submission-lifecycle-summary dd {
-  margin: 0;
-  overflow-wrap: anywhere;
-  line-height: 1.6;
-}
-.submission-lifecycle-consequences,
-.submission-lifecycle-notice {
-  padding: 14px;
+  border: 1px solid var(--color-input-border);
   border-radius: 8px;
-  background: var(--color-soft);
+  background: #fbfcfe;
+  color: var(--color-text);
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.65;
 }
-.submission-lifecycle-consequences p + p,
-.submission-lifecycle-notice p + p {
-  margin-top: 8px;
-}
-.submission-lifecycle-notice {
-  margin-top: 16px;
-}
-.submission-lifecycle-notice button {
-  margin-top: 12px;
-}
-.submission-lifecycle-check {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  line-height: 1.6;
-  padding: 8px 0;
-}
-.submission-lifecycle-check input {
-  width: 18px;
-  height: 18px;
-  margin-top: 3px;
-  flex: 0 0 auto;
-  accent-color: var(--color-primary);
-}
-@media (max-width: 560px) {
-  .submission-lifecycle {
-    padding: 16px;
-  }
-  .submission-lifecycle textarea {
-    font-size: 16px;
-  }
-  .submission-lifecycle .submission-detail-actions > button {
-    flex: 1 1 140px;
-  }
+.submission-detail .submission-lifecycle textarea:disabled { background: #f2f5f9; }
+.submission-detail .submission-lifecycle :is(textarea, input, button):focus-visible { outline: 2px solid var(--color-primary); outline-offset: 3px; }
+.submission-detail .submission-lifecycle-review-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; }
+.submission-detail .submission-lifecycle-review-heading h3 { margin: 0; color: var(--color-heading); font-size: 16px; font-weight: 650; line-height: 1.6; }
+.submission-detail .submission-lifecycle-transition { padding: 4px 9px; border-radius: 6px; color: var(--color-primary); background: var(--color-soft); font-size: 12px; font-weight: 600; }
+.submission-detail .submission-lifecycle-summary { display: grid; gap: 10px; min-width: 0; margin: 2px 0 0; padding-bottom: 16px; border-bottom: 1px solid var(--color-border); }
+.submission-detail .submission-lifecycle-summary > div { display: grid; grid-template-columns: 100px minmax(0, 1fr); gap: 14px; align-items: baseline; min-width: 0; }
+.submission-detail .submission-lifecycle-summary dt { color: var(--color-muted); font-size: 12px; line-height: 1.7; }
+.submission-detail .submission-lifecycle-summary dd { min-width: 0; margin: 0; color: var(--color-text); font-size: 13px; line-height: 1.7; overflow-wrap: anywhere; }
+.submission-detail .submission-lifecycle-summary .submission-detail-text { white-space: pre-wrap; }
+.submission-detail .submission-lifecycle .submission-lifecycle-effect { padding: 10px 12px; border-left: 3px solid #91b5ee; border-radius: 0 7px 7px 0; background: #f3f7ff; color: #345581; font-size: 13px; line-height: 1.7; }
+.submission-detail .submission-lifecycle--cancel .submission-lifecycle-effect { border-left-color: #d4a370; background: #fffbf4; color: #7b592e; }
+.submission-detail .submission-lifecycle-consequences { min-width: 0; padding: 4px 0; background: transparent; }
+.submission-detail .submission-lifecycle-consequences h4 { margin: 0 0 10px; color: var(--color-heading); font-size: 13px; font-weight: 650; }
+.submission-detail .submission-lifecycle-consequences dl { display: grid; gap: 10px; margin: 0; }
+.submission-detail .submission-lifecycle-consequences dl > div { display: grid; grid-template-columns: 74px minmax(0, 1fr); gap: 12px; align-items: baseline; min-width: 0; }
+.submission-detail .submission-lifecycle-consequences dt { color: var(--color-muted); font-size: 12px; line-height: 1.75; }
+.submission-detail .submission-lifecycle-consequences dd { min-width: 0; margin: 0; color: var(--color-muted); font-size: 12px; line-height: 1.75; word-break: keep-all; overflow-wrap: anywhere; }
+.submission-detail .submission-lifecycle-consequences dd p { margin-top: 4px; font-size: 12px; }
+.submission-detail .submission-lifecycle-consequences strong { color: var(--color-heading); font-weight: 600; }
+.submission-detail .submission-lifecycle-notice { margin-top: 16px; padding: 12px 14px; border: 1px solid #eac4cb; border-radius: 8px; background: #fff6f7; color: var(--color-danger); }
+.submission-detail .submission-lifecycle-notice p + p { margin-top: 6px; }
+.submission-detail .submission-lifecycle-notice button { min-height: 44px; margin-top: 12px; }
+.submission-detail .submission-lifecycle-check { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 8px 0; color: var(--color-text); font-size: 13px; line-height: 1.65; cursor: pointer; }
+.submission-detail .submission-lifecycle-check input { flex: 0 0 auto; width: 18px; height: 18px; margin: 0; accent-color: var(--color-primary); }
+.submission-detail .submission-lifecycle .submission-detail-actions { justify-content: flex-end; gap: 8px; margin-top: 2px; padding-top: 16px; border-top: 1px solid var(--color-border); }
+.submission-detail .submission-lifecycle .submission-detail-actions .ui-button { min-height: 44px; font-size: 13px; }
+@media (max-width: 600px) {
+  .submission-detail .submission-lifecycle.submission-detail-card { padding: 16px; }
+  .submission-detail .submission-lifecycle textarea { font-size: 16px; }
+  .submission-detail .submission-lifecycle-summary > div { grid-template-columns: 74px minmax(0, 1fr); gap: 10px; }
+  .submission-detail .submission-lifecycle-consequences dl > div { grid-template-columns: 62px minmax(0, 1fr); gap: 10px; }
+  .submission-detail .submission-lifecycle .submission-detail-actions > button { flex: 1 1 0; min-width: 0; padding-inline: 10px; }
+  .submission-detail .submission-lifecycle-check { align-items: flex-start; }
+  .submission-detail .submission-lifecycle-check input { margin-top: 2px; }
 }

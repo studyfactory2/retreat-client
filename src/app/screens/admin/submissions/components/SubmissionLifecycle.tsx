@@ -100,12 +100,20 @@ export function SubmissionLifecycle({
             prepareReview();
           }}
         >
-          <p>{copy.introduction}</p>
-          <p className="submission-detail-caption">
-            기록과 사진을 삭제하지 않으며 연결된 이상사항은 그대로 유지됩니다.
-            저장 전에 영향을 한 번 더 확인합니다.
-          </p>
-          <label htmlFor={reasonId}>{copy.reasonLabel} · 필수</label>
+          <div className="submission-lifecycle-introduction">
+            <p>{copy.introduction}</p>
+            <p className="submission-detail-caption">
+              기록·사진과 연결된 이상사항은 유지됩니다. 저장 전에 영향을
+              확인합니다.
+            </p>
+          </div>
+          <div className="submission-lifecycle-reason-heading">
+            <label htmlFor={reasonId}>{copy.reasonLabel} <span>필수</span></label>
+            <span>
+              {[...reason.trim()].length.toLocaleString('ko-KR')} /{' '}
+              {ADMIN_LIFECYCLE_REASON_LIMIT.toLocaleString('ko-KR')}자
+            </span>
+          </div>
           <textarea
             id={reasonId}
             rows={3}
@@ -122,8 +130,8 @@ export function SubmissionLifecycle({
             }}
           />
           <p id={reasonHintId} className="submission-detail-caption">
-            1–{ADMIN_LIFECYCLE_REASON_LIMIT}자로 입력해 주세요. 현재{' '}
-            {[...reason.trim()].length.toLocaleString('ko-KR')}자
+            1–{ADMIN_LIFECYCLE_REASON_LIMIT.toLocaleString('ko-KR')}자로 입력해
+            주세요.
           </p>
           {!blocked && (
             <div className="submission-detail-actions">

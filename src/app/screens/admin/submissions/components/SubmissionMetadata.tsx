@@ -166,7 +166,7 @@ function MaintenanceRecordFacts({ record, historical, children }: {
     { key: 'visit', title: '방문 정보', fields: [
       ['휴양소', <>{record.property.name}{record.property.region && <span className="submission-detail-muted"> · {record.property.region}</span>}</>],
       ['방문일', record.visitDate.replaceAll('-', '.')],
-      ['점검 종류', submissionTypeLabel(record.type)],
+      ['기록 유형', submissionTypeLabel(record.type)],
       ['체크리스트', <>{record.template.title} · 버전 {record.template.version}</>],
       [historical ? '당시 일정' : '연결 일정', record.stayId
         ? <Link key="stay" to={`/admin/stays/${record.stayId}?view=list`}>이용 일정 보기{historical ? ' (현재 정보)' : ''} →</Link>

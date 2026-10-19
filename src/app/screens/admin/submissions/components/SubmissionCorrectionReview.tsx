@@ -22,7 +22,7 @@ function AnswerSummary({
 }) {
   if (!answer) return <p>미응답</p>;
   return (
-    <div>
+    <div className="submission-correction-answer-summary">
       <p>
         <strong>{answer.value === 'NORMAL' ? '정상' : '이상'}</strong>
         {answer.isUrgent && ' · 답변 긴급'}
@@ -69,16 +69,15 @@ export function SubmissionCorrectionReview({
       aria-labelledby={headingId}
     >
       <h3 id={headingId} ref={heading} tabIndex={-1}>
-        정정 내용을 확인해 주세요
+        변경 항목{' '}
+        <span>{consequences.changes.length + (consequences.noteChanged ? 1 : 0)}건</span>
       </h3>
       <p className="submission-detail-caption">
-        현재 버전 {input.expectedRevision}을 기준으로 저장합니다. 원래 작성자와
-        제출 시각은 유지됩니다.
+        버전 {input.expectedRevision} 기준 · 원래 작성자와 제출 시각 유지
       </p>
       {!consequences.changed && (
-        <p className="submission-detail-notice">
-          저장된 답변·전체 메모와 같습니다. 확인하더라도 새 정정 이력은 추가되지
-          않습니다.
+        <p className="submission-correction-unchanged">
+          답변과 메모가 동일합니다. 새 정정 이력은 추가되지 않습니다.
         </p>
       )}
       {consequences.changes.map(({ item, section, before, after }) => (
@@ -132,70 +131,82 @@ export function SubmissionCorrectionReview({
         <h4>정정 사유</h4>
         <p className="submission-detail-text">{input.reason}</p>
       </div>
-      {consequences.removedRepair.length > 0 && (
-        <aside className="submission-correction-consequence">
-          <strong>
-            현재 답변에서 직원 조치 정보 {consequences.removedRepair.length}건이
-            제외됩니다.
-          </strong>
-          <ul>
-            {consequences.removedRepair.map((answer) => (
-              <li key={answer.itemId}>
-                {
-                  record.template.definition.sections
-                    .flatMap((section) => section.items)
-                    .find((item) => item.id === answer.itemId)?.label
-                }
-                {answer.repairNote && (
-                  <p className="submission-detail-text">
-                    기존 조치 메모: {answer.repairNote}
-                  </p>
-                )}
-              </li>
-            ))}
-          </ul>
-          <p>
-            정상 또는 미응답으로 바뀐 항목의 정보입니다. 정정 전 이력에는 그대로
-            남습니다.
-          </p>
-        </aside>
+      {(consequences.removedRepair.length > 0 ||
+        consequences.removedPhotos.length > 0) && (
+        <div className="submission-correction-consequences">
+          {consequences.removedRepair.length > 0 && (
+            <aside className="submission-correction-consequence">
+              <strong>
+                직원 조치 정보 {consequences.removedRepair.length}건 제외
+              </strong>
+              <p>
+                정상·미응답으로 바뀐 항목의 현재 조치 정보에서 제외됩니다.
+                정정 전 이력에는 그대로 남습니다.
+              </p>
+              <details>
+                <summary>제외 항목 보기</summary>
+                <ul>
+                  {consequences.removedRepair.map((answer) => (
+                    <li key={answer.itemId}>
+                      {
+                        record.template.definition.sections
+                          .flatMap((section) => section.items)
+                          .find((item) => item.id === answer.itemId)?.label
+                      }
+                      {answer.repairNote && (
+                        <p className="submission-detail-text">
+                          기존 조치 메모: {answer.repairNote}
+                        </p>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            </aside>
+          )}
+          {consequences.removedPhotos.length > 0 && (
+            <aside className="submission-correction-consequence">
+              <strong>
+                현재 첨부 사진 {consequences.removedPhotos.length}장 제외
+              </strong>
+              <p>
+                파일과 과거 기록의 사진은 삭제되지 않습니다. 다시 이상으로
+                정정해도 현재 첨부에 자동으로 복구되지 않습니다.
+              </p>
+              <details>
+                <summary>제외 사진 보기</summary>
+                <ul>
+                  {consequences.removedPhotos.map((photo) => (
+                    <li key={photo.id}>
+                      {submissionPhotoPurpose(photo.purpose)} ·{' '}
+                      {submissionPhotoLocation(photo, record)}
+                      <span>{photo.filename}</span>
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            </aside>
+          )}
+        </div>
       )}
-      {consequences.removedPhotos.length > 0 && (
-        <aside className="submission-correction-consequence">
-          <strong>
-            현재 첨부에서 사진 {consequences.removedPhotos.length}장이
-            제외됩니다.
-          </strong>
-          <ul>
-            {consequences.removedPhotos.map((photo) => (
-              <li key={photo.id}>
-                {submissionPhotoPurpose(photo.purpose)} ·{' '}
-                {submissionPhotoLocation(photo, record)}
-                <span>{photo.filename}</span>
-              </li>
-            ))}
-          </ul>
-          <p>
-            파일과 과거 기록의 사진은 삭제되지 않습니다. 다시 이상으로 정정해도
-            현재 첨부에 자동으로 복구되지 않습니다.
-          </p>
-        </aside>
-      )}
-      <aside className="submission-detail-notice">
-        {record.type === 'MAINTENANCE' && (
-          <p>
-            정비 전·후 사진은 유지됩니다. 계속 이상인 항목의 기존 직원 조치
-            정보와 유효한 조치 사진도 유지됩니다.
-          </p>
-        )}
-        <p>
-          기존 이상사항의 긴급도·처리 상태·이전 이상사항 연결은 바뀌지 않습니다.
-          정상으로 정정해도 해결 처리되지 않습니다.
-        </p>
-        <p>
-          새로 생긴 이상사항에만 답변의 긴급 표시가 적용됩니다. 기존 이상사항의
-          긴급도는 이상사항 상세에서 별도로 변경하세요.
-        </p>
+      <aside className="submission-correction-policy">
+        <h4>저장 후 반영</h4>
+        <ul>
+          {record.type === 'MAINTENANCE' && (
+            <li>
+              정비 전·후 사진은 유지됩니다. 계속 이상인 항목의 기존 직원 조치
+              정보와 유효한 조치 사진도 유지됩니다.
+            </li>
+          )}
+          <li>
+            기존 이상사항의 긴급도·처리 상태·이전 연결은 바뀌지 않습니다.
+            <strong> 정상으로 정정해도 해결 처리되지 않습니다.</strong>
+          </li>
+          <li>
+            답변의 긴급 표시는 새 이상사항에만 적용됩니다. 기존 이상사항의
+            긴급도는 이상사항 상세에서 별도로 변경하세요.
+          </li>
+        </ul>
       </aside>
       {!blocked && (
         <>

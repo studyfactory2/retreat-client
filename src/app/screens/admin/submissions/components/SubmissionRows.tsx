@@ -1,9 +1,6 @@
 import { Link } from 'react-router-dom';
 import type { AdminSubmissionSummary } from '../../../../features/admin-submissions/admin-submissions.types';
-import {
-  submissionTime,
-  submissionTypeLabel,
-} from '../model/submission-list-model';
+import { submissionTypeLabel } from '../model/submission-list-model';
 
 export function SubmissionRows({
   items,
@@ -13,126 +10,59 @@ export function SubmissionRows({
   detailSearch: string;
 }) {
   return (
-    <div className="submission-table-wrap">
-      <table className="submission-table" role="table">
-        <caption className="submission-sr-only">저장된 체크리스트 기록</caption>
-        <thead role="rowgroup">
-          <tr role="row">
-            {[
-              '휴양소',
-              '유형 · 상태 / 방문일',
-              '작성자',
-              '기록 요약',
-              '제출 일시 · 한국 시간',
-              '상세',
-            ].map((label) => (
-              <th key={label} scope="col" role="columnheader">
-                {label}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody role="rowgroup">
-          {items.map((item) => (
-            <tr
-              key={item.id}
-              role="row"
-              className={
-                item.status === 'CANCELLED' ? 'submission-row--cancelled' : ''
-              }
-            >
-              <td role="cell">
-                <span className="submission-mobile-label" aria-hidden="true">
-                  휴양소
-                </span>
-                <Link
-                  className="submission-property-name"
-                  to={`/admin/submissions/${item.id}${detailSearch}`}
-                  aria-label={`${item.property.name} ${item.visitDate} ${submissionTypeLabel[item.type]} 기록 상세`}
-                >
-                  {item.property.name}
-                </Link>
-                {item.property.region && (
-                  <p className="submission-row-muted">{item.property.region}</p>
-                )}
-              </td>
-              <td role="cell">
-                <span className="submission-mobile-label" aria-hidden="true">
-                  유형 · 상태 / 방문일
-                </span>
-                <div className="submission-badges">
-                  <span className="submission-type-badge">
-                    {submissionTypeLabel[item.type]}
+    <div className="submission-list">
+      <div className="submission-list-columns" aria-hidden="true">
+        <span>구분</span>
+        <span>휴양소 · 작성자</span>
+        <span>방문일</span>
+        <span>이상 응답 · 상태</span>
+        <span />
+      </div>
+      <ul className="submission-rows" role="list" aria-label="제출 기록 목록">
+        {items.map((item) => {
+          const typeLabel = submissionTypeLabel[item.type];
+          const cancelled = item.status === 'CANCELLED';
+          const date = item.visitDate.replaceAll('-', '.');
+          return (
+            <li key={item.id}>
+              <Link
+                className={`submission-row${cancelled ? ' submission-row--cancelled' : ''}`}
+                to={`/admin/submissions/${item.id}${detailSearch}`}
+                aria-label={`${item.property.name}, ${item.visitDate} ${typeLabel}, ${item.author.name}, ${cancelled ? '취소됨' : '제출됨'}, 이상 응답 ${item.abnormalItemCount}개, 기록 상세`}
+              >
+                <span className="submission-row-type">
+                  <span className={`submission-type-badge submission-type-badge--${item.type.toLowerCase()}`}>
+                    {typeLabel}
                   </span>
-                  <span
-                    className={`submission-status${item.status === 'CANCELLED' ? ' submission-status--cancelled' : ''}`}
-                  >
-                    {item.status === 'CANCELLED' ? '취소됨' : '제출됨'}
+                </span>
+                <span className="submission-row-identity">
+                  <strong className="submission-property-name">{item.property.name}</strong>
+                  <span className="submission-row-context">
+                    <span className="submission-compact-type">{typeLabel}</span>
+                    <time className="submission-compact-date" dateTime={item.visitDate}>{date}</time>
+                    <span className="submission-row-author">{item.author.name}</span>
                   </span>
-                </div>
-                <time
-                  className="submission-visit-date"
-                  dateTime={item.visitDate}
-                >
-                  {item.visitDate}
-                </time>
-                {item.type !== 'MAINTENANCE' && (
-                  <p className="submission-row-muted">
-                    {item.stayId !== null
-                      ? '일정 연결됨'
-                      : item.status === 'SUBMITTED' &&
-                          item.authorSource === 'GUEST_QR'
-                        ? '일정 미연결'
-                        : '연결된 일정 없음'}
-                  </p>
-                )}
-              </td>
-              <td role="cell">
-                <span className="submission-mobile-label" aria-hidden="true">
-                  작성자
                 </span>
-                <strong>{item.author.name}</strong>
-                <p className="submission-row-muted">
-                  {item.author.role === 'GUEST' ? '이용객' : '정비 담당자'}
-                </p>
-              </td>
-              <td role="cell">
-                <span className="submission-mobile-label" aria-hidden="true">
-                  기록 요약
+                <time className="submission-row-date" dateTime={item.visitDate}>{date}</time>
+                <span className="submission-row-status">
+                  {item.abnormalItemCount > 0 ? (
+                    <span className="submission-abnormal">이상 응답 {item.abnormalItemCount}</span>
+                  ) : (
+                    <span className="submission-no-abnormal">없음</span>
+                  )}
+                  {cancelled && <span className="submission-cancelled">취소됨</span>}
                 </span>
-                <p>응답 {item.answeredItemCount}개</p>
-                <p
-                  className={
-                    item.abnormalItemCount > 0
-                      ? 'submission-abnormal'
-                      : 'submission-row-muted'
-                  }
-                >
-                  이상 응답 {item.abnormalItemCount}개 · 사진 {item.photoCount}
-                  장
-                </p>
-              </td>
-              <td role="cell">
-                <span className="submission-mobile-label" aria-hidden="true">
-                  제출 일시 · 한국 시간
+                <span className="submission-row-action">
+                  <span>상세</span>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="m9 5 7 7-7 7" />
+                  </svg>
                 </span>
-                <time dateTime={item.submittedAt}>
-                  {submissionTime(item.submittedAt)}
-                </time>
-              </td>
-              <td role="cell">
-                <Link
-                  className="submission-detail-link"
-                  to={`/admin/submissions/${item.id}${detailSearch}`}
-                  aria-label={`${item.property.name} ${item.visitDate} ${submissionTypeLabel[item.type]} 기록 상세`}
-                >
-                  기록 보기 <span aria-hidden="true">→</span>
-                </Link>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
     </div>
   );
 }

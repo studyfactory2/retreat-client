@@ -9,6 +9,7 @@ import {
   submissionRoleLabel,
   submissionSourceLabel,
   submissionTime,
+  submissionTypeLabel,
 } from '../model/submission-detail-model';
 
 type ReportTab = 'answers' | 'photos' | 'history' | 'information';
@@ -30,7 +31,7 @@ export function MaintenanceSubmissionReport({
   const { revision } = detail;
   const { record } = revision;
   const labels: Record<ReportTab, string> = {
-    answers: '점검 내용',
+    answers: '체크 내용',
     photos: `사진 ${revision.photos.length}`,
     history: '변경 이력',
     information: '기록 정보',
@@ -55,6 +56,10 @@ export function MaintenanceSubmissionReport({
     <section className="maintenance-report" aria-labelledby="maintenance-report-title">
       <header className="maintenance-report__heading">
         <div>
+          <div className="submission-report-kicker">
+            <span>{submissionTypeLabel(record.type)}</span>
+            <span>버전 {detail.currentRevision}</span>
+          </div>
           <h2 id="maintenance-report-title">{record.property.name}</h2>
           <p>
             <span>방문일 {record.visitDate.replaceAll('-', '.')}</span>
@@ -70,7 +75,7 @@ export function MaintenanceSubmissionReport({
           취소된 기록입니다. 답변과 사진은 보존되어 있습니다.
         </p>
       )}
-      <div className="maintenance-report__tabs" role="tablist" aria-label="점검 기록 내용">
+      <div className="maintenance-report__tabs" role="tablist" aria-label="제출 기록 내용">
         {tabOrder.map((value) => (
           <button
             type="button"
