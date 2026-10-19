@@ -7,9 +7,9 @@ import type {
 import { ScheduleIcon } from './ScheduleIcon';
 
 const statusLabels: Record<CalendarChecklistStatus, string> = {
-  SCHEDULED: '작성 예정',
+  SCHEDULED: '예정',
   NOT_SUBMITTED: '미제출',
-  SUBMITTED: '제출 완료',
+  SUBMITTED: '제출됨',
   NEEDS_REVIEW: '확인 필요',
 };
 const reasonLabels: Record<CalendarReviewReason, string> = {
@@ -20,43 +20,37 @@ const reasonLabels: Record<CalendarReviewReason, string> = {
   INVALID_SUBMISSION_RECORD: '제출 기록 정보를 확인해 주세요.',
 };
 
-export function ScheduleChecklist({
-  label,
-  checklist,
-  stayId,
-}: {
+type ChecklistProps = {
   label: string;
   checklist: CalendarChecklistDto;
-  stayId: string;
-}) {
-  const hasDetails =
-    checklist.reviewReasons.length > 0 || checklist.submissionCount > 0;
-  const status = (
-    <>
+};
+
+function ScheduleChecklistBadge({ label, checklist }: ChecklistProps) {
+  return (
+    <span className="schedule-checklist__summary">
       <span className="schedule-checklist__label">{label}</span>
       <span
         className={`schedule-checklist__badge schedule-checklist__badge--${checklist.status.toLowerCase()}`}
       >
         {statusLabels[checklist.status]}
       </span>
-    </>
+    </span>
   );
+}
 
-  if (!hasDetails) {
-    return (
-      <div className="schedule-checklist schedule-checklist__summary">
-        {status}
-      </div>
-    );
+export function ScheduleChecklist({
+  label,
+  checklist,
+  stayId,
+}: ChecklistProps & { stayId: string }) {
+  if (checklist.reviewReasons.length === 0 && checklist.submissionCount === 0) {
+    return <ScheduleChecklistBadge label={label} checklist={checklist} />;
   }
 
   return (
     <details className="schedule-checklist">
-      <summary
-        className="schedule-checklist__summary"
-        aria-label={`${label} ${statusLabels[checklist.status]}, 상세 확인`}
-      >
-        {status}
+      <summary>
+        <ScheduleChecklistBadge label={label} checklist={checklist} />
         <ScheduleIcon name="chevron" />
       </summary>
       <div className="schedule-checklist__body">

@@ -9,11 +9,6 @@ const dateFormat = new Intl.DateTimeFormat('ko-KR', {
   month: '2-digit',
   day: '2-digit',
 });
-const shortDateFormat = new Intl.DateTimeFormat('ko-KR', {
-  timeZone: 'Asia/Seoul',
-  month: 'numeric',
-  day: 'numeric',
-});
 const timeFormat = new Intl.DateTimeFormat('ko-KR', {
   timeZone: 'Asia/Seoul',
   hour: '2-digit',
@@ -31,6 +26,13 @@ function ScheduledTime({ value }: { value: string }) {
   );
 }
 
+function shortDate(value: string, includeYear: boolean) {
+  const parts = dateFormat.formatToParts(new Date(value));
+  const part = (type: Intl.DateTimeFormatPartTypes) =>
+    parts.find((item) => item.type === type)?.value ?? '';
+  return `${includeYear ? `${part('year')}.` : ''}${Number(part('month'))}.${Number(part('day'))}`;
+}
+
 export function ScheduleRow({
   stay,
   detailHref,
@@ -38,79 +40,55 @@ export function ScheduleRow({
   stay: AdminCalendarStayDto;
   detailHref: string;
 }) {
-  const rangeFormat =
-    stay.checkIn.expectedDate.slice(0, 4) === stay.checkOut.expectedDate.slice(0, 4)
-      ? shortDateFormat
-      : dateFormat;
+  const includeYear =
+    stay.checkIn.expectedDate.slice(0, 4) !== stay.checkOut.expectedDate.slice(0, 4);
+  const startLabel = shortDate(stay.checkInAt, includeYear);
+  const endLabel = shortDate(stay.checkOutAt, includeYear);
 
   return (
-    <article className="schedule-row">
-      <div className="schedule-row__identity">
+    <article className="schedule-row" aria-label={`${stay.property.name}, ${stay.guestName}`}>
+      <div className="schedule-row__guest">
         <span className="schedule-row__avatar" aria-hidden="true">
-          {Array.from(stay.guestName)[0]}
+          {Array.from(stay.guestName.trim())[0] || '이'}
         </span>
-        <div>
-          <span className="schedule-row__label">이용객</span>
-          <h3>{stay.guestName}</h3>
-        </div>
+        <span>{stay.guestName}</span>
       </div>
       <div className="schedule-row__property">
-        <span className="schedule-row__label">휴양소</span>
         <strong>{stay.property.name}</strong>
-        {stay.property.region && <small>{stay.property.region}</small>}
         {!stay.property.isActive && (
-          <small className="schedule-row__inactive">비활성 휴양소</small>
+          <span className="schedule-row__inactive">비활성</span>
         )}
       </div>
-      <div className="schedule-row__period">
-        <span className="schedule-row__label">이용 기간</span>
-        <p className="schedule-row__range">
-          <time dateTime={stay.checkInAt}>
-            {rangeFormat.format(new Date(stay.checkInAt))}
-          </time>
-          <span aria-hidden="true">–</span>
-          <span className="schedule-visually-hidden">부터</span>
-          <time dateTime={stay.checkOutAt}>
-            {rangeFormat.format(new Date(stay.checkOutAt))}
-          </time>
-        </p>
-        <details className="schedule-row__times">
-          <summary>
-            예정 시간 <ScheduleIcon name="chevron" />
-          </summary>
+      <details className="schedule-row__period">
+        <summary aria-label={`${startLabel}부터 ${endLabel}까지, 예정 시간 확인`}>
+          <ScheduleIcon name="calendar" />
+          <span className="schedule-row__range">
+            <time dateTime={stay.checkInAt}>{startLabel}</time>
+            <span aria-hidden="true">–</span>
+            <span className="schedule-visually-hidden">부터</span>
+            <time dateTime={stay.checkOutAt}>{endLabel}</time>
+          </span>
+          <ScheduleIcon name="chevron" />
+        </summary>
+        <div className="schedule-row__times">
           <dl>
-            <div>
-              <dt>입실 예정</dt>
-              <dd><ScheduledTime value={stay.checkInAt} /></dd>
-            </div>
-            <div>
-              <dt>퇴실 예정</dt>
-              <dd><ScheduledTime value={stay.checkOutAt} /></dd>
-            </div>
+            <div><dt>입실 예정</dt><dd><ScheduledTime value={stay.checkInAt} /></dd></div>
+            <div><dt>퇴실 예정</dt><dd><ScheduledTime value={stay.checkOutAt} /></dd></div>
+            {stay.property.region && <div><dt>지역</dt><dd>{stay.property.region}</dd></div>}
           </dl>
-        </details>
-      </div>
-      <div
-        className="schedule-row__checklists"
-        aria-label="체크리스트 제출 현황"
-      >
-        <ScheduleChecklist
-          label="입실"
-          checklist={stay.checkIn}
-          stayId={stay.id}
-        />
-        <ScheduleChecklist
-          label="퇴실"
-          checklist={stay.checkOut}
-          stayId={stay.id}
-        />
+          <p>한국 시간 기준</p>
+        </div>
+      </details>
+      <div className="schedule-row__checklists">
+        <ScheduleChecklist label="입실" checklist={stay.checkIn} stayId={stay.id} />
+        <ScheduleChecklist label="퇴실" checklist={stay.checkOut} stayId={stay.id} />
       </div>
       <Link
         className="schedule-row__detail"
         to={detailHref}
         aria-label={`${stay.property.name}, ${stay.guestName} 이용 일정 상세 보기`}
       >
-        상세 <ScheduleIcon name="arrow" />
+        <ScheduleIcon name="arrow" /> 상세
       </Link>
     </article>
   );

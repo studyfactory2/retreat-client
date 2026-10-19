@@ -83,16 +83,6 @@ function StayListWorkspace({
           <Link className="ui-button" to={createHref}>
             일정 등록
           </Link>
-          <Button
-            className="admin-button-secondary"
-            disabled={resource.status === 'loading'}
-            onClick={() => {
-              refresh();
-              propertyOptions.refresh();
-            }}
-          >
-            새로고침
-          </Button>
         </div>
       </header>
       <StayViewNavigation
@@ -146,73 +136,107 @@ function StayListWorkspace({
         </div>
       ) : (
         <>
-          <div className="stay-list-summary" role="status">
-            <p>
-              {filtered ? '조회 결과' : '전체 일정'}{' '}
-              <strong>{resource.data.total.toLocaleString('ko-KR')}건</strong>
-            </p>
-            <span>등록된 일정과 실제 입·퇴실 여부는 다릅니다.</span>
-          </div>
-          {resource.data.items.length === 0 ? (
-            <AdminListState
-              title={
-                filtered
-                  ? '조건에 맞는 이용 일정이 없습니다'
-                  : '등록된 이용 일정이 없습니다'
-              }
-              description={
-                filtered
-                  ? '검색어나 휴양소, 일정 상태를 변경해 다시 조회해 주세요.'
-                  : '휴양소를 이용할 일정을 등록해 주세요.'
-              }
-            >
-              {filtered ? (
-                <Button onClick={() => applyFilters({ page: 1 })}>
-                  조회 조건 초기화
-                </Button>
-              ) : (
-                <Link className="ui-button" to={createHref}>
-                  이용 일정 등록
-                </Link>
-              )}
-            </AdminListState>
-          ) : (
-            <section
-              className="admin-directory-table"
-              aria-label="이용 일정 기록"
-            >
-              <div className="admin-directory-table-head" aria-hidden="true">
-                <span>휴양소 · 이용객</span>
-                <span>이용 기간</span>
-                <span>일정 상태</span>
-                <span>관리</span>
-              </div>
-              <ul
-                className="admin-directory-rows"
-                role="list"
-                aria-label="이용 일정 목록"
+          <section
+            className="stay-records-panel"
+            aria-labelledby="stay-records-title"
+          >
+            <header className="stay-records-panel__header">
+              <h2 id="stay-records-title">
+                이용 일정{' '}
+                <span
+                  role="status"
+                  aria-label={`${filtered ? '조회 결과' : '전체 일정'} ${resource.data.total.toLocaleString('ko-KR')}건`}
+                >
+                  {resource.data.total.toLocaleString('ko-KR')}건
+                </span>
+              </h2>
+              <Button
+                className="stay-records-refresh"
+                aria-label="이용 일정 새로고침"
+                onClick={() => {
+                  refresh();
+                  propertyOptions.refresh();
+                }}
               >
-                {resource.data.items.map((stay) => (
-                  <li key={stay.id}>
-                    <StayListCard
-                      stay={stay}
-                      detailHref={`/admin/stays/${stay.id}${detailSearch}`}
-                    />
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )}
-          <p className="admin-directory-footnote">
-            입·퇴실 예정 시간은 한국 시간 기준입니다. 체크리스트 제출 여부는
-            일정 현황에서 확인하세요.
-          </p>
-          <AdminListPagination
-            label="이용 일정 목록 페이지"
-            page={filters.page}
-            totalPages={resource.data.totalPages}
-            onPage={(page) => applyFilters({ ...filters, page })}
-          />
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M20 7v5h-5M4 17v-5h5" />
+                  <path d="M6 7a7 7 0 0 1 11.8-2L20 8M4 16l2.2 3A7 7 0 0 0 18 17" />
+                </svg>
+              </Button>
+            </header>
+            {resource.data.items.length === 0 ? (
+              <AdminListState
+                title={
+                  filtered
+                    ? '조건에 맞는 이용 일정이 없습니다'
+                    : '등록된 이용 일정이 없습니다'
+                }
+                description={
+                  filtered
+                    ? '검색어나 휴양소, 일정 상태를 변경해 다시 조회해 주세요.'
+                    : '휴양소를 이용할 일정을 등록해 주세요.'
+                }
+              >
+                {filtered ? (
+                  <Button onClick={() => applyFilters({ page: 1 })}>
+                    조회 조건 초기화
+                  </Button>
+                ) : (
+                  <Link className="ui-button" to={createHref}>
+                    이용 일정 등록
+                  </Link>
+                )}
+              </AdminListState>
+            ) : (
+              <div className="stay-records-table">
+                <div className="stay-records-table__head" aria-hidden="true">
+                  <span>이용객</span>
+                  <span>휴양소</span>
+                  <span>이용 기간</span>
+                  <span>상태</span>
+                  <span />
+                </div>
+                <ul
+                  className="stay-records-table__rows"
+                  role="list"
+                  aria-label="이용 일정 목록"
+                >
+                  {resource.data.items.map((stay) => (
+                    <li key={stay.id}>
+                      <StayListCard
+                        stay={stay}
+                        detailHref={`/admin/stays/${stay.id}${detailSearch}`}
+                      />
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            <AdminListPagination
+              label="이용 일정 목록 페이지"
+              page={filters.page}
+              totalPages={resource.data.totalPages}
+              onPage={(page) => applyFilters({ ...filters, page })}
+            />
+          </section>
+          <details className="stay-records-note">
+            <summary>일정 표시 안내</summary>
+            <p>등록된 일정과 실제 입·퇴실 여부는 다릅니다.</p>
+            <p>
+              입·퇴실 예정 시간은 한국 시간 기준입니다. 체크리스트 제출 여부는
+              일정 현황에서 확인하세요.
+            </p>
+          </details>
         </>
       )}
     </div>

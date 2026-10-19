@@ -73,6 +73,10 @@ function ScheduleWorkspace({
     data && filters.page > Math.max(1, data.totalPages)
       ? Math.max(1, data.totalPages)
       : null;
+  const currentMonth = getMonthRange(initialDate.slice(0, 7));
+  const listTitle = filters.from === currentMonth.from && filters.to === currentMonth.to
+    ? '이번 달 일정'
+    : '이용 일정';
   const propertyName =
     selectedProperty?.name ??
     (filters.propertyId ? '선택한 휴양소' : '전체 휴양소');
@@ -238,12 +242,12 @@ function ScheduleWorkspace({
             >
               <div>
                 <h2 id="schedule-list-title">
-                  이용 일정
+                  {listTitle}
                   {data && correctedPage === null && (
                     <span>{data.total.toLocaleString('ko-KR')}건</span>
                   )}
                 </h2>
-                <p className="schedule-summary__scope">
+                <p className="schedule-visually-hidden">
                   <strong>{propertyName}</strong>
                   <span>
                     {filters.from.replaceAll('-', '.')} –{' '}
@@ -259,18 +263,12 @@ function ScheduleWorkspace({
                 </p>
               </div>
               <div className="schedule-summary__refresh">
-                {data && correctedPage === null && (
-                  <span className="schedule-summary__updated">
-                    최근 조회{' '}
-                    <time dateTime={data.asOf}>
-                      {formatSeoulUpdatedAt(data.asOf)}
-                    </time>
-                  </span>
-                )}
                 <Button
                   className="schedule-button-quiet"
                   aria-label="일정 새로고침"
-                  title="새로고침"
+                  title={data && correctedPage === null
+                    ? `최근 조회 ${formatSeoulUpdatedAt(data.asOf)} · 새로고침`
+                    : '새로고침'}
                   onClick={refresh}
                   disabled={
                     resource.status === 'loading' || correctedPage !== null
