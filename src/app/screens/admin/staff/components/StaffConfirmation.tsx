@@ -19,7 +19,7 @@ export function StaffConfirmation({
   }, []);
   return (
     <div
-      className="staff-banner"
+      className="staff-banner staff-confirmation"
       role="alertdialog"
       tabIndex={-1}
       ref={notice}
@@ -33,7 +33,7 @@ export function StaffConfirmation({
       </h2>
       <p id="staff-confirm-description">
         {mode === 'discard'
-          ? '현재 입력한 내용이 사라집니다. 계속하면 선택한 화면의 최신 정보를 확인합니다.'
+          ? '저장하지 않은 변경 사항이 사라집니다.'
           : `${name ?? '이 직원'} 님을 비활성화하면 새로 담당 직원으로 배정할 수 없습니다. 기존 정비 기록은 유지되며, 입력한 다른 변경 사항도 함께 저장됩니다.`}
       </p>
       <div className="staff-actions">

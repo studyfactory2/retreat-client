@@ -13,16 +13,28 @@ export function StaffCard({
     .filter(Boolean)
     .join(' · ');
   return (
-    <article className="admin-directory-row">
-      <div className="admin-directory-identity">
-        <h2>{staff.name}</h2>
-        <p className="admin-directory-muted">{affiliation || '소속 미등록'}</p>
+    <article className="staff-directory-row">
+      <div className="staff-directory-identity">
+        <span className="staff-directory-avatar" aria-hidden="true">
+          {[...staff.name.trim()][0] || '직'}
+        </span>
+        <div>
+          <h3>{staff.name}</h3>
+          <p>{affiliation || '소속 미등록'}</p>
+        </div>
       </div>
-      <dl className="admin-directory-fields">
+      <dl className="staff-directory-facts">
         <div>
           <dt>연락처</dt>
-          <dd className={staff.phone ? undefined : 'admin-directory-muted'}>
-            {staff.phone || '미등록'}
+          <dd
+            className={`staff-directory-contact${staff.phone ? '' : ' admin-directory-muted'}`}
+          >
+            {staff.phone || (
+              <>
+                <span className="staff-directory-mobile-context">연락처 </span>
+                미등록
+              </>
+            )}
           </dd>
         </div>
         <div>
@@ -30,23 +42,41 @@ export function StaffCard({
           <dd
             className={
               staff.assignedProperties.length
-                ? undefined
+                ? 'staff-directory-properties'
                 : 'admin-directory-muted'
             }
           >
-            {staff.assignedProperties.length
-              ? `${staff.assignedProperties.length.toLocaleString('ko-KR')}곳`
-              : '미배정'}
+            {staff.assignedProperties[0] ? (
+              <>
+                <span>{staff.assignedProperties[0].name}</span>
+                {!staff.assignedProperties[0].isActive && (
+                  <small>비활성</small>
+                )}
+                {staff.assignedProperties.length > 1 && (
+                  <span className="staff-directory-more">
+                    외 {(staff.assignedProperties.length - 1).toLocaleString('ko-KR')}곳
+                  </span>
+                )}
+              </>
+            ) : (
+              <>
+                <span className="staff-directory-mobile-context">휴양소 </span>
+                미배정
+              </>
+            )}
           </dd>
         </div>
       </dl>
       <AdminActivityBadge active={staff.isActive} />
       <Link
-        className="admin-directory-detail"
+        className="staff-directory-detail"
         to={href}
         aria-label={`${staff.name} 상세 보기`}
       >
-        상세 보기 <span aria-hidden="true">→</span>
+        <span>상세</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M5 12h14m-6-6 6 6-6 6" />
+        </svg>
       </Link>
     </article>
   );

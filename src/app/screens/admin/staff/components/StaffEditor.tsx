@@ -27,106 +27,124 @@ export function StaffEditor({
     if (mutation.message) notice.current?.focus();
   }, [mutation.message]);
   const confirming = editor.confirming || navigation.pending;
+  const affiliation = original
+    ? [original.company, original.department].filter(Boolean).join(' · ')
+    : '';
   return (
-    <div className="staff-editor">
+    <form
+      className={`staff-form staff-editor${original ? '' : ' staff-editor--create'}`}
+      noValidate
+      aria-labelledby="staff-editor-title"
+      aria-busy={mutation.busy}
+      onSubmit={(event) => {
+        event.preventDefault();
+        if (!mutation.busy && !mutation.blocked && !confirming) editor.submit();
+      }}
+    >
       <header className="staff-heading">
-        <div>
-          <p className="staff-heading__eyebrow">
-            {original ? 'STAFF PROFILE' : 'NEW STAFF'}
-          </p>
-          <h1>{original ? '직원 정보' : '직원 등록'}</h1>
-          <p>
-            {original
-              ? `${original.name} 님의 정보와 담당 휴양소를 확인하세요.`
-              : '휴양소에서 정비를 담당할 직원을 등록하세요.'}
-          </p>
-        </div>
-        <div className="staff-actions">
-          <Button
-            className="admin-button-secondary"
-            disabled={mutation.busy || confirming}
-            onClick={editor.returnToList}
-          >
-            목록으로 돌아가기
-          </Button>
-          {onReload && (
-            <Button
-              className="admin-button-secondary"
-              disabled={mutation.busy || confirming}
-              onClick={() => navigation.request(onReload)}
-            >
-              최신 정보 불러오기
-            </Button>
+        <p className="staff-editor__breadcrumb">관리자 <span aria-hidden="true">›</span> 직원</p>
+        <div className="staff-heading__title">
+          <h1 id="staff-editor-title">{original ? original.name : '직원 등록'}</h1>
+          {original && (
+            <span className={`staff-badge${original.isActive ? '' : ' staff-badge--inactive'}`}>
+              {original.isActive ? '활성' : '비활성'}
+            </span>
           )}
         </div>
+        {affiliation && <p className="staff-heading__affiliation">{affiliation}</p>}
       </header>
-      <div className="staff-banner">
-        <p>
-          직원 프로필은 휴양소 배정과 정비 기록에 사용됩니다. 관리자 로그인
-          계정이나 비밀번호는 생성되지 않습니다.
-        </p>
-      </div>
-      {mutation.message && (
+      <div className="staff-editor__body">
+        {mutation.message && (
+          <div
+            className="staff-banner staff-banner--error"
+            role="alert"
+            tabIndex={-1}
+            ref={notice}
+          >
+            <p>{mutation.message}</p>
+            {mutation.blocked && (
+              <>
+                <p>
+                  입력 내용은 남아 있습니다. 최신 정보를 확인한 뒤 변경 사항을
+                  다시 검토해 주세요.
+                </p>
+                <Button
+                  className="admin-button-secondary"
+                  disabled={confirming}
+                  onClick={
+                    onReload
+                      ? () => navigation.request(onReload)
+                      : editor.returnToList
+                  }
+                >
+                  {onReload ? '최신 직원 정보 확인' : '목록에서 등록 결과 확인'}
+                </Button>
+              </>
+            )}
+          </div>
+        )}
+        {editor.unchanged && (
+          <p className="staff-banner" role="status">
+            변경된 내용이 없습니다.
+          </p>
+        )}
+        {navigation.pending && (
+          <StaffConfirmation
+            mode="discard"
+            onKeep={navigation.keep}
+            onConfirm={navigation.discard}
+          />
+        )}
+        {editor.confirming && (
+          <StaffConfirmation
+            mode="deactivate"
+            name={editor.values.name.trim()}
+            onKeep={editor.keepEditing}
+            onConfirm={editor.persist}
+          />
+        )}
         <div
-          className="staff-banner staff-banner--error"
-          role="alert"
-          tabIndex={-1}
-          ref={notice}
+          className={`staff-editor__layout${original ? '' : ' staff-editor__layout--create'}`}
         >
-          <p>{mutation.message}</p>
-          {mutation.blocked && (
-            <>
-              <p>
-                입력 내용은 남아 있습니다. 최신 정보를 확인한 뒤 변경 사항을
-                다시 검토해 주세요.
-              </p>
-              <Button
-                className="admin-button-secondary"
-                disabled={confirming}
-                onClick={
-                  onReload
-                    ? () => navigation.request(onReload)
-                    : editor.returnToList
-                }
-              >
-                {onReload ? '최신 직원 정보 확인' : '목록에서 등록 결과 확인'}
-              </Button>
-            </>
-          )}
+          <StaffForm
+            values={editor.values}
+            errors={editor.errors}
+            editing={!!original}
+            hasAssignments={!!original?.assignedProperties.length}
+            busy={mutation.busy}
+            blocked={!!mutation.blocked || confirming}
+            onChange={editor.change}
+          />
+          {original && <StaffAssignments staff={original} />}
         </div>
-      )}
-      {editor.unchanged && (
-        <p className="staff-banner" role="status">
-          변경된 내용이 없습니다.
-        </p>
-      )}
-      {navigation.pending && (
-        <StaffConfirmation
-          mode="discard"
-          onKeep={navigation.keep}
-          onConfirm={navigation.discard}
-        />
-      )}
-      {editor.confirming && (
-        <StaffConfirmation
-          mode="deactivate"
-          name={editor.values.name.trim()}
-          onKeep={editor.keepEditing}
-          onConfirm={editor.persist}
-        />
-      )}
-      <StaffForm
-        values={editor.values}
-        errors={editor.errors}
-        editing={!!original}
-        hasAssignments={!!original?.assignedProperties.length}
-        busy={mutation.busy}
-        blocked={!!mutation.blocked || confirming}
-        onChange={editor.change}
-        onSubmit={editor.submit}
-        onCancel={editor.returnToList}
-      />
-      {original && <StaffAssignments staff={original} />}
-    </div>
+        <details className="staff-editor__help">
+          <summary>직원 등록 안내</summary>
+          <p>휴양소 배정과 정비 기록을 위한 직원 정보입니다. 관리자 로그인 계정은 생성되지 않습니다.</p>
+        </details>
+      </div>
+      <div className="staff-form__actions">
+        {onReload && (
+          <Button
+            className="admin-button-secondary staff-editor__reload"
+            disabled={mutation.busy || confirming}
+            onClick={() => navigation.request(onReload)}
+            aria-label="직원 정보 새로고침"
+          >
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5" /><path d="M6.1 7a7 7 0 0 1 11.55-2L20 8M4 16l2.35 3A7 7 0 0 0 17.9 17" /></svg>
+          </Button>
+        )}
+        <Button
+          className="admin-button-secondary staff-editor__back"
+          disabled={mutation.busy || !!mutation.blocked || confirming}
+          onClick={editor.returnToList}
+        >
+          <span aria-hidden="true">←</span> {original ? '취소' : '목록'}
+        </Button>
+        <Button type="submit" loading={mutation.busy} disabled={!!mutation.blocked || confirming}>
+          {!mutation.busy && <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m5 12 4 4L19 6" /></svg>}
+          {mutation.busy ? '저장 중' : original ? '변경 저장' : '직원 등록'}
+        </Button>
+      </div>
+    </form>
   );
 }

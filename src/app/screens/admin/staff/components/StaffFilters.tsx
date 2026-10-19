@@ -19,7 +19,8 @@ export function StaffFilters({
   );
   return (
     <form
-      className="admin-directory-filters"
+      id="staff-filters"
+      className="staff-directory-filters"
       aria-label="직원 조회 조건"
       onSubmit={(event) => {
         event.preventDefault();
@@ -35,28 +36,29 @@ export function StaffFilters({
         <input
           id="staff-search"
           type="search"
-          placeholder="이름, 연락처, 회사 또는 부서"
+          placeholder="이름·연락처·회사·부서 검색"
           value={text}
           onChange={(event) => setText(event.target.value)}
         />
       </div>
       <div>
-        <label htmlFor="staff-status">활성 상태</label>
+        <label htmlFor="staff-status">상태</label>
         <select
           id="staff-status"
           value={status}
           onChange={(event) => setStatus(event.target.value)}
         >
-          <option value="all">전체</option>
+          <option value="all">전체 상태</option>
           <option value="active">활성</option>
           <option value="inactive">비활성</option>
         </select>
       </div>
       <div className="admin-directory-filter-actions">
-        <Button type="submit" className="admin-button-secondary">
+        <Button id="staff-filter-submit" type="submit" className="admin-button-secondary">
           조회
         </Button>
         <Button
+          id="staff-filter-reset"
           className="admin-directory-reset"
           onClick={() => {
             setText('');

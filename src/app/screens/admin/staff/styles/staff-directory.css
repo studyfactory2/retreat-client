@@ -1,0 +1,239 @@
+.admin-directory.admin-staff-directory {
+  width: 100%;
+  max-width: 1200px;
+  margin-inline: auto;
+  gap: 22px;
+  container: staff-directory / inline-size;
+}
+.admin-staff-directory svg {
+  flex-shrink: 0;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.staff-directory-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.staff-directory-heading h1 {
+  color: var(--color-heading);
+  font-size: clamp(26px, 3vw, 32px);
+  font-weight: 700;
+  letter-spacing: -1px;
+  line-height: 1.4;
+}
+.staff-directory-heading > a { flex-shrink: 0; gap: 6px; }
+.staff-directory-filters {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(140px, 200px) auto;
+  align-items: end;
+  gap: 16px;
+  padding: 20px;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  background: var(--color-surface);
+}
+.staff-directory-filters > div { min-width: 0; }
+.staff-directory-filters label {
+  display: block;
+  margin-bottom: 7px;
+  color: var(--color-heading);
+  font-size: 13px;
+  font-weight: 600;
+}
+.staff-directory-filters :is(input, select) {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: #fbfcfe;
+  color: var(--color-text);
+  font: inherit;
+  font-size: 14px;
+}
+.staff-directory-panel {
+  min-width: 0;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  background: var(--color-surface);
+}
+.staff-directory-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 24px;
+}
+.staff-directory-summary h2 {
+  color: var(--color-heading);
+  font-size: 17px;
+  font-weight: 650;
+  letter-spacing: -.4px;
+}
+.staff-directory-summary h2 strong {
+  margin-left: 5px;
+  color: var(--color-primary);
+  font-size: 13px;
+  font-weight: 600;
+}
+.admin-staff-directory .staff-directory-refresh {
+  width: 44px;
+  padding: 10px;
+  border-radius: 8px;
+}
+.staff-directory-table { padding-inline: 24px; }
+.staff-directory-table-head,
+.staff-directory-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(0, 2.1fr) 64px 60px;
+  align-items: center;
+  gap: 18px;
+}
+.staff-directory-table-head {
+  min-height: 42px;
+  padding: 10px 12px;
+  background: var(--color-background);
+  color: var(--color-muted);
+  font-size: 12px;
+  border-bottom: 1px solid var(--color-border);
+}
+.staff-directory-facts {
+  display: grid;
+  grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
+  align-items: baseline;
+  gap: 18px;
+  min-width: 0;
+}
+.staff-directory-rows { padding: 0; list-style: none; }
+.staff-directory-rows > li + li { border-top: 1px solid var(--color-border); }
+.staff-directory-row { padding: 18px 12px; min-height: 92px; font-size: 14px; }
+.staff-directory-identity { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.staff-directory-avatar {
+  display: grid;
+  place-items: center;
+  flex: 0 0 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--color-soft);
+  color: var(--color-primary);
+  font-size: 15px;
+  font-weight: 600;
+}
+.staff-directory-identity > div { min-width: 0; }
+.staff-directory-identity h3 { margin: 0; color: var(--color-heading); font-size: 15px; font-weight: 650; line-height: 1.5; word-break: keep-all; overflow-wrap: anywhere; }
+.staff-directory-identity p { margin-top: 3px; color: var(--color-muted); font-size: 13px; line-height: 1.5; word-break: keep-all; overflow-wrap: anywhere; }
+.staff-directory-facts > div { min-width: 0; }
+.staff-directory-facts dt { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.staff-directory-facts dd { min-width: 0; font-size: 14px; line-height: 1.65; overflow-wrap: anywhere; }
+.staff-directory-contact { font-variant-numeric: tabular-nums; }
+.staff-directory-mobile-context { display: none; }
+.staff-directory-properties { display: flex; align-items: baseline; flex-wrap: wrap; gap: 2px 6px; }
+.staff-directory-properties small { padding: 1px 6px; border-radius: 4px; color: var(--color-muted); background: #f0f3f7; font-size: 12px; }
+.staff-directory-more { color: var(--color-muted); font-size: 13px; white-space: nowrap; }
+.admin-staff-directory .admin-directory-status { min-height: 28px; padding: 4px 9px; border: 0; border-radius: 6px; background: #e6f5ef; color: #17695a; font-size: 12px; font-weight: 600; line-height: 1.5; }
+.admin-staff-directory .admin-directory-status > span { display: none; }
+.admin-staff-directory .admin-directory-status--inactive { background: #f0f3f7; color: var(--color-muted); }
+.staff-directory-detail {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 5px;
+  min-width: 44px;
+  min-height: 44px;
+  color: var(--color-primary);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 6px;
+}
+.staff-directory-detail:hover { color: var(--color-primary); }
+.admin-staff-directory .admin-directory-pagination { margin: 0 24px; padding-block: 18px; border-top: 1px solid var(--color-border); }
+.admin-staff-directory .admin-directory-state { margin: 0; padding: 32px 24px; border: 0; background: transparent; }
+.staff-directory-note { margin-top: -8px !important; color: var(--color-muted); font-size: 12px; }
+.admin-staff-directory :is(button, a, input, select):focus-visible { outline: 3px solid #82aaf1; outline-offset: 3px; }
+@media (max-width: 760px) {
+  .admin-directory.admin-staff-directory { gap: 14px; }
+  .staff-directory-heading h1 { font-size: 24px; }
+  .staff-directory-filters { grid-template-columns: minmax(0,1fr) auto; gap: 8px; padding: 12px; }
+  .staff-directory-filters > div:first-child { grid-column: 1/-1; }
+  .admin-staff-directory .staff-directory-filters .admin-directory-filter-actions { grid-column: auto; }
+  .staff-directory-filters :is(input, select) { font-size: 16px; }
+  .staff-directory-filters label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .staff-directory-heading > .ui-button { padding-inline: 12px; }
+}
+
+/* Use the space left by the sidebar, not the viewport, to choose the row layout. */
+@container staff-directory (max-width: 759px) {
+  .staff-directory-table-head { display: none; }
+  .staff-directory-summary { padding: 8px 14px 0; }
+  .staff-directory-summary h2 { font-size: 16px; }
+  .staff-directory-table { padding-inline: 14px; }
+  .staff-directory-row {
+    position: relative;
+    grid-template-columns: minmax(0, 1fr) auto 44px;
+    gap: 8px;
+    min-height: 64px;
+    padding: 10px 0;
+  }
+  .staff-directory-identity { grid-column: 1; grid-row: 1; gap: 10px; align-items: center; }
+  .staff-directory-avatar { flex-basis: 32px; height: 32px; font-size: 13px; }
+  .staff-directory-identity h3 {
+    overflow: hidden;
+    font-size: 15px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .staff-directory-identity p,
+  .staff-directory-facts { display: none; }
+  .staff-directory-row > .admin-directory-status {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: center;
+    justify-self: end;
+    margin: 0;
+    min-height: 24px;
+    padding: 3px 7px;
+    font-size: 11px;
+  }
+  .staff-directory-detail {
+    grid-column: 3;
+    grid-row: 1;
+    align-self: center;
+    justify-content: center;
+    width: 44px;
+    min-height: 44px;
+    padding: 0;
+  }
+  .staff-directory-detail::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    border-radius: 8px;
+  }
+  .staff-directory-row:has(.staff-directory-detail:hover) {
+    background: #f8faff;
+  }
+  .staff-directory-row:has(.staff-directory-detail:focus-visible) {
+    outline: 3px solid #82aaf1;
+    outline-offset: 1px;
+    border-radius: 8px;
+  }
+  .admin-staff-directory .staff-directory-detail:focus-visible { outline: none; }
+  .staff-directory-detail > span { display: none; }
+  .staff-directory-note { display: none; }
+}
