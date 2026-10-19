@@ -115,10 +115,10 @@ export function SubmissionRecord({
           </p>
         )}
       </section>
-      <section className="submission-detail-card submission-general-note">
+      <section className={`submission-detail-card submission-general-note${presentation === 'maintenance' && !record.answers.generalNote ? ' submission-general-note--empty' : ''}`}>
         <h3>{presentation === 'maintenance' ? '메모' : '전체 메모'}</h3>
         <p className="submission-detail-text">
-          {record.answers.generalNote || '작성된 메모가 없습니다.'}
+          {record.answers.generalNote || (presentation === 'maintenance' ? '메모 없음' : '작성된 메모가 없습니다.')}
         </p>
       </section>
       {includeMetadata && (

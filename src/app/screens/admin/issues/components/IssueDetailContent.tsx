@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import type { AdminIssueDetailDto } from '../../../../features/admin-issues/admin-issues.types';
 import { Button } from '../../../../shared/ui/Button/Button';
@@ -17,12 +17,18 @@ import { IssueLifecycleEditor } from './IssueLifecycleEditor';
 import { issueLifecycleSavedMessage } from '../model/issue-lifecycle-model';
 import { IssueActions } from './IssueActions';
 import { IssueNavigationNotice } from './IssueNavigationNotice';
-import { IssueRecord } from './IssueRecord';
 import { IssueCurrentSummary } from './IssueCurrentSummary';
-import { issueEventLabel, issueTime } from '../model/issue-presentation';
+import { issueStatusLabel, issueStatusTone, issueTime } from '../model/issue-presentation';
 import { IssuePhotos } from './IssuePhotos';
 import { IssueHistory } from './IssueHistory';
-import { IssueEventSummary } from './IssueEventSummary';
+import '../styles/issue-workspace.css';
+
+type IssueTab = 'report' | 'processing' | 'history';
+const issueTabs: { id: IssueTab; label: string }[] = [
+  { id: 'report', label: '신고 내용' },
+  { id: 'processing', label: '처리' },
+  { id: 'history', label: '이력' },
+];
 
 export function IssueDetailContent({
   detail,
@@ -48,6 +54,9 @@ export function IssueDetailContent({
   clearLifecycleNotice: () => void;
 }) {
   const navigate = useNavigate();
+  const [tab, setTab] = useState<IssueTab>('report');
+  const [historyVisited, setHistoryVisited] = useState(false);
+  const tabButtons = useRef(new Map<IssueTab, HTMLButtonElement>());
   const [dirty, setDirty] = useState(false);
   const [activeEditor, setActiveEditor] = useState<IssueEditorKind>('record');
   const [candidatePage, setCandidatePage] = useState(1);
@@ -109,13 +118,26 @@ export function IssueDetailContent({
     if (lifecycleNotice || savedNotice?.version === detail.issue.currentVersion)
       noticeRef.current?.focus();
   }, [savedNotice, lifecycleNotice, detail.issue.currentVersion]);
-  const { issue, report, latestEvent } = detail;
+  function selectTab(next: IssueTab) {
+    if (busy || navigation.pending) return;
+    setTab(next);
+    if (next === 'history') setHistoryVisited(true);
+  }
+  function moveTab(event: KeyboardEvent<HTMLButtonElement>) {
+    const index = issueTabs.findIndex((item) => item.id === tab);
+    const next = event.key === 'ArrowRight' ? issueTabs[(index + 1) % issueTabs.length]
+      : event.key === 'ArrowLeft' ? issueTabs[(index + issueTabs.length - 1) % issueTabs.length]
+        : event.key === 'Home' ? issueTabs[0]
+          : event.key === 'End' ? issueTabs[issueTabs.length - 1] : undefined;
+    if (!next || busy || navigation.pending) return;
+    event.preventDefault();
+    selectTab(next.id);
+    tabButtons.current.get(next.id)?.focus();
+  }
+  const { issue, report } = detail;
   return (
-    <div className="issue-detail">
-      <header className="issue-detail-heading">
-        <div>
-          <h1>이상사항 상세</h1>
-        </div>
+    <div className="issue-detail issue-detail--compact">
+      <div className="issue-workspace-toolbar">
         <div className="issue-detail-actions">
           <Link
             className="ui-button admin-button-secondary"
@@ -126,7 +148,7 @@ export function IssueDetailContent({
               navigation.request(() => navigate(returnTo));
             }}
           >
-            이상사항 목록으로
+            <span aria-hidden="true">←</span> 목록
           </Link>
           <Button
             className="admin-button-secondary"
@@ -136,7 +158,7 @@ export function IssueDetailContent({
             새로고침
           </Button>
         </div>
-      </header>
+      </div>
       {navigation.pending && (
         <IssueNavigationNotice
           onKeep={navigation.keep}
@@ -175,36 +197,110 @@ export function IssueDetailContent({
           </p>
         </div>
       )}
-      <div className="issue-detail-workspace">
-        <div className="issue-detail-overview">
-          <IssueCurrentSummary issue={issue} original={report.record} />
-          <section
-            className="issue-detail-card issue-original-evidence"
-            aria-label="최초 신고 사진"
-          >
-            <IssuePhotos
-              key={`report:${report.id}`}
-              event={report}
-              title="최초 신고 사진"
-              token={token}
-              rejectSession={rejectSession}
-            />
-          </section>
+      <section className="issue-workspace" aria-labelledby="issue-workspace-title">
+        <header className="issue-workspace-heading">
+          <div>
+            <h1 id="issue-workspace-title">{issue.title}</h1>
+            <p>{issue.property.name}{issue.property.region && <span> · {issue.property.region}</span>}</p>
+          </div>
+          <div className="issue-detail-badges" aria-label="현재 처리 상태와 긴급도">
+            <span className={`issue-detail-badge issue-detail-badge--${issueStatusTone(issue.status)}`}>
+              {issueStatusLabel(issue.status)}
+            </span>
+            {issue.isUrgent && <span className="issue-detail-badge issue-detail-badge--danger">긴급</span>}
+            {issue.cancelledAt && <span className="issue-detail-badge issue-detail-badge--muted">취소됨</span>}
+          </div>
+        </header>
+        <div className="issue-workspace-tabs" role="tablist" aria-label="이상사항 상세">
+          {issueTabs.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              role="tab"
+              id={`issue-tab-${item.id}`}
+              aria-controls={`issue-panel-${item.id}`}
+              aria-selected={tab === item.id}
+              tabIndex={tab === item.id ? 0 : -1}
+              disabled={busy || !!navigation.pending}
+              ref={(element) => {
+                if (element) tabButtons.current.set(item.id, element);
+                else tabButtons.current.delete(item.id);
+              }}
+              onKeyDown={moveTab}
+              onClick={() => selectTab(item.id)}
+            >
+              {item.label}{item.id === 'processing' && dirty && <span className="issue-draft-indicator" aria-label="저장하지 않은 입력"> · 작성 중</span>}
+            </button>
+          ))}
         </div>
-        <fieldset
-          className="issue-detail-action-boundary issue-detail-card"
-          disabled={navigation.pending}
-          aria-label="이상사항 처리"
-        >
-          <IssueManagementSummary
+        <div id="issue-panel-report" role="tabpanel" aria-labelledby="issue-tab-report" hidden={tab !== 'report'} className="issue-workspace-panel" tabIndex={0}>
+          <IssueCurrentSummary
             issue={issue}
-            activeEditor={activeEditor}
-            locked={busy || blocked || navigation.pending}
-            linked={linked.resource}
-            onLinkedRefresh={linked.refresh}
-            onEdit={openEditor}
+            original={report.record}
+            reporter={report.actor}
             onNavigate={openIssue}
+          />
+          {tab === 'report' && report.photos.length > 0 && (
+            <IssuePhotos key={`report:${report.id}`} event={report} title="최초 신고 사진" token={token} rejectSession={rejectSession} />
+          )}
+        </div>
+        <div id="issue-panel-processing" role="tabpanel" aria-labelledby="issue-tab-processing" hidden={tab !== 'processing'} className="issue-workspace-panel" tabIndex={0}>
+          <fieldset
+            className="issue-detail-action-boundary"
+            disabled={navigation.pending}
+            aria-label="이상사항 처리"
           >
+            <IssueManagementSummary
+              issue={issue}
+              activeEditor={activeEditor}
+              locked={busy || blocked || navigation.pending}
+              linked={linked.resource}
+              onLinkedRefresh={linked.refresh}
+              onEdit={openEditor}
+              onNavigate={openIssue}
+            />
+            {activeEditor === 'cancel' || activeEditor === 'restore' ? (
+              <IssueLifecycleEditor
+                key={`${issue.id}:${issue.currentVersion}:${activeEditor}`}
+                issue={issue}
+                action={activeEditor}
+                mutation={mutation}
+                onSubmit={(command) => {
+                  if (!navigation.pending) void submit(command);
+                }}
+                onReload={reload}
+                onDirtyChange={setDirty}
+                onClose={() => openEditor('record')}
+              />
+            ) : activeEditor === 'record' ? (
+              <IssueActions
+                key={`${issue.id}:${issue.currentVersion}:record`}
+                issue={issue}
+                mutation={mutation}
+                onSubmit={(command) => {
+                  if (!navigation.pending) void submit(command);
+                }}
+                onReload={reload}
+                onDirtyChange={setDirty}
+              />
+            ) : (
+              <IssueManagementEditor
+                key={`${issue.id}:${issue.currentVersion}:${activeEditor}`}
+                issue={issue}
+                kind={activeEditor}
+                mutation={mutation}
+                candidates={candidates.resource}
+                page={candidatePage}
+                onPage={setCandidatePage}
+                onCandidatesRefresh={candidates.refresh}
+                onSubmit={(command) => {
+                  if (!navigation.pending) void submit(command);
+                }}
+                onReload={reload}
+                onDirtyChange={setDirty}
+                onClose={() => openEditor('record')}
+              />
+            )}
             {issue.currentVersion <= 2_147_483_646 && (
               <div className="issue-lifecycle-actions">
                 {issue.cancelledAt === null ? (
@@ -238,114 +334,14 @@ export function IssueDetailContent({
                 )}
               </div>
             )}
-          </IssueManagementSummary>
-          {activeEditor === 'cancel' || activeEditor === 'restore' ? (
-            <IssueLifecycleEditor
-              key={`${issue.id}:${issue.currentVersion}:${activeEditor}`}
-              issue={issue}
-              action={activeEditor}
-              mutation={mutation}
-              onSubmit={(command) => {
-                if (!navigation.pending) void submit(command);
-              }}
-              onReload={reload}
-              onDirtyChange={setDirty}
-              onClose={() => openEditor('record')}
-            />
-          ) : activeEditor === 'record' ? (
-            <IssueActions
-              key={`${issue.id}:${issue.currentVersion}:record`}
-              issue={issue}
-              mutation={mutation}
-              onSubmit={(command) => {
-                if (!navigation.pending) void submit(command);
-              }}
-              onReload={reload}
-              onDirtyChange={setDirty}
-            />
-          ) : (
-            <IssueManagementEditor
-              key={`${issue.id}:${issue.currentVersion}:${activeEditor}`}
-              issue={issue}
-              kind={activeEditor}
-              mutation={mutation}
-              candidates={candidates.resource}
-              page={candidatePage}
-              onPage={setCandidatePage}
-              onCandidatesRefresh={candidates.refresh}
-              onSubmit={(command) => {
-                if (!navigation.pending) void submit(command);
-              }}
-              onReload={reload}
-              onDirtyChange={setDirty}
-              onClose={() => openEditor('record')}
-            />
+          </fieldset>
+        </div>
+        <div id="issue-panel-history" role="tabpanel" aria-labelledby="issue-tab-history" hidden={tab !== 'history'} className="issue-workspace-panel" tabIndex={0}>
+          {historyVisited && (
+            <IssueHistory detail={detail} token={token} rejectSession={rejectSession} onRefreshDetail={reload} onNavigate={openIssue} />
           )}
-        </fieldset>
-      </div>
-      <details className="issue-detail-disclosure issue-original-report">
-        <summary>
-          <span>
-            <strong>최초 신고</strong>
-            <span className="issue-detail-caption">
-              신고 당시 내용 · 신고자 · 출처
-            </span>
-          </span>
-          <span className="issue-disclosure-indicator" aria-hidden="true">
-            +
-          </span>
-        </summary>
-        <div className="issue-disclosure-body">
-          <IssueEventSummary event={report} />
-          <p className="issue-detail-caption">
-            {report.actor.role === 'GUEST'
-              ? '신고자 정보는 이용객이 직접 입력했습니다.'
-              : report.actor.role === 'STAFF'
-                ? '신고 당시 배정된 직원 정보입니다.'
-                : '최초 신고 당시 작성자 정보입니다.'}
-          </p>
-          <IssueRecord
-            record={report.record}
-            title="최초 신고 당시 내용"
-            showSourceLink
-            onNavigate={openIssue}
-          />
         </div>
-      </details>
-      <details className="issue-detail-disclosure issue-audit-disclosure">
-        <summary>
-          <span>
-            <strong>
-              처리 이력{' '}
-              <span className="issue-disclosure-count">
-                버전 {issue.currentVersion}
-              </span>
-            </strong>
-            <span className="issue-detail-caption">
-              최근: {issueEventLabel(latestEvent.type)} ·{' '}
-              {issueTime(latestEvent.createdAt)}
-              {latestEvent.photos.length > 0
-                ? ` · 사진 ${latestEvent.photos.length}장`
-                : ''}
-            </span>
-            {latestEvent.note && (
-              <span className="issue-history-preview">{latestEvent.note}</span>
-            )}
-          </span>
-          <span className="issue-disclosure-indicator" aria-hidden="true">
-            +
-          </span>
-        </summary>
-        <div className="issue-disclosure-body">
-          <IssueHistory
-            detail={detail}
-            token={token}
-            rejectSession={rejectSession}
-            onRefreshDetail={reload}
-            onNavigate={openIssue}
-          />
-        </div>
-      </details>
+      </section>
     </div>
   );
 }

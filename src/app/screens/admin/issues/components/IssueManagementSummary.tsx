@@ -45,7 +45,7 @@ export function IssueManagementSummary({
             disabled={locked}
             onClick={() => onEdit('record')}
           >
-            메모·처리 상태 기록으로
+            처리 기록으로
           </Button>
         )}
         {editable && (
@@ -64,7 +64,7 @@ export function IssueManagementSummary({
               aria-expanded={activeEditor === 'recurrence'}
               onClick={() => onEdit('recurrence')}
             >
-              {issue.recurrenceOfIssueId ? '연결 변경·해제' : '이전 신고 선택'}
+              {issue.recurrenceOfIssueId ? '연결 변경·해제' : '이전 신고 연결'}
             </Button>
           </>
         )}

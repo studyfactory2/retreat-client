@@ -27,13 +27,16 @@
 }
 .issue-actions__choices label {
   display: flex;
-  flex: 1 1 120px;
-  align-items: flex-start;
+  flex: 1 1 0;
+  position: relative;
+  align-items: center;
+  justify-content: center;
   gap: 8px;
   min-width: 0;
   padding: 10px;
-  border: 1px solid var(--color-input-border);
-  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  border-radius: 9px;
+  min-height: 44px;
   cursor: pointer;
 }
 .issue-actions__choices label.is-selected {
@@ -45,28 +48,26 @@
   outline: 3px solid var(--color-primary);
   outline-offset: 3px;
 }
-.issue-actions__choices input {
-  width: 18px;
-  height: 18px;
-  margin: 2px 0 0;
-  flex-shrink: 0;
-  accent-color: var(--color-primary);
+.issue-actions__choices input,
+.issue-actions__choices label > span > span {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 .issue-actions__choices label > span {
-  display: grid;
-  gap: 3px;
   min-width: 0;
 }
 .issue-actions__choices strong {
   color: var(--color-heading);
   font-size: 13px;
   line-height: 1.6;
+  word-break: keep-all;
   overflow-wrap: anywhere;
-}
-.issue-actions__choices label > span > span {
-  color: var(--color-muted);
-  font-size: 12px;
-  line-height: 1.7;
 }
 .issue-actions__choices:disabled label {
   cursor: default;
@@ -87,7 +88,7 @@
 }
 .issue-actions__note textarea {
   width: 100%;
-  min-height: 100px;
+  min-height: 124px;
   padding: 10px 12px;
   border: 1px solid var(--color-input-border);
   border-radius: var(--radius-sm);
@@ -125,7 +126,7 @@
   justify-content: flex-end;
   flex-wrap: wrap;
   gap: 10px;
-  margin-top: 14px;
+  margin-top: 20px;
 }
 .issue-action-buttons > .ui-button {
   min-height: 44px;

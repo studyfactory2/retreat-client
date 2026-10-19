@@ -1,0 +1,128 @@
+.maintenance-history > .submission-detail-section-heading {
+  align-items: center;
+  margin-bottom: 18px;
+}
+.maintenance-history > .submission-detail-section-heading h2 {
+  font-size: 16px;
+}
+.maintenance-history > .submission-detail-section-heading .submission-detail-caption {
+  margin-top: 4px;
+  font-size: 12px;
+}
+.maintenance-history .submission-history-list {
+  gap: 0;
+  border-top: 1px solid var(--color-border);
+}
+.maintenance-history .submission-history-entry {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0 20px;
+  padding: 20px 0;
+  border: 0;
+  border-bottom: 1px solid var(--color-border);
+  border-radius: 0;
+  background: transparent;
+}
+.maintenance-history-summary { min-width: 0; }
+.maintenance-history-summary__title {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  min-height: 28px;
+}
+.maintenance-history-summary__title h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 650;
+  line-height: 1.6;
+}
+.maintenance-history-version {
+  color: var(--color-muted);
+  font-size: 12px;
+  white-space: nowrap;
+}
+.maintenance-history-summary__meta {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 3px 18px;
+  margin-top: 7px;
+  color: var(--color-muted);
+  font-size: 12px;
+  line-height: 1.7;
+}
+.maintenance-history-summary__actor {
+  min-width: 0;
+  margin: 0;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+.maintenance-history-summary__actor strong {
+  color: var(--color-text);
+  font-weight: 500;
+}
+.maintenance-history-summary__time {
+  min-width: 0;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+.maintenance-history-summary__reason {
+  margin: 10px 0 0;
+  font-size: 13px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+.maintenance-history-summary__reason > span {
+  margin-right: 6px;
+  color: var(--color-muted);
+  font-size: 12px;
+}
+.maintenance-history .submission-history-entry > .maintenance-history-toggle {
+  align-self: start;
+  min-height: 44px;
+  margin: 0;
+  padding: 9px 12px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.maintenance-history .submission-history-snapshot {
+  grid-column: 1 / -1;
+  gap: 24px;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--color-border);
+}
+.maintenance-history .submission-history-snapshot > .submission-detail-notice {
+  margin: 0;
+  padding: 10px 12px;
+  font-size: 12px;
+}
+.maintenance-history .submission-history-snapshot .maintenance-current-record .submission-detail-card {
+  border-radius: 0;
+}
+.maintenance-history .submission-history-snapshot > .submission-photos {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+}
+.maintenance-history .submission-history-snapshot > .maintenance-record-information {
+  margin-top: 0;
+}
+@container maintenance-detail (max-width: 460px) {
+  .maintenance-history .submission-history-entry {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+    padding-block: 18px;
+  }
+  .maintenance-history .submission-history-entry > .maintenance-history-toggle {
+    justify-self: start;
+  }
+  .maintenance-history .submission-history-snapshot {
+    margin-top: 2px;
+    padding-top: 18px;
+    gap: 22px;
+  }
+}

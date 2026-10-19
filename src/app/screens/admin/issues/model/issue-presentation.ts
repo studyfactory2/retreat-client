@@ -9,7 +9,7 @@ import type {
 } from '../../../../features/admin-issues/admin-issues.types';
 
 export function issueStatusLabel(status: IssueStatus): string {
-  return { NEW: '신규 접수', IN_PROGRESS: '조치 중', RESOLVED: '해결됨' }[
+  return { NEW: '신규 접수', IN_PROGRESS: '조치 중', RESOLVED: '해결 완료' }[
     status
   ];
 }
@@ -17,7 +17,7 @@ export function issueStatusLabel(status: IssueStatus): string {
 export function issueStatusTone(
   status: IssueStatus,
 ): 'blue' | 'amber' | 'green' {
-  return { NEW: 'blue', IN_PROGRESS: 'amber', RESOLVED: 'green' }[status] as
+  return { NEW: 'amber', IN_PROGRESS: 'blue', RESOLVED: 'green' }[status] as
     'blue' | 'amber' | 'green';
 }
 

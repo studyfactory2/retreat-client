@@ -11,16 +11,8 @@ import {
   submissionTime,
 } from '../model/submission-detail-model';
 
-type ReportTab = 'answers' | 'photos' | 'history';
-const tabOrder: ReportTab[] = ['answers', 'photos', 'history'];
-const submittedTime = new Intl.DateTimeFormat('ko-KR', {
-  timeZone: 'Asia/Seoul',
-  month: 'numeric',
-  day: 'numeric',
-  hour: '2-digit',
-  minute: '2-digit',
-  hourCycle: 'h23',
-});
+type ReportTab = 'answers' | 'photos' | 'history' | 'information';
+const tabOrder: ReportTab[] = ['answers', 'photos', 'history', 'information'];
 
 export function MaintenanceSubmissionReport({
   detail,
@@ -41,6 +33,7 @@ export function MaintenanceSubmissionReport({
     answers: '점검 내용',
     photos: `사진 ${revision.photos.length}`,
     history: '변경 이력',
+    information: '기록 정보',
   };
   function moveTab(event: KeyboardEvent<HTMLButtonElement>) {
     const index = tabOrder.indexOf(tab);
@@ -58,23 +51,14 @@ export function MaintenanceSubmissionReport({
     setTab(next);
     tabButtons.current.get(next)?.focus();
   }
-  const photos = (
-    <SubmissionPhotos
-      key={revision.id}
-      revision={revision}
-      token={token}
-      rejectSession={rejectSession}
-      compact
-    />
-  );
   return (
     <section className="maintenance-report" aria-labelledby="maintenance-report-title">
       <header className="maintenance-report__heading">
         <div>
           <h2 id="maintenance-report-title">{record.property.name}</h2>
           <p>
-            <span>{record.author.name}</span>
-            <span>{submittedTime.format(new Date(record.submittedAt))} 제출</span>
+            <span>방문일 {record.visitDate.replaceAll('-', '.')}</span>
+            <span>작성자 {record.author.name}</span>
           </p>
         </div>
         <span className={`submission-detail-badge ${detail.status === 'CANCELLED' ? 'submission-detail-badge--muted' : 'submission-detail-badge--success'}`}>
@@ -118,39 +102,42 @@ export function MaintenanceSubmissionReport({
           className={`maintenance-report__panel maintenance-report__panel--${value}`}
         >
           {tab === value && (value === 'answers' ? (
-            <>
-              <div className="maintenance-current-record">
-                <SubmissionRecord record={record} presentation="maintenance" includeMetadata={false} />
-              </div>
-              <aside className="maintenance-report__photo-sidebar" aria-label="첨부 사진">
-                {photos}
-              </aside>
-            </>
-          ) : value === 'photos' ? photos : (
+            <div className="maintenance-current-record">
+              <SubmissionRecord record={record} presentation="maintenance" includeMetadata={false} />
+            </div>
+          ) : value === 'photos' ? (
+            <SubmissionPhotos
+              key={revision.id}
+              revision={revision}
+              token={token}
+              rejectSession={rejectSession}
+              presentation="maintenance"
+            />
+          ) : value === 'history' ? (
             <SubmissionHistory
               submissionId={detail.id}
               currentRevision={detail.currentRevision}
               token={token}
               rejectSession={rejectSession}
               onRefreshDetail={onRefreshDetail}
+              presentation="maintenance"
             />
+          ) : (
+            <SubmissionMetadata record={record} presentation="maintenance" disclosure={false}>
+              <div className="submission-current-change">
+                <p>
+                  <strong>버전 {detail.currentRevision} · {submissionActionLabel(revision.action)}</strong>
+                  {' · '}{submissionTime(revision.createdAt)}
+                </p>
+                <p>
+                  {revision.actor.name} · {submissionRoleLabel(revision.actor.role)} · {submissionSourceLabel(revision.actorSource)}
+                </p>
+                {revision.reason && <p className="submission-detail-text"><strong>사유: </strong>{revision.reason}</p>}
+              </div>
+            </SubmissionMetadata>
           ))}
         </div>
       ))}
-      <div className="maintenance-report__metadata">
-        <SubmissionMetadata record={record} title="기록 정보">
-          <div className="submission-current-change">
-            <p>
-              <strong>버전 {detail.currentRevision} · {submissionActionLabel(revision.action)}</strong>
-              {' · '}{submissionTime(revision.createdAt)}
-            </p>
-            <p>
-              {revision.actor.name} · {submissionRoleLabel(revision.actor.role)} · {submissionSourceLabel(revision.actorSource)}
-            </p>
-            {revision.reason && <p className="submission-detail-text"><strong>사유: </strong>{revision.reason}</p>}
-          </div>
-        </SubmissionMetadata>
-      </div>
     </section>
   );
 }

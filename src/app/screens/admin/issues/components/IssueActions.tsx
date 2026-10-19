@@ -126,11 +126,7 @@ export function IssueActions({
       className="issue-detail-card issue-actions"
       aria-labelledby={headingId}
     >
-      <div className="issue-detail-section-heading">
-        <div>
-          <h2 id={headingId}>처리 기록</h2>
-        </div>
-      </div>
+      <h3 id={headingId} className="issue-action-sr-only">조치 기록</h3>
       <p className="issue-actions__intro">{nextStep.description}</p>
       {unavailable ? (
         <p className="issue-detail-notice">
@@ -203,6 +199,7 @@ export function IssueActions({
                 id={noteId}
                 ref={noteInput}
                 rows={3}
+                placeholder="확인한 내용과 조치 사항을 남겨 주세요."
                 value={note}
                 disabled={locked || !!confirmation}
                 aria-required={noteRequired}

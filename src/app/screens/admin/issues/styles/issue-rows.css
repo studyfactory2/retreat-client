@@ -1,0 +1,205 @@
+.issue-records {
+  container-name: issue-records;
+  container-type: inline-size;
+  width: 100%;
+  min-width: 0;
+}
+.issue-records-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  color: var(--color-text);
+  font-size: 13px;
+  line-height: 1.55;
+}
+.issue-records-table th {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--color-border);
+  background: #f6f8fc;
+  color: var(--color-muted);
+  font-size: 11px;
+  font-weight: 500;
+  text-align: left;
+}
+.issue-records-table th:nth-child(1) { width: 33%; }
+.issue-records-table th:nth-child(2) { width: 23%; }
+.issue-records-table th:nth-child(3) { width: 15%; }
+.issue-records-table th:nth-child(4) { width: 19%; }
+.issue-records-table th:nth-child(5) { width: 10%; }
+.issue-records-table td {
+  padding: 19px 14px;
+  border-bottom: 1px solid var(--color-border);
+  vertical-align: middle;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+.issue-records-table tbody tr:last-child td { border-bottom: 0; }
+.issue-record-title {
+  display: block;
+  color: var(--color-heading);
+  font-size: 14px;
+  font-weight: 650;
+  line-height: 1.55;
+}
+.issue-record-context {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 8px;
+  margin: 5px 0 0;
+  color: var(--color-muted);
+  font-size: 11px;
+}
+.issue-record-context > div {
+  display: flex;
+  min-width: 0;
+}
+.issue-record-context > div + div::before {
+  content: '·';
+  margin-right: 8px;
+}
+.issue-record-context dd { margin: 0; }
+.issue-record-property strong {
+  display: block;
+  color: var(--color-heading);
+  font-size: 13px;
+  font-weight: 550;
+}
+.issue-record-property > span {
+  display: block;
+  margin-top: 4px;
+  color: var(--color-muted);
+  font-size: 11px;
+}
+.issue-record-badges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+}
+.issue-record-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 7px;
+  border-radius: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.55;
+  white-space: nowrap;
+}
+.issue-record-badge--blue { color: #164fd0; background: #eaf1ff; }
+.issue-record-badge--green { color: #17695a; background: #e6f5ef; }
+.issue-record-badge--amber { color: #875711; background: #fff1d9; }
+.issue-record-badge--urgent { color: #aa2e40; background: #fff0f2; }
+.issue-record-badge--cancelled { color: #65758d; background: #f0f3f8; }
+.issue-record-dates {
+  min-width: 0;
+  font-variant-numeric: tabular-nums;
+}
+.issue-record-dates summary {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: fit-content;
+  min-width: 44px;
+  min-height: 44px;
+  cursor: pointer;
+  list-style: none;
+}
+.issue-record-dates summary::-webkit-details-marker { display: none; }
+.issue-record-dates summary time { white-space: nowrap; }
+.issue-record-calendar { display: none; }
+.issue-record-chevron { flex-shrink: 0; color: var(--color-muted); }
+.issue-record-dates[open] .issue-record-chevron { transform: rotate(180deg); }
+.issue-record-date-content {
+  margin-top: 4px;
+  padding: 10px 0 2px;
+  border-top: 1px solid var(--color-border);
+  font-size: 11px;
+}
+.issue-record-date-content dl { display: grid; gap: 8px; margin: 0; }
+.issue-record-date-content dt { color: var(--color-muted); }
+.issue-record-date-content dd { margin: 2px 0 0; line-height: 1.65; }
+.issue-record-date-content > p { margin: 8px 0 0; color: var(--color-muted); }
+.issue-record-action { text-align: right; }
+.issue-record-link {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 7px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 2px;
+  color: var(--color-primary);
+  font-size: 12px;
+  font-weight: 550;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.issue-record-link > span { font-size: 17px; line-height: 1; }
+.issue-record-link:hover { text-decoration: underline; text-underline-offset: 4px; }
+.issue-record-link:focus-visible,
+.issue-record-dates summary:focus-visible {
+  border-radius: 4px;
+  outline: 2px solid var(--color-primary);
+  outline-offset: 3px;
+}
+.issue-record-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+@container issue-records (max-width: 699px) {
+  .issue-records-table,
+  .issue-records-table tbody { display: block; }
+  .issue-records-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  .issue-records-table tbody tr {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: 'content action' 'property property' 'reported state';
+    column-gap: 12px;
+    row-gap: 4px;
+    min-width: 0;
+    padding: 18px 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .issue-records-table tbody tr:first-child { padding-top: 2px; }
+  .issue-records-table tbody tr:last-child { padding-bottom: 0; border-bottom: 0; }
+  .issue-records-table td { display: block; min-width: 0; padding: 0; border: 0; }
+  .issue-record-content { grid-area: content; }
+  .issue-record-title { padding-top: 6px; font-size: 15px; }
+  .issue-record-context { margin-top: 4px; font-size: 11px; }
+  .issue-record-property {
+    grid-area: property;
+    display: flex !important;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 3px 7px;
+  }
+  .issue-record-property strong { color: var(--color-muted); font-size: 12px; font-weight: 450; }
+  .issue-record-property > span { margin-top: 0; }
+  .issue-record-reported { grid-area: reported; align-self: center; }
+  .issue-record-calendar { display: block; flex-shrink: 0; color: var(--color-muted); }
+  .issue-record-dates summary { gap: 6px; font-size: 12px; }
+  .issue-record-reported:has(.issue-record-dates[open]) { grid-column: 1 / -1; }
+  .issue-record-reported:has(.issue-record-dates[open]) + .issue-record-state { grid-column: 1 / -1; grid-row: auto; }
+  .issue-record-date-content dl { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .issue-record-state { grid-area: state; align-self: center; }
+  .issue-record-badges { justify-content: flex-end; }
+  .issue-record-reported:has(.issue-record-dates[open]) + .issue-record-state .issue-record-badges { justify-content: flex-start; margin-top: 7px; }
+  .issue-record-action { grid-area: action; align-self: start; }
+  .issue-record-link { padding-inline: 2px; }
+}
+@container issue-records (max-width: 310px) {
+  .issue-records-table tbody tr { grid-template-areas: 'content action' 'property property' 'reported reported' 'state state'; row-gap: 2px; }
+  .issue-record-badges { justify-content: flex-start; }
+  .issue-record-state { margin-top: 1px; }
+}

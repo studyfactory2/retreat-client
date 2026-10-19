@@ -20,12 +20,14 @@ export function IssueFilters({
   propertiesLoading,
   propertyError = false,
   onApply,
+  onReset,
 }: {
   input: AdminIssueFilters;
   properties?: AdminPropertyOption[];
   propertiesLoading: boolean;
   propertyError?: boolean;
   onApply: (value: AdminIssueFilters) => void;
+  onReset: () => void;
 }) {
   const [draft, setDraft] = useState(input);
   const [submitted, setSubmitted] = useState(false);
@@ -53,12 +55,9 @@ export function IssueFilters({
     <form
       ref={form}
       id="issue-filters"
-      onReset={() => {
-        const defaults = { page: 1 };
-        setDraft(defaults);
-        setSubmitted(false);
-        setDateErrors({});
-        onApply(defaults);
+      onReset={(event) => {
+        event.preventDefault();
+        onReset();
       }}
       className="issue-filters"
       aria-label="이상사항 조회 조건"
@@ -91,30 +90,6 @@ export function IssueFilters({
         onApply({ ...draft, page: 1 });
       }}
     >
-      <fieldset className="issue-filters__statuses">
-        <legend>처리 상태</legend>
-        <div>
-          {statuses.map(([value, label]) => (
-            <label
-              key={value}
-              className={(draft.status ?? '') === value ? 'is-selected' : ''}
-            >
-              <input
-                name="status"
-                type="radio"
-                checked={(draft.status ?? '') === value}
-                onChange={() => change('status', value)}
-                aria-invalid={showErrors && !!errors.status}
-                aria-describedby={
-                  showErrors && errors.status ? 'issue-status-error' : undefined
-                }
-              />
-              {label}
-            </label>
-          ))}
-        </div>
-        {error('status')}
-      </fieldset>
       <div className="issue-filters__fields">
         <div className="issue-field issue-field--property">
           <AdminPropertySelect
@@ -134,6 +109,19 @@ export function IssueFilters({
             }
           />
           {error('propertyId')}
+        </div>
+        <div className="issue-field">
+          <label htmlFor="issue-status">처리 상태</label>
+          <select id="issue-status" name="status" value={draft.status ?? ''}
+            onChange={(event) => change('status', event.target.value)}
+            aria-invalid={showErrors && !!errors.status}
+            aria-describedby={showErrors && errors.status ? 'issue-status-error' : undefined}>
+            {draft.status !== undefined && !statuses.some(([value]) => value === draft.status) && (
+              <option value={draft.status}>처리 상태 선택</option>
+            )}
+            {statuses.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+          </select>
+          {error('status')}
         </div>
         <div className="issue-field">
           <label htmlFor="issue-urgency">긴급 여부</label>
@@ -176,7 +164,7 @@ export function IssueFilters({
               )}
             <option value="active">취소 제외</option>
             <option value="cancelled">취소만</option>
-            <option value="all">전체</option>
+            <option value="all">취소 포함</option>
           </select>
           {error('cancellation')}
         </div>
@@ -200,6 +188,10 @@ export function IssueFilters({
           </div>
         ))}
       </div>
+      {(['propertyId', 'status', 'isUrgent', 'cancellation', 'from', 'to'] as const)
+        .some((key) => draft[key] !== input[key]) && (
+        <p className="issue-filters__pending" role="status">변경한 조건은 조회 후 반영됩니다.</p>
+      )}
       <div className="issue-filters__footer">
         <div>
           <p id="issue-date-hint">
@@ -210,10 +202,10 @@ export function IssueFilters({
           )}
         </div>
         <div className="issue-filters__actions">
-          <Button className="admin-button-secondary" type="reset">
+          <Button id="issue-filter-reset" className="admin-button-secondary" type="reset">
             초기화
           </Button>
-          <Button type="submit">조회</Button>
+          <Button id="issue-filter-apply" type="submit">조회</Button>
         </div>
       </div>
     </form>

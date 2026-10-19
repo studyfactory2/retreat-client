@@ -1,0 +1,134 @@
+.maintenance-record-facts--compact {
+  container: maintenance-record-info / inline-size;
+  min-width: 0;
+}
+.maintenance-record-facts--compact .maintenance-record-facts__groups {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 22px;
+  align-items: start;
+}
+.maintenance-record-facts--compact .maintenance-record-facts__group {
+  min-width: 0;
+}
+.maintenance-record-facts--compact .maintenance-record-facts__groups h3 {
+  margin: 0 0 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 14px;
+  font-weight: 650;
+  line-height: 1.5;
+}
+.maintenance-record-facts--compact .maintenance-record-facts__groups dl {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+}
+.maintenance-record-facts--compact .maintenance-record-facts__groups dl > div {
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr);
+  gap: 10px;
+  align-items: baseline;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.maintenance-record-facts--compact .maintenance-record-facts__groups dt {
+  color: var(--color-muted);
+  font-size: 13px;
+  word-break: keep-all;
+}
+.maintenance-record-facts--compact .maintenance-record-facts__groups dd {
+  min-width: 0;
+  margin: 0;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+.maintenance-record-facts--compact .maintenance-record-facts__group--saved dd {
+  font-variant-numeric: tabular-nums;
+}
+.maintenance-record-facts--compact .maintenance-record-facts__groups dd a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-block: -10px;
+  max-width: 100%;
+  color: var(--color-primary);
+}
+.maintenance-record-facts__optional {
+  margin-top: 10px;
+  border-top: 1px solid var(--color-border);
+}
+.maintenance-record-facts__optional > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 44px;
+  padding: 4px 0;
+  color: var(--color-muted);
+  font-size: 13px;
+  cursor: pointer;
+  list-style: none;
+}
+.maintenance-record-facts__optional > summary::-webkit-details-marker { display: none; }
+.maintenance-record-facts__optional-count { margin-left: 6px; color: var(--color-muted); font-size: 12px; }
+.maintenance-record-facts__optional-chevron { flex-shrink: 0; font-size: 16px; }
+.maintenance-record-facts__optional[open] .maintenance-record-facts__optional-chevron { transform: rotate(180deg); }
+.maintenance-record-facts--compact .maintenance-record-facts__optional dl { padding-bottom: 4px; }
+.maintenance-record-facts__optional > summary:focus-visible,
+.maintenance-record-facts--compact dd a:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+.maintenance-record-facts__footer {
+  display: grid;
+  gap: 10px;
+  margin-top: 22px;
+  padding-top: 14px;
+  border-top: 1px solid var(--color-border);
+}
+.maintenance-record-facts--compact .maintenance-record-facts__note {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.65;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+.maintenance-record-facts__footer .submission-current-change {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 12px;
+}
+.maintenance-record-facts__footer .submission-current-change > p { min-width: 0; margin: 0; }
+.maintenance-record-facts__footer .submission-current-change > .submission-detail-text { flex-basis: 100%; }
+@container maintenance-record-info (min-width: 500px) {
+  .maintenance-record-facts--compact .maintenance-record-facts__groups {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px 28px;
+  }
+  .maintenance-record-facts--compact .maintenance-record-facts__group--saved { grid-column: 1 / -1; }
+  .maintenance-record-facts--compact .maintenance-record-facts__group--saved dl {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px 28px;
+  }
+}
+@container maintenance-record-info (min-width: 920px) {
+  .maintenance-record-facts--compact .maintenance-record-facts__groups {
+    grid-template-columns: 1.1fr .9fr 1.05fr;
+    gap: 28px;
+  }
+  .maintenance-record-facts--compact .maintenance-record-facts__group--saved { grid-column: auto; }
+  .maintenance-record-facts--compact .maintenance-record-facts__group--saved dl { grid-template-columns: minmax(0, 1fr); }
+}
+@container maintenance-record-info (max-width: 300px) {
+  .maintenance-record-facts--compact .maintenance-record-facts__groups dl > div {
+    grid-template-columns: 68px minmax(0, 1fr);
+    gap: 8px;
+  }
+}
