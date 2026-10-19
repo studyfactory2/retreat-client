@@ -139,37 +139,28 @@ export function PropertyEditor({
   }
 
   return (
-    <div className="properties-editor">
+    <form
+      className="properties-editor property-form"
+      noValidate
+      aria-busy={mutation.state.busy}
+      onSubmit={(event) => {
+        event.preventDefault();
+        submit();
+      }}
+    >
       <header className="properties-heading">
-        <div>
-          <p className="properties-heading__eyebrow">
-            {original ? '휴양소 설정' : '새 휴양소'}
-          </p>
+        <p className="properties-heading__eyebrow">휴양소 관리</p>
+        <div className="property-editor-title">
           <h1>{original ? original.name : '휴양소 등록'}</h1>
-          <p>
-            {original
-              ? `${original.region || '지역 미등록'} · ${original.isActive ? '활성' : '비활성'}`
-              : '휴양소를 등록하면 이용 일정에 연결할 수 있습니다.'}
-          </p>
+          {original && (
+            <span className={`property-editor-badge${original.isActive ? '' : ' property-editor-badge--inactive'}`}>
+              {original.isActive ? '활성' : '비활성'}
+            </span>
+          )}
         </div>
-        <div className="properties-heading__actions">
-          <Button
-            className="admin-button-secondary"
-            disabled={mutation.state.busy || discarding}
-            onClick={() => leave(returnUrl)}
-          >
-            휴양소 목록으로
-          </Button>
-        </div>
+        {original?.region && <p className="property-editor-region">{original.region}</p>}
       </header>
-      {original && (
-        <PropertyManagementCard
-          property={original}
-          returnUrl={returnUrl}
-          disabled={mutation.state.busy || discarding}
-          onNavigate={leave}
-        />
-      )}
+      <div className="property-editor-body">
       {mutation.state.message && (
         <div
           className="properties-banner properties-banner--error"
@@ -227,17 +218,45 @@ export function PropertyEditor({
           </div>
         </div>
       )}
-      <PropertyForm
-        values={values}
-        onChange={change}
-        onSubmit={submit}
-        onCancel={() => leave(returnUrl)}
-        editing={!!original}
-        dirty={dirty}
-        errors={{ ...mutation.state.errors, ...errors }}
-        busy={mutation.state.busy}
-        blocked={mutation.state.uncertain || discarding}
-      />
-    </div>
+      <div className={`property-editor-layout${original ? '' : ' property-editor-layout--create'}`}>
+        <PropertyForm
+          values={values}
+          onChange={change}
+          editing={!!original}
+          errors={{ ...mutation.state.errors, ...errors }}
+          busy={mutation.state.busy}
+          blocked={mutation.state.uncertain || discarding}
+        />
+        {original && (
+          <PropertyManagementCard
+            property={original}
+            returnUrl={returnUrl}
+            disabled={mutation.state.busy || discarding}
+            onNavigate={leave}
+          />
+        )}
+      </div>
+      <p className="property-editor-save-state" role="status">
+        {mutation.state.busy
+          ? '변경 내용을 저장하고 있습니다.'
+          : mutation.state.uncertain || discarding
+            ? '안내를 확인한 뒤 계속해 주세요.'
+            : dirty ? '저장하지 않은 변경 사항이 있습니다.' : ''}
+      </p>
+      </div>
+      <div className="property-editor-actions">
+        <Button
+          className="admin-button-secondary"
+          disabled={mutation.state.busy || discarding}
+          onClick={() => leave(returnUrl)}
+        >
+          <span aria-hidden="true">←</span> 목록
+        </Button>
+        <Button type="submit" loading={mutation.state.busy} disabled={!!mutation.state.uncertain || discarding}>
+          {!mutation.state.busy && <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m5 12 4 4L19 6" /></svg>}
+          {mutation.state.busy ? '저장 중' : original ? '변경 저장' : '휴양소 등록'}
+        </Button>
+      </div>
+    </form>
   );
 }

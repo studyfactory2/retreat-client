@@ -21,7 +21,7 @@ export function AdminPropertyEditorScreen({
   if (state.status !== 'authenticated') return null;
   const key = `${id}:${state.user.id}:${state.expiresAt}`;
   return (
-    <div className="admin-properties">
+    <div className="admin-properties admin-property-editor">
       {creating ? (
         <PropertyEditor
           key={key}

@@ -1,55 +1,64 @@
+import { AdminMenuIcon } from '../../layout/components/AdminMenuIcon';
+
 export function ReportContents() {
   return (
     <section
       className="reports-contents"
       aria-labelledby="report-contents-heading"
     >
-      <h2 id="report-contents-heading">엑셀에 담기는 기록</h2>
+      <div className="reports-contents__heading">
+        <h2 id="report-contents-heading">포함되는 기록</h2>
+        <span>3개 시트</span>
+      </div>
       <ol className="reports-sheets" role="list">
         <li>
-          <span className="reports-sheets__number" aria-hidden="true">
-            01
+          <span className="reports-sheets__icon" aria-hidden="true">
+            <AdminMenuIcon name="submissions" />
           </span>
           <div className="reports-sheets__label">
             <h3>입퇴실 제출</h3>
-            <p className="reports-sheets__basis">체크리스트 제출일 기준</p>
+            <p className="reports-sheets__basis">제출일 기준</p>
           </div>
           <p className="reports-sheets__description">
-            제출 완료된 입실·퇴실 기록, 작성자, 확인 항목·이상 항목·사진 수
+            제출 완료 기록 · 작성자 · 확인·이상 항목 수 · 사진 수
           </p>
         </li>
         <li>
-          <span className="reports-sheets__number" aria-hidden="true">
-            02
+          <span className="reports-sheets__icon" aria-hidden="true">
+            <AdminMenuIcon name="maintenance" />
           </span>
           <div className="reports-sheets__label">
             <h3>정비 제출</h3>
-            <p className="reports-sheets__basis">체크리스트 제출일 기준</p>
+            <p className="reports-sheets__basis">제출일 기준</p>
           </div>
           <p className="reports-sheets__description">
-            제출 완료된 정비 기록, 담당자, 시작·제출 시각, 항목·사진 수
+            제출 완료 기록 · 담당자 · 시작·제출 시각 · 항목·사진 수
           </p>
         </li>
         <li>
-          <span className="reports-sheets__number" aria-hidden="true">
-            03
+          <span className="reports-sheets__icon" aria-hidden="true">
+            <AdminMenuIcon name="issues" />
           </span>
           <div className="reports-sheets__label">
             <h3>이상사항</h3>
-            <p className="reports-sheets__basis">이상사항 접수일 기준</p>
+            <p className="reports-sheets__basis">접수일 기준</p>
           </div>
           <p className="reports-sheets__description">
-            문제의 제목, 분류, 긴급 여부와 다운로드 시점의 현재 상태
+            제목 · 분류 · 긴급 여부 · 현재 처리 상태
           </p>
         </li>
       </ol>
       <p className="reports-contents__basis">
-        점검일과 제출일이 다르면 제출일로 조회합니다. 이상사항 상태는 선택한
-        기간 말일이 아닌 다운로드 시점 기준입니다.
+        사진은 개수만 포함합니다. 이상사항 상태는 기간 말일이 아닌
+        다운로드 시점 기준입니다.
       </p>
       <details className="reports-scope">
         <summary>포함 범위와 다운로드 제한</summary>
         <ul>
+          <li>
+            점검일과 제출일이 다르면 제출일로 조회합니다. 비활성 휴양소의
+            기록도 선택하여 받을 수 있습니다.
+          </li>
           <li>
             작성 중이거나 취소된 기록은 제외합니다. 사진은 개수만 포함하며, 사진
             파일·상세 답변·전체 변경 이력·차량번호는 포함하지 않습니다.

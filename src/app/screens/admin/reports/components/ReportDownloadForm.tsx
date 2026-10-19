@@ -4,6 +4,7 @@ import type { AdminReportErrors } from '../../../../features/admin-reports/admin
 import { Button } from '../../../../shared/ui/Button/Button';
 import { AdminPropertySelect } from '../../components/AdminPropertySelect';
 import {
+  getReportMonthRange,
   validateReportForm,
   type ReportFormValues,
 } from '../model/report-form-model';
@@ -43,6 +44,18 @@ export function ReportDownloadForm({
       ? `${selected.name}${selected.isActive ? '' : ' · 비활성'}`
       : '선택한 휴양소 · 목록 확인 필요'
     : '전체 휴양소';
+  const validPeriod = !periodErrors.from && !periodErrors.to;
+  const periodDays = validPeriod
+    ? (Date.parse(`${values.to}T00:00:00.000Z`) -
+        Date.parse(`${values.from}T00:00:00.000Z`)) /
+        86_400_000 +
+      1
+    : null;
+
+  function isSelectedMonth(offset: 0 | -1) {
+    const range = getReportMonthRange(offset);
+    return validPeriod && values.from === range.from && values.to === range.to;
+  }
 
   function changeDate(field: 'from' | 'to', input: HTMLInputElement) {
     const invalid = input.validity.badInput;
@@ -91,19 +104,24 @@ export function ReportDownloadForm({
     >
       <fieldset className="reports-form__controls" disabled={busy}>
         <legend className="reports-form__legend">보고서 다운로드 조건</legend>
-        <div className="reports-presets" aria-label="기간 빠른 선택">
-          <Button
-            className="admin-button-secondary"
-            onClick={() => chooseMonth(0)}
-          >
-            이번 달
-          </Button>
-          <Button
-            className="admin-button-secondary"
-            onClick={() => chooseMonth(-1)}
-          >
-            지난달
-          </Button>
+        <div className="reports-period-heading">
+          <span>조회 기간</span>
+          <div className="reports-presets" aria-label="기간 빠른 선택">
+            <Button
+              className="admin-button-secondary"
+              aria-pressed={isSelectedMonth(0)}
+              onClick={() => chooseMonth(0)}
+            >
+              이번 달
+            </Button>
+            <Button
+              className="admin-button-secondary"
+              aria-pressed={isSelectedMonth(-1)}
+              onClick={() => chooseMonth(-1)}
+            >
+              지난달
+            </Button>
+          </div>
         </div>
         <div className="reports-fields">
           {(['from', 'to'] as const).map((field) => (
@@ -162,7 +180,7 @@ export function ReportDownloadForm({
             한국 시간 기준 · 시작일과 종료일을 포함해 최대 62일
           </p>
           <p>입실·퇴실·정비는 제출일, 이상사항은 접수일로 조회합니다.</p>
-          <p id={`${id}-property-hint`}>
+          <p className="reports-form__legend" id={`${id}-property-hint`}>
             비활성 휴양소의 기록도 선택하여 받을 수 있습니다.
           </p>
         </div>
@@ -171,9 +189,9 @@ export function ReportDownloadForm({
         <div>
           <dt>기간</dt>
           <dd>
-            {periodErrors.from || periodErrors.to
+            {!validPeriod
               ? '시작일과 종료일을 확인해 주세요.'
-              : `${values.from} ~ ${values.to}`}
+              : `${values.from.replaceAll('-', '.')} – ${values.to.replaceAll('-', '.')} · ${periodDays}일`}
           </dd>
         </div>
         <div>
@@ -182,8 +200,13 @@ export function ReportDownloadForm({
         </div>
       </dl>
       <div className="reports-form__footer">
-        <p>엑셀 파일 1개 · 시트 3개 · 사진은 개수만 포함</p>
+        <p>파일 1개 · 시트 3개</p>
         <Button type="submit" loading={busy} disabled={!propertiesReady}>
+          {!busy && (
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M12 3v12m-5-5 5 5 5-5M4 16v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4" />
+            </svg>
+          )}
           {busy ? '엑셀 생성 중…' : '엑셀 다운로드'}
         </Button>
       </div>

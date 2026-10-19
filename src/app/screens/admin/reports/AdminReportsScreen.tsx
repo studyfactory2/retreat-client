@@ -77,80 +77,83 @@ function ReportsWorkspace({
     <div className="admin-reports">
       <header className="reports-heading">
         <h1>운영 보고서</h1>
-        <p>기간과 휴양소를 선택하고 엑셀로 내려받으세요.</p>
       </header>
-
-      <section
-        className="reports-card"
-        aria-labelledby="report-download-heading"
-      >
-        <div className="reports-card__heading">
-          <div>
+      <div className="reports-workspace">
+        <section
+          className="reports-card"
+          aria-labelledby="report-download-heading"
+        >
+          <div className="reports-card__heading">
+            <span className="reports-card__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6Zm0 0v6h6M8 14h8M8 18h5" />
+              </svg>
+            </span>
             <h2 id="report-download-heading">다운로드 조건</h2>
+            <span className="reports-format">XLSX</span>
           </div>
-          <span className="reports-format">3개 시트 · .xlsx</span>
-        </div>
-        {properties.resource.status === 'loading' && (
-          <p className="reports-notice" role="status">
-            휴양소 목록을 불러오는 중입니다.
-          </p>
-        )}
-        {properties.resource.status === 'error' && (
-          <div className="reports-notice reports-notice--error" role="alert">
-            <p>
-              휴양소 목록을 불러오지 못했습니다. {properties.resource.message}
+          {properties.resource.status === 'loading' && (
+            <p className="reports-notice" role="status">
+              휴양소 목록을 불러오는 중입니다.
             </p>
-            <Button
-              className="admin-button-secondary"
-              onClick={properties.refresh}
-            >
-              목록 다시 불러오기
-            </Button>
-          </div>
-        )}
-        <ReportDownloadForm
-          values={values}
-          errors={errors}
-          properties={options}
-          propertiesReady={properties.resource.status === 'ready'}
-          propertiesLoading={properties.resource.status === 'loading'}
-          busy={busy}
-          onChange={change}
-          onMonth={chooseMonth}
-          onSubmit={submit}
-        />
-        {download.state.status === 'busy' && (
-          <p className="reports-notice" role="status">
-            엑셀 파일을 생성하고 있습니다. 잠시만 기다려 주세요.
-          </p>
-        )}
-        {download.state.status === 'requested' && (
-          <div className="reports-notice" role="status">
-            <p>
-              다운로드를 요청했습니다. 브라우저의 다운로드 목록을 확인해 주세요.
-            </p>
-            <p className="reports-filename">{download.state.filename}</p>
-          </div>
-        )}
-        {download.state.status === 'error' && (
-          <div className="reports-notice reports-notice--error" role="alert">
-            <p>{download.state.message}</p>
-            <p>조건을 확인한 뒤 엑셀 다운로드를 다시 눌러 주세요.</p>
-            {download.state.code === 'PROPERTY_NOT_FOUND' && (
+          )}
+          {properties.resource.status === 'error' && (
+            <div className="reports-notice reports-notice--error" role="alert">
+              <p>
+                휴양소 목록을 불러오지 못했습니다. {properties.resource.message}
+              </p>
               <Button
                 className="admin-button-secondary"
-                onClick={() => {
-                  download.reset();
-                  properties.refresh();
-                }}
+                onClick={properties.refresh}
               >
-                휴양소 목록 새로고침
+                목록 다시 불러오기
               </Button>
-            )}
-          </div>
-        )}
-      </section>
-      <ReportContents />
+            </div>
+          )}
+          <ReportDownloadForm
+            values={values}
+            errors={errors}
+            properties={options}
+            propertiesReady={properties.resource.status === 'ready'}
+            propertiesLoading={properties.resource.status === 'loading'}
+            busy={busy}
+            onChange={change}
+            onMonth={chooseMonth}
+            onSubmit={submit}
+          />
+          {download.state.status === 'busy' && (
+            <p className="reports-notice" role="status">
+              엑셀 파일을 생성하고 있습니다. 잠시만 기다려 주세요.
+            </p>
+          )}
+          {download.state.status === 'requested' && (
+            <div className="reports-notice" role="status">
+              <p>
+                다운로드를 요청했습니다. 브라우저의 다운로드 목록을 확인해 주세요.
+              </p>
+              <p className="reports-filename">{download.state.filename}</p>
+            </div>
+          )}
+          {download.state.status === 'error' && (
+            <div className="reports-notice reports-notice--error" role="alert">
+              <p>{download.state.message}</p>
+              <p>조건을 확인한 뒤 엑셀 다운로드를 다시 눌러 주세요.</p>
+              {download.state.code === 'PROPERTY_NOT_FOUND' && (
+                <Button
+                  className="admin-button-secondary"
+                  onClick={() => {
+                    download.reset();
+                    properties.refresh();
+                  }}
+                >
+                  휴양소 목록 새로고침
+                </Button>
+              )}
+            </div>
+          )}
+        </section>
+        <ReportContents />
+      </div>
     </div>
   );
 }

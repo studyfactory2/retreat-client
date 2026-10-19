@@ -1,11 +1,10 @@
-import { useEffect } from 'react';
+import { useEffect, useLayoutEffect, useRef } from 'react';
 import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import { appRoutes } from '../../../core/router/routes';
 import { useAdminSession } from '../../../core/session/use-admin-session';
 import { isPropertyId } from '../../../features/admin-properties/admin-property-management-validation';
 import type { GetAdminPropertiesInput } from '../../../features/admin-properties/admin-property-management.types';
 import { Button } from '../../../shared/ui/Button/Button';
-import { AdminListHeader } from '../components/AdminListHeader';
 import { AdminListPagination } from '../components/AdminListPagination';
 import { AdminListState } from '../components/AdminListState';
 import { PropertyFilters } from './components/PropertyFilters';
@@ -16,6 +15,7 @@ import {
 } from './model/property-list-model';
 import { useAdminProperties } from './hooks/use-admin-properties';
 import '../styles/admin-directory.css';
+import './styles/properties.css';
 
 export function AdminPropertiesScreen() {
   const { state, rejectSession } = useAdminSession();
@@ -37,6 +37,11 @@ function PropertiesWorkspace({
   rejectSession: (token: string) => void;
 }) {
   const [search, setSearch] = useSearchParams();
+  const filterFocus = useRef<{
+    element: HTMLElement;
+    id: string;
+    query: string;
+  } | null>(null);
   const filters = readPropertyFilters(search);
   const returnSearch = propertyListSearch(filters);
   const { resource, refresh } = useAdminProperties(
@@ -69,6 +74,18 @@ function PropertiesWorkspace({
       : null;
   const filtered = !!filters.search || filters.isActive !== undefined;
 
+  useLayoutEffect(() => {
+    const previous = filterFocus.current;
+    filterFocus.current = null;
+    if (
+      previous?.query === returnSearch &&
+      !previous.element.isConnected &&
+      document.activeElement === document.body
+    ) {
+      document.getElementById(previous.id)?.focus({ preventScroll: true });
+    }
+  }, [returnSearch]);
+
   useEffect(() => {
     document.getElementById('main-content')?.focus({ preventScroll: true });
     window.scrollTo({ top: 0, left: 0 });
@@ -83,17 +100,30 @@ function PropertiesWorkspace({
   }, [correctedPage, returnSearch, setSearch]);
 
   function select(next: GetAdminPropertiesInput) {
-    setSearch(propertyListSearch(next));
+    const nextSearch = propertyListSearch(next);
+    const active = document.activeElement;
+    filterFocus.current =
+      nextSearch !== returnSearch &&
+      active instanceof HTMLElement &&
+      active.closest('#property-filters')
+        ? {
+            element: active,
+            id: active.id || 'properties-search',
+            query: nextSearch,
+          }
+        : null;
+    setSearch(nextSearch);
   }
 
   return (
     <div className="admin-directory admin-property-directory">
-      <AdminListHeader
-        title="휴양소 관리"
-        description="휴양소 정보와 담당 직원을 확인하세요."
-        createLabel="휴양소 등록"
-        createHref={appRoutes.adminPropertyCreate + returnSearch}
-      />
+      <header className="property-directory-heading">
+        <h1>휴양소 관리</h1>
+        <Link className="ui-button" to={appRoutes.adminPropertyCreate + returnSearch}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+          휴양소 등록
+        </Link>
+      </header>
       {saved && (
         <div className="admin-directory-notice" role="status">
           <p>
@@ -106,101 +136,101 @@ function PropertiesWorkspace({
         </div>
       )}
       <PropertyFilters key={returnSearch} input={filters} onApply={select} />
-      <div className="admin-directory-summary">
-        <p role="status">
-          {data && correctedPage === null ? (
-            <>
-              {filtered ? '검색 결과' : '등록된 휴양소'}{' '}
-              <strong>{data.total.toLocaleString('ko-KR')}곳</strong>
-            </>
-          ) : resource.status === 'error' ? (
-            '목록을 다시 확인해 주세요.'
-          ) : (
-            '목록을 불러오고 있습니다…'
-          )}
-        </p>
-        <Button
-          className="admin-directory-refresh"
-          onClick={refresh}
-          disabled={resource.status === 'loading' || correctedPage !== null}
-        >
-          새로고침
-        </Button>
-      </div>
-      {resource.status === 'loading' || correctedPage !== null ? (
-        <AdminListState
-          title="휴양소를 불러오는 중"
-          description="잠시만 기다려 주세요."
-          loading
-        />
-      ) : resource.status === 'error' ? (
-        <AdminListState
-          title="휴양소 목록을 불러오지 못했습니다"
-          description={resource.message}
-          error
-        >
-          <Button className="admin-button-secondary" onClick={refresh}>
-            다시 불러오기
+      <section className="property-directory-panel" aria-labelledby="property-results-title">
+        <div className="property-directory-summary">
+          <h2 id="property-results-title" aria-live="polite">
+            {data && correctedPage === null ? (
+              <>
+                {filtered ? '검색 결과' : '휴양소'}{' '}
+                <strong>{data.total.toLocaleString('ko-KR')}곳</strong>
+              </>
+            ) : resource.status === 'error' ? (
+              '목록을 다시 확인해 주세요.'
+            ) : (
+              '목록을 불러오고 있습니다…'
+            )}
+          </h2>
+          <Button
+            className="admin-directory-refresh property-directory-refresh"
+            aria-label="휴양소 목록 새로고침"
+            onClick={refresh}
+            disabled={resource.status === 'loading' || correctedPage !== null}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5M6.1 7a7 7 0 0 1 11.6-1.5L20 8M4 16l2.3 2.5A7 7 0 0 0 17.9 17" /></svg>
           </Button>
-        </AdminListState>
-      ) : (
-        <>
-          {resource.data.items.length === 0 ? (
-            <AdminListState
-              title={
-                filtered
-                  ? '조건에 맞는 휴양소가 없습니다'
-                  : '등록된 휴양소가 없습니다'
-              }
-              description={
-                filtered
-                  ? '검색어나 운영 상태를 변경해 주세요.'
-                  : '상단의 휴양소 등록에서 첫 휴양소를 등록해 주세요.'
-              }
-            >
-              {filtered && (
-                <Button
-                  className="admin-button-secondary"
-                  onClick={() => select({ page: 1 })}
-                >
-                  조회 조건 초기화
-                </Button>
-              )}
-            </AdminListState>
-          ) : (
-            <section className="admin-directory-table" aria-label="휴양소 목록">
-              <div className="admin-directory-table-head" aria-hidden="true">
-                <span>휴양소</span>
-                <div className="admin-directory-fields">
-                  <span>지역</span>
-                  <span>담당 직원</span>
-                </div>
-                <span>상태</span>
-                <span>관리</span>
-              </div>
-              <ul className="admin-directory-rows" role="list">
-                {resource.data.items.map((property) => (
-                  <li key={property.id}>
-                    <PropertyCard
-                      property={property}
-                      detailHref={`${appRoutes.adminProperties}/${property.id}${returnSearch}`}
-                    />
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )}
-          <p className="admin-directory-footnote">
-            활성 휴양소는 새 이용 일정을 등록할 수 있습니다.
-          </p>
-          <AdminListPagination
-            label="휴양소 목록 페이지"
-            page={filters.page}
-            totalPages={resource.data.totalPages}
-            onPage={(page) => select({ ...filters, page })}
+        </div>
+        {resource.status === 'loading' || correctedPage !== null ? (
+          <AdminListState
+            title="휴양소를 불러오는 중"
+            description="잠시만 기다려 주세요."
+            loading
           />
-        </>
-      )}
+        ) : resource.status === 'error' ? (
+          <AdminListState
+            title="휴양소 목록을 불러오지 못했습니다"
+            description={resource.message}
+            error
+          >
+            <Button className="admin-button-secondary" onClick={refresh}>
+              다시 불러오기
+            </Button>
+          </AdminListState>
+        ) : (
+          <>
+            {resource.data.items.length === 0 ? (
+              <AdminListState
+                title={
+                  filtered
+                    ? '조건에 맞는 휴양소가 없습니다'
+                    : '등록된 휴양소가 없습니다'
+                }
+                description={
+                  filtered
+                    ? '검색어나 운영 상태를 변경해 주세요.'
+                    : '상단의 휴양소 등록에서 첫 휴양소를 등록해 주세요.'
+                }
+              >
+                {filtered && (
+                  <Button
+                    className="admin-button-secondary"
+                    onClick={() => select({ page: 1 })}
+                  >
+                    조회 조건 초기화
+                  </Button>
+                )}
+              </AdminListState>
+            ) : (
+              <div className="property-directory-table">
+                <div className="property-directory-table-head" aria-hidden="true">
+                  <span>휴양소</span>
+                  <div className="property-directory-facts">
+                    <span>지역</span>
+                    <span>담당 직원</span>
+                  </div>
+                  <span>상태</span>
+                  <span />
+                </div>
+                <ul className="property-directory-rows" role="list" aria-label="휴양소 목록">
+                  {resource.data.items.map((property) => (
+                    <li key={property.id}>
+                      <PropertyCard
+                        property={property}
+                        detailHref={`${appRoutes.adminProperties}/${property.id}${returnSearch}`}
+                      />
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            <AdminListPagination
+              label="휴양소 목록 페이지"
+              page={filters.page}
+              totalPages={resource.data.totalPages}
+              onPage={(page) => select({ ...filters, page })}
+            />
+          </>
+        )}
+      </section>
     </div>
   );
 }

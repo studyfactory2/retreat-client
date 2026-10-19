@@ -20,7 +20,8 @@ export function PropertyFilters({
   );
   return (
     <form
-      className="admin-directory-filters"
+      id="property-filters"
+      className="property-directory-filters"
       aria-label="휴양소 조회 조건"
       onSubmit={(event) => {
         event.preventDefault();
@@ -36,7 +37,7 @@ export function PropertyFilters({
         <input
           id="properties-search"
           type="search"
-          placeholder="휴양소 이름 또는 지역"
+          placeholder="휴양소 이름·지역 검색"
           value={text}
           onChange={(event) => setText(event.target.value)}
         />
@@ -48,16 +49,17 @@ export function PropertyFilters({
           value={status}
           onChange={(event) => setStatus(event.target.value)}
         >
-          <option value="all">전체</option>
+          <option value="all">전체 상태</option>
           <option value="active">활성</option>
           <option value="inactive">비활성</option>
         </select>
       </div>
       <div className="admin-directory-filter-actions">
-        <Button type="submit" className="admin-button-secondary">
+        <Button id="property-filter-submit" type="submit" className="admin-button-secondary">
           조회
         </Button>
         <Button
+          id="property-filter-reset"
           className="admin-directory-reset"
           onClick={() => {
             setText('');
