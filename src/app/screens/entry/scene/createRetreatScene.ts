@@ -44,9 +44,7 @@ interface PointerDrag {
 }
 
 const FULL_TURN = Math.PI * 2
-const DESKTOP_TURN_SECONDS = 40
-const MOBILE_CYCLE_SECONDS = 14
-const MOBILE_AMPLITUDE = 0.22
+const AUTO_TURN_SECONDS = 40
 const INTERACTION_PAUSE_MS = 3000
 const FRAME_INTERVAL_MS = 1000 / 30
 
@@ -66,7 +64,6 @@ export function createRetreatScene(
   let height = 1
   let currentAngle = 0
   let targetAngle = 0
-  let mobilePhase = 0
   let pointer: PointerDrag | null = null
   let holdUntil = 0
   let previousTick = 0
@@ -377,18 +374,13 @@ export function createRetreatScene(
     const automatic = autoEnabled() && !pointer && now >= holdUntil
     const oldAngle = currentAngle
     if (automatic) {
-      if (mobile) {
-        mobilePhase += dt * FULL_TURN / MOBILE_CYCLE_SECONDS
-        targetAngle = Math.sin(mobilePhase) * MOBILE_AMPLITUDE
-      } else {
-        targetAngle += dt * FULL_TURN / DESKTOP_TURN_SECONDS
-      }
+      targetAngle += dt * FULL_TURN / AUTO_TURN_SECONDS
     }
     const delta = targetAngle - currentAngle
     if (reducedMotion || Math.abs(delta) < 0.0002) currentAngle = targetAngle
     else currentAngle += delta * (1 - Math.exp(-11 * dt))
     // Keep long sessions numerically stable without changing the view.
-    if (!mobile && Math.abs(currentAngle) > FULL_TURN * 2) {
+    if (!pointer && Math.abs(currentAngle) > FULL_TURN * 2) {
       const turns = Math.trunc(currentAngle / FULL_TURN) * FULL_TURN
       currentAngle -= turns
       targetAngle -= turns
@@ -420,10 +412,6 @@ export function createRetreatScene(
     requestFrame()
   }
 
-  function clampAngle(value: number) {
-    return mobile ? Math.max(-0.5, Math.min(0.5, value)) : value
-  }
-
   function pauseAfterInteraction() {
     holdUntil = performance.now() + INTERACTION_PAUSE_MS
   }
@@ -431,30 +419,21 @@ export function createRetreatScene(
   function rotate(delta: number) {
     if (disposed || !Number.isFinite(delta)) return
     pauseAfterInteraction()
-    targetAngle = clampAngle(targetAngle + delta)
+    targetAngle += delta
     requestFrame()
   }
 
   function reset() {
     if (disposed) return
     pauseAfterInteraction()
-    if (!mobile) {
-      // Return by the nearest turn, even after several automatic revolutions.
-      targetAngle = Math.round(currentAngle / FULL_TURN) * FULL_TURN
-    } else targetAngle = 0
-    mobilePhase = 0
+    // Return by the nearest turn, even after several automatic revolutions.
+    targetAngle = Math.round(currentAngle / FULL_TURN) * FULL_TURN
     requestFrame()
   }
 
   function setMobile(next: boolean) {
     if (disposed || mobile === next) return
     mobile = next
-    if (mobile) {
-      currentAngle = Math.atan2(Math.sin(currentAngle), Math.cos(currentAngle))
-      targetAngle = clampAngle(currentAngle)
-      mobilePhase = 0
-      pauseAfterInteraction()
-    }
     resize()
   }
 
@@ -503,7 +482,7 @@ export function createRetreatScene(
       canvas.setPointerCapture(event.pointerId)
     }
     if (event.cancelable) event.preventDefault()
-    targetAngle = clampAngle(pointer.initial + dx / Math.max(width, 200) * (mobile ? 1.15 : 2.4))
+    targetAngle = pointer.initial + dx / Math.max(width, 200) * 2.4
     pauseAfterInteraction()
     requestFrame()
   }
