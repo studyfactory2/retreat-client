@@ -44,11 +44,10 @@ export function ImportPropertyMappings({
         </div>
       </div>
       <div className="import-upload__mapping-guide">
-        <p>
-          연결하지 않은 시트는 다음 단계에서 휴양소를 선택해 검토합니다.
-        </p>
+        <p>연결하지 않은 시트는 다음 단계에서 휴양소를 선택해 검토합니다.</p>
         <p id="import-upload-sheet-hint">
-          시트 이름은 공백까지 원본과 같아야 합니다. 추천 이름 외에도 직접 입력할 수 있습니다.
+          파일에 있는 지원 시트 이름을 공백까지 동일하게 입력해 주세요. 지원
+          이름은 입력란에서 확인할 수 있습니다.
         </p>
       </div>
 

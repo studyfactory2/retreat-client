@@ -18,6 +18,7 @@ import {
 import { ImportPropertyMappings } from './components/ImportPropertyMappings';
 import { UploadFileField } from './components/UploadFileField';
 import { ImportSteps } from './components/ImportSteps';
+import { ImportPreparation } from './components/ImportPreparation';
 import './styles/import-upload.css';
 
 type UploadState = {
@@ -199,11 +200,7 @@ function UploadWorkspace({
       </header>
 
       <ImportSteps current={0} />
-
-      <div className="import-upload__guide">
-        <strong>명단 검토 후 등록을 확정합니다.</strong>
-        <p>파일 업로드만으로 이용 일정이 등록되지는 않습니다.</p>
-      </div>
+      <ImportPreparation />
 
       {state.message && (
         <div
@@ -299,7 +296,7 @@ function UploadWorkspace({
           <p>
             {state.busy
               ? '미리보기를 만들고 있습니다. 업로드가 끝날 때까지 화면을 유지해 주세요.'
-              : '다음 단계에서 휴양소와 이용객 정보를 검토합니다.'}
+              : '업로드 후 검토하고 최종 확정해야 일정이 등록됩니다.'}
           </p>
           <Button type="submit" loading={state.busy} disabled={state.uncertain}>
             {state.busy ? '미리보기 만드는 중' : '명단 검토하기'}

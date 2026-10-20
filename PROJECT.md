@@ -2989,3 +2989,27 @@ bundle-size warning only). Actual local landing/disclosure layouts were checked
 at desktop, 390px and 320px; no horizontal overflow at 320px. Independent source
 review covered native install/loading/installed states and compact admin markup.
 No device-installation, authenticated admin or new deployment acceptance claimed.
+
+### Excel roster preparation and review — 2026-10-20
+
+The approved first three slices retain explicit arrival and departure dates and
+times. The upload screen now offers a blank legacy `.xls` template, a clearly
+fictional example and a printable Korean writing guide. Both workbooks preserve
+the six supported sheet names and original A:L headers. Phone cells are text;
+arrival/departure cells display Korean local time in `yyyy-mm-dd hh:mm` format.
+Examples do not establish default arrival/departure times. Date-only rows must
+still be reviewed and supplied with times before registration.
+
+Import steps, summary counts and review rows use the existing admin visual
+system with compact phone/tablet layouts. Original Excel cells open in a native
+dialog without expanding a table row; keyboard dismissal restores focus. Existing
+review, skip and explicit final-confirmation flows remain in place. The matching
+API change accepts minute-precision text timestamps while preserving seconds.
+
+Verification: isolated Yarn typecheck, non-fixing lint and production build;
+21 actual parser/workbook checks; browser checks with fictional API fixtures at
+320, 399, 760, 907, 1024 and 1440px. Checks covered downloads, missing-time blocking
+and correction, source-dialog focus, and error recovery. The Korean guide was
+checked at 320, 907 and 1440px. No live database workflow, native Excel session,
+physical device or production deployment acceptance is claimed. No dependencies,
+permanent tests, migrations, staging or commits were added.

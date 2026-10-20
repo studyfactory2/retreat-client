@@ -1,0 +1,118 @@
+.import-preparation {
+  margin-bottom: 18px;
+  padding: 20px;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  background: var(--color-surface);
+}
+.import-preparation__heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+.import-preparation h2 {
+  color: var(--color-heading);
+  font-size: 16px;
+  font-weight: 650;
+}
+.import-preparation p {
+  color: var(--color-muted);
+  font-size: 12px;
+  line-height: 1.75;
+  margin-top: 6px;
+}
+.import-preparation__heading > a {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  min-height: 44px;
+  flex-shrink: 0;
+  color: var(--color-primary);
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+}
+.import-preparation__new-tab {
+  font-size: 10px;
+  font-weight: 400;
+}
+.import-preparation__downloads {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+}
+.import-preparation__downloads a {
+  text-decoration: none;
+}
+.import-preparation__downloads > span {
+  color: var(--color-muted);
+  font-size: 11px;
+}
+.import-preparation__help {
+  margin-top: 14px;
+  border-top: 1px solid var(--color-border);
+}
+.import-preparation__help summary {
+  min-height: 44px;
+  padding-top: 13px;
+  color: var(--color-heading);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.import-preparation__help dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 24px;
+  padding: 14px;
+  border-radius: 8px;
+  background: var(--color-background);
+}
+.import-preparation__help dt {
+  color: var(--color-muted);
+  font-size: 11px;
+  margin-bottom: 4px;
+}
+.import-preparation__help dd {
+  margin: 0;
+  color: var(--color-text);
+  font-size: 12px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+.import-preparation :is(a, summary):focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 3px;
+}
+@media (max-width: 600px) {
+  .import-preparation {
+    padding: 16px;
+  }
+  .import-preparation__heading {
+    display: block;
+    position: relative;
+  }
+  .import-preparation__heading > a {
+    justify-content: flex-start;
+  }
+  .import-preparation__downloads {
+    margin-top: 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .import-preparation__downloads a {
+    padding-inline: 8px;
+    font-size: 12px;
+  }
+  .import-preparation__downloads > span {
+    grid-column: 1 / -1;
+  }
+  .import-preparation__help dl {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

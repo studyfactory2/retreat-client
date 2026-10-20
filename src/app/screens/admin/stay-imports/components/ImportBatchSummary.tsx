@@ -59,12 +59,17 @@ export function ImportBatchSummary({
             {importTime(batch.confirmedAt)}
           </p>
           <p>각 행의 일정 보기에서 등록된 내용을 확인할 수 있습니다.</p>
-          <Link className="ui-button admin-button-secondary" to="/admin/calendar">이용 달력 보기 →</Link>
+          <Link
+            className="ui-button admin-button-secondary"
+            to="/admin/calendar"
+          >
+            이용 달력 보기 →
+          </Link>
         </div>
       ) : batch.status === 'PREVIEW' ? (
         <p className="stay-import-notice">
-          확인 필요·오류 행을 검토하거나 제외해 주세요. 날짜만 있는 행은
-          입·퇴실 시간을 입력해야 합니다. 최종 확정 전에는 일정에 반영되지 않습니다.
+          확인 필요·오류 행을 수정하거나 제외해 주세요. 날짜만 있는 행은 입·퇴실
+          시간을 추가해야 합니다.
         </p>
       ) : (
         <p className="stay-import-notice">

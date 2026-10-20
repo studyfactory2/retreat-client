@@ -9,22 +9,28 @@ export function ImportSourceCells({ row }: { row: StayImportRowDto }) {
       <p>
         업로드한 원본 값입니다. 검토 내용을 저장해도 원본은 바뀌지 않습니다.
       </p>
-      <dl>
-        {row.rawData.cells.map((cell) => (
-          <div key={cell.column}>
-            <dt>
-              {cell.column}
-              {cell.formula ? ' · 수식 있음' : ''}
-              {cell.type === 'e' ? ' · 셀 오류' : ''}
-            </dt>
-            <dd>
-              {cell.value === null || cell.value === ''
-                ? '빈 셀'
-                : String(cell.value)}
-            </dd>
-          </div>
-        ))}
-      </dl>
+      <ImportSourceValues row={row} />
     </details>
+  );
+}
+
+export function ImportSourceValues({ row }: { row: StayImportRowDto }) {
+  return (
+    <dl className="stay-import-source-values">
+      {row.rawData.cells.map((cell) => (
+        <div key={cell.column}>
+          <dt>
+            {cell.column}
+            {cell.formula ? ' · 수식 있음' : ''}
+            {cell.type === 'e' ? ' · 셀 오류' : ''}
+          </dt>
+          <dd>
+            {cell.value === null || cell.value === ''
+              ? '빈 셀'
+              : String(cell.value)}
+          </dd>
+        </div>
+      ))}
+    </dl>
   );
 }
