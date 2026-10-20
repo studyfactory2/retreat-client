@@ -1,12 +1,12 @@
-import { Navigate } from 'react-router-dom'
-import { useAdminSession } from '../../../core/session/use-admin-session'
-import { Button } from '../../../shared/ui/Button/Button'
-import { AdminSessionState } from '../components/AdminSessionState'
-import { useAdminLogin } from './hooks/use-admin-login'
-import '../styles/admin.css'
+import { Navigate } from 'react-router-dom';
+import { useAdminSession } from '../../../core/session/use-admin-session';
+import { Button } from '../../../shared/ui/Button/Button';
+import { AdminSessionState } from '../components/AdminSessionState';
+import { useAdminLogin } from './hooks/use-admin-login';
+import '../styles/admin.css';
 
 export function AdminLoginScreen() {
-  const { state } = useAdminSession()
+  const { state } = useAdminSession();
   const {
     loginId,
     setLoginId,
@@ -22,10 +22,10 @@ export function AdminLoginScreen() {
     fieldErrors,
     error,
     submit,
-  } = useAdminLogin()
+  } = useAdminLogin();
 
-  if (state.status === 'authenticated') return <Navigate to="/admin" replace />
-  if (state.status !== 'anonymous') return <AdminSessionState />
+  if (state.status === 'authenticated') return <Navigate to="/admin" replace />;
+  if (state.status !== 'anonymous') return <AdminSessionState />;
 
   return (
     <div className="admin-login">
@@ -48,12 +48,24 @@ export function AdminLoginScreen() {
             로그아웃되었습니다.
           </p>
         )}
+        {state.reason === 'password-changed' && (
+          <p className="admin-notice" role="status">
+            비밀번호가 변경되었습니다. 모든 기기의 기존 로그인이 해제되었습니다.
+            새 비밀번호로 로그인해 주세요.
+          </p>
+        )}
+        {state.reason === 'password-uncertain' && (
+          <p className="admin-notice" role="status">
+            비밀번호 변경 결과를 확인하지 못했습니다. 새 비밀번호로 로그인해
+            주세요. 변경되지 않았다면 기존 비밀번호를 사용하세요.
+          </p>
+        )}
 
         <form
           className="admin-login__form"
           noValidate
           onSubmit={(event) => {
-            void submit(event)
+            void submit(event);
           }}
           aria-busy={busy || undefined}
         >
@@ -105,9 +117,7 @@ export function AdminLoginScreen() {
                 className="admin-field__visibility"
                 type="button"
                 disabled={busy}
-                aria-label={
-                  showPassword ? '비밀번호 숨기기' : '비밀번호 보기'
-                }
+                aria-label={showPassword ? '비밀번호 숨기기' : '비밀번호 보기'}
                 aria-controls="admin-password"
                 onClick={() => setShowPassword(!showPassword)}
               >
@@ -141,15 +151,11 @@ export function AdminLoginScreen() {
               {error}
             </p>
           )}
-          <Button
-            type="submit"
-            loading={busy}
-            className="admin-login__submit"
-          >
+          <Button type="submit" loading={busy} className="admin-login__submit">
             {busy ? '로그인 중…' : '로그인'}
           </Button>
         </form>
       </section>
     </div>
-  )
+  );
 }

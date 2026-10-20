@@ -1,5 +1,12 @@
 import { APP_BRAND } from '../../../core/config/brand';
-import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { appRoutes } from '../../../core/router/routes';
 import { useAdminSession } from '../../../core/session/use-admin-session';
@@ -86,16 +93,22 @@ export function AdminLayout() {
           <span>휴양소 관리</span>
         </NavLink>
         <div className="admin-layout__account">
-          <span className="admin-layout__avatar" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none">
-              <circle cx="12" cy="8" r="3" />
-              <path d="M5 20v-2a7 7 0 0 1 14 0v2" />
-            </svg>
-          </span>
-          <span className="admin-layout__identity">
-            <strong title={state.user.name}>{state.user.name}</strong>
-            <span>관리자</span>
-          </span>
+          <Link
+            className="admin-layout__account-link"
+            to={appRoutes.adminAccount}
+            aria-label={`${state.user.name} 내 계정`}
+          >
+            <span className="admin-layout__avatar" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="8" r="3" />
+                <path d="M5 20v-2a7 7 0 0 1 14 0v2" />
+              </svg>
+            </span>
+            <span className="admin-layout__identity">
+              <strong title={state.user.name}>{state.user.name}</strong>
+              <span>관리자</span>
+            </span>
+          </Link>
           <button
             className="admin-layout__logout admin-layout__logout--header"
             type="button"
@@ -150,9 +163,12 @@ export function AdminLayout() {
           if (event.target !== event.currentTarget) return;
           const bounds = event.currentTarget.getBoundingClientRect();
           if (
-            event.clientX < bounds.left || event.clientX > bounds.right ||
-            event.clientY < bounds.top || event.clientY > bounds.bottom
-          ) closeDrawer();
+            event.clientX < bounds.left ||
+            event.clientX > bounds.right ||
+            event.clientY < bounds.top ||
+            event.clientY > bounds.bottom
+          )
+            closeDrawer();
         }}
       >
         <div className="admin-layout__drawer-header">

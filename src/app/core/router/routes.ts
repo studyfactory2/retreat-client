@@ -11,6 +11,7 @@ export const appRoutes = {
   adminIssueCategories: '/admin/issues/categories',
   adminIssueDetail: '/admin/issues/:id',
   adminMore: '/admin/more',
+  adminAccount: '/admin/account',
   adminSubmissionDetail: '/admin/submissions/:id',
   adminStayImportCreate: '/admin/stays/imports/new',
   adminStayImportDetail: '/admin/stays/imports/:id',

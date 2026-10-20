@@ -48,15 +48,21 @@ export function createAdminSessionStore(dependencies: SessionDependencies) {
     return { version: generation, signal: controller.signal };
   }
 
-  function logout(reason: 'expired' | 'signed-out' = 'signed-out') {
+  function logout(
+    reason:
+      | 'expired'
+      | 'signed-out'
+      | 'password-changed'
+      | 'password-uncertain' = 'signed-out',
+  ) {
     cancelPending();
     const previous = credential;
     credential = null;
     storageNotice = undefined;
     dependencies.storage.clear(
-      reason === 'expired' ? previous?.token : undefined,
+      reason !== 'signed-out' ? previous?.token : undefined,
     );
-    if (reason === 'expired' && previous?.persistence === 'local') {
+    if (reason !== 'signed-out' && previous?.persistence === 'local') {
       const replacement = dependencies.storage.read(now()).session;
       // A late rejection of token A must not erase a newer login B from another tab.
       if (replacement && replacement.token !== previous.token) {
@@ -189,6 +195,29 @@ export function createAdminSessionStore(dependencies: SessionDependencies) {
     rejectSession: (token: string) => {
       // A feature response can reject only the credential that made its request.
       if (credential?.token === token) logout('expired');
+    },
+    updateProfile: (token: string, user: AdminUser) => {
+      if (
+        credential?.token !== token ||
+        state.status !== 'authenticated' ||
+        state.user.id !== user.id
+      )
+        return;
+      // A read started before this save must not restore the old header name.
+      cancelPending();
+      publish({
+        ...state,
+        user: {
+          id: user.id,
+          name: user.name,
+          loginId: user.loginId,
+          role: user.role,
+        },
+      });
+    },
+    finishPasswordChange: (token: string, uncertain = false) => {
+      if (credential?.token === token)
+        logout(uncertain ? 'password-uncertain' : 'password-changed');
     },
     retry: () => {
       void verify();

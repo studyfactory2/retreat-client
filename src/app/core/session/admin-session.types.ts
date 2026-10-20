@@ -2,7 +2,11 @@ import type { AdminUser } from '../../features/admin-auth/admin-auth.types';
 
 export type AdminSessionState =
   | { status: 'checking' }
-  | { status: 'anonymous'; reason?: 'expired' | 'signed-out' }
+  | {
+      status: 'anonymous';
+      reason?:
+        'expired' | 'signed-out' | 'password-changed' | 'password-uncertain';
+    }
   | { status: 'unavailable'; message: string }
   | {
       status: 'authenticated';

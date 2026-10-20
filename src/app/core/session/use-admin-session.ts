@@ -11,5 +11,7 @@ export function useAdminSession() {
     retry: store.retry,
     logout: store.logout,
     rejectSession: store.rejectSession,
+    updateProfile: store.updateProfile,
+    finishPasswordChange: store.finishPasswordChange,
   };
 }

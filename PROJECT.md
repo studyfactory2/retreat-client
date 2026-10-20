@@ -3013,3 +3013,44 @@ and correction, source-dialog focus, and error recovery. The Korean guide was
 checked at 320, 907 and 1440px. No live database workflow, native Excel session,
 physical device or production deployment acceptance is claimed. No dependencies,
 permanent tests, migrations, staging or commits were added.
+
+### Slice 4 — responsive administrator account settings — 2026-10-20
+
+`/admin/account` is available from the header avatar/name, sidebar and mobile
+menu. Two compact cards provide profile editing and password change. Cards sit
+side by side on wide screens and stack on tablets/phones; profile fields use
+two columns where space permits. Login ID is read-only. Separate save actions,
+inline errors, password visibility controls, unsaved-edit navigation protection
+and an explicit reload dialog keep account work reviewable.
+
+Domain contracts/validation/API calls live in `features/admin-account`; the
+screen's components, hooks and scoped CSS live in `screens/admin/account`.
+Profile saves update the session header without persisting profile/password
+data. A late response cannot replace a newer credential or overwrite a saved
+name. Successful password changes clear the matching login and show a new-login
+notice. Uncertain writes never automatically retry; profile saves require a
+reread and password changes direct the user to log in again. Unsaved profile
+edits must be saved or cancelled before a password change can proceed.
+
+Requires the matching API account routes and `sessionVersion` migration;
+see the API's `docs/admin-account.md`. Verification: isolated Yarn typecheck,
+non-fixing lint, production build, 20 disposable session/validation checks and
+15 browser groups with fictional responses at 320, 399, 760, 907, 1024 and 1440px.
+Browser checks cover both forms, errors, source-of-truth reload, navigation,
+logout notices and compact layouts. No live database, physical device or
+production acceptance is claimed. No dependencies, permanent tests, staging,
+commits or deployment actions were added.
+
+
+### Account password form refinement — 2026-10-20
+
+Shortened the password form to a compact heading, one-line password guidance and
+a brief sign-out notice. Accessible eye buttons replace visibility text; wider
+cards pair the new-password fields while narrow cards keep a single column.
+Validation and account/session behavior remain unchanged.
+
+Verification: isolated typecheck and non-fixing lint passed. Browser checks with
+fictional API responses covered 320, 399, 760, 907, 1024 and 1440px, validation,
+visibility, reset and password submission. Mobile save-button clearance was
+checked separately. These are browser viewport checks, not physical-device or
+production acceptance. No commits or deployment actions were made.

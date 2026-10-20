@@ -64,4 +64,11 @@ export const adminSecondaryMenu: AdminMenuEntry[] = [
     icon: 'properties',
     description: '휴양소를 등록하고 운영 정보를 관리합니다.',
   },
+  {
+    to: appRoutes.adminAccount,
+    label: '내 계정',
+    mobileLabel: '내 계정',
+    icon: 'account',
+    description: '내 정보와 로그인 비밀번호를 관리합니다.',
+  },
 ];

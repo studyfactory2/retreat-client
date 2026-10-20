@@ -7,12 +7,19 @@ export type AdminMenuIconName =
   | 'reports'
   | 'properties'
   | 'staff'
+  | 'account'
   | 'more'
   | 'menu'
   | 'close';
 export function AdminMenuIcon({ name }: { name: AdminMenuIconName }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      {name === 'account' && (
+        <>
+          <circle cx="12" cy="8" r="3.5" />
+          <path d="M5 21v-3a7 7 0 0 1 14 0v3" />
+        </>
+      )}
       {name === 'menu' && <path d="M4 6h16M4 12h16M4 18h16" />}
       {name === 'close' && <path d="m6 6 12 12M18 6 6 18" />}
       {name === 'overview' && (
