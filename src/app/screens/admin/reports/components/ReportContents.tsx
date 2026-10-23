@@ -1,6 +1,9 @@
 import { AdminMenuIcon } from '../../layout/components/AdminMenuIcon';
+import type { AdminReportMode } from '../../../../features/admin-reports/admin-reports.types';
+import { PreservationContents } from './PreservationContents';
 
-export function ReportContents() {
+export function ReportContents({ mode }: { mode: AdminReportMode }) {
+  if (mode === 'preservation') return <PreservationContents />;
   return (
     <section
       className="reports-contents"
@@ -49,15 +52,15 @@ export function ReportContents() {
         </li>
       </ol>
       <p className="reports-contents__basis">
-        사진은 개수만 포함합니다. 이상사항 상태는 기간 말일이 아닌
-        다운로드 시점 기준입니다.
+        사진은 개수만 포함합니다. 이상사항 상태는 기간 말일이 아닌 다운로드 시점
+        기준입니다.
       </p>
       <details className="reports-scope">
         <summary>포함 범위와 다운로드 제한</summary>
         <ul>
           <li>
-            점검일과 제출일이 다르면 제출일로 조회합니다. 비활성 휴양소의
-            기록도 선택하여 받을 수 있습니다.
+            점검일과 제출일이 다르면 제출일로 조회합니다. 비활성 휴양소의 기록도
+            선택하여 받을 수 있습니다.
           </li>
           <li>
             작성 중이거나 취소된 기록은 제외합니다. 사진은 개수만 포함하며, 사진

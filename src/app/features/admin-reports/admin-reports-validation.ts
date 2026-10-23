@@ -1,5 +1,8 @@
 import { ApiRequestError } from '../../core/api/api-error';
-import type { AdminReportErrors, AdminReportQuery } from './admin-reports.types';
+import type {
+  AdminReportErrors,
+  AdminReportQuery,
+} from './admin-reports.types';
 
 export const REPORT_MAX_DAYS = 62;
 export const REPORT_MAX_BYTES = 16 * 1024 * 1024;
@@ -31,13 +34,22 @@ export function validateAdminReportQuery(
   query: AdminReportQuery,
 ): AdminReportErrors {
   const errors: AdminReportErrors = {};
+  if (
+    query?.mode !== undefined &&
+    query.mode !== 'summary' &&
+    query.mode !== 'preservation'
+  )
+    errors.mode = '다운로드 종류를 다시 선택해 주세요.';
   if (!isAdminReportDate(query?.from))
     errors.from =
       '시작일은 1900~2100년의 올바른 YYYY-MM-DD 날짜로 입력해 주세요.';
   if (!isAdminReportDate(query?.to))
     errors.to =
       '종료일은 1900~2100년의 올바른 YYYY-MM-DD 날짜로 입력해 주세요.';
-  if (query?.propertyId !== undefined && !isAdminReportPropertyId(query.propertyId))
+  if (
+    query?.propertyId !== undefined &&
+    !isAdminReportPropertyId(query.propertyId)
+  )
     errors.propertyId = '보고서를 받을 휴양소를 다시 선택해 주세요.';
   if (!errors.from && !errors.to) {
     const days =
@@ -52,7 +64,9 @@ export function validateAdminReportQuery(
   return errors;
 }
 
-export function prepareAdminReportQuery(query: AdminReportQuery): AdminReportQuery {
+export function prepareAdminReportQuery(
+  query: AdminReportQuery,
+): AdminReportQuery {
   const errors = validateAdminReportQuery(query);
   if (Object.keys(errors).length)
     throw new ApiRequestError(
@@ -68,6 +82,7 @@ export function prepareAdminReportQuery(query: AdminReportQuery): AdminReportQue
   return {
     from: query.from,
     to: query.to,
+    mode: query.mode ?? 'summary',
     ...(query.propertyId === undefined
       ? {}
       : { propertyId: query.propertyId.toLowerCase() }),

@@ -1,6 +1,7 @@
 import type {
   AdminReportErrors,
   AdminReportQuery,
+  AdminReportMode,
 } from '../../../../features/admin-reports/admin-reports.types';
 import { validateAdminReportQuery } from '../../../../features/admin-reports/admin-reports-validation';
 
@@ -8,6 +9,7 @@ export interface ReportFormValues {
   from: string;
   to: string;
   propertyId: string;
+  mode: AdminReportMode;
 }
 
 const seoulMonth = new Intl.DateTimeFormat('en-CA', {
@@ -31,22 +33,37 @@ export function getReportMonthRange(
   };
 }
 
-export function createReportFormValues(now: Date = new Date()): ReportFormValues {
-  return { ...getReportMonthRange(0, now), propertyId: '' };
+export function createReportFormValues(
+  now: Date = new Date(),
+  search?: URLSearchParams,
+): ReportFormValues {
+  return {
+    ...getReportMonthRange(0, now),
+    propertyId: search?.get('propertyId') ?? '',
+    mode: search?.get('mode') === 'preservation' ? 'preservation' : 'summary',
+  };
 }
 
 export function toAdminReportQuery(values: ReportFormValues): AdminReportQuery {
   return {
     from: values.from,
     to: values.to,
+    mode: values.mode,
     ...(values.propertyId === '' ? {} : { propertyId: values.propertyId }),
   };
 }
 
-export function validateReportForm(values: ReportFormValues): AdminReportErrors {
+export function validateReportForm(
+  values: ReportFormValues,
+): AdminReportErrors {
   return validateAdminReportQuery(toAdminReportQuery(values));
 }
 
 export function getReportFormScope(values: ReportFormValues): string {
-  return JSON.stringify([values.from, values.to, values.propertyId]);
+  return JSON.stringify([
+    values.from,
+    values.to,
+    values.propertyId,
+    values.mode,
+  ]);
 }

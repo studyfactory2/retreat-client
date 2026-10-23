@@ -3080,3 +3080,20 @@ with fictional intercepted APIs at 320/399/760/907/1024/1440px. Checks include a
 restore, blocked/empty previews, stale/uncertain saves, auth rejection, long names,
 scrolling and focus return. Physical-device and production/database acceptance are
 not claimed. No permanent tests, dependencies, staging, commits or deployment.
+
+
+## Slice 6B — preservation download
+
+The reports screen adds 운영 요약 / 기록 보관 selection with a single download
+action and concise seven-sheet guide. Preservation calls the separate
+/admin/reports/preservation-excel endpoint and saves retreat-archive-FROM-TO.xlsx;
+summary keeps its original endpoint and filename. Date/property validation,
+abort/session handling, Blob validation and request-scope guards remain shared.
+Mode is part of the request scope; changing it clears stale download feedback.
+Archived property management links to a preselected preservation export through
+?propertyId=...&mode=preservation. An invalid property never silently broadens
+selection. Controls fit phone, tablet and desktop with native radio keyboard
+behavior, 44px+ selection targets and a full-width mobile download action.
+Temporary mocked-browser checks covered 320/399/760/907/1024/1440px, both modes,
+download filenames, validation and recovery. Physical-device and live API
+acceptance remain with the user. No commits or deployment performed.

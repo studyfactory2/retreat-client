@@ -70,6 +70,7 @@ export function PropertyManagementCard({
       <div className="property-management-card__operation">
         <div><strong>{property.isActive ? '운영 목록에서 제외' : '보관된 휴양소'}</strong><p>{property.isActive ? '기록은 남기고 운영을 중지합니다.' : '기록과 설정이 보관되어 있습니다.'}</p></div>
         {!property.isActive && <Button className="admin-button-secondary" disabled={disabled} onClick={() => onNavigate(`${appRoutes.adminSubmissions}?propertyId=${property.id}`)}>제출 기록 보기 →</Button>}
+        {!property.isActive && <Button className="admin-button-secondary" disabled={disabled} onClick={() => onNavigate(`${appRoutes.adminReports}?propertyId=${property.id}&mode=preservation`)}>보관용 엑셀 →</Button>}
         <Button className={property.isActive ? 'admin-button-secondary' : ''} disabled={disabled || operationDisabled} onClick={onOperation} aria-describedby={operationDisabled ? 'property-operation-save-first' : undefined}>
           {property.isActive ? '운영 목록에서 제외' : '운영 재개'}
         </Button>

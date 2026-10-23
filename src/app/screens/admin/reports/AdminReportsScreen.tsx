@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useAdminSession } from '../../../core/session/use-admin-session';
 import { useAdminPropertyOptions } from '../../../features/admin-properties/use-admin-property-options';
 import { Button } from '../../../shared/ui/Button/Button';
@@ -17,10 +18,12 @@ import './styles/reports.css';
 
 export function AdminReportsScreen() {
   const { state, rejectSession } = useAdminSession();
+  const [search] = useSearchParams();
   if (state.status !== 'authenticated') return null;
   return (
     <ReportsWorkspace
-      key={`${state.user.id}:${state.expiresAt}`}
+      key={`${state.user.id}:${state.expiresAt}:${search.toString()}`}
+      search={search}
       token={state.token}
       rejectSession={rejectSession}
     />
@@ -30,11 +33,15 @@ export function AdminReportsScreen() {
 function ReportsWorkspace({
   token,
   rejectSession,
+  search,
 }: {
   token: string;
   rejectSession: (token: string) => void;
+  search: URLSearchParams;
 }) {
-  const [values, setValues] = useState(() => createReportFormValues());
+  const [values, setValues] = useState(() =>
+    createReportFormValues(new Date(), search),
+  );
   const [errors, setErrors] = useState<ReturnType<typeof validateReportForm>>(
     {},
   );
@@ -129,7 +136,8 @@ function ReportsWorkspace({
           {download.state.status === 'requested' && (
             <div className="reports-notice" role="status">
               <p>
-                다운로드를 요청했습니다. 브라우저의 다운로드 목록을 확인해 주세요.
+                다운로드를 요청했습니다. 브라우저의 다운로드 목록을 확인해
+                주세요.
               </p>
               <p className="reports-filename">{download.state.filename}</p>
             </div>
@@ -152,7 +160,7 @@ function ReportsWorkspace({
             </div>
           )}
         </section>
-        <ReportContents />
+        <ReportContents mode={values.mode} />
       </div>
     </div>
   );

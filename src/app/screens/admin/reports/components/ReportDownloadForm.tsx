@@ -41,7 +41,7 @@ export function ReportDownloadForm({
   );
   const propertyName = values.propertyId
     ? selected
-      ? `${selected.name}${selected.isActive ? '' : ' · 비활성'}`
+      ? `${selected.name}${selected.isActive ? '' : ' · 보관됨'}`
       : '선택한 휴양소 · 목록 확인 필요'
     : '전체 휴양소';
   const validPeriod = !periodErrors.from && !periodErrors.to;
@@ -104,6 +104,26 @@ export function ReportDownloadForm({
     >
       <fieldset className="reports-form__controls" disabled={busy}>
         <legend className="reports-form__legend">보고서 다운로드 조건</legend>
+        <fieldset
+          className="reports-field reports-field--property"
+          disabled={!propertiesReady}
+        >
+          <legend className="reports-form__legend">휴양소 선택</legend>
+          <AdminPropertySelect
+            id={`${id}-property`}
+            value={values.propertyId}
+            properties={propertiesReady ? properties : undefined}
+            loading={propertiesLoading}
+            invalid={!!errors.propertyId}
+            describedBy={`${id}-property-hint${errors.propertyId ? ` ${id}-property-error` : ''}`}
+            onChange={(value) => onChange('propertyId', value)}
+          />
+          {errors.propertyId && (
+            <p className="reports-field__error" id={`${id}-property-error`}>
+              {errors.propertyId}
+            </p>
+          )}
+        </fieldset>
         <div className="reports-period-heading">
           <span>조회 기간</span>
           <div className="reports-presets" aria-label="기간 빠른 선택">
@@ -154,36 +174,50 @@ export function ReportDownloadForm({
               )}
             </div>
           ))}
-          <fieldset
-            className="reports-field reports-field--property"
-            disabled={!propertiesReady}
-          >
-            <legend className="reports-form__legend">휴양소 선택</legend>
-            <AdminPropertySelect
-              id={`${id}-property`}
-              value={values.propertyId}
-              properties={propertiesReady ? properties : undefined}
-              loading={propertiesLoading}
-              invalid={!!errors.propertyId}
-              describedBy={`${id}-property-hint${errors.propertyId ? ` ${id}-property-error` : ''}`}
-              onChange={(value) => onChange('propertyId', value)}
-            />
-            {errors.propertyId && (
-              <p className="reports-field__error" id={`${id}-property-error`}>
-                {errors.propertyId}
-              </p>
-            )}
-          </fieldset>
         </div>
         <div className="reports-form__hints">
           <p id={`${id}-date-hint`}>
             한국 시간 기준 · 시작일과 종료일을 포함해 최대 62일
           </p>
-          <p>입실·퇴실·정비는 제출일, 이상사항은 접수일로 조회합니다.</p>
+          <p>
+            {values.mode === 'preservation'
+              ? '일정은 기간 겹침 · 점검은 최초 제출일 · 이상사항은 접수일'
+              : '점검은 제출일 · 이상사항은 접수일 기준'}
+          </p>
           <p className="reports-form__legend" id={`${id}-property-hint`}>
             비활성 휴양소의 기록도 선택하여 받을 수 있습니다.
           </p>
         </div>
+        <fieldset className="reports-mode">
+          <legend>다운로드 종류</legend>
+          <div className="reports-mode__options">
+            {(
+              [
+                ['summary', '운영 요약', '현황 중심 · 3개 시트'],
+                ['preservation', '기록 보관', '상세·취소·이력 · 7개 시트'],
+              ] as const
+            ).map(([mode, label, description]) => (
+              <label className="reports-mode__option" key={mode}>
+                <input
+                  type="radio"
+                  name="report-mode"
+                  value={mode}
+                  checked={values.mode === mode}
+                  onChange={() => onChange('mode', mode)}
+                />
+                <span>
+                  <strong>{label}</strong>
+                  <small>{description}</small>
+                </span>
+              </label>
+            ))}
+          </div>
+          {errors.mode && (
+            <p className="reports-field__error" role="alert">
+              {errors.mode}
+            </p>
+          )}
+        </fieldset>
       </fieldset>
       <dl className="reports-form__summary" aria-label="다운로드할 범위">
         <div>
@@ -200,14 +234,22 @@ export function ReportDownloadForm({
         </div>
       </dl>
       <div className="reports-form__footer">
-        <p>파일 1개 · 시트 3개</p>
+        <p>
+          {values.mode === 'preservation'
+            ? '취소된 기록과 변경 이력 포함 · 사진 파일 제외'
+            : '취소된 기록 제외 · 사진은 개수만 포함'}
+        </p>
         <Button type="submit" loading={busy} disabled={!propertiesReady}>
           {!busy && (
             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M12 3v12m-5-5 5 5 5-5M4 16v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4" />
             </svg>
           )}
-          {busy ? '엑셀 생성 중…' : '엑셀 다운로드'}
+          {busy
+            ? '엑셀 생성 중…'
+            : values.mode === 'preservation'
+              ? '보관용 엑셀 다운로드'
+              : '요약 엑셀 다운로드'}
         </Button>
       </div>
     </form>

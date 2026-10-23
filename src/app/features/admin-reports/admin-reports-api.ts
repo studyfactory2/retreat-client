@@ -15,18 +15,23 @@ export async function getAdminReportExcel(
   const search = new URLSearchParams({ from: prepared.from, to: prepared.to });
   if (prepared.propertyId !== undefined)
     search.set('propertyId', prepared.propertyId);
+  const preservation = prepared.mode === 'preservation';
   const blob = await readAdminReportBlob(
-    await apiDownload(`/admin/reports/excel?${search.toString()}`, {
-      token,
-      signal,
-      timeoutMs: 60_000,
-    }),
+    await apiDownload(
+      `/admin/reports/${preservation ? 'preservation-excel' : 'excel'}?${search.toString()}`,
+      {
+        token,
+        signal,
+        timeoutMs: 60_000,
+      },
+    ),
   );
-  if (signal?.aborted) throw new DOMException('Request cancelled', 'AbortError');
+  if (signal?.aborted)
+    throw new DOMException('Request cancelled', 'AbortError');
   return {
     blob,
     // The core transport returns a Blob, so derive the same server filename
     // from the validated request snapshot without trusting header text.
-    filename: `retreat-report-${prepared.from}-${prepared.to}.xlsx`,
+    filename: `retreat-${preservation ? 'archive' : 'report'}-${prepared.from}-${prepared.to}.xlsx`,
   };
 }
