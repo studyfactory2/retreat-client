@@ -1,9 +1,11 @@
 import { AdminMenuIcon } from '../../layout/components/AdminMenuIcon';
 import type { AdminReportMode } from '../../../../features/admin-reports/admin-reports.types';
 import { PreservationContents } from './PreservationContents';
+import { ArchiveContents } from './ArchiveContents';
 
 export function ReportContents({ mode }: { mode: AdminReportMode }) {
   if (mode === 'preservation') return <PreservationContents />;
+  if (mode === 'archive') return <ArchiveContents />;
   return (
     <section
       className="reports-contents"

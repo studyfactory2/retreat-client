@@ -220,3 +220,31 @@ Pending on physical iPhone/Safari and Android/Chrome after the user deploys:
   `retreat-public-offline-*` caches. No API, private page, photo or token URL.
 
 These are pending device/production checks, not automated acceptance claims.
+
+
+## Slice 6C combined archive acceptance — 2026-10-23
+
+After deploying both matching API/client releases, check with authorized data:
+
+- On phone, tablet and desktop, open 운영 보고서 and choose 보관용 ZIP. Select a
+  small period/retreat and download. The notice says requested, not locally saved.
+- Open the browser download and extract it in the device file manager. Confirm
+  기록.xlsx opens, 다운로드안내.txt is readable, and the grouped JPG files open.
+  App photos are processed JPEG copies, not untouched camera originals.
+- In the workbook's 사진 목록 sheet, match ZIP 파일 경로 to extracted files and
+  다운로드 결과 to the guide. Repeated references to one photo share one file.
+- Check a cancelled record and a retained historical photo. Period scope selects
+  records; a later change/photo of a selected record still appears. Check an
+  archived retreat and a no-photo period as well.
+- If a confirmed missing/deleted photo exists in authorized test data, check the
+  included/skipped unique counts and explicit reasons. Storage permission or
+  network errors must not be misrepresented as missing photos.
+- Cancel preparation, leave the page, and change accounts while a request is
+  pending; no late download may start. Retry explicitly after a failure. Check
+  that summary and standalone preservation Excel still download normally.
+- Check the deployed CloudFront origin timeout and the exact Nginx archive route
+  with a larger authorized ZIP. The API caps preparation at 80 seconds; browser
+  total request timeout is 180 seconds. Slow device/network behavior remains a
+  device acceptance item, not an automated completion guarantee.
+
+These production/device checks remain pending; automated checks use fixtures.

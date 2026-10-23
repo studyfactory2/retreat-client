@@ -40,7 +40,12 @@ export function createReportFormValues(
   return {
     ...getReportMonthRange(0, now),
     propertyId: search?.get('propertyId') ?? '',
-    mode: search?.get('mode') === 'preservation' ? 'preservation' : 'summary',
+    mode:
+      search?.get('mode') === 'archive'
+        ? 'archive'
+        : search?.get('mode') === 'preservation'
+          ? 'preservation'
+          : 'summary',
   };
 }
 

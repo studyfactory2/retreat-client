@@ -143,3 +143,50 @@ export function apiDownload(
 ): Promise<Blob> {
   return request(path, options, (response) => response.blob());
 }
+
+// A bounded binary response with headers for exports that report their contents.
+// Ordinary apiDownload callers retain their existing Blob-only contract.
+export function apiDownloadWithHeaders(
+  path: string,
+  options: RequestOptions,
+  maxBytes: number,
+): Promise<{ blob: Blob; headers: Headers }> {
+  return request(path, options, async (response) => {
+    const oversized = () =>
+      new ApiRequestError(
+        '다운로드 파일이 허용된 크기를 초과했습니다. 기간이나 휴양소 범위를 줄여 주세요.',
+        response.status,
+        'DOWNLOAD_TOO_LARGE',
+      );
+    if (!Number.isSafeInteger(maxBytes) || maxBytes < 1) throw oversized();
+    const declared = response.headers.get('Content-Length');
+    if (declared && /^\d+$/.test(declared) && Number(declared) > maxBytes) {
+      await response.body?.cancel();
+      throw oversized();
+    }
+    const reader = response.body?.getReader();
+    if (!reader) return { blob: new Blob(), headers: response.headers };
+    const chunks: Uint8Array<ArrayBuffer>[] = [];
+    let bytes = 0;
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        bytes += value.byteLength;
+        if (bytes > maxBytes) throw oversized();
+        chunks.push(value);
+      }
+    } catch (error) {
+      await reader.cancel().catch(() => undefined);
+      throw error;
+    } finally {
+      reader.releaseLock();
+    }
+    return {
+      blob: new Blob(chunks, {
+        type: response.headers.get('Content-Type') ?? '',
+      }),
+      headers: response.headers,
+    };
+  });
+}

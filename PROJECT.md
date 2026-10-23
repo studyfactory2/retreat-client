@@ -3097,3 +3097,39 @@ behavior, 44px+ selection targets and a full-width mobile download action.
 Temporary mocked-browser checks covered 320/399/760/907/1024/1440px, both modes,
 download filenames, validation and recovery. Physical-device and live API
 acceptance remain with the user. No commits or deployment performed.
+
+
+## Slice 6C — combined Excel and photo archive
+
+Reports now offers a third `archive` mode, 보관용 ZIP, calling the authenticated
+GET /admin/reports/preservation-zip endpoint with the same date/property scope.
+The ZIP contains the seven-sheet 기록.xlsx, 다운로드안내.txt and retained stored
+JPEG photos grouped by retreat. The screen explains historical/cancelled records,
+one file per photo ID, skipped-photo reasons and the difference from camera
+originals. Summary and standalone preservation Excel remain available.
+
+The narrow apiDownloadWithHeaders helper bounds bytes while reading and preserves
+the ordinary Blob-only apiDownload contract. The feature validates ZIP MIME,
+local-file signature, 128 MiB size and the three integer unique-photo count headers;
+this is transport validation, not browser ZIP-entry parsing. The server constructs
+the package. Server bounds are 100 unique referenced photos, 100 MiB photo bytes,
+128 MiB ZIP and 80 seconds preparation. Browser requests time out after 180 seconds.
+
+Compact native radio rows on phones become three columns where space permits.
+Preparing has no invented percentage and offers cancellation. Success says only
+that a download was requested, includes photo counts, and points to the guide
+when photos were skipped. Request cancellation, unmount/session fences and scope
+changes prevent stale results from starting a download or clearing another login.
+
+The exact gateway ZIP route keeps the existing proxy/security/no-store settings
+with a 180-second read timeout. The preparation cap fits the documented CloudFront
+90-second origin response timeout; apply the gateway change during the user's
+normal redeployment. This slice performs no deployment or cloud configuration.
+
+Verification: isolated typecheck, non-fixing lint and production build passed
+(existing bundle-size warning). Temporary browser fixtures cover 320/399/760/907/
+1024/1440px, full/empty/partial/all-skipped downloads, response rejection,
+cancellation/retry, stale unmount, date validation and existing Excel downloads.
+These checks do not establish live S3, deployed proxy, physical-device or native
+Excel acceptance. No dependencies, permanent test files, commits or deployment
+were added by the client change.

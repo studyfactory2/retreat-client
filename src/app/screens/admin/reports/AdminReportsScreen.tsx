@@ -5,6 +5,7 @@ import { useAdminPropertyOptions } from '../../../features/admin-properties/use-
 import { Button } from '../../../shared/ui/Button/Button';
 import { ReportDownloadForm } from './components/ReportDownloadForm';
 import { ReportContents } from './components/ReportContents';
+import { ReportDownloadFeedback } from './components/ReportDownloadFeedback';
 import { useReportDownload } from './hooks/use-report-download';
 import {
   createReportFormValues,
@@ -97,7 +98,9 @@ function ReportsWorkspace({
               </svg>
             </span>
             <h2 id="report-download-heading">다운로드 조건</h2>
-            <span className="reports-format">XLSX</span>
+            <span className="reports-format">
+              {values.mode === 'archive' ? 'ZIP' : 'XLSX'}
+            </span>
           </div>
           {properties.resource.status === 'loading' && (
             <p className="reports-notice" role="status">
@@ -128,37 +131,15 @@ function ReportsWorkspace({
             onMonth={chooseMonth}
             onSubmit={submit}
           />
-          {download.state.status === 'busy' && (
-            <p className="reports-notice" role="status">
-              엑셀 파일을 생성하고 있습니다. 잠시만 기다려 주세요.
-            </p>
-          )}
-          {download.state.status === 'requested' && (
-            <div className="reports-notice" role="status">
-              <p>
-                다운로드를 요청했습니다. 브라우저의 다운로드 목록을 확인해
-                주세요.
-              </p>
-              <p className="reports-filename">{download.state.filename}</p>
-            </div>
-          )}
-          {download.state.status === 'error' && (
-            <div className="reports-notice reports-notice--error" role="alert">
-              <p>{download.state.message}</p>
-              <p>조건을 확인한 뒤 엑셀 다운로드를 다시 눌러 주세요.</p>
-              {download.state.code === 'PROPERTY_NOT_FOUND' && (
-                <Button
-                  className="admin-button-secondary"
-                  onClick={() => {
-                    download.reset();
-                    properties.refresh();
-                  }}
-                >
-                  휴양소 목록 새로고침
-                </Button>
-              )}
-            </div>
-          )}
+          <ReportDownloadFeedback
+            state={download.state}
+            mode={values.mode}
+            onCancel={download.cancel}
+            onReload={() => {
+              download.reset();
+              properties.refresh();
+            }}
+          />
         </section>
         <ReportContents mode={values.mode} />
       </div>

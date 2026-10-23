@@ -124,9 +124,9 @@
 }
 
 .admin-reports .reports-field--property { margin-bottom: 18px; }
-.admin-reports .reports-mode { margin: 18px 0 0; padding: 0; border: 0; min-width: 0; }
+.admin-reports .reports-mode { margin: 0 0 20px; padding: 0; border: 0; min-width: 0; }
 .admin-reports .reports-mode legend { margin-bottom: 9px; color: var(--color-heading); font-size: 13px; font-weight: 600; }
-.admin-reports .reports-mode__options { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; }
+.admin-reports .reports-mode__options { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 8px; }
 .admin-reports .reports-mode__option { display: flex; align-items: flex-start; gap: 8px; padding: 13px 10px; border: 1px solid var(--color-border); border-radius: 10px; cursor: pointer; min-width: 0; }
 .admin-reports .reports-mode__option:has(input:checked) { border-color: var(--color-primary); background: var(--color-soft); }
 .admin-reports .reports-mode__option:has(input:focus-visible) { outline: 2px solid var(--color-primary); outline-offset: 3px; }
@@ -142,9 +142,31 @@
 .admin-reports .reports-archive-sheets__number { flex: 0 0 28px; color: var(--color-primary); font-size: 12px; font-variant-numeric: tabular-nums; }
 .admin-reports .reports-archive-sheets h3 { font-size: 13px; color: var(--color-heading); line-height: 1.6; }
 .admin-reports .reports-archive-sheets p { margin-top: 2px; color: var(--color-muted); font-size: 12px; line-height: 1.7; overflow-wrap: anywhere; }
+.admin-reports .reports-package { padding: 0; margin-top: 18px; list-style: none; }
+.admin-reports .reports-package li { display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 12px; align-items: start; padding-block: 14px; }
+.admin-reports .reports-package li + li { border-top: 1px solid var(--color-border); }
+.admin-reports .reports-package__format { display: grid; place-items: center; width: 40px; height: 42px; border: 1px solid #d4e4de; border-radius: 9px; background: #edf7f3; color: #34735d; font-size: 10px; font-weight: 700; letter-spacing: .3px; }
+.admin-reports .reports-package__format--jpg { border-color: #dae5ff; background: #eff4ff; color: #4166ad; }
+.admin-reports .reports-package__format--txt { border-color: #e1e6ee; background: #f5f7fa; color: #64748b; }
+.admin-reports .reports-package h3 { color: var(--color-heading); font-size: 14px; font-weight: 650; line-height: 1.6; overflow-wrap: anywhere; }
+.admin-reports .reports-package p { margin-top: 3px; color: var(--color-muted); font-size: 12px; line-height: 1.7; word-break: keep-all; overflow-wrap: anywhere; }
+.admin-reports .reports-package__hint { padding: 12px; margin-block: 10px 16px; border-radius: 9px; background: #f2f6ff; color: var(--color-heading); font-size: 12px; line-height: 1.8; word-break: keep-all; overflow-wrap: anywhere; }
+.admin-reports .reports-notice--preparing { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px 12px; }
+.admin-reports .reports-notice--preparing .ui-button { flex-shrink: 0; margin: 0; }
+.admin-reports .reports-notice--partial { border-color: #eed9ac; background: #fffaf0; color: #725319; }
+.admin-reports .reports-photo-result { margin-top: 5px; }
+@container report-download (max-width: 450px) {
+  .admin-reports .reports-mode__options { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+  .admin-reports .reports-mode__option { min-height: 48px; align-items: center; padding: 9px 12px; gap: 10px; }
+  .admin-reports .reports-mode__option input { margin: 0; }
+  .admin-reports .reports-mode__option span { display: flex; flex: 1; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 2px 8px; }
+  .admin-reports .reports-mode__option small { margin: 0; }
+}
 @media (max-width: 600px) {
   .admin-reports .reports-form__summary { display: none; }
   .admin-reports .reports-form__footer { padding-top: 14px; border-top: 1px solid var(--color-border); }
   .admin-reports .reports-form__footer p { font-size: 11px; }
-  .admin-reports .reports-mode__option { padding: 12px 8px; gap: 6px; }
+  .admin-reports .reports-mode__option { padding: 9px 10px; }
+  .admin-reports .reports-package { margin-top: 10px; }
+  .admin-reports .reports-package li { gap: 10px; padding-block: 12px; }
 }

@@ -1,10 +1,13 @@
-import { apiDownload } from '../../core/api/api-client';
-import { readAdminReportBlob } from './admin-reports-readers';
+import { apiDownload, apiDownloadWithHeaders } from '../../core/api/api-client';
+import { readAdminArchive, readAdminReportBlob } from './admin-reports-readers';
 import type {
   AdminReportDownload,
   AdminReportQuery,
 } from './admin-reports.types';
-import { prepareAdminReportQuery } from './admin-reports-validation';
+import {
+  ARCHIVE_MAX_BYTES,
+  prepareAdminReportQuery,
+} from './admin-reports-validation';
 
 export async function getAdminReportExcel(
   query: AdminReportQuery,
@@ -15,6 +18,21 @@ export async function getAdminReportExcel(
   const search = new URLSearchParams({ from: prepared.from, to: prepared.to });
   if (prepared.propertyId !== undefined)
     search.set('propertyId', prepared.propertyId);
+  if (prepared.mode === 'archive') {
+    const archive = await readAdminArchive(
+      await apiDownloadWithHeaders(
+        `/admin/reports/preservation-zip?${search.toString()}`,
+        { token, signal, timeoutMs: 180_000 },
+        ARCHIVE_MAX_BYTES,
+      ),
+    );
+    if (signal?.aborted)
+      throw new DOMException('Request cancelled', 'AbortError');
+    return {
+      ...archive,
+      filename: `retreat-archive-${prepared.from}-${prepared.to}.zip`,
+    };
+  }
   const preservation = prepared.mode === 'preservation';
   const blob = await readAdminReportBlob(
     await apiDownload(

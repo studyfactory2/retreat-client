@@ -6,6 +6,9 @@ import type {
 
 export const REPORT_MAX_DAYS = 62;
 export const REPORT_MAX_BYTES = 16 * 1024 * 1024;
+export const ARCHIVE_MAX_BYTES = 128 * 1024 * 1024;
+export const ARCHIVE_MAX_PHOTOS = 100;
+export const ARCHIVE_CONTENT_TYPE = 'application/zip';
 export const REPORT_CONTENT_TYPE =
   'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 
@@ -37,7 +40,8 @@ export function validateAdminReportQuery(
   if (
     query?.mode !== undefined &&
     query.mode !== 'summary' &&
-    query.mode !== 'preservation'
+    query.mode !== 'preservation' &&
+    query.mode !== 'archive'
   )
     errors.mode = '다운로드 종류를 다시 선택해 주세요.';
   if (!isAdminReportDate(query?.from))
@@ -94,5 +98,13 @@ export function invalidAdminReportResponse(): ApiRequestError {
     '엑셀 보고서 파일을 확인할 수 없습니다. 조건을 확인한 뒤 다시 요청해 주세요.',
     200,
     'INVALID_REPORT_RESPONSE',
+  );
+}
+
+export function invalidArchiveResponse(): ApiRequestError {
+  return new ApiRequestError(
+    'ZIP 파일과 사진 결과를 확인할 수 없습니다. 조건을 확인한 뒤 다시 요청해 주세요.',
+    200,
+    'INVALID_ARCHIVE_RESPONSE',
   );
 }

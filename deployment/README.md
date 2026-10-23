@@ -62,6 +62,16 @@ timeouts, and no automatic upstream retry or disk buffering. API errors never
 fall back to the SPA. Nginx passes CloudFront X-Forwarded-For unchanged and strips
 the verification secret before forwarding; backend trusts exactly one proxy hop.
 
+The exact `/api/admin/reports/preservation-zip` route has a 180-second Nginx
+read timeout for the bounded archive response. All forwarding, origin verification,
+no-store, no-buffering and no-retry behavior matches other API routes. The API
+limits preparation to 80 seconds, below the documented 90-second CloudFront
+origin response timeout; the browser limits the whole request to 180 seconds.
+The limit is not a completion-time guarantee, especially on a slow connection.
+The updated location is applied by the next normal frontend rebuild/redeploy;
+no separate CloudFront change is required by this slice. Verify the deployed
+CloudFront timeout and an authenticated ZIP download after deploying both repos.
+
 Nginx access logs omit query strings, Referer and credentials. Its unredacted error
 log is suppressed because it can contain request query strings; use HTTP status,
 container health and the backend safe logs for diagnostics. The container-local

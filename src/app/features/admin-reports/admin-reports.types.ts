@@ -1,4 +1,4 @@
-export type AdminReportMode = 'summary' | 'preservation';
+export type AdminReportMode = 'summary' | 'preservation' | 'archive';
 
 export interface AdminReportQuery {
   from: string;
@@ -14,4 +14,11 @@ export type AdminReportErrors = Partial<
 export interface AdminReportDownload {
   blob: Blob;
   filename: string;
+  photos?: ArchivePhotoCounts;
+}
+
+export interface ArchivePhotoCounts {
+  total: number;
+  included: number;
+  skipped: number;
 }

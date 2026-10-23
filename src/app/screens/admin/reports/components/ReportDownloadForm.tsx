@@ -104,6 +104,37 @@ export function ReportDownloadForm({
     >
       <fieldset className="reports-form__controls" disabled={busy}>
         <legend className="reports-form__legend">보고서 다운로드 조건</legend>
+        <fieldset className="reports-mode">
+          <legend>다운로드 종류</legend>
+          <div className="reports-mode__options">
+            {(
+              [
+                ['summary', '운영 요약', '엑셀 · 3개 시트'],
+                ['preservation', '기록 보관', '엑셀 · 7개 시트'],
+                ['archive', '보관용 ZIP', '엑셀 + 사진'],
+              ] as const
+            ).map(([mode, label, description]) => (
+              <label className="reports-mode__option" key={mode}>
+                <input
+                  type="radio"
+                  name="report-mode"
+                  value={mode}
+                  checked={values.mode === mode}
+                  onChange={() => onChange('mode', mode)}
+                />
+                <span>
+                  <strong>{label}</strong>
+                  <small>{description}</small>
+                </span>
+              </label>
+            ))}
+          </div>
+          {errors.mode && (
+            <p className="reports-field__error" role="alert">
+              {errors.mode}
+            </p>
+          )}
+        </fieldset>
         <fieldset
           className="reports-field reports-field--property"
           disabled={!propertiesReady}
@@ -180,7 +211,7 @@ export function ReportDownloadForm({
             한국 시간 기준 · 시작일과 종료일을 포함해 최대 62일
           </p>
           <p>
-            {values.mode === 'preservation'
+            {values.mode !== 'summary'
               ? '일정은 기간 겹침 · 점검은 최초 제출일 · 이상사항은 접수일'
               : '점검은 제출일 · 이상사항은 접수일 기준'}
           </p>
@@ -188,36 +219,6 @@ export function ReportDownloadForm({
             비활성 휴양소의 기록도 선택하여 받을 수 있습니다.
           </p>
         </div>
-        <fieldset className="reports-mode">
-          <legend>다운로드 종류</legend>
-          <div className="reports-mode__options">
-            {(
-              [
-                ['summary', '운영 요약', '현황 중심 · 3개 시트'],
-                ['preservation', '기록 보관', '상세·취소·이력 · 7개 시트'],
-              ] as const
-            ).map(([mode, label, description]) => (
-              <label className="reports-mode__option" key={mode}>
-                <input
-                  type="radio"
-                  name="report-mode"
-                  value={mode}
-                  checked={values.mode === mode}
-                  onChange={() => onChange('mode', mode)}
-                />
-                <span>
-                  <strong>{label}</strong>
-                  <small>{description}</small>
-                </span>
-              </label>
-            ))}
-          </div>
-          {errors.mode && (
-            <p className="reports-field__error" role="alert">
-              {errors.mode}
-            </p>
-          )}
-        </fieldset>
       </fieldset>
       <dl className="reports-form__summary" aria-label="다운로드할 범위">
         <div>
@@ -235,9 +236,11 @@ export function ReportDownloadForm({
       </dl>
       <div className="reports-form__footer">
         <p>
-          {values.mode === 'preservation'
-            ? '취소된 기록과 변경 이력 포함 · 사진 파일 제외'
-            : '취소된 기록 제외 · 사진은 개수만 포함'}
+          {values.mode === 'archive'
+            ? '취소·이력 포함 · 보관된 사진을 함께 다운로드'
+            : values.mode === 'preservation'
+              ? '취소된 기록과 변경 이력 포함 · 사진 파일 제외'
+              : '취소된 기록 제외 · 사진은 개수만 포함'}
         </p>
         <Button type="submit" loading={busy} disabled={!propertiesReady}>
           {!busy && (
@@ -246,10 +249,14 @@ export function ReportDownloadForm({
             </svg>
           )}
           {busy
-            ? '엑셀 생성 중…'
-            : values.mode === 'preservation'
-              ? '보관용 엑셀 다운로드'
-              : '요약 엑셀 다운로드'}
+            ? values.mode === 'archive'
+              ? 'ZIP 준비 중…'
+              : '엑셀 생성 중…'
+            : values.mode === 'archive'
+              ? '엑셀 + 사진 ZIP 다운로드'
+              : values.mode === 'preservation'
+                ? '보관용 엑셀 다운로드'
+                : '요약 엑셀 다운로드'}
         </Button>
       </div>
     </form>
