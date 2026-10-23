@@ -1,0 +1,68 @@
+.property-operation-dialog {
+  width: min(540px, calc(100vw - 40px));
+  max-width: none;
+  max-height: min(820px, calc(100dvh - 64px));
+  margin: auto;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: 0 24px 80px #13254833;
+}
+.property-operation-dialog[open] { display: flex; flex-direction: column; }
+.property-operation-dialog::backdrop { background: #11254466; backdrop-filter: blur(3px); }
+.property-operation-header { display: flex; align-items: flex-start; justify-content: space-between; flex-shrink: 0; gap: 8px; padding: 24px 24px 16px; }
+.property-operation-header > div { min-width: 0; }
+.property-operation-eyebrow { display: block; margin-bottom: 6px; color: var(--color-primary); font-size: 12px; font-weight: 600; }
+.property-operation-header h2 { margin: 0; color: var(--color-heading); font-size: 22px; font-weight: 700; line-height: 1.45; letter-spacing: -.6px; word-break: keep-all; overflow-wrap: anywhere; }
+.property-operation-dialog .property-operation-close { flex: 0 0 44px; width: 44px; min-height: 44px; padding: 0; border: 0; background: var(--color-background); color: var(--color-muted); font-size: 25px; font-weight: 400; }
+.property-operation-content { min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 0 24px 20px; scrollbar-gutter: stable; }
+.property-operation-property { display: flex; flex-direction: column; gap: 3px; margin: 0 0 12px; padding: 12px 14px; border: 1px solid var(--color-border); border-radius: 10px; background: var(--color-background); overflow-wrap: anywhere; }
+.property-operation-property strong { font-size: 15px; font-weight: 650; color: var(--color-heading); }
+.property-operation-property span { color: var(--color-muted); font-size: 12px; }
+.property-operation-description { margin: 0; font-size: 13px; line-height: 1.75; word-break: keep-all; overflow-wrap: anywhere; }
+.property-operation-feedback { margin: 16px 0 0; padding: 12px; border-radius: 8px; background: var(--color-background); font-size: 13px; line-height: 1.7; }
+.property-operation-feedback--error { background: #fff1f2; color: #a73548; }
+.property-operation-stays { margin-top: 20px; }
+.property-operation-stays-heading { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.property-operation-stays-heading h3 { margin: 0; color: var(--color-heading); font-size: 15px; font-weight: 650; }
+.property-operation-stays-heading > span { padding: 3px 8px; border-radius: 5px; color: #875719; background: #fff2d9; font-size: 12px; font-weight: 600; }
+.property-operation-stays > p { margin: 5px 0 12px; color: var(--color-muted); font-size: 12px; line-height: 1.7; }
+.property-operation-stays ul { margin: 0; padding: 0; list-style: none; border: 1px solid var(--color-border); border-radius: 12px; }
+.property-operation-stays li + li { border-top: 1px solid var(--color-border); }
+.property-operation-stays li a { display: block; padding: 13px 14px; color: var(--color-text); text-decoration: none; border-radius: 10px; }
+.property-operation-stays li a:hover { background: var(--color-background); }
+.property-operation-stay-heading { display: grid; grid-template-columns: minmax(0, 1fr) auto 16px; align-items: center; gap: 8px; margin-bottom: 8px; }
+.property-operation-stay-heading strong { font-size: 14px; font-weight: 600; overflow-wrap: anywhere; }
+.property-operation-stay-heading span { color: var(--color-primary); font-size: 11px; }
+.property-operation-stay-heading span:last-child { font-size: 16px; }
+.property-operation-stays dl { display: grid; gap: 3px; margin: 0; }
+.property-operation-stays dl > div { display: grid; grid-template-columns: 30px minmax(0, 1fr); align-items: baseline; gap: 8px; font-size: 12px; line-height: 1.65; }
+.property-operation-stays dt { color: var(--color-muted); }
+.property-operation-stays dd { margin: 0; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+.property-operation-stays-footer { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0 12px; margin-top: 4px; }
+.property-operation-stays-footer > span { color: var(--color-muted); font-size: 11px; }
+.property-operation-stays-footer a { display: inline-flex; align-items: center; min-height: 44px; color: var(--color-primary); font-size: 12px; font-weight: 600; text-decoration: none; }
+.property-operation-clear { display: flex; align-items: baseline; gap: 8px; margin: 18px 0 0; padding: 13px; border-radius: 9px; background: #eaf7f1; color: #276c56; font-size: 13px; line-height: 1.7; }
+.property-operation-clear span { font-weight: 700; }
+.property-operation-restore { margin-top: 18px; padding: 14px; border-radius: 10px; background: var(--color-background); }
+.property-operation-restore dl { margin: 0 0 12px; }
+.property-operation-restore dl > div { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; font-size: 13px; }
+.property-operation-restore dt { flex-shrink: 0; color: var(--color-muted); }
+.property-operation-restore dd { margin: 0; color: var(--color-heading); font-weight: 600; text-align: right; overflow-wrap: anywhere; }
+.property-operation-restore p { margin: 6px 0 0; color: var(--color-muted); font-size: 12px; line-height: 1.7; }
+.property-operation-footer { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr); flex-shrink: 0; gap: 10px; padding: 16px 24px; border-top: 1px solid var(--color-border); background: var(--color-surface); }
+.property-operation-footer .ui-button { min-height: 48px; min-width: 0; padding: 11px 12px; font-size: 14px; border-radius: 10px; }
+.property-operation-dialog :is(button, a):focus-visible { outline: 3px solid #82aaf1; outline-offset: 2px; }
+@media (max-width: 600px) {
+  .property-operation-dialog { width: 100%; max-height: 90dvh; margin: auto 0 0; border: 0; border-radius: 20px 20px 0 0; }
+  .property-operation-header { padding: 20px 18px 14px; }
+  .property-operation-header h2 { font-size: 20px; }
+  .property-operation-content { padding: 0 18px 16px; scrollbar-gutter: auto; }
+  .property-operation-footer { padding: 12px 18px max(16px, env(safe-area-inset-bottom)); }
+}
+.property-operation-dialog .admin-button-secondary { border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-heading); }
+.property-operation-dialog .admin-button-secondary:hover:not(:disabled),
+.property-operation-dialog .property-operation-close:hover:not(:disabled) { background: var(--color-soft); color: var(--color-primary); }

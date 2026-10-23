@@ -10,7 +10,6 @@ import type {
 type PropertyFormProps = {
   values: PropertyFormValues;
   onChange: (values: PropertyFormValues) => void;
-  editing: boolean;
   errors?: PropertyFormErrors;
   busy: boolean;
   blocked?: boolean;
@@ -19,7 +18,6 @@ type PropertyFormProps = {
 export function PropertyForm({
   values,
   onChange,
-  editing,
   errors = {},
   busy,
   blocked = false,
@@ -193,32 +191,7 @@ export function PropertyForm({
             {fieldError('vehicleRegistrationEnabled')}
           </div>
 
-          {editing && (
-            <div className="property-setting">
-              <label htmlFor="property-isActive">
-                <input
-                  id="property-isActive"
-                  name="isActive"
-                  type="checkbox"
-                  role="switch"
-                  checked={values.isActive}
-                  onChange={(event) =>
-                    onChange({ ...values, isActive: event.target.checked })
-                  }
-                  aria-invalid={!!errors.isActive || undefined}
-                  aria-describedby={descriptionId(
-                    'isActive',
-                    'property-active-hint',
-                  )}
-                />
-                <span>휴양소 활성화</span>
-              </label>
-              <p className="property-setting__notice" id="property-active-hint">
-                비활성화하면 새 일정 등록이 중지됩니다. 기존 이용 기록은 유지됩니다.
-              </p>
-              {fieldError('isActive')}
-            </div>
-          )}
+
         </section>
       </fieldset>
   );

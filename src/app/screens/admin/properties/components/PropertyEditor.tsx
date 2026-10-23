@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { appRoutes } from '../../../../core/router/routes';
+import { PropertyOperationDialog } from './PropertyOperationDialog';
 import {
   createAdminProperty,
   updateAdminProperty,
@@ -34,6 +36,7 @@ export function PropertyEditor({
   returnUrl,
 }: Props) {
   const navigate = useNavigate();
+  const [operationOpen, setOperationOpen] = useState(false);
   const [initial] = useState(() => createPropertyFormValues(original));
   const [values, setValues] = useState(initial);
   const currentValues = useRef(initial);
@@ -74,7 +77,6 @@ export function PropertyEditor({
         'name',
         'region',
         'publicContactPhone',
-        'isActive',
         'vehicleRegistrationEnabled',
       ] as const) {
         if (next[field] !== values[field]) remaining[field] = undefined;
@@ -154,7 +156,7 @@ export function PropertyEditor({
           <h1>{original ? original.name : '휴양소 등록'}</h1>
           {original && (
             <span className={`property-editor-badge${original.isActive ? '' : ' property-editor-badge--inactive'}`}>
-              {original.isActive ? '활성' : '비활성'}
+              {original.isActive ? '운영 중' : '보관됨'}
             </span>
           )}
         </div>
@@ -222,7 +224,6 @@ export function PropertyEditor({
         <PropertyForm
           values={values}
           onChange={change}
-          editing={!!original}
           errors={{ ...mutation.state.errors, ...errors }}
           busy={mutation.state.busy}
           blocked={mutation.state.uncertain || discarding}
@@ -233,6 +234,8 @@ export function PropertyEditor({
             returnUrl={returnUrl}
             disabled={mutation.state.busy || discarding}
             onNavigate={leave}
+            operationDisabled={dirty || !!mutation.state.uncertain}
+            onOperation={() => setOperationOpen(true)}
           />
         )}
       </div>
@@ -257,6 +260,18 @@ export function PropertyEditor({
           {mutation.state.busy ? '저장 중' : original ? '변경 저장' : '휴양소 등록'}
         </Button>
       </div>
+      {operationOpen && original && (
+        <PropertyOperationDialog
+          property={original}
+          token={token}
+          rejectSession={rejectSession}
+          onClose={() => setOperationOpen(false)}
+          onSaved={(saved) => runConfirmed(() => navigate(
+            appRoutes.adminProperties + (saved.isActive ? '' : '?status=inactive'),
+            { replace: true, state: { propertyNotice: saved.isActive ? 'restored' : 'archived', propertyName: saved.name, propertyId: saved.id } },
+          ))}
+        />
+      )}
     </form>
   );
 }

@@ -61,7 +61,7 @@ function PropertiesWorkspace({
     notice !== null &&
     'propertyNotice' in notice &&
     (notice.propertyNotice === 'created' ||
-      notice.propertyNotice === 'updated') &&
+      notice.propertyNotice === 'updated' || notice.propertyNotice === 'archived' || notice.propertyNotice === 'restored') &&
     'propertyName' in notice &&
     typeof notice.propertyName === 'string' &&
     'propertyId' in notice &&
@@ -69,10 +69,10 @@ function PropertiesWorkspace({
       ? {
           name: notice.propertyName,
           id: notice.propertyId,
-          created: notice.propertyNotice === 'created',
+          action: notice.propertyNotice,
         }
       : null;
-  const filtered = !!filters.search || filters.isActive !== undefined;
+  const filtered = !!filters.search;
 
   useLayoutEffect(() => {
     const previous = filterFocus.current;
@@ -128,7 +128,7 @@ function PropertiesWorkspace({
         <div className="admin-directory-notice" role="status">
           <p>
             <strong>{saved.name}</strong> 휴양소가{' '}
-            {saved.created ? '등록' : '수정'}되었습니다.
+            {saved.action === 'archived' ? '보관되었습니다.' : saved.action === 'restored' ? '운영을 재개했습니다.' : saved.action === 'created' ? '등록되었습니다.' : '수정되었습니다.'}
           </p>
           <Link to={`${appRoutes.adminProperties}/${saved.id}${returnSearch}`}>
             저장된 정보 확인 →
@@ -141,7 +141,7 @@ function PropertiesWorkspace({
           <h2 id="property-results-title" aria-live="polite">
             {data && correctedPage === null ? (
               <>
-                {filtered ? '검색 결과' : '휴양소'}{' '}
+                {filtered ? '검색 결과' : filters.isActive === false ? '보관된 휴양소' : filters.isActive === true ? '운영 중인 휴양소' : '전체 휴양소'}{' '}
                 <strong>{data.total.toLocaleString('ko-KR')}곳</strong>
               </>
             ) : resource.status === 'error' ? (
@@ -182,18 +182,18 @@ function PropertiesWorkspace({
                 title={
                   filtered
                     ? '조건에 맞는 휴양소가 없습니다'
-                    : '등록된 휴양소가 없습니다'
+                    : filters.isActive === false ? '보관된 휴양소가 없습니다' : '운영 중인 휴양소가 없습니다'
                 }
                 description={
                   filtered
                     ? '검색어나 운영 상태를 변경해 주세요.'
-                    : '상단의 휴양소 등록에서 첫 휴양소를 등록해 주세요.'
+                    : filters.isActive === false ? '운영을 중지한 휴양소는 이곳에서 확인하고 다시 운영할 수 있습니다.' : '휴양소를 등록하거나 보관됨에서 운영을 재개해 주세요.'
                 }
               >
                 {filtered && (
                   <Button
                     className="admin-button-secondary"
-                    onClick={() => select({ page: 1 })}
+                    onClick={() => select({ page: 1, isActive: filters.isActive })}
                   >
                     조회 조건 초기화
                   </Button>

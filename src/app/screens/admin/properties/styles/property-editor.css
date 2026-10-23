@@ -116,3 +116,6 @@
   .properties-editor .property-form__grid { grid-template-columns: minmax(0, 1fr); gap: 18px; }
   .properties-editor .property-editor-layout { gap: 16px; }
 }
+@media (max-width: 760px) {
+  .properties-editor .property-editor-layout > .property-management-card { order: -1; }
+}

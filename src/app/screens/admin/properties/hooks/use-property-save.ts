@@ -58,7 +58,6 @@ export function usePropertySave(
           'name',
           'region',
           'publicContactPhone',
-          'isActive',
           'vehicleRegistrationEnabled',
         ] as const) {
           const entry = error.errors.find((item) => item.field === field);

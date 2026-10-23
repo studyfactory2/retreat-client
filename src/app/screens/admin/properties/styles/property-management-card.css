@@ -42,3 +42,7 @@
   .property-management-card__icon svg { width: 16px; height: 16px; }
   .property-management-card__arrow { display: none; }
 }
+.property-management-card__operation { display: grid; gap: 12px; margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--color-border); }
+.property-management-card__operation strong { color: var(--color-heading); font-size: 13px; font-weight: 600; }
+.property-management-card__operation p { margin: 4px 0 0; color: var(--color-muted); font-size: 12px; line-height: 1.7; }
+.property-management-card__operation .ui-button { min-width: 0; min-height: 44px; padding: 10px 12px; border-radius: 8px; font-size: 13px; }

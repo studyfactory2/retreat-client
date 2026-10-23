@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom';
 import type { AdminPropertyDto } from '../../../../features/admin-properties/admin-property-management.types';
-import { AdminActivityBadge } from '../../components/AdminActivityBadge';
 
 type PropertyCardProps = {
   property: AdminPropertyDto;
@@ -45,7 +44,7 @@ export function PropertyCard({ property, detailHref }: PropertyCardProps) {
           </dd>
         </div>
       </dl>
-      <AdminActivityBadge active={property.isActive} />
+      <span className={`admin-directory-status${property.isActive ? '' : ' admin-directory-status--inactive'}`}>{property.isActive ? '운영 중' : '보관됨'}</span>
       <span className="property-directory-detail" aria-hidden="true">
         <span>상세</span>
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none">

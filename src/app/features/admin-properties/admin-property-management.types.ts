@@ -42,5 +42,4 @@ export interface UpdateAdminPropertyInput {
   region?: string | null;
   publicContactPhone?: string | null;
   vehicleRegistrationEnabled?: boolean;
-  isActive?: boolean;
 }

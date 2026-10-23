@@ -8,6 +8,8 @@ type Props = {
   returnUrl: string;
   disabled: boolean;
   onNavigate: (url: string) => void;
+  operationDisabled: boolean;
+  onOperation: () => void;
 };
 
 const actions = [
@@ -22,6 +24,8 @@ export function PropertyManagementCard({
   returnUrl,
   disabled,
   onNavigate,
+  operationDisabled,
+  onOperation,
 }: Props) {
   return (
     <section className="property-management-card" aria-labelledby="property-management-title">
@@ -62,6 +66,14 @@ export function PropertyManagementCard({
             <span className="property-management-card__arrow" aria-hidden="true">→</span>
           </Button>
         ))}
+      </div>
+      <div className="property-management-card__operation">
+        <div><strong>{property.isActive ? '운영 목록에서 제외' : '보관된 휴양소'}</strong><p>{property.isActive ? '기록은 남기고 운영을 중지합니다.' : '기록과 설정이 보관되어 있습니다.'}</p></div>
+        {!property.isActive && <Button className="admin-button-secondary" disabled={disabled} onClick={() => onNavigate(`${appRoutes.adminSubmissions}?propertyId=${property.id}`)}>제출 기록 보기 →</Button>}
+        <Button className={property.isActive ? 'admin-button-secondary' : ''} disabled={disabled || operationDisabled} onClick={onOperation} aria-describedby={operationDisabled ? 'property-operation-save-first' : undefined}>
+          {property.isActive ? '운영 목록에서 제외' : '운영 재개'}
+        </Button>
+        {operationDisabled && <p id="property-operation-save-first">변경 내용을 먼저 저장하거나 되돌려 주세요.</p>}
       </div>
     </section>
   );

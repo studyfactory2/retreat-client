@@ -3054,3 +3054,29 @@ fictional API responses covered 320, 399, 760, 907, 1024 and 1440px, validation,
 visibility, reset and password submission. Mobile save-button clearance was
 checked separately. These are browser viewport checks, not physical-device or
 production acceptance. No commits or deployment actions were made.
+
+
+### Slice 6A — mobile-first property archive and restore — 2026-10-23
+
+The property directory defaults to 운영 중, with 보관됨 and 전체 filters above a
+compact search row. Existing inactive properties appear in 보관됨; historical
+selectors continue to include them. Rows keep their compact phone/tablet layout.
+The generic activation checkbox is replaced with an explicit operation action in
+property management, above the edit fields on phones. Unsaved metadata must be
+saved/reverted before proceeding.
+A native dialog presents as a bottom sheet on phones and a centered panel on larger
+screens, with bounded scrolling, visible actions, safe-area padding and focus return.
+
+The features/admin-properties operation contract owns safe response validation;
+screen hooks own aborts, session rejection, loading and mutation recovery. A fresh
+preview shows up to five current/upcoming stays, Korean times and detail links.
+Blocked properties offer schedule review instead of archive submission. Server
+conflicts and uncertain writes require a fresh read before another action. Restore
+shows the preserved staff assignment and QR behavior. Success navigates to the
+matching operating/archived list. No expanded exports or automatic backup is added.
+
+Verification uses typecheck, lint, production build and temporary browser probes
+with fictional intercepted APIs at 320/399/760/907/1024/1440px. Checks include archive,
+restore, blocked/empty previews, stale/uncertain saves, auth rejection, long names,
+scrolling and focus return. Physical-device and production/database acceptance are
+not claimed. No permanent tests, dependencies, staging, commits or deployment.

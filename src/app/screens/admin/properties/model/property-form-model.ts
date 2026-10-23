@@ -15,7 +15,6 @@ export interface PropertyFormValues {
   region: string;
   publicContactPhone: string;
   vehicleRegistrationEnabled: boolean;
-  isActive: boolean;
 }
 
 export type PropertyFormErrors = Partial<
@@ -34,7 +33,6 @@ export function createPropertyFormValues(
     region: property?.region ?? '',
     publicContactPhone: property?.publicContactPhone ?? '',
     vehicleRegistrationEnabled: property?.vehicleRegistrationEnabled ?? false,
-    isActive: property?.isActive ?? true,
   };
 }
 
@@ -52,8 +50,6 @@ export function validatePropertyForm(
     errors.publicContactPhone = PUBLIC_CONTACT_HELP;
   if (typeof values.vehicleRegistrationEnabled !== 'boolean')
     errors.vehicleRegistrationEnabled = '차량 등록 사용 여부를 선택해 주세요.';
-  if (typeof values.isActive !== 'boolean')
-    errors.isActive = '운영 상태를 선택해 주세요.';
   return errors;
 }
 
@@ -100,6 +96,5 @@ export function buildUpdatePropertyInput(
     changes.publicContactPhone = publicContactPhone;
   if (values.vehicleRegistrationEnabled !== original.vehicleRegistrationEnabled)
     changes.vehicleRegistrationEnabled = values.vehicleRegistrationEnabled;
-  if (values.isActive !== original.isActive) changes.isActive = values.isActive;
   return Object.keys(changes).length ? changes : null;
 }

@@ -290,13 +290,10 @@ export async function updateAdminProperty(
         ...(input.vehicleRegistrationEnabled === undefined
           ? {}
           : { vehicleRegistrationEnabled: input.vehicleRegistrationEnabled }),
-        ...(input.isActive === undefined ? {} : { isActive: input.isActive }),
       },
     },
   );
   const property = readAdminProperty(value, propertyId);
-  if (input.isActive !== undefined && property.isActive !== input.isActive)
-    throw invalidResponse();
   requireSavedFields(property, input, value);
   return property;
 }
