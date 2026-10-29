@@ -69,7 +69,9 @@ function EditorWorkspace({
           ref={notice}
           tabIndex={-1}
         >
-          체크리스트를 저장했습니다.
+          버전{' '}
+          {resource.status === 'ready' ? resource.data.template?.version : ''}을
+          저장했습니다. 작성 중인 점검과 제출 기록은 유지됩니다.
         </div>
       )}
       {resource.status === 'ready' ? (

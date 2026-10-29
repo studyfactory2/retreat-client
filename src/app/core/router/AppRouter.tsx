@@ -25,6 +25,7 @@ import { AdminIssueCategoriesScreen } from '../../screens/admin/issue-categories
 import {
   AdminPropertyChecklistsScreen,
   AdminChecklistEditorScreen,
+  AdminChecklistHistoryScreen,
 } from '../../screens/admin/property-checklists';
 import { AdminMoreScreen } from '../../screens/admin/more';
 import { AdminAccountScreen } from '../../screens/admin/account';
@@ -156,6 +157,10 @@ export function AppRouter() {
             <Route
               path={appRoutes.adminChecklistEditor}
               element={<AdminChecklistEditorScreen />}
+            />
+            <Route
+              path={appRoutes.adminChecklistHistory}
+              element={<AdminChecklistHistoryScreen />}
             />
             <Route
               path={appRoutes.adminPropertyStaff}

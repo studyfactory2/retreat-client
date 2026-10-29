@@ -25,6 +25,7 @@ export const appRoutes = {
   adminPropertyGuide: '/admin/properties/:id/guide',
   adminPropertyChecklists: '/admin/properties/:id/checklists',
   adminChecklistEditor: '/admin/properties/:id/checklists/:type',
+  adminChecklistHistory: '/admin/properties/:id/checklists/:type/history',
   adminStaff: '/admin/staff',
   adminStaffCreate: '/admin/staff/new',
   adminStaffDetail: '/admin/staff/:id',

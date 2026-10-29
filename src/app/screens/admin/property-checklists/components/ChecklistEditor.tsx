@@ -17,6 +17,7 @@ import type { ChecklistWorkspaceData } from '../hooks/use-checklist-resource';
 import {
   buildCreateChecklistInput,
   buildUpdateChecklistInput,
+  checklistEditorPath,
   checklistTypeLabels,
   createChecklistValues,
   validateChecklistForm,
@@ -71,10 +72,9 @@ export function ChecklistEditor({
   const notice = useRef<HTMLDivElement>(null);
   const active =
     data.property.isActive && (!original || original.property.isActive);
-  const fixed = !!original && type !== 'MAINTENANCE';
   const versionLimit =
     !!original && original.version > MAX_WRITABLE_CHECKLIST_VERSION;
-  const editable = active && !fixed && !versionLimit;
+  const editable = active && !versionLimit;
   const blocked =
     mutation.state.busy || !!mutation.state.blocked || !!navigation.pending;
   useEffect(() => {
@@ -176,7 +176,7 @@ export function ChecklistEditor({
     <>
       <header className="checklist-heading">
         <div>
-          <p className="checklist-heading__eyebrow">PROPERTY CHECKLIST</p>
+          <p className="checklist-heading__eyebrow">체크리스트 설정</p>
           <h1>{checklistTypeLabels[type]}</h1>
           <p>
             {data.property.name}
@@ -191,15 +191,30 @@ export function ChecklistEditor({
               navigation.request('return', () => navigate(returnUrl))
             }
           >
-            목록으로 돌아가기
+            목록
           </Button>
           <Button
             className="admin-button-secondary"
             disabled={mutation.state.busy || !!navigation.pending}
             onClick={() => navigation.request('reload', onReload)}
           >
-            최신 정보 불러오기
+            새로고침
           </Button>
+          {original && (
+            <Button
+              className="admin-button-secondary"
+              disabled={mutation.state.busy || !!navigation.pending}
+              onClick={() =>
+                navigation.request('return', () =>
+                  navigate(
+                    `${checklistEditorPath(data.property.id, type)}/history`,
+                  ),
+                )
+              }
+            >
+              버전 이력
+            </Button>
+          )}
         </div>
       </header>
       {navigation.pending && (
@@ -237,15 +252,6 @@ export function ChecklistEditor({
           </p>
         </div>
       )}
-      {fixed && (
-        <div className="checklist-banner" role="status">
-          <strong>초기 설정이 완료된 체크리스트입니다.</strong>
-          <p>
-            입실·퇴실 체크리스트는 생성 후 문구와 활성 여부를 변경할 수
-            없습니다.
-          </p>
-        </div>
-      )}
       {versionLimit && (
         <div className="checklist-banner" role="status">
           체크리스트가 수정 가능한 버전 한도에 도달했습니다. 내용을 확인할 수
@@ -273,7 +279,8 @@ export function ChecklistEditor({
               )}
               <ChecklistReview
                 creating={!original}
-                type={type}
+                nextVersion={(original?.version ?? 0) + 1}
+                active={values.isActive}
                 onBack={editAgain}
                 onConfirm={save}
                 busy={mutation.state.busy}
@@ -288,15 +295,10 @@ export function ChecklistEditor({
               }}
               noValidate
             >
-              {!original && type !== 'MAINTENANCE' && (
-                <div className="checklist-banner">
-                  <strong>저장 전에 문구와 순서를 확인해 주세요.</strong>
-                  <p>
-                    입실·퇴실 체크리스트는 한 번 만들면 수정할 수 없습니다. 다음
-                    단계에서 전체 내용을 미리 볼 수 있습니다.
-                  </p>
-                </div>
-              )}
+              <p className="checklist-scope-note">
+                새로 시작하는 점검부터 적용됩니다. 작성 중인 점검과 제출 기록은
+                그대로 유지됩니다.
+              </p>
               <ChecklistForm
                 values={values}
                 onChange={change}
@@ -314,11 +316,11 @@ export function ChecklistEditor({
                         change({ ...values, isActive: event.target.checked })
                       }
                     />{' '}
-                    정비 체크리스트 사용
+                    새 점검에 사용
                   </label>
                   <p>
-                    사용 중지하면 새 정비 체크리스트 작성에 제공되지 않습니다.
-                    기존 작성·제출 기록은 유지됩니다.
+                    사용 중지해도 작성 중인 점검은 기존 구성으로 완료할 수
+                    있습니다.
                   </p>
                 </div>
               )}
@@ -328,7 +330,7 @@ export function ChecklistEditor({
                   type="submit"
                   disabled={blocked}
                 >
-                  미리보기 및 저장 확인
+                  미리보기 · 저장
                 </Button>
               </div>
             </form>

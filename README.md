@@ -135,6 +135,12 @@ The admin area includes operations, stays/imports, properties, checklist records
 maintenance, issues, staff and reports. Frontend route protection never substitutes
 for backend authorization.
 
+Property checklist management supports version-checked editing for arrival,
+departure and maintenance, with a read-only published-version history. Existing
+drafts keep their captured configuration; changes apply to newly started checks.
+Slice 8 requires the matching API migration/cutover before frontend rollout.
+See [manual acceptance](MANUAL_ACCEPTANCE.md#slice-8-checklist-versions--2026-10-29).
+
 Production hosting must send frontend page requests to `index.html` so a direct
 QR/private-link visit works. This frontend does not replace backend authorization.
 

@@ -240,7 +240,6 @@ export function verifyUpdatedChecklist(
       section.items.some((item) => item.id === undefined),
   );
   if (
-    template.type !== 'MAINTENANCE' ||
     !template.property.isActive ||
     (template.version !== input.expectedVersion + 1 &&
       (hasNewIds || template.version !== input.expectedVersion)) ||

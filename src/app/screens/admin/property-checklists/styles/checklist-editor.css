@@ -13,7 +13,7 @@
 .checklist-builder__title-panel,
 .checklist-section-editor {
   min-width: 0;
-  padding: 26px;
+  padding: 20px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   background: var(--color-surface);
@@ -111,7 +111,7 @@
   align-items: flex-end;
   justify-content: space-between;
   gap: 12px 18px;
-  margin: 30px 0 18px;
+  margin: 22px 0 14px;
 }
 
 .checklist-builder__section-heading h2 {
@@ -127,7 +127,7 @@
 
 .checklist-builder__sections {
   display: grid;
-  gap: 20px;
+  gap: 16px;
 }
 
 .checklist-section-editor__heading,
@@ -137,7 +137,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  margin-bottom: 20px;
+  margin-bottom: 14px;
 }
 
 .checklist-section-editor__heading h3 {
@@ -198,8 +198,8 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin: 24px 0 14px;
-  padding-top: 20px;
+  margin: 18px 0 12px;
+  padding-top: 16px;
   border-top: 1px solid var(--color-border);
 }
 
@@ -225,7 +225,7 @@
 
 .checklist-item-editor {
   min-width: 0;
-  padding: 18px;
+  padding: 14px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   background: #f8faff;
@@ -310,7 +310,7 @@
 @media (max-width: 650px) {
   .checklist-builder__title-panel,
   .checklist-section-editor {
-    padding: 22px 18px;
+    padding: 16px 12px;
   }
 
   .checklist-field input,
@@ -319,23 +319,23 @@
   }
 
   .checklist-item-editor {
-    padding: 16px 12px;
+    padding: 12px 10px;
   }
 }
 
 @media (max-width: 380px) {
-  .checklist-section-editor__heading,
-  .checklist-item-editor__heading {
-    align-items: flex-start;
+  .checklist-section-editor__heading h3 {
+    gap: 6px;
+    font-size: 13px;
   }
-
-  .checklist-section-editor__heading > .checklist-order-actions {
-    width: 100%;
-    justify-content: flex-end;
+  .checklist-section-editor__heading h3 > span {
+    width: 24px;
+    height: 24px;
   }
-
-  .checklist-item-editor__heading > .checklist-order-actions {
-    width: 100%;
-    justify-content: flex-end;
+  .checklist-order-actions {
+    gap: 2px;
+  }
+  .checklist-builder .checklist-delete-button {
+    padding-inline: 6px;
   }
 }

@@ -16,17 +16,25 @@ type PreviewSection = {
 export function ChecklistPreview({
   title,
   sections,
+  archived = false,
 }: {
   title: string;
   sections: ReadonlyArray<PreviewSection>;
+  archived?: boolean;
 }) {
   const headingId = useId();
   return (
     <section className="checklist-preview" aria-labelledby={headingId}>
       <header className="checklist-preview__heading">
-        <p className="checklist-eyebrow">구성 미리보기</p>
+        <p className="checklist-eyebrow">
+          {archived ? '당시 저장된 구성' : '구성 미리보기'}
+        </p>
         <h2 id={headingId}>{title.trim() || '체크리스트 제목'}</h2>
-        <p>구성과 응답 방식의 예시입니다. 여기서는 답변을 입력하지 않습니다.</p>
+        <p>
+          {archived
+            ? '이 버전의 질문과 필수 여부입니다.'
+            : '저장할 질문과 필수 여부를 확인해 주세요.'}
+        </p>
       </header>
       {sections.length === 0 ? (
         <p className="checklist-preview__empty">

@@ -28,14 +28,14 @@ export function ChecklistNavigationNotice({
         아직 확인되지 않은 입력 내용이 사라집니다.{' '}
         {reload
           ? '최신 저장 내용을 다시 불러옵니다.'
-          : '체크리스트 목록으로 돌아갑니다.'}
+          : '선택한 화면으로 이동합니다.'}
       </p>
       <div className="checklist-actions">
         <Button className="admin-button-secondary" onClick={onKeep}>
           계속 확인하기
         </Button>
         <Button onClick={onProceed}>
-          {reload ? '입력 버리고 다시 불러오기' : '입력 버리고 돌아가기'}
+          {reload ? '입력 버리고 다시 불러오기' : '입력 버리고 이동'}
         </Button>
       </div>
     </div>

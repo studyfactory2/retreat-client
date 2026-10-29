@@ -44,7 +44,7 @@ function ChecklistWorkspace({
     <div className="checklist-workspace">
       <header className="checklist-heading">
         <div>
-          <p className="checklist-heading__eyebrow">PROPERTY CHECKLISTS</p>
+          <p className="checklist-heading__eyebrow">휴양소 설정</p>
           <h1>체크리스트 관리</h1>
           <p>
             {resource.status === 'ready'
@@ -57,26 +57,22 @@ function ChecklistWorkspace({
             className="ui-button admin-button-secondary"
             to={appRoutes.adminPropertyDetail.replace(':id', id)}
           >
-            휴양소 정보로 돌아가기
+            휴양소 정보
           </Link>
           <Button
             className="admin-button-secondary"
             disabled={resource.status === 'loading'}
             onClick={() => void refresh()}
           >
-            최신 정보 불러오기
+            새로고침
           </Button>
         </div>
       </header>
       {resource.status === 'ready' ? (
         <>
-          <div className="checklist-banner">
-            <strong>머무는 순간부터 정비까지, 필요한 점검을 준비하세요.</strong>
-            <p>
-              휴양소마다 입실·퇴실·정비 체크리스트를 각각 하나씩 설정합니다.
-              입실·퇴실은 초기 설정 후 고정되며, 정비 항목은 수정할 수 있습니다.
-            </p>
-          </div>
+          <p className="checklist-scope-note">
+            입실·퇴실·정비 항목을 수정하고 버전별 구성을 확인하세요.
+          </p>
           {!resource.data.property.isActive && (
             <div className="checklist-banner" role="status">
               비활성 휴양소입니다. 기존 내용은 확인할 수 있으며, 새 설정과
@@ -93,12 +89,15 @@ function ChecklistWorkspace({
                 )}
                 propertyActive={resource.data.property.isActive}
                 onOpen={() => navigate(checklistEditorPath(id, type))}
+                onHistory={() =>
+                  navigate(`${checklistEditorPath(id, type)}/history`)
+                }
               />
             ))}
           </div>
-          <p className="checklist-summary">
-            체크리스트 설정은 앞으로 작성할 내용에 적용됩니다. 이미 작성
-            중이거나 제출된 기록의 점검 문구는 바뀌지 않습니다.
+          <p className="checklist-scope-note checklist-scope-note--footer">
+            변경 내용은 새로 시작하는 점검부터 적용됩니다. 작성 중인 점검과 제출
+            기록은 유지됩니다.
           </p>
         </>
       ) : (

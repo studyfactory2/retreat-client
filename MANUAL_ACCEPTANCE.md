@@ -290,3 +290,57 @@ old QR/private links fail, the freshly issued staff QR identifies the replacemen
 and old submitted records/photos still display their original authors. Previously
 issued signed photo URLs can remain usable until their existing short expiry.
 No production data, migration, commit, push or deployment was performed.
+
+## Slice 8 checklist versions — 2026-10-29
+
+Entry: 휴양소 관리 → a retreat → 체크리스트 관리 → 입실 / 퇴실 / 정비.
+All three types can now be edited. A meaningful save publishes a new version;
+an unchanged save does not. The history view shows the stored questions, order,
+required flags, activity and administrator name for each published version.
+Phone history uses a list and a separate detail view; wider screens show both.
+
+Deployment requires the matching API, its Prisma-generated schema migration
+`20261029080000_add_checklist_template_versions` and the separate Prisma Client
+backfill (`npm run checklist:versions:backfill -- --apply`). The operator must
+stop the old API while applying both steps and replacing it, so no old process
+can publish between baseline capture and cutover. Follow
+`docs/admin-checklist-templates.md` in retreat-api, verify history on the new API,
+then deploy the frontend. Neither database step was executed during implementation.
+
+The backfill captures only each existing template's current configuration as
+`BASELINE`, using its known last-save time and no invented publisher. Versions
+before that baseline are unavailable in template history. Existing submission
+snapshots still retain their original questions. Old history cannot be restored
+or edited through this screen.
+
+After migration and backfill on a disposable/staging database, verify with authorized records:
+
+- Start one persisted draft for each type. Save an answer, and attach a photo to
+  an applicable abnormal item. Record the displayed checklist version.
+- Publish a new version that renames/removes an old question, changes order and
+  adds a required question. The existing drafts must still open, save and submit
+  their original questions, required rules, answers and photo associations.
+- Start fresh checks: these must use the newly published configuration. Merely
+  creating a stay, issuing a QR/link, or opening an entry page must not pin a
+  version before the draft is actually started on the server.
+- Disable a template: new starts must be blocked; existing drafts may finish
+  under their captured configuration subject to normal access and expiry rules.
+- Use two administrator tabs to edit the same version. Only one update succeeds;
+  the other shows a conflict and requires reloading. No silent overwrite or
+  duplicate publication should occur.
+- Read the baseline and a later version, including an inactive retreat. Check
+  saved publisher names, Seoul timestamps, required flags and current-version
+  badge. Earlier unavailable versions must not be invented.
+- On a physical phone/tablet, check the editor keyboard, reorder/delete controls,
+  confirmation, footer clearance and list/detail navigation. Verify long Korean
+  text and browser zoom. Unsaved work must prompt before leaving or logging out.
+
+Local validation uses intercepted synthetic Chrome fixtures, isolated reader/API
+checks and mocked backend tests; it does not certify a live database or deployment.
+Widths 320, 399, 760, 907, 1024 and 1440px were checked for overflow and phone save
+actions above the footer. Browser coverage includes all-type creation/editing,
+no-op saves, validation focus, add/reorder/required flags and retained IDs, version
+pagination/baseline, stale responses, scope errors, retry, 401/403 session rejection,
+unsaved navigation/logout, conflict and uncertain-save protection. See the API
+guide for persistence behavior and cutover boundaries. Database concurrency,
+migration acceptance and physical devices remain pending.
