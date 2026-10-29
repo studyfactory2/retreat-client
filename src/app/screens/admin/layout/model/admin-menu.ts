@@ -1,6 +1,6 @@
 import { appRoutes } from '../../../../core/router/routes';
 import type { AdminMenuIconName } from '../components/AdminMenuIcon';
-interface AdminMenuEntry {
+export interface AdminMenuEntry {
   to: string;
   href?: string;
   label: string;
@@ -72,3 +72,20 @@ export const adminSecondaryMenu: AdminMenuEntry[] = [
     description: '내 정보와 로그인 비밀번호를 관리합니다.',
   },
 ];
+
+// The footer has three direct destinations and a button for the compact drawer.
+// Keep the full route definitions shared with the sidebar and More screen.
+export const adminFooterMenu = adminPrimaryMenu.filter(
+  (item) => item.to !== appRoutes.adminMaintenance,
+);
+export const adminManagementMenu = [
+  ...adminPrimaryMenu.filter((item) => item.to === appRoutes.adminMaintenance),
+  ...adminSecondaryMenu.filter(
+    (item) =>
+      item.to === appRoutes.adminStaff || item.to === appRoutes.adminProperties,
+  ),
+];
+export const adminRecordsMenu = adminSecondaryMenu.filter(
+  (item) =>
+    item.to === appRoutes.adminSubmissions || item.to === appRoutes.adminReports,
+);

@@ -122,7 +122,8 @@ export function AdminLayout() {
       <aside className="admin-layout__sidebar">
         <AdminNavigation />
         <Link className="admin-layout__app-guide" to={appRoutes.home}>
-          앱 안내 <span aria-hidden="true">↗</span>
+          <AdminMenuIcon name="help" />
+          앱 안내
         </Link>
       </aside>
 
@@ -172,7 +173,7 @@ export function AdminLayout() {
         }}
       >
         <div className="admin-layout__drawer-header">
-          <h2 id={drawerTitleId}>전체 메뉴</h2>
+          <h2 id={drawerTitleId}>관리 메뉴</h2>
           <button
             className="admin-layout__drawer-close"
             type="button"
@@ -183,10 +184,24 @@ export function AdminLayout() {
             <AdminMenuIcon name="close" />
           </button>
         </div>
-        <div className="admin-layout__drawer-account">
-          <strong>{state.user.name}</strong>
-          <span>관리자</span>
-        </div>
+        <Link
+          className="admin-layout__drawer-account"
+          to={appRoutes.adminAccount}
+          onClick={() => closeDrawer()}
+          aria-label={`${state.user.name} 내 계정`}
+          aria-current={pathname === appRoutes.adminAccount ? 'page' : undefined}
+        >
+          <span className="admin-layout__avatar" aria-hidden="true">
+            <AdminMenuIcon name="account" />
+          </span>
+          <span className="admin-layout__drawer-identity">
+            <strong>{state.user.name}</strong>
+            <small>관리자</small>
+          </span>
+          <span className="admin-layout__drawer-account-action">
+            내 계정 <AdminMenuIcon name="chevron" />
+          </span>
+        </Link>
         <AdminNavigation
           presentation="drawer"
           // Close the native modal before the existing navigation guard opens
@@ -194,6 +209,14 @@ export function AdminLayout() {
           onNavigate={() => closeDrawer()}
         />
         <div className="admin-layout__drawer-footer">
+          <Link
+            className="admin-layout__app-guide"
+            to={appRoutes.home}
+            onClick={() => closeDrawer()}
+          >
+            <AdminMenuIcon name="help" />
+            앱 안내
+          </Link>
           <button
             className="admin-layout__logout"
             type="button"
@@ -202,6 +225,7 @@ export function AdminLayout() {
               logout();
             }}
           >
+            <AdminMenuIcon name="logout" />
             로그아웃
           </button>
         </div>

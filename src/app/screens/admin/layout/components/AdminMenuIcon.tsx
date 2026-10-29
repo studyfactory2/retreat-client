@@ -10,6 +10,9 @@ export type AdminMenuIconName =
   | 'account'
   | 'more'
   | 'menu'
+  | 'chevron'
+  | 'help'
+  | 'logout'
   | 'close';
 export function AdminMenuIcon({ name }: { name: AdminMenuIconName }) {
   return (
@@ -21,6 +24,16 @@ export function AdminMenuIcon({ name }: { name: AdminMenuIconName }) {
         </>
       )}
       {name === 'menu' && <path d="M4 6h16M4 12h16M4 18h16" />}
+      {name === 'chevron' && <path d="m9 6 6 6-6 6" />}
+      {name === 'help' && (
+        <>
+          <circle cx="12" cy="12" r="9" />
+          <path d="M9.5 9a2.5 2.5 0 0 1 5 0c0 2-2.5 2-2.5 4m0 3v.1" />
+        </>
+      )}
+      {name === 'logout' && (
+        <path d="M9 4H4v16h5m0-8h12m-4-4 4 4-4 4" />
+      )}
       {name === 'close' && <path d="m6 6 12 12M18 6 6 18" />}
       {name === 'overview' && (
         <>

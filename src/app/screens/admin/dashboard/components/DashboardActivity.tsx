@@ -36,22 +36,17 @@ function ActivityHeading({
   return (
     <header className="dashboard-activity__heading">
       <div>
-        <h2 id={id}>
-          {title}
-          {total !== undefined && (
-            <span className="dashboard-activity__count">
-              {total.toLocaleString('ko-KR')}건
-            </span>
-          )}
-        </h2>
+        <h2 id={id}>{title}</h2>
         <p>{subtitle}</p>
       </div>
       <Link
         className="dashboard-activity__all-link"
         to={href}
-        aria-label={`${title} 전체 보기`}
+        aria-label={`${title} 전체${total === undefined ? '' : ` ${total.toLocaleString('ko-KR')}건`} 보기`}
       >
-        {linkLabel} <span aria-hidden="true">↗</span>
+        {linkLabel}
+        {total !== undefined && ` ${total.toLocaleString('ko-KR')}건`}
+        <span aria-hidden="true">→</span>
       </Link>
     </header>
   );
@@ -101,16 +96,14 @@ function ActivityState({
 function PreviewCount({
   total,
   displayed,
-  recent,
 }: {
   total: number;
   displayed: number;
-  recent?: boolean;
 }) {
   if (total <= displayed) return null;
   return (
     <p className="dashboard-activity__preview-count">
-      전체 {total.toLocaleString('ko-KR')}건 중 {recent ? '최근 ' : ''}
+      전체 {total.toLocaleString('ko-KR')}건 중{' '}
       {displayed.toLocaleString('ko-KR')}건
     </p>
   );
@@ -210,7 +203,7 @@ export function DashboardActivity({
           <ActivityHeading
             id="dashboard-maintenance-activity-heading"
             title="정비 진행"
-            subtitle="선택일 시작 기록"
+            subtitle={`선택일 시작 기록${maintenanceData?.items.length ? ` · 최근 ${Math.min(RECORD_PREVIEW_SIZE, maintenanceData.items.length)}건` : ''}`}
             total={maintenanceData?.total}
             href={
               appRoutes.adminMaintenance + maintenanceSearch(maintenanceInput)
@@ -218,20 +211,10 @@ export function DashboardActivity({
             linkLabel="전체"
           />
           {maintenanceData && maintenanceData.items.length > 0 ? (
-            <>
-              <DashboardMaintenanceActivity
-                items={maintenanceData.items.slice(0, RECORD_PREVIEW_SIZE)}
-                input={maintenanceInput}
-              />
-              <PreviewCount
-                total={maintenanceData.total}
-                displayed={Math.min(
-                  RECORD_PREVIEW_SIZE,
-                  maintenanceData.items.length,
-                )}
-                recent
-              />
-            </>
+            <DashboardMaintenanceActivity
+              items={maintenanceData.items.slice(0, RECORD_PREVIEW_SIZE)}
+              input={maintenanceInput}
+            />
           ) : (
             <ActivityState
               resource={maintenance.resource}
@@ -250,26 +233,16 @@ export function DashboardActivity({
           <ActivityHeading
             id="dashboard-submissions-heading"
             title="최근 제출"
-            subtitle="전체 날짜"
+            subtitle={`전체 기간${submissionData?.items.length ? ` · 최근 ${Math.min(RECORD_PREVIEW_SIZE, submissionData.items.length)}건` : ''}`}
             total={submissionData?.total}
             href={appRoutes.adminSubmissions + submissionSearch}
             linkLabel="전체"
           />
           {submissionData && submissionData.items.length > 0 ? (
-            <>
-              <DashboardSubmissionActivity
-                items={submissionData.items.slice(0, RECORD_PREVIEW_SIZE)}
-                returnSearch={submissionSearch}
-              />
-              <PreviewCount
-                total={submissionData.total}
-                displayed={Math.min(
-                  RECORD_PREVIEW_SIZE,
-                  submissionData.items.length,
-                )}
-                recent
-              />
-            </>
+            <DashboardSubmissionActivity
+              items={submissionData.items.slice(0, RECORD_PREVIEW_SIZE)}
+              returnSearch={submissionSearch}
+            />
           ) : (
             <ActivityState
               resource={submissions.resource}

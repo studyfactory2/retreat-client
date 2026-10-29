@@ -1,7 +1,13 @@
 import type { Ref } from 'react';
 import { Link, matchPath, useLocation } from 'react-router-dom';
 import { appRoutes } from '../../../../core/router/routes';
-import { adminPrimaryMenu, adminSecondaryMenu } from '../model/admin-menu';
+import {
+  adminFooterMenu,
+  adminManagementMenu,
+  adminRecordsMenu,
+  adminSecondaryMenu,
+  type AdminMenuEntry,
+} from '../model/admin-menu';
 import { AdminMenuIcon } from './AdminMenuIcon';
 
 interface AdminNavigationProps {
@@ -45,33 +51,55 @@ export function AdminNavigation({
     pathname,
   );
   const moreActive =
-    morePage || adminSecondaryMenu.some((item) => activeRoute(item.to));
+    morePage ||
+    [...adminManagementMenu, ...adminSecondaryMenu].some((item) =>
+      activeRoute(item.to),
+    );
   const bottom = presentation === 'bottom';
-  const menu = bottom
-    ? adminPrimaryMenu
-    : [...adminPrimaryMenu, ...adminSecondaryMenu];
+  function renderLink(item: AdminMenuEntry) {
+    const active = activeRoute(item.to);
+    return (
+      <Link
+        key={item.to}
+        to={item.href ?? item.to}
+        onClick={onNavigate}
+        className={`admin-layout__nav-link${active ? ' active' : ''}`}
+        aria-current={
+          active ? (pathname === item.to ? 'page' : 'location') : undefined
+        }
+      >
+        <span className="admin-layout__nav-icon">
+          <AdminMenuIcon name={item.icon} />
+        </span>
+        <span>{bottom ? item.mobileLabel : item.label}</span>
+        {presentation === 'drawer' && (
+          <span className="admin-layout__nav-chevron">
+            <AdminMenuIcon name="chevron" />
+          </span>
+        )}
+      </Link>
+    );
+  }
+  const groups = [
+    ...(presentation === 'sidebar'
+      ? [{ label: '운영', items: adminFooterMenu }]
+      : []),
+    { label: '관리', items: adminManagementMenu },
+    { label: '기록', items: adminRecordsMenu },
+  ];
   return (
     <nav
       className={`admin-layout__nav admin-layout__nav--${presentation}`}
       aria-label={bottom ? '관리자 빠른 메뉴' : '관리자 전체 메뉴'}
     >
-      {menu.map((item) => {
-        const active = activeRoute(item.to);
-        return (
-          <Link
-            key={item.to}
-            to={item.href ?? item.to}
-            onClick={onNavigate}
-            className={`admin-layout__nav-link${active ? ' active' : ''}`}
-            aria-current={
-              active ? (pathname === item.to ? 'page' : 'location') : undefined
-            }
-          >
-            <AdminMenuIcon name={item.icon} />
-            <span>{bottom ? item.mobileLabel : item.label}</span>
-          </Link>
-        );
-      })}
+      {bottom
+        ? adminFooterMenu.map(renderLink)
+        : groups.map((group) => (
+            <div className="admin-layout__nav-group" key={group.label}>
+              <p className="admin-layout__nav-heading">{group.label}</p>
+              {group.items.map(renderLink)}
+            </div>
+          ))}
       {bottom ? (
         <button
           ref={menuButtonRef}
@@ -82,20 +110,16 @@ export function AdminNavigation({
           aria-controls={menuId}
           onClick={onOpenMenu}
         >
-          <AdminMenuIcon name="menu" />
+          <span className="admin-layout__nav-icon">
+            <AdminMenuIcon name="menu" />
+          </span>
           <span>메뉴</span>
         </button>
-      ) : presentation === 'drawer' ? (
-        <Link
-          className={`admin-layout__nav-link admin-layout__nav-link--more${morePage ? ' active' : ''}`}
-          to={appRoutes.adminMore}
-          onClick={onNavigate}
-          aria-current={morePage ? 'page' : undefined}
-        >
-          <AdminMenuIcon name="more" />
-          <span>더보기</span>
-        </Link>
-      ) : null}
+      ) : presentation === 'sidebar'
+        ? adminSecondaryMenu
+            .filter((item) => item.to === appRoutes.adminAccount)
+            .map(renderLink)
+        : null}
     </nav>
   );
 }
