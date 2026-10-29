@@ -251,8 +251,9 @@ export function PropertyStaffAssignment({
                 {selected?.name ?? '미배정'}
               </p>
               <p id="assignment-confirm-description">
-                변경하면 이전 담당자가 작성 중이던 정비 기록에 계속 접근할 수
-                없을 수 있습니다. 제출된 기록은 유지됩니다.
+                변경하면 기존 직원 QR이 해제됩니다. 이전 담당자의 작성 중인
+                정비 기록은 새 담당자에게 이전되지 않으며, 제출된 기록은 유지됩니다.
+                {selected && ' 저장 후 새 직원 QR을 발급해 전달해 주세요.'}
               </p>
               <div className="properties-heading__actions">
                 <Button

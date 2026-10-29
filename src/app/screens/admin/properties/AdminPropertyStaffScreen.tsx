@@ -94,7 +94,12 @@ function AssignmentWorkspace({
               ref={notice}
               tabIndex={-1}
             >
-              담당 직원 배정을 저장했습니다.
+              <p>담당 직원 배정을 저장했습니다.</p>
+              <p>담당자가 변경되면 기존 직원 QR이 해제됩니다. 새 담당자에게 전달할 QR을 확인해 주세요.</p>
+              {property.staffUserId && <Link
+                className="ui-button admin-button-secondary"
+                to={appRoutes.adminPropertyQr.replace(':id', property.id)}
+              >직원 QR 관리 →</Link>}
             </div>
           )}
           <PropertyStaffAssignment

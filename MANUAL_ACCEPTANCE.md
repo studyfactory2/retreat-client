@@ -248,3 +248,45 @@ After deploying both matching API/client releases, check with authorized data:
   device acceptance item, not an automated completion guarantee.
 
 These production/device checks remain pending; automated checks use fixtures.
+
+## Slice 7 staff handover — 2026-10-29
+
+Implemented locally with the matching API handover contract. Apply the API's
+`20261029060000_add_staff_deactivation_audit` migration before rollout; it was
+authored but not run during implementation.
+
+Entry: 직원 관리 → a staff member → 담당 인계 · 비활성화.
+
+- Assign a different active employee to every operating retreat. A bulk selection
+  can be applied, then individual retreats overridden. Removed retreats have their
+  assignments cleared. Review once before the final deactivation action.
+- The preview identifies unsubmitted work, including expired/blocked drafts and
+  drafts at previously assigned retreats. Work is not transferred to a new author.
+  Finish needed, still-submittable work before confirming the handover.
+- The receipt retains the original assignment names, administrator and Seoul
+  timestamp, and links to QR management. Issue and distribute new staff QRs.
+  Guest QR, bookings, submitted records, revisions, and photos remain unchanged.
+- Reactivation is explicit in staff editing and restores neither assignments nor
+  old staff QR/private links. Inactive staff can reopen their latest handover record.
+- Ordinary single-retreat assignment changes also revoke the existing staff QR.
+  Reissue staff QRs at retreats reassigned before this fix where an old worker may
+  still hold a copy; current assignments cannot identify every historical holder.
+
+Local evidence: client typecheck, lint and production build passed (existing
+bundle-size warning remains). Synthetic Chrome API fixtures passed at widths
+320, 399, 760, 907, 1024 and 1440px with no horizontal overflow; reviewed screenshots
+and checked sticky phone actions above the footer. Covered required selection,
+bulk/per-retreat choices, exact save payload, success receipt, no replacement,
+no assignments, existing inactive staff, stale 409 responses, and uncertain 503
+responses recovered through a fresh preview without duplicate POSTs. Staff editor
+and handover unsaved-navigation guards, mobile logout cancellation, and explicit
+reactivation were checked. Reader/input and mocked API checks covered 58 cases.
+Backend mock tests are documented separately in `docs/staff-deactivation.md`.
+
+Still pending: disposable migrated PostgreSQL integration (including competing
+reassignment/deactivation and transaction rollback), deployed end-to-end access
+checks, and physical phone/tablet acceptance. With authorized test records, verify
+old QR/private links fail, the freshly issued staff QR identifies the replacement,
+and old submitted records/photos still display their original authors. Previously
+issued signed photo URLs can remain usable until their existing short expiry.
+No production data, migration, commit, push or deployment was performed.

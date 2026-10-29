@@ -1,4 +1,6 @@
 import { useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
+import { appRoutes } from '../../../../core/router/routes';
 import type { AdminStaffDto } from '../../../../features/admin-staff/admin-staff.types';
 import { Button } from '../../../../shared/ui/Button/Button';
 import { useStaffEditor } from '../hooks/use-staff-editor';
@@ -110,13 +112,23 @@ export function StaffEditor({
             values={editor.values}
             errors={editor.errors}
             editing={!!original}
-            hasAssignments={!!original?.assignedProperties.length}
+            handoverUrl={original?.isActive
+              ? appRoutes.adminStaffHandover.replace(':id', original.id)
+              : undefined}
             busy={mutation.busy}
             blocked={!!mutation.blocked || confirming}
             onChange={editor.change}
           />
           {original && <StaffAssignments staff={original} />}
         </div>
+        {original && !original.isActive && (
+          <Link
+            className="staff-text-link"
+            to={appRoutes.adminStaffHandover.replace(':id', original.id)}
+          >
+            최근 인계 기록 확인 <span aria-hidden="true">→</span>
+          </Link>
+        )}
         <details className="staff-editor__help">
           <summary>직원 등록 안내</summary>
           <p>휴양소 배정과 정비 기록을 위한 직원 정보입니다. 관리자 로그인 계정은 생성되지 않습니다.</p>

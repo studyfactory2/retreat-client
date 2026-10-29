@@ -28,6 +28,7 @@ export const appRoutes = {
   adminStaff: '/admin/staff',
   adminStaffCreate: '/admin/staff/new',
   adminStaffDetail: '/admin/staff/:id',
+  adminStaffHandover: '/admin/staff/:id/handover',
   guest: '/guest',
   guestStay: '/guest/stay',
   staff: '/staff',

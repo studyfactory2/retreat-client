@@ -3,6 +3,7 @@ import {
   type StaffFormErrors,
   type StaffFormValues,
 } from '../model/staff-form-model';
+import { Link } from 'react-router-dom';
 
 const fieldLabels = { name: '이름', phone: '연락처', company: '회사', department: '부서' };
 
@@ -10,7 +11,7 @@ type Props = {
   values: StaffFormValues;
   errors: StaffFormErrors;
   editing: boolean;
-  hasAssignments: boolean;
+  handoverUrl?: string;
   busy: boolean;
   blocked: boolean;
   onChange: (values: StaffFormValues) => void;
@@ -19,7 +20,7 @@ export function StaffForm({
   values,
   errors,
   editing,
-  hasAssignments,
+  handoverUrl,
   busy,
   blocked,
   onChange,
@@ -74,29 +75,36 @@ export function StaffForm({
       >
         <div className="staff-form__status-heading">
           <h2 id="staff-active-title">활성 직원</h2>
-          <label className="staff-toggle" htmlFor="staff-isActive">
+          {handoverUrl ? (
+            <span className="staff-badge">활성</span>
+          ) : <label className="staff-toggle" htmlFor="staff-isActive">
             <input
               id="staff-isActive"
               type="checkbox"
               role="switch"
               aria-label="직원 활성화"
               checked={values.isActive}
-              disabled={!editing || (values.isActive && hasAssignments)}
+              disabled={!editing}
               aria-describedby={`staff-active-hint${errors.isActive ? ' staff-isActive-error' : ''}`}
               aria-invalid={!!errors.isActive || undefined}
               onChange={(event) =>
                 onChange({ ...values, isActive: event.target.checked })
               }
             />
-          </label>
+          </label>}
         </div>
         <p className="staff-hint" id="staff-active-hint">
           {!editing
             ? '등록 후 상태를 변경할 수 있습니다.'
-            : hasAssignments
-            ? '비활성화하려면 휴양소 설정에서 담당 배정을 먼저 해제하거나 변경해 주세요.'
-            : '활성 직원만 담당 휴양소에 배정할 수 있습니다. 비활성화해도 기존 정비 기록은 유지됩니다.'}
+            : handoverUrl
+            ? '담당 휴양소를 인계한 뒤 비활성화할 수 있습니다. 기존 기록은 유지됩니다.'
+            : '다시 활성화해도 휴양소는 자동 배정되지 않습니다. 기존 직원 QR과 개인 작성 링크도 복구되지 않습니다.'}
         </p>
+        {handoverUrl && !busy && !blocked && (
+          <Link className="staff-text-link" to={handoverUrl}>
+            담당 인계 · 비활성화 <span aria-hidden="true">→</span>
+          </Link>
+        )}
         {errors.isActive && (
           <p className="staff-field__error" id="staff-isActive-error">
             {errors.isActive}

@@ -49,6 +49,7 @@ import {
 import {
   AdminStaffScreen,
   AdminStaffEditorScreen,
+  AdminStaffHandoverScreen,
 } from '../../screens/admin/staff';
 
 import {
@@ -128,6 +129,10 @@ export function AppRouter() {
               element={<AdminReportsScreen />}
             />
             <Route path={appRoutes.adminStaff} element={<AdminStaffScreen />} />
+            <Route
+              path={appRoutes.adminStaffHandover}
+              element={<AdminStaffHandoverScreen />}
+            />
             <Route
               path={appRoutes.adminStaffCreate}
               element={<AdminStaffEditorScreen creating />}
