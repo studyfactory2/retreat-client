@@ -33,9 +33,10 @@ export function GuestFrame({
 }) {
   const homePresentation = view === 'home';
   const journeyPresentation = view === 'check-in' || view === 'check-out';
+  const guidePresentation = view === 'guide';
   return (
     <div
-      className={`guest-entry${homePresentation ? ' guest-entry--home' : ''}${journeyPresentation ? ' guest-entry--journey' : ''}${ready ? ' guest-entry--navigable' : ''}`}
+      className={`guest-entry${homePresentation ? ' guest-entry--home' : ''}${journeyPresentation ? ' guest-entry--journey' : ''}${guidePresentation ? ' guest-entry--guide' : ''}${ready ? ' guest-entry--navigable' : ''}`}
       onClickCapture={(event) => {
         if (
           event.target instanceof Element &&
@@ -70,11 +71,13 @@ export function GuestFrame({
               to={home}
               aria-label={`${APP_BRAND.appName} 이용 안내 홈`}
             >
-              <BrandLogo /><span>휴양소 이용 안내</span>
+              <BrandLogo />
+              <span>휴양소 이용 안내</span>
             </Link>
           ) : (
             <div className="guest-brand">
-              <BrandLogo /><span>휴양소 이용 안내</span>
+              <BrandLogo />
+              <span>휴양소 이용 안내</span>
             </div>
           )}
           <div className="guest-header__tools">
@@ -102,9 +105,7 @@ export function GuestFrame({
       >
         {children}
       </main>
-      <footer className="guest-footer">
-        {APP_BRAND.appName}
-      </footer>
+      <footer className="guest-footer">{APP_BRAND.appName}</footer>
       {ready && (
         <nav
           className={`guest-navigation${report ? ' guest-navigation--report' : ''}`}

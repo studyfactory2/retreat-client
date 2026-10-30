@@ -46,6 +46,7 @@ export function PropertyGuideEditor({
   const currentValues = useRef(initial);
   const [errors, setErrors] = useState<GuideFormErrors>({});
   const [reviewing, setReviewing] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
   const [unchanged, setUnchanged] = useState(false);
   const mutation = useGuideSave(token, rejectSession);
   const dirty =
@@ -140,15 +141,61 @@ export function PropertyGuideEditor({
     );
   }
 
+  function openPreview() {
+    setPreviewOpen(true);
+    requestAnimationFrame(() => {
+      const panel = document.getElementById('guide-live-preview');
+      panel?.focus({ preventScroll: true });
+      panel?.scrollIntoView({ block: 'start' });
+    });
+  }
+
+  function closePreview() {
+    setPreviewOpen(false);
+    requestAnimationFrame(() => {
+      const field = document.getElementById('guide-content');
+      const target =
+        field && !field.matches(':disabled')
+          ? field
+          : document.getElementById('guide-preview-button');
+      target?.focus({ preventScroll: true });
+      target?.scrollIntoView({ block: 'start' });
+    });
+  }
+
   return (
     <>
       <header className="property-guide-heading">
-        <div>
-          <p className="property-guide-heading__eyebrow">PROPERTY GUIDE</p>
-          <h1>이용 안내 관리</h1>
-          <p>{data.property.name}의 이용객에게 전할 안내를 준비하세요.</p>
+        <div className="property-guide-heading__identity">
+          <p className="property-guide-heading__eyebrow">
+            {data.property.name}
+          </p>
+          <div className="property-guide-heading__title">
+            <h1>이용 안내 관리</h1>
+            <span
+              className="property-guide-saved-state"
+              aria-label="현재 저장 상태"
+            >
+              {data.guide
+                ? data.guide.isPublished
+                  ? '공개'
+                  : '비공개'
+                : '미등록'}
+              {data.guide && <> · 버전 {data.guide.version}</>}
+            </span>
+          </div>
         </div>
         <div className="property-guide-actions">
+          <Button
+            id="guide-preview-button"
+            type="button"
+            className="admin-button-secondary property-guide-preview-link"
+            aria-controls="guide-live-preview"
+            aria-expanded={previewOpen}
+            onClick={openPreview}
+          >
+            미리보기
+          </Button>
           <Button
             className="admin-button-secondary"
             disabled={mutation.state.busy || !!navigation.pending}
@@ -163,30 +210,17 @@ export function PropertyGuideEditor({
               )
             }
           >
-            휴양소 정보로 돌아가기
+            휴양소 정보
           </Button>
           <Button
             className="admin-button-secondary"
             disabled={mutation.state.busy || !!navigation.pending}
             onClick={() => navigation.request('reload', onReload)}
           >
-            최신 정보 불러오기
+            새로고침
           </Button>
         </div>
       </header>
-      <div className="property-guide-summary">
-        <span>
-          현재 저장 상태:{' '}
-          <strong>
-            {data.guide
-              ? data.guide.isPublished
-                ? '공개'
-                : '비공개'
-              : '미등록'}
-          </strong>
-        </span>
-        {data.guide && <span>버전 {data.guide.version}</span>}
-      </div>
       {!data.property.isActive && (
         <div className="property-guide-banner" role="status">
           <strong>비활성 휴양소의 안내를 준비하고 있습니다.</strong>
@@ -256,7 +290,7 @@ export function PropertyGuideEditor({
                   type="submit"
                   disabled={blocked}
                 >
-                  저장 내용 확인
+                  저장
                 </Button>
               </div>
             )}
@@ -276,11 +310,14 @@ export function PropertyGuideEditor({
         <aside
           className="property-guide-editor-sidebar"
           aria-label="이용 안내 미리보기"
+          data-open={previewOpen}
+          onFocusCapture={() => setPreviewOpen(true)}
         >
           <PropertyGuidePreview
             {...preview}
             propertyName={data.property.name}
             propertyActive={data.property.isActive}
+            onClose={closePreview}
           />
         </aside>
       </div>

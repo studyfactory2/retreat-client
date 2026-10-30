@@ -400,3 +400,79 @@ retry recovered and a genuine empty response showed zero schedules separately.
 Phone, tablet and PC screenshots were reviewed. Model/SSR checks cover the other
 edge cases above; this was not live API or physical-device acceptance. No database,
 commit, push or deployment was performed.
+
+## Slice 10 compact guest guide and section template — 2026-10-30
+
+Entry: 휴양소 관리 → 휴양소 → 이용 안내 관리. Guest property QR and personal
+stay links both use 이용 안내. This is frontend-only, with no API contract,
+database, migration, dependency or authentication changes.
+
+Manual acceptance checklist:
+
+- Open an existing plain-text guide. It must keep its complete text and line
+  breaks until 구분별 템플릿 사용 is explicitly selected. Conversion keeps the
+  original body in 기타 안내; switching back preserves populated titles/content.
+- Fill the seven optional sections. 꼭 확인해 주세요 stays visible to guests;
+  other populated sections open independently and empty sections are omitted.
+  An entirely empty template must not pass validation. The 20,000-character
+  limit includes the stored section headings and escaping.
+- Compare the live preview with the guest guide. Both use the same content
+  renderer, including line breaks, literal HTML/URLs, and expanded sections.
+  The narrow editor's 미리보기 / 내용 편집으로 돌아가기 controls must move focus
+  to the correct panel without submitting or losing text.
+- Save through the existing publication review. The next guest refresh must
+  show the updated guide. Confirm unsaved navigation can be cancelled and a
+  version conflict retains typed content instead of overwriting the newer guide.
+- Guest property QR access must not show a personal schedule. A valid personal
+  link shows planned Seoul arrival/departure dates and times, labelled 예정.
+  Only the configured public manager number is callable; missing numbers have
+  a noninteractive fallback. Contact remains available when no guide is published.
+- Check expired/invalid access, missing/unpublished guides, and failed requests
+  separately. Failed requests must show retry, not an empty guide, and invalid
+  access must not reveal guide content, phone numbers or personal times.
+- At phone, tablet and desktop widths, check long names/text, readable section
+  rows, keyboard expansion, visible focus and content clearance above the footer.
+
+Local evidence: 17 temporary isolated model/API/SSR scenarios passed, including
+strict format fallback, legacy preservation, Unicode/escaping limits, empty-body
+rejection, save receipts, QR/personal route separation, escaped rendering, matching
+preview markup, and missing/unpublished guides. No repository test files were
+added. Typecheck, lint, production build and git diff --check passed; the existing
+bundle-size warning remains. The build used HTTPS placeholder origins.
+
+The actual frontend was also exercised in the in-app browser against a separate,
+temporary synthetic API. Admin and guest widths 320, 399, 760, 907, 1024 and
+1440px had no page-wide horizontal overflow. Reviewed phone, tablet and desktop
+screenshots; checked live editing/preview, save and guest refresh, original text
+retention, empty-template validation focus, unsaved-navigation cancellation,
+conflict retention, missing contact/guide, error/retry, expired personal access,
+long labels, keyboard expansion and footer clearance. These checks used fictional
+data only. Real API persistence, deployed behavior and physical-device acceptance
+remain pending. No database, commit, push or deployment action was performed.
+
+### Guide editor wording/layout follow-up — 2026-10-30
+
+The editor now places saved status/version beside the title and groups title,
+content and a native public-visibility switch in one compact form. Permanent
+explanatory paragraphs are removed; counters, errors, inactive-property warnings
+and a brief post-conversion preservation notice remain. The Save label is shorter
+but still opens the existing explicit publication confirmation; its impact,
+single-copy/no-history and no-notification warnings are unchanged.
+
+At editor content widths of 900px or less, the preview is hidden from layout and
+keyboard navigation until requested. Opening focuses the preview; close, return
+and Escape restore editor focus, falling back to the preview trigger when the
+legacy input is disabled during review. Wide layouts show the preview beside the
+form. A focused preview stays visible when the window narrows.
+
+Local follow-up checks: TypeScript, lint, production build, formatting and diff
+checks passed, with the existing bundle-size warning. The 17 existing temporary
+model/API/SSR scenarios passed after updating copy expectations. Synthetic browser
+checks at 320/399/760/907/1024/1440px found no page-wide horizontal overflow and
+confirmed narrow/wide preview visibility. Checked unsaved text/visibility in the
+preview, return/Escape focus (including disabled legacy input during review),
+public/private impact confirmation, explicit synthetic save and receipt, legacy
+conversion retention, empty-template validation focus and focused-preview resize.
+The compact 399px form and Save action fit above the fixed mobile menu. Screenshots
+use fictional local data. No live API, physical-device, database, deployment or
+Git write operations were performed.

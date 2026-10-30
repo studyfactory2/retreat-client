@@ -2,6 +2,7 @@ import type {
   AdminPropertyGuideDto,
   SaveAdminPropertyGuideInput,
 } from '../../../../features/admin-property-guides/admin-property-guide.types';
+import { hasGuideContent } from '../../../../features/property-guide/guide-sections';
 import {
   GUIDE_LIMITS,
   normalizeGuideContent,
@@ -43,7 +44,8 @@ export function validateGuideForm(values: GuideFormValues): GuideFormErrors {
     errors.title = '제목은 100자 이내로 입력해 주세요.';
   else if (/[\r\n]/u.test(title) || title.includes('\u0000'))
     errors.title = '제목에는 줄바꿈이나 널 문자를 사용할 수 없습니다.';
-  if (!content) errors.content = '안내문 내용을 입력해 주세요.';
+  if (!hasGuideContent(content))
+    errors.content = '안내문 내용을 입력해 주세요.';
   else if (Array.from(content).length > GUIDE_LIMITS.content)
     errors.content = '내용은 20,000자 이내로 입력해 주세요.';
   else if (content.includes('\u0000'))

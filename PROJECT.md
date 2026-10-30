@@ -143,8 +143,9 @@ maintenance monitoring and read-only issue lists/details/history/photos are avai
 Issue notes, resolution and reopening are available. Staff profile management and
 property staff assignment are available. Property QR status, issuance/replacement,
 local QR images and link copying are available. Property checklist setup, fixed guest template previews,
-and maintenance template editing are available. Property usage guides support editing, mobile preview,
-and publication controls. Personal stay links support status, issuance/replacement,
+and maintenance template editing are available. Property usage guides support plain-text
+and optional section-template editing, a matching mobile preview, and publication
+controls. Personal stay links support status, issuance/replacement,
 copying and revocation in stay details. Stay details also provide read-only vehicle
 information with collection status and revision-review warnings. Shared issue categories support search, registration,
 renaming, display order and activation. Excel report downloads provide date/property
@@ -730,15 +731,53 @@ styles. Existing properties / mobile More navigation stays active.
 One guide per property contains a title (100 Unicode characters), plain-text
 content (20,000), and isPublished. Both text fields are required even when
 unpublished; outer whitespace is trimmed and content line endings become LF.
-The live mobile-width preview renders text with preserved newlines, never HTML or
-Markdown. Inactive properties allow guide preparation but guest access is blocked.
+The optional section template uses the existing content string and API; there are
+no new fields or database changes. `features/property-guide/guide-sections` owns
+an explicit opt-in marker and seven fixed sections: 꼭 확인해 주세요, 주차 안내,
+Wi-Fi, 시설 이용, 이용 수칙, 퇴실 안내 and 기타 안내. Only the complete, ordered
+format is parsed; unmarked or malformed content remains literal legacy text.
+Heading-like lines and backslashes inside section content are escaped by the
+serializer, and the editor counts the entire serialized string toward 20,000
+characters. An all-empty template cannot be saved.
+
+Applying the template is an explicit administrator action. Existing text is kept
+in full in 기타 안내, without automatic reclassification or deletion. A conversion
+that would exceed the content limit is blocked until the text is shortened.
+Switching back to one plain-text guide preserves populated section titles and
+content. Compact expandable editors show which sections contain text; the
+important-notice section starts open. Existing legacy guides keep their single
+textarea until the administrator chooses 구분해서 작성. A brief preservation
+notice appears only after conversion, rather than repeating the explanation
+above the editor. The reverse action is 한 편으로 작성.
+
+The compact editor places the saved publication state and version beside the
+page title instead of in a separate status card. Its form keeps 제목, 내용,
+character counts, validation errors and the 이용객에게 공개 switch. Repeated
+introductory, formatting and publication explanations are removed; the switch
+has one short consequence sentence, plus the inactive-property caveat when
+applicable. Shorter copy does not change required fields or save validation.
+
+`features/property-guide/components/PropertyGuideContent` is shared by the actual
+guest guide and the administrator's mobile-width preview. Empty sections are
+omitted; the important notice stays visible and other populated sections use
+native expandable rows. The preview shows the current unsaved title/body and
+publication intent, not invented guest dates or contact details. Narrow editor
+layouts (at most 900px of editor-container width) hide the preview until 미리보기
+is requested. Opening it moves focus to the panel; 닫기, 편집으로 돌아가기 or
+Escape while focus is inside the narrow preview closes it and returns focus to
+the content field, or the preview control when that field is disabled. Wider layouts
+always show the matching preview beside the editor. All guide content remains
+escaped text with preserved newlines, never HTML or Markdown. Inactive properties
+allow guide preparation but guest access is blocked.
 
 First save sends expectedVersion:0; updates send the loaded version and require
 a matching next-version receipt. The frontend suppresses unchanged saves. Every
 save has a publication confirmation: there are no separate draft/published copies,
 and editing a published guide immediately replaces the guest-visible content.
-Unpublishing hides it while retaining its saved content. No deletion, history,
-notifications or guest-screen implementation is added.
+The main action is labelled 저장 and still opens this unchanged critical review
+before any save request is sent.
+Unpublishing hides it while retaining its saved content. No deletion, history
+or notifications are added. The guest reader is documented below.
 
 Duplicate saves are fenced. Scope/token changes and unmount abort pending requests
 and ignore late results; 401/403 rejects only the requesting credential. Conflicts,
@@ -748,9 +787,10 @@ version, actor and existing timestamps. Local return/reload and browser unload
 warn about unsaved/pending input; global sidebar/browser-back navigation remains
 outside these local guards. No browser draft storage or automatic mutation retries.
 
-Verification: typecheck/lint/build and disposable feature/model/hook/editor probes;
-browser checks with synthetic authentication cover first save, publication changes,
-plain-text rendering, no-op/duplicate saves, dirty reload, version conflicts,
+Initial guide implementation verification: typecheck/lint/build and disposable
+feature/model/hook/editor probes; browser checks with synthetic authentication
+cover first save, publication changes, plain-text rendering, no-op/duplicate saves,
+dirty reload, version conflicts,
 lost-response recovery, inactive-property editing, expiry and 320px/390px layouts.
 Actual backend DTO/admin/guest-guide/QR services were exercised through an in-memory
 fixture, including visibility rules. Real JWT/PostgreSQL, private-stay access and
@@ -963,9 +1003,11 @@ personal stay invitation. These route screens have their own OH BOK guest frame,
 mobile Home/Guide navigation and scoped styles, outside the admin session/provider
 and generic entry shell. QR home displays property name/region only; private home
 also displays the guest name and planned arrival/departure in Seoul time. These
-dates do not establish actual occupancy. No manager contact field exists, so no
-phone number or call action is invented. Checklist definitions are validated but
-there are no unimplemented checklist, photo, issue, vehicle or staff action buttons.
+dates do not establish actual occupancy. The configured public manager contact
+is now provided by the validated entry context (see the later public-contact
+slice); it is never derived from staff or guest private phone numbers. Checklist
+definitions are validated but there are no unimplemented checklist, photo, issue,
+vehicle or staff action buttons.
 
 `features/guest-entry` separates DTOs, canonical token/response validation,
 checklist-definition readers and API calls. GET `/qr/guest` and
@@ -977,10 +1019,23 @@ are bounded and validated; empty/partial checklist configuration is valid.
 
 Guide identity must match the entry's property ID. Names/regions can legitimately
 change between these reads; guide view uses the guide response's current labels.
-Only the published title/content is displayed, as escaped text with preserved
-line breaks and wrapping. No HTML, Markdown, automatic links or remote previews
-are rendered. A successful `guide: null` means no guide is published and has a
-distinct empty state; it is never used as a fallback for failed reads.
+The compact guide header shows the published title, current property/region and
+update date. The configured public manager contact comes from the freshly loaded
+entry context; only a valid configured number exposes the existing telephone
+app action, while a missing number has a noninteractive empty state. Personal
+stay access also shows planned arrival/departure dates and times in Seoul, clearly
+labelled as 예정; property QR access does not invent a personal stay schedule.
+These planned values do not establish actual arrival, departure or occupancy.
+
+The body uses the same `PropertyGuideContent` reader as the administrator preview.
+Legacy guides remain a single plain-text body. Explicit section-template guides
+keep the important notice visible and put other nonempty sections in compact
+expandable rows; empty sections are omitted. The guide-only frame, contact card
+and body spacing are compact on phones, while wider screens have room for the
+schedule/contact pair and section layout. No HTML, Markdown, automatic links
+inside guide content or remote previews are rendered. A successful `guide: null`
+means no guide is published and has a distinct empty state; it is never used as
+a fallback for failed reads.
 
 The fragment parser accepts the backend's exact canonical 32-byte base64url token
 format. Missing/malformed fragments cause no API calls. Guest credentials remain

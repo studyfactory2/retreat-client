@@ -3,6 +3,7 @@ import {
   normalizeGuideContent,
   normalizeGuideTitle,
 } from '../../../../features/admin-property-guides/admin-property-guide-validation';
+import { PropertyGuideContent } from '../../../../features/property-guide/components/PropertyGuideContent';
 import '../styles/property-guide.css';
 
 export function PropertyGuidePreview({
@@ -11,26 +12,51 @@ export function PropertyGuidePreview({
   isPublished,
   propertyActive,
   propertyName,
+  onClose,
 }: {
   title: string;
   content: string;
   isPublished: boolean;
   propertyActive: boolean;
   propertyName?: string;
+  onClose?: () => void;
 }) {
   const titleId = useId();
   const previewTitle = normalizeGuideTitle(title);
   const previewContent = normalizeGuideContent(content);
   return (
-    <section className="property-guide-preview" aria-labelledby={titleId}>
+    <section
+      id="guide-live-preview"
+      className="property-guide-preview"
+      aria-labelledby={titleId}
+      tabIndex={-1}
+      onKeyDown={(event) => {
+        if (
+          event.key === 'Escape' &&
+          onClose &&
+          event.currentTarget
+            .querySelector('.property-guide-preview__close')
+            ?.getClientRects().length
+        ) {
+          event.preventDefault();
+          onClose();
+        }
+      }}
+    >
       <header className="property-guide-preview__heading">
-        <p className="property-guide-eyebrow">MOBILE PREVIEW</p>
-        <h2 id={titleId}>입력 내용 미리보기</h2>
-        <p>휴대폰 너비에서 글의 흐름과 줄바꿈을 확인하세요.</p>
+        <h2 id={titleId}>미리보기</h2>
+        {onClose && (
+          <button
+            type="button"
+            className="property-guide-preview__close"
+            onClick={onClose}
+          >
+            닫기
+          </button>
+        )}
       </header>
       <div className="property-guide-preview__phone">
         <div className="property-guide-preview__context">
-          <span>이용 안내</span>
           {propertyName && <p>{propertyName}</p>}
         </div>
         <article className="property-guide-preview__article">
@@ -41,11 +67,10 @@ export function PropertyGuidePreview({
           >
             {previewTitle || '안내 제목'}
           </h3>
-          <div
-            className={`property-guide-preview__text${previewContent ? '' : ' property-guide-preview__placeholder'}`}
-          >
-            {previewContent || '작성한 안내 내용이 여기에 표시됩니다.'}
-          </div>
+          <PropertyGuideContent
+            content={previewContent}
+            emptyText="안내 내용을 입력해 주세요."
+          />
         </article>
       </div>
       <div className="property-guide-preview__notice">
@@ -53,16 +78,21 @@ export function PropertyGuidePreview({
           className={`property-guide-badge${isPublished && propertyActive ? ' property-guide-badge--active' : ''}`}
         >
           {!isPublished
-            ? '비공개로 저장 예정'
+            ? '저장 시 비공개'
             : propertyActive
-              ? '공개로 저장 예정'
-              : '공개 설정 · 접근 중지'}
+              ? '저장 시 공개'
+              : '휴양소 비활성 · 접근 중지'}
         </span>
-        <p>
-          현재 입력한 내용의 관리자용 미리보기입니다. 실제 공개 여부는 저장한
-          설정에 따릅니다.
-        </p>
       </div>
+      {onClose && (
+        <button
+          type="button"
+          className="property-guide-preview__return"
+          onClick={onClose}
+        >
+          편집으로 돌아가기
+        </button>
+      )}
     </section>
   );
 }

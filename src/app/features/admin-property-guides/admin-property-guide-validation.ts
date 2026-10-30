@@ -1,4 +1,5 @@
 import { ApiRequestError } from '../../core/api/api-error';
+import { hasGuideContent } from '../property-guide/guide-sections';
 import type { SaveAdminPropertyGuideInput } from './admin-property-guide.types';
 
 export const GUIDE_LIMITS = { title: 100, content: 20_000 } as const;
@@ -74,7 +75,8 @@ export function prepareSaveAdminPropertyGuide(
     invalidInput('title', '안내문 제목에는 줄바꿈을 사용할 수 없습니다.');
   if (title.includes('\u0000'))
     invalidInput('title', '안내문 제목에는 널 문자를 사용할 수 없습니다.');
-  if (!content) invalidInput('content', '안내문 내용을 입력해 주세요.');
+  if (!hasGuideContent(content))
+    invalidInput('content', '안내문 내용을 입력해 주세요.');
   if ([...content].length > GUIDE_LIMITS.content)
     invalidInput('content', '안내문 내용은 20,000자 이하여야 합니다.');
   if (content.includes('\u0000'))

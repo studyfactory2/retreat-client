@@ -1,8 +1,16 @@
+import { useState } from 'react';
 import {
   GUIDE_LIMITS,
   normalizeGuideContent,
   normalizeGuideTitle,
 } from '../../../../features/admin-property-guides/admin-property-guide-validation';
+import {
+  createGuideSections,
+  guideSectionsToPlainText,
+  parseGuideSections,
+  serializeGuideSections,
+} from '../../../../features/property-guide/guide-sections';
+import { Button } from '../../../../shared/ui/Button/Button';
 import type {
   GuideFormErrors,
   GuideFormValues,
@@ -22,39 +30,47 @@ export function PropertyGuideForm({
   disabled: boolean;
   propertyActive: boolean;
 }) {
+  const [formatNotice, setFormatNotice] = useState<string | null>(null);
   const titleCount = [...normalizeGuideTitle(values.title)].length;
   const contentCount = [...normalizeGuideContent(values.content)].length;
+  const sections = parseGuideSections(values.content);
+  const templateContent = sections
+    ? null
+    : serializeGuideSections(createGuideSections(values.content));
+  const templateTooLong =
+    templateContent !== null &&
+    [...normalizeGuideContent(templateContent)].length > GUIDE_LIMITS.content;
+
+  function changeFormat(content: string, notice: string | null = null) {
+    onChange({ ...values, content });
+    setFormatNotice(notice);
+    requestAnimationFrame(() =>
+      document.getElementById('guide-content')?.focus(),
+    );
+  }
   return (
     <fieldset className="property-guide-form" disabled={disabled}>
       <legend className="property-guide-visually-hidden">
         이용 안내 내용과 공개 설정
       </legend>
-      <section
-        className="property-guide-form__content"
-        aria-labelledby="guide-form-heading"
-      >
-        <div className="property-guide-form__heading">
-          <p className="property-guide-eyebrow">PROPERTY GUIDE</p>
-          <h2 id="guide-form-heading">이용객에게 전할 안내</h2>
-          <p>시설 이용 방법과 머무는 동안 필요한 공통 안내를 작성해 주세요.</p>
-        </div>
+      <section className="property-guide-form__content" aria-label="안내 작성">
         <div className="property-guide-field">
           <label htmlFor="guide-title">
-            안내 제목 <span>필수</span>
+            제목 <span aria-hidden="true">*</span>
+            <span className="property-guide-visually-hidden">필수</span>
           </label>
           <input
             id="guide-title"
             value={values.title}
             aria-required="true"
             aria-invalid={!!errors.title}
-            aria-describedby={`guide-title-hint guide-title-count${errors.title ? ' guide-title-error' : ''}`}
+            aria-describedby={`guide-title-count${errors.title ? ' guide-title-error' : ''}`}
             placeholder="예: 휴양소 이용 안내"
             onChange={(event) =>
               onChange({ ...values, title: event.target.value })
             }
           />
           <div className="property-guide-field__meta">
-            <p id="guide-title-hint">줄바꿈 없이 제목을 입력해 주세요.</p>
             <span
               id="guide-title-count"
               className={
@@ -77,25 +93,133 @@ export function PropertyGuideForm({
           )}
         </div>
         <div className="property-guide-field">
-          <label htmlFor="guide-content">
-            안내 내용 <span>필수</span>
-          </label>
-          <textarea
-            id="guide-content"
-            rows={16}
-            value={values.content}
-            aria-required="true"
-            aria-invalid={!!errors.content}
-            aria-describedby={`guide-content-hint guide-content-count${errors.content ? ' guide-content-error' : ''}`}
-            placeholder="이용객에게 공통으로 안내할 내용을 입력하세요."
-            onChange={(event) =>
-              onChange({ ...values, content: event.target.value })
-            }
-          />
-          <div className="property-guide-field__meta">
-            <p id="guide-content-hint">
-              줄바꿈은 유지됩니다. HTML이나 마크다운은 일반 글자로 표시됩니다.
+          <div className="property-guide-format">
+            <div>
+              <p
+                id="guide-content-label"
+                className="property-guide-field__label"
+              >
+                내용 <span aria-hidden="true">*</span>
+                <span className="property-guide-visually-hidden">필수</span>
+              </p>
+            </div>
+            <Button
+              type="button"
+              className="admin-button-secondary property-guide-format__button"
+              disabled={templateTooLong}
+              aria-describedby={
+                templateTooLong ? 'guide-template-limit' : undefined
+              }
+              onClick={() => {
+                if (sections) changeFormat(guideSectionsToPlainText(sections));
+                else if (templateContent !== null && !templateTooLong)
+                  changeFormat(
+                    templateContent,
+                    values.content.trim()
+                      ? '기존 글을 ‘기타 안내’에 담았습니다.'
+                      : null,
+                  );
+              }}
+            >
+              {sections ? '한 편으로 작성' : '구분해서 작성'}
+            </Button>
+          </div>
+          {formatNotice && sections && (
+            <p className="property-guide-format__notice" role="status">
+              {formatNotice}
             </p>
+          )}
+          {templateTooLong && (
+            <p
+              id="guide-template-limit"
+              className="property-guide-field__error"
+            >
+              구분 제목을 넣을 공간이 부족합니다. 내용을 조금 줄인 뒤
+              사용하세요.
+            </p>
+          )}
+          {sections ? (
+            <div
+              id="guide-content"
+              className="property-guide-sections"
+              role="group"
+              tabIndex={-1}
+              aria-labelledby="guide-content-label"
+              aria-invalid={!!errors.content}
+              aria-describedby={`guide-content-count${errors.content ? ' guide-content-error' : ''}`}
+            >
+              {sections.map((section) => (
+                <details
+                  key={section.id}
+                  className="property-guide-section"
+                  open={section.id === 'essentials'}
+                >
+                  <summary>
+                    <span className="property-guide-section__name">
+                      <strong>{section.title}</strong>
+                      {section.id === 'essentials' && (
+                        <small>항상 펼쳐서 표시</small>
+                      )}
+                    </span>
+                    <span
+                      className={`property-guide-section__state${section.content.trim() ? ' property-guide-section__state--written' : ''}`}
+                    >
+                      {section.content.trim() ? '작성됨' : '비어 있음'}
+                    </span>
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <path d="m7 10 5 5 5-5" />
+                    </svg>
+                  </summary>
+                  <div className="property-guide-section__body">
+                    <label
+                      className="property-guide-visually-hidden"
+                      htmlFor={`guide-section-${section.id}`}
+                    >
+                      {section.title} 내용
+                    </label>
+                    <textarea
+                      id={`guide-section-${section.id}`}
+                      rows={4}
+                      value={section.content}
+                      placeholder={
+                        section.id === 'essentials'
+                          ? '이용객이 꼭 알아야 할 내용을 짧게 적어 주세요.'
+                          : '안내할 내용이 있을 때 작성하세요.'
+                      }
+                      onChange={(event) => {
+                        setFormatNotice(null);
+                        onChange({
+                          ...values,
+                          content: serializeGuideSections(
+                            sections.map((item) =>
+                              item.id === section.id
+                                ? { ...item, content: event.target.value }
+                                : item,
+                            ),
+                          ),
+                        });
+                      }}
+                    />
+                  </div>
+                </details>
+              ))}
+            </div>
+          ) : (
+            <textarea
+              id="guide-content"
+              rows={7}
+              value={values.content}
+              aria-labelledby="guide-content-label"
+              aria-required="true"
+              aria-invalid={!!errors.content}
+              aria-describedby={`guide-content-count${errors.content ? ' guide-content-error' : ''}`}
+              placeholder="안내 내용을 입력하세요."
+              onChange={(event) =>
+                onChange({ ...values, content: event.target.value })
+              }
+            />
+          )}
+          <div className="property-guide-field__meta">
             <span
               id="guide-content-count"
               className={
@@ -118,46 +242,32 @@ export function PropertyGuideForm({
             </p>
           )}
         </div>
-        <p className="property-guide-form__hint">
-          앞뒤 공백을 제외한 글자 수입니다. 비공개로 저장할 때도 제목과 내용이
-          필요합니다.
-        </p>
       </section>
       <section
-        className="property-guide-publish"
-        aria-labelledby="guide-publish-heading"
+        className="property-guide-publish property-guide-publish--compact"
+        aria-label="공개 설정"
       >
-        <h2 id="guide-publish-heading">공개 설정</h2>
         <label className="property-guide-publish__toggle">
+          <span>이용객에게 공개</span>
           <input
             type="checkbox"
+            role="switch"
             checked={values.isPublished}
-            aria-label="이용객에게 안내 공개"
+            aria-label="이용객에게 공개"
             aria-describedby="guide-publish-description"
             onChange={(event) =>
               onChange({ ...values, isPublished: event.target.checked })
             }
           />
-          <span>이용객에게 안내 공개</span>
-          <span
-            className={`property-guide-badge${values.isPublished ? ' property-guide-badge--active' : ''}`}
-          >
-            {values.isPublished ? '공개로 저장 예정' : '비공개로 저장 예정'}
-          </span>
         </label>
         <p id="guide-publish-description">
           {values.isPublished
-            ? '공개 상태로 저장하면 이 내용이 이용객에게 제공되는 최신 안내가 됩니다.'
-            : '비공개로 저장하면 관리자만 내용을 보관하며 이용객에게는 안내가 표시되지 않습니다.'}
-        </p>
-        <p className="property-guide-publish__single-copy">
-          공개용과 초안용 사본이 따로 저장되지 않습니다. 저장할 때 기존 안내
-          내용과 공개 설정이 함께 바뀝니다.
+            ? '저장하면 이용객 안내에 바로 반영됩니다.'
+            : '저장하면 이용객에게 표시되지 않습니다.'}
         </p>
         {!propertyActive && (
           <p className="property-guide-publish__inactive">
-            비활성 휴양소도 안내를 작성하고 저장할 수 있습니다. 공개로 저장해도
-            휴양소가 비활성인 동안 이용객은 접근할 수 없습니다.
+            비활성 휴양소는 공개로 저장해도 이용객이 볼 수 없습니다.
           </p>
         )}
       </section>
