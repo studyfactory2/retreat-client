@@ -107,7 +107,7 @@ export function buildCalendarWeeks(
       days: cells.slice(offset, offset + 7),
       segments,
       overflow,
-      laneCount: Math.max(1, ...segments.map((segment) => segment.lane + 1)),
+      laneCount: Math.max(0, ...segments.map((segment) => segment.lane + 1)),
     });
   }
   return weeks;

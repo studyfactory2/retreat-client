@@ -344,3 +344,59 @@ pagination/baseline, stale responses, scope errors, retry, 401/403 session rejec
 unsaved navigation/logout, conflict and uncertain-save protection. See the API
 guide for persistence behavior and cutover boundaries. Database concurrency,
 migration acceptance and physical devices remain pending.
+
+## Slice 9 compact calendar and daily agenda — 2026-10-30
+
+Entry: 이용 일정 → 달력. This slice is frontend-only; no API contract, database,
+migration or dependency changes are required. Existing date/property filters,
+calendar/list switching and stay-detail return context remain in place.
+
+The compact layout applies while the calendar content is narrower than 1000px,
+including tablets with a sidebar. Date cells show the date and a positive unique
+stay count; the selected-day agenda follows the month. With at least 1000px of
+calendar content, property bars and the daily agenda appear side by side.
+
+Manual acceptance checklist:
+
+- At phone, tablet and desktop widths, select dates with no schedules, one stay
+  and several stays. Confirm readable day/count cells, distinct today/selection
+  indicators, no page-wide horizontal overflow and actions clear of the footer.
+- On a busy day, confirm arrival/departure rows follow their planned Seoul times,
+  not the original check-in order. At equal times, departure precedes arrival.
+  A midnight checkout displays 00:00 and belongs to its checkout date.
+- A same-day stay contributes one to the daily schedule count and produces two
+  timed events. A stay spanning several days appears in the separate continuing
+  group on interior days, including across month and year boundaries.
+- Check submitted, missing and review-needed checklist examples. Open the
+  collapsed details and confirm both checklist states and review reasons remain
+  available. Planned events must not imply actual arrival, departure or occupancy.
+- Check long retreat/guest names and an inactive retreat. On wide screens,
+  overflow must open the complete day's agenda; an empty week must not reserve
+  unused bar lanes. Open a property bar or agenda row and return to the selected
+  date/property context. Confirm the calendar/list view switch still works.
+- Change only the selected day within a loaded month: no calendar fetch is needed.
+  Change month/property or refresh: hide stale results during loading. A failed
+  request must show retry rather than zero schedules; verify retry and a genuinely
+  empty result separately. Confirm expired-session handling remains intact.
+
+Local evidence: 18 isolated source-model, mocked API and server-rendered component
+scenarios passed. Coverage includes calendar boundaries, same-day and midnight
+events, continuing stays, chronological/tie ordering, unique counts, non-mutating
+agenda construction, complete multi-page loading, inconsistent-page rejection,
+overflow accounting, retained links, API-derived checklist labels, escaped text,
+accessible date counts and distinct loading/error/empty states. These checks used
+synthetic data and temporary files outside the repository; no test files were
+added. Typecheck, lint, production build and diff checks passed; the existing
+bundle-size warning remains. The build used HTTPS placeholder origins and was
+not deployed.
+
+Local in-app-browser checks with a separate synthetic API passed at widths 320,
+399, 760, 907, 1024 and 1440px: no page-wide horizontal overflow, no overlap between
+row links and expansion controls, readable long names, chronological rows,
+same-day counts, midnight time, continuing/inactive retreats, empty days,
+Today/month navigation, property filtering, checklist expansion, stay-detail
+navigation and return context. Error/loading states hid stale days and agenda;
+retry recovered and a genuine empty response showed zero schedules separately.
+Phone, tablet and PC screenshots were reviewed. Model/SSR checks cover the other
+edge cases above; this was not live API or physical-device acceptance. No database,
+commit, push or deployment was performed.

@@ -1,11 +1,10 @@
 import { Link } from 'react-router-dom';
 import type {
-  AdminCalendarStayDto,
   CalendarChecklistDto,
   CalendarChecklistStatus,
   CalendarReviewReason,
 } from '../../../../features/admin-calendar/admin-calendar.types';
-import { getPropertyColor } from '../model/calendar-lanes';
+import type { CalendarAgendaEntry } from '../model/calendar-agenda';
 
 const checklistLabels: Record<CalendarChecklistStatus, string> = {
   SCHEDULED: '예정',
@@ -33,6 +32,12 @@ const periodFormatter = new Intl.DateTimeFormat('ko-KR', {
   timeZone: 'UTC',
   month: 'numeric',
   day: 'numeric',
+});
+const eventTimeFormatter = new Intl.DateTimeFormat('ko-KR', {
+  timeZone: 'Asia/Seoul',
+  hour: '2-digit',
+  minute: '2-digit',
+  hourCycle: 'h23',
 });
 
 function ChecklistStatus({
@@ -75,16 +80,33 @@ function ChecklistStatus({
 }
 
 export function CalendarStayRow({
-  stay,
-  date,
+  entry,
   returnSearch,
 }: {
-  stay: AdminCalendarStayDto;
-  date: string;
+  entry: CalendarAgendaEntry;
   returnSearch: string;
 }) {
-  const isArrival = stay.checkIn.expectedDate === date;
-  const isDeparture = stay.checkOut.expectedDate === date;
+  const { stay } = entry;
+  const eventLabel =
+    entry.kind === 'arrival'
+      ? '입실 예정'
+      : entry.kind === 'departure'
+        ? '퇴실 예정'
+        : '연속 일정';
+  const time =
+    entry.kind === 'continuing'
+      ? undefined
+      : eventTimeFormatter.format(new Date(entry.at));
+  const relevantChecklists =
+    entry.kind === 'arrival'
+      ? [stay.checkIn]
+      : entry.kind === 'departure'
+        ? [stay.checkOut]
+        : [stay.checkIn, stay.checkOut];
+  const needsReview = relevantChecklists.some(
+    (checklist) => checklist.status === 'NEEDS_REVIEW',
+  );
+  const PropertyHeading = entry.kind === 'continuing' ? 'h4' : 'h3';
   const crossYear =
     stay.checkIn.expectedDate.slice(0, 4) !==
     stay.checkOut.expectedDate.slice(0, 4);
@@ -93,53 +115,52 @@ export function CalendarStayRow({
     return crossYear ? `${value.slice(0, 4)}. ${label}` : label;
   }
   return (
-    <article className="calendar-stay">
-      <div className="calendar-stay__main">
-        <span
-          className="calendar-stay__property-dot"
-          style={{ background: getPropertyColor(stay.property.id) }}
-          aria-hidden="true"
-        />
+    <article className={`calendar-stay calendar-stay--${entry.kind}`}>
+      <Link
+        className="calendar-stay__main"
+        to={`/admin/stays/${stay.id}${returnSearch}`}
+        aria-label={`${time ? `${time} ` : ''}${eventLabel}, ${stay.property.name}, ${stay.guestName}${needsReview ? ', 확인 필요' : ''}${!stay.property.isActive ? ', 비활성' : ''} 이용 일정 상세 보기`}
+      >
+        <div className="calendar-stay__event">
+          {entry.kind !== 'continuing' ? (
+            <time dateTime={entry.at}>{time}</time>
+          ) : (
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <rect x="4" y="5" width="16" height="16" rx="3" />
+              <path d="M8 3v4m8-4v4M4 11h16m-10 5h4" />
+            </svg>
+          )}
+          <span>{eventLabel}</span>
+        </div>
         <div className="calendar-stay__identity">
-          <h3>{stay.property.name}</h3>
-          <p className="calendar-stay__guest">{stay.guestName}</p>
-          <p className="calendar-stay__dates">
-            <time dateTime={stay.checkIn.expectedDate}>
-              {formatPeriodDay(stay.checkIn.expectedDate)}
-            </time>
-            <span aria-hidden="true">–</span>
-            <time dateTime={stay.checkOut.expectedDate}>
-              {formatPeriodDay(stay.checkOut.expectedDate)}
-            </time>
-          </p>
-        </div>
-        <div className="calendar-stay__events">
-          {isArrival && <span>입실 예정</span>}
-          {isDeparture && <span>퇴실 예정</span>}
-          {!isArrival && !isDeparture && <span>연속 일정</span>}
-          {!stay.property.isActive && (
-            <span className="calendar-stay__inactive">비활성</span>
+          <PropertyHeading>{stay.property.name}</PropertyHeading>
+          <div className="calendar-stay__meta">
+            <p className="calendar-stay__guest">{stay.guestName}</p>
+            {needsReview && (
+              <span className="calendar-stay__review-alert">확인 필요</span>
+            )}
+            {!stay.property.isActive && (
+              <span className="calendar-stay__inactive">비활성</span>
+            )}
+          </div>
+          {entry.kind === 'continuing' && (
+            <p className="calendar-stay__dates">
+              <time dateTime={stay.checkIn.expectedDate}>
+                {formatPeriodDay(stay.checkIn.expectedDate)}
+              </time>
+              <span aria-hidden="true">–</span>
+              <time dateTime={stay.checkOut.expectedDate}>
+                {formatPeriodDay(stay.checkOut.expectedDate)}
+              </time>
+            </p>
           )}
         </div>
-        <Link
-          className="calendar-stay__detail"
-          to={`/admin/stays/${stay.id}${returnSearch}`}
-          aria-label={`${stay.property.name}, ${stay.guestName} 이용 일정 상세 보기`}
-        >
-          <span>상세</span>
-          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path d="M5 12h14m-6-6 6 6-6 6" />
-          </svg>
-        </Link>
-      </div>
+      </Link>
       <details className="calendar-stay__details">
-        <summary>
-          <span>체크리스트 · 시간</span>
-          {([stay.checkIn, stay.checkOut] as const).some(
-            (checklist) => checklist.status === 'NEEDS_REVIEW',
-          ) && (
-            <span className="calendar-stay__review-alert">확인 필요</span>
-          )}
+        <summary
+          aria-label={`${time ? `${time} ` : ''}${eventLabel}, ${stay.property.name}, ${stay.guestName} 체크리스트 및 상세 시간`}
+          title="체크리스트 · 상세 시간"
+        >
           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path d="m7 10 5 5 5-5" />
           </svg>

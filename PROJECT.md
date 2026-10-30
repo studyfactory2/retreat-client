@@ -163,17 +163,31 @@ cancelled stays. Each page is a separate server snapshot; this is a current view
 not a historical report. Reload when the list changes during pagination.
 
 `screens/admin/calendar` separates the screen, fetch hook, calendar model,
-month grid and selected-day list. Date/property filters live in URL search
+month grid and selected-day agenda. Date/property filters live in URL search
 parameters. Changing the selected day within the loaded month needs no new
 calendar request. Month/property changes cancel pending requests and hide stale
 data. Failed data is never displayed as an empty calendar.
 
+The Slice 9 calendar refinement (2026-10-30) uses the calendar content width,
+not just the viewport, to choose its layout. Below 1000px, each date cell shows
+the date and a positive unique-stay count; the selected-day agenda follows the
+month. At 1000px and wider, the month uses compact property bars beside the
+agenda. A week reserves only its occupied bar lanes, up to three, with an
+overflow action that opens the complete selected-day agenda. Wide property
+bars open stay details with the existing return context. Today and the selected
+date have distinct indicators, and date buttons expose counts to assistive
+technology. Calendar/list navigation and existing filters keep their contracts.
+
 Classify date cells using the API's Seoul expected dates. A stay appears from
 its arrival through its checkout day inclusive; a midnight checkout still has a
 departure event. Same-day arrival/departure counts as one stay with two events.
-Middle days show a continuing planned schedule, not observed occupancy. Render
-checklist statuses and review reasons supplied by the API without inferring
-physical presence, late submissions or completed cleaning.
+The agenda sorts arrival/departure events by their planned Seoul time, with
+departures before arrivals at the same time. Middle days appear in a separate
+continuing group: this is a planned schedule, not observed occupancy. Checklist
+details remain collapsed until opened; the row shows the relevant review
+flag without discarding either checklist. Render checklist statuses and review
+reasons supplied by the API without inferring physical presence, late submissions
+or completed cleaning.
 
 Dashboard and calendar reuse the property-options hook and Seoul date helpers.
 Calendar loading, empty, failed/retry and expired-session states remain distinct.

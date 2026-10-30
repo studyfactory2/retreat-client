@@ -1,6 +1,7 @@
 import type { AdminCalendarStayDto } from '../../../../features/admin-calendar/admin-calendar.types';
+import { buildDayAgenda } from '../model/calendar-agenda';
 import { CalendarStayRow } from './CalendarStayRow';
-import '../styles/calendar-panels.css';
+import '../styles/calendar-agenda.css';
 
 type SelectedDayStaysProps = {
   date: string;
@@ -22,12 +23,7 @@ export function SelectedDayStays({
   const selectedDate = selectedDateFormatter.format(
     new Date(`${date}T00:00:00Z`),
   );
-  const arrivals = stays.filter(
-    (stay) => stay.checkIn.expectedDate === date,
-  ).length;
-  const departures = stays.filter(
-    (stay) => stay.checkOut.expectedDate === date,
-  ).length;
+  const agenda = buildDayAgenda(date, stays);
   return (
     <section
       className="calendar-selected"
@@ -39,28 +35,67 @@ export function SelectedDayStays({
             <time dateTime={date}>{selectedDate}</time>
           </h2>
           <span className="calendar-selected__count">
-            {stays.length.toLocaleString('ko-KR')}건
+            일정 {agenda.total.toLocaleString('ko-KR')}건
           </span>
         </div>
-        {stays.length > 0 && (
-          <p>
-            입실 예정 {arrivals.toLocaleString('ko-KR')} · 퇴실 예정{' '}
-            {departures.toLocaleString('ko-KR')}
-          </p>
+        {agenda.total > 0 && (
+          <ul
+            className="calendar-selected__summary"
+            aria-label="선택일 예정 일정"
+          >
+            <li className="calendar-selected__summary--arrival">
+              입실 <strong>{agenda.arrivals.toLocaleString('ko-KR')}</strong>
+            </li>
+            <li className="calendar-selected__summary--departure">
+              퇴실 <strong>{agenda.departures.toLocaleString('ko-KR')}</strong>
+            </li>
+            <li>
+              연속{' '}
+              <strong>
+                {agenda.continuing.length.toLocaleString('ko-KR')}
+              </strong>
+            </li>
+          </ul>
         )}
       </header>
-      {stays.length > 0 ? (
-        <ol className="calendar-selected__stays">
-          {stays.map((stay) => (
-            <li key={stay.id}>
-              <CalendarStayRow
-                stay={stay}
-                date={date}
-                returnSearch={returnSearch}
-              />
-            </li>
-          ))}
-        </ol>
+      {agenda.total > 0 ? (
+        <>
+          {agenda.timed.length > 0 && (
+            <ol
+              className="calendar-selected__stays"
+              aria-label="시간순 입실·퇴실 예정"
+            >
+              {agenda.timed.map((entry) => (
+                <li key={entry.key}>
+                  <CalendarStayRow entry={entry} returnSearch={returnSearch} />
+                </li>
+              ))}
+            </ol>
+          )}
+          {agenda.continuing.length > 0 && (
+            <section
+              className="calendar-selected__continuing"
+              aria-label="연속 일정"
+            >
+              <h3>
+                연속 일정{' '}
+                <span>
+                  {agenda.continuing.length.toLocaleString('ko-KR')}건
+                </span>
+              </h3>
+              <ul className="calendar-selected__stays">
+                {agenda.continuing.map((entry) => (
+                  <li key={entry.key}>
+                    <CalendarStayRow
+                      entry={entry}
+                      returnSearch={returnSearch}
+                    />
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+        </>
       ) : (
         <div className="calendar-selected__empty">
           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">

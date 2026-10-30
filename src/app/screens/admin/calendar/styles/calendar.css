@@ -1,7 +1,22 @@
 .admin-calendar {
   display: grid;
-  gap: 24px;
+  gap: 16px;
   min-width: 0;
+  container: calendar-workspace / inline-size;
+}
+
+.admin-calendar .calendar-workspace {
+  display: grid;
+  align-items: start;
+  gap: 16px;
+  min-width: 0;
+}
+
+@container calendar-workspace (min-width: 1000px) {
+  .admin-calendar .calendar-workspace {
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 0.5fr);
+    gap: 20px;
+  }
 }
 
 .admin-calendar :where(h1, h2, h3, p) {
@@ -57,9 +72,9 @@
 
 .admin-calendar .calendar-main {
   display: grid;
-  gap: 24px;
+  gap: 16px;
   min-width: 0;
-  padding: 24px;
+  padding: 20px;
   border: 1px solid var(--color-border);
   border-radius: 16px;
   background: var(--color-surface);
@@ -160,11 +175,15 @@
   background: #fbfcfe;
 }
 
-.admin-calendar .calendar-filters :is(input, .admin-property-select__trigger):hover {
+.admin-calendar
+  .calendar-filters
+  :is(input, .admin-property-select__trigger):hover {
   border-color: #b2c2d9;
 }
 
-.admin-calendar .calendar-filters :is(input, .admin-property-select__trigger)[aria-invalid='true'] {
+.admin-calendar
+  .calendar-filters
+  :is(input, .admin-property-select__trigger)[aria-invalid='true'] {
   border-color: var(--color-danger);
 }
 
@@ -315,45 +334,55 @@
   white-space: nowrap;
 }
 
-.admin-calendar :is(button, a, input, select, summary, [tabindex]):focus-visible {
+.admin-calendar
+  :is(button, a, input, select, summary, [tabindex]):focus-visible {
   outline: 3px solid #82aaf1;
   outline-offset: 3px;
 }
 
 @media (max-width: 760px) {
   .admin-calendar {
-    gap: 20px;
+    gap: 14px;
   }
 
   .admin-calendar .calendar-heading {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 16px;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
   }
 
   .admin-calendar .calendar-heading h1 {
-    font-size: 26px;
+    font-size: 23px;
     letter-spacing: -0.8px;
   }
 
   .admin-calendar .calendar-heading__actions {
-    width: 100%;
+    gap: 4px;
   }
 
   .admin-calendar .calendar-heading__actions > a {
-    flex: 1;
-    padding-inline: 10px;
+    padding-inline: 8px;
+    font-size: 12px;
   }
 
   .admin-calendar .calendar-main {
-    gap: 20px;
-    padding: 18px 14px;
+    gap: 12px;
+    padding: 12px;
     border-radius: 14px;
   }
 
   .admin-calendar .calendar-filters__row {
     grid-template-columns: minmax(0, 1fr) 82px;
     gap: 12px;
+  }
+
+  .admin-calendar .calendar-filters .admin-property-select > label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
 
   .admin-calendar .calendar-filters__advanced-body {
@@ -372,8 +401,9 @@
   }
 
   .admin-calendar .calendar-meta {
-    align-items: flex-start;
+    align-items: center;
     margin-top: -8px;
+    padding-top: 4px;
     font-size: 11px;
   }
 
