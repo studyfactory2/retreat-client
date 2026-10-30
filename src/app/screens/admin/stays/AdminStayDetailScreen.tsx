@@ -10,6 +10,7 @@ import { updateAdminStay } from '../../../features/admin-stays/admin-stays-api';
 import type { AdminStayDto } from '../../../features/admin-stays/admin-stays.types';
 import { Button } from '../../../shared/ui/Button/Button';
 import { PageState } from '../../../shared/ui/PageState/PageState';
+import { AdminBackButton } from '../components/AdminBackButton';
 import { StayStatusAction } from './components/StayStatusAction';
 import { StayHistory } from './components/StayHistory';
 import { isStayRevision } from '../../../features/admin-stays/admin-stays-validation';
@@ -85,6 +86,15 @@ function DetailWorkspace({
   if (resource.status !== 'ready')
     return (
       <div className="admin-stay">
+        <header className="stay-heading">
+          <div className="admin-page-heading-title">
+            <AdminBackButton
+              label={navigation.returnLabel}
+              onBack={() => navigate(navigation.returnTo)}
+            />
+            <h1>이용 일정 상세</h1>
+          </div>
+        </header>
         <PageState
           title={
             resource.status === 'loading'
@@ -100,12 +110,6 @@ function DetailWorkspace({
           {resource.status === 'error' && (
             <Button onClick={refresh}>다시 불러오기</Button>
           )}
-          <Button
-            className="admin-button-secondary"
-            onClick={() => navigate(navigation.returnTo)}
-          >
-            {navigation.returnLabel}
-          </Button>
         </PageState>
       </div>
     );
@@ -132,22 +136,22 @@ function DetailWorkspace({
     <div className="admin-stay admin-stay--detail">
       <header className="stay-heading">
         <div>
-          <h1>{stay.status === 'CANCELLED' ? '취소된 이용 일정' : '이용 일정 상세'}</h1>
+          <div className="admin-page-heading-title">
+            <AdminBackButton
+              label={navigation.returnLabel}
+              disabled={changingStatus || linkNavigation.busy || linkNavigation.pending}
+              onBack={() =>
+                linkNavigation.request(() => navigate(navigation.returnTo))
+              }
+            />
+            <h1>{stay.status === 'CANCELLED' ? '취소된 이용 일정' : '이용 일정 상세'}</h1>
+          </div>
           <p>
             {stay.property.name} · {stay.guestName}
           </p>
         </div>
         {!changingStatus && (
           <div className="stay-heading__actions">
-            <Button
-              className="admin-button-secondary"
-              disabled={linkNavigation.busy || linkNavigation.pending}
-              onClick={() =>
-                linkNavigation.request(() => navigate(navigation.returnTo))
-              }
-            >
-              {navigation.returnLabel}
-            </Button>
             <Button
               className="admin-button-secondary"
               disabled={linkNavigation.busy || linkNavigation.pending}
@@ -346,7 +350,14 @@ function StayEditor({
     <div className="admin-stay admin-stay--form">
       <header className="stay-heading">
         <div>
-          <h1>이용 일정 수정</h1>
+          <div className="admin-page-heading-title">
+            <AdminBackButton
+              label="이용 일정 상세로 돌아가기"
+              disabled={mutation.state.busy || leave.pending}
+              onBack={() => leave.askToLeave(onCancel)}
+            />
+            <h1>이용 일정 수정</h1>
+          </div>
         </div>
       </header>
       <p className="stay-banner">

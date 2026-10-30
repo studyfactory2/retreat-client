@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, useParams, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useAdminSession } from '../../../core/session/use-admin-session';
 import { useAdminPropertyOptions } from '../../../features/admin-properties/use-admin-property-options';
 import {
@@ -13,6 +13,7 @@ import type {
 import { isStayRevision } from '../../../features/admin-stays/admin-stays-validation';
 import { Button } from '../../../shared/ui/Button/Button';
 import { PageState } from '../../../shared/ui/PageState/PageState';
+import { AdminBackButton } from '../components/AdminBackButton';
 import { useAdminNavigationGuard } from '../hooks/use-admin-navigation-guard';
 import { ImportRowEditor } from './components/ImportRowEditor';
 import { ImportRows } from './components/ImportRows';
@@ -52,6 +53,7 @@ function ImportWorkspace({
   rejectSession: (token: string) => void;
 }) {
   const [search, setSearch] = useSearchParams();
+  const navigate = useNavigate();
   const filters = readImportFilters(search);
   const query = importFilterSearch(filters);
   const { resource, refresh } = useStayImport(
@@ -163,13 +165,17 @@ function ImportWorkspace({
     <div className="stay-import">
       <header className="stay-import-heading">
         <div>
-          <h1>{resource.status === 'ready' && resource.data.batch.status === 'CONFIRMED' ? '엑셀 가져오기 완료' : '엑셀 명단 검토'}</h1>
+          <div className="admin-page-heading-title">
+            <AdminBackButton
+              label="일정 목록으로 돌아가기"
+              disabled={mutation.state.busy}
+              onBack={() => navigate('/admin/stays')}
+            />
+            <h1>{resource.status === 'ready' && resource.data.batch.status === 'CONFIRMED' ? '엑셀 가져오기 완료' : '엑셀 명단 검토'}</h1>
+          </div>
           <p>{resource.status === 'ready' && resource.data.batch.status === 'CONFIRMED' ? '등록된 이용 일정을 확인해 주세요.' : '휴양소와 이용 정보를 확인해 주세요.'}</p>
         </div>
         <div className="stay-import-actions">
-          <Link className="ui-button admin-button-secondary" to="/admin/stays">
-            일정 목록
-          </Link>
           <Button
             className="admin-button-secondary"
             disabled={mutation.state.busy || resource.status === 'loading'}

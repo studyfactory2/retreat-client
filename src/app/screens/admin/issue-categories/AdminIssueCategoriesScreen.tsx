@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { appRoutes } from '../../../core/router/routes';
 import { useAdminSession } from '../../../core/session/use-admin-session';
 import type {
@@ -8,6 +8,7 @@ import type {
 } from '../../../features/admin-issue-categories/admin-issue-category.types';
 import { Button } from '../../../shared/ui/Button/Button';
 import { PageState } from '../../../shared/ui/PageState/PageState';
+import { AdminBackButton } from '../components/AdminBackButton';
 import { CategoryEditor } from './components/CategoryEditor';
 import { CategoryFilterPanel } from './components/CategoryFilterPanel';
 import { CategoryRows } from './components/CategoryRows';
@@ -150,18 +151,15 @@ function CategoryPage({
       <header className="category-heading">
         <div>
           <p className="category-heading__eyebrow">ISSUE CATEGORIES</p>
-          <h1 id="category-list-title" tabIndex={-1}>
-            이상사항 분류 관리
-          </h1>
+          <div className="admin-page-heading-title">
+            <AdminBackButton fallback={appRoutes.adminIssues} />
+            <h1 id="category-list-title" tabIndex={-1}>
+              이상사항 분류 관리
+            </h1>
+          </div>
           <p>모든 휴양소에서 함께 사용할 신고 분류를 관리하세요.</p>
         </div>
         <div className="category-actions">
-          <Link
-            className="ui-button admin-button-secondary"
-            to={appRoutes.adminIssues}
-          >
-            이상사항으로 돌아가기
-          </Link>
           <Button
             onClick={() => {
               onEditing();

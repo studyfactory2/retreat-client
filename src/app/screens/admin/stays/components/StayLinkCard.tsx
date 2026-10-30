@@ -74,12 +74,25 @@ export function StayLinkCard({
     <section
       className="stay-card stay-link"
       aria-labelledby={title}
-      aria-busy={resource.status === 'loading' || mutation.busy}
+      aria-busy={
+        resource.status === 'loading' || mutation.busy || link.reopening
+      }
     >
       <div className="stay-link__heading">
-        <h2 id={title} ref={heading} tabIndex={-1}>
-          개인 이용 링크
-        </h2>
+        <div>
+          <h2 id={title} ref={heading} tabIndex={-1}>
+            개인 이용 링크
+          </h2>
+          {current && (
+            <span
+              className={`stay-link__status${current.enabled && !mutation.blocked ? ' stay-link__status--active' : ''}`}
+            >
+              {mutation.blocked
+                ? '상태 확인 필요'
+                : stayLinkStatusLabel(current, stay)}
+            </span>
+          )}
+        </div>
         <Button
           className="admin-button-secondary"
           aria-label="링크 상태 새로고침"
@@ -97,7 +110,6 @@ export function StayLinkCard({
           새로고침
         </Button>
       </div>
-      <p>이 일정 전용 링크입니다.</p>
       {resource.status === 'loading' && (
         <p role="status">개인 이용 링크 상태를 불러오는 중입니다.</p>
       )}
@@ -119,15 +131,7 @@ export function StayLinkCard({
         <>
           <dl className="stay-link__details">
             <div>
-              <dt>링크 상태</dt>
-              <dd>
-                {mutation.blocked
-                  ? '확인 필요 · 상태 새로고침'
-                  : stayLinkStatusLabel(current, stay)}
-              </dd>
-            </div>
-            <div>
-              <dt>유효기간 · 한국 시간</dt>
+              <dt>이용 가능 기한 · 한국 시간</dt>
               <dd>
                 {current.expiresAt ? (
                   <time dateTime={current.expiresAt}>
@@ -139,7 +143,7 @@ export function StayLinkCard({
               </dd>
             </div>
             <div>
-              <dt>최근 발급·폐기</dt>
+              <dt>최근 변경</dt>
               <dd>
                 {current.updatedAt ? (
                   <time dateTime={current.updatedAt}>
@@ -151,28 +155,67 @@ export function StayLinkCard({
               </dd>
             </div>
           </dl>
-          {!confirming && (
+          {!confirming && !receipt && (
             <div className="stay-link__actions">
-              <Button
-                disabled={
-                  navigationPending ||
-                  mutation.busy ||
-                  mutation.blocked ||
-                  !canIssueStayLink(stay, current)
-                }
-                onClick={() =>
-                  setConfirmation({ action: 'issue', status: current })
-                }
-              >
-                {current.issued ? '새 링크로 교체' : '개인 링크 발급'}
-              </Button>
-              {current.issued && (
+              {current.issued && current.canReopen ? (
+                <Button
+                  loading={link.reopening}
+                  disabled={
+                    navigationPending ||
+                    mutation.busy ||
+                    mutation.blocked ||
+                    !current.enabled
+                  }
+                  onClick={() => void link.reopen()}
+                >
+                  QR · 링크 보기
+                </Button>
+              ) : (
+                !current.issued && (
+                  <Button
+                    disabled={
+                      navigationPending ||
+                      mutation.busy ||
+                      mutation.blocked ||
+                      link.reopening ||
+                      !canIssueStayLink(stay, current)
+                    }
+                    onClick={() =>
+                      setConfirmation({ action: 'issue', status: current })
+                    }
+                  >
+                    개인 링크 발급
+                  </Button>
+                )
+              )}
+            </div>
+          )}
+          {!confirming && current.issued && (
+            <details className="stay-link__manage">
+              <summary>링크 관리</summary>
+              <div className="stay-link__actions">
                 <Button
                   className="admin-button-secondary"
                   disabled={
                     navigationPending ||
                     mutation.busy ||
                     mutation.blocked ||
+                    link.reopening ||
+                    !canIssueStayLink(stay, current)
+                  }
+                  onClick={() =>
+                    setConfirmation({ action: 'issue', status: current })
+                  }
+                >
+                  새 링크로 교체
+                </Button>
+                <Button
+                  className="admin-button-secondary stay-link__revoke"
+                  disabled={
+                    navigationPending ||
+                    mutation.busy ||
+                    mutation.blocked ||
+                    link.reopening ||
                     !canRevokeStayLink(current)
                   }
                   onClick={() =>
@@ -181,25 +224,27 @@ export function StayLinkCard({
                 >
                   링크 폐기
                 </Button>
-              )}
-            </div>
+              </div>
+            </details>
           )}
           {!canIssueStayLink(stay, current) && (
             <p className="stay-link__help">
-              취소된 일정, 비활성 휴양소, 발급 가능 기간이 지난 일정에는 링크를
-              발급할 수 없습니다. 상태가 변경되었다면 최신 이용 일정을 다시
-              확인해 주세요.
+              현재 일정 상태에서는 새 링크를 발급할 수 없습니다.
             </p>
           )}
           {current.issued &&
+            !current.canReopen &&
             !receipt &&
             !mutation.busy &&
             !mutation.blocked &&
             !confirming && (
-              <p className="stay-link__help">
-                이전에 발급한 주소는 다시 조회할 수 없습니다.
+              <p className="stay-link__legacy">
+                이전 방식으로 발급한 링크는 다시 조회할 수 없습니다.
+                {current.enabled
+                  ? ' 보관한 링크는 계속 사용할 수 있습니다.'
+                  : ' 현재 링크는 이용할 수 없습니다.'}
                 {canIssueStayLink(stay, current) &&
-                  ' 보관한 주소가 없으면 새 링크로 교체해 주세요.'}
+                  ' 필요하면 링크 관리에서 교체해 주세요.'}
               </p>
             )}
         </>
@@ -227,14 +272,32 @@ export function StayLinkCard({
           {mutation.message}
         </div>
       )}
-      {receipt && !confirming && (
-        <StayLinkReceipt key={receipt.version} receipt={receipt} />
+      {link.reopenMessage && !confirming && (
+        <p className="stay-banner stay-banner--error" role="alert">
+          {link.reopenMessage}
+        </p>
       )}
-      <p className="stay-link__help">
-        이용객 정보·예정 날짜·관리자 메모 등 일정을 수정하면 기존 링크가
-        무효화됩니다. 취소한 일정을 복원해도 새 링크가 필요합니다. 링크의
-        유효기간은 퇴실 예정 시각부터 7일 후까지입니다.
-      </p>
+      {receipt && !confirming && (
+        <StayLinkReceipt
+          key={receipt.version}
+          receipt={receipt}
+          stay={stay}
+          onClose={() => {
+            link.hideReceipt();
+            requestAnimationFrame(() =>
+              heading.current?.focus({ preventScroll: true }),
+            );
+          }}
+        />
+      )}
+      <details className="stay-link__rules">
+        <summary>이용 기한과 링크 변경 안내</summary>
+        <p>
+          퇴실 예정 시각부터 7일 후까지 이용할 수 있습니다. 일정 수정·취소, 링크
+          교체·폐기 시 기존 링크는 사용할 수 없습니다. 취소한 일정을 복원해도 새
+          링크가 필요합니다.
+        </p>
+      </details>
     </section>
   );
 }

@@ -14,6 +14,7 @@ import { BrandLogo } from '../../../shared/ui/BrandLogo/BrandLogo';
 import { useAdminLogout } from '../hooks/use-admin-logout';
 import { AdminNavigation } from './components/AdminNavigation';
 import { AdminMenuIcon } from './components/AdminMenuIcon';
+import { AdminPageNavigation } from './components/AdminPageNavigation';
 import './styles/admin-layout.css';
 
 export function AdminLayout() {
@@ -49,11 +50,6 @@ export function AdminLayout() {
     // Route changes close the native surface; its close event updates state.
     drawer.current?.close();
   }, [pathname, search]);
-
-  useEffect(() => {
-    document.getElementById('main-content')?.focus({ preventScroll: true });
-    window.scrollTo({ top: 0, left: 0 });
-  }, [pathname]);
 
   useEffect(() => {
     const desktop = window.matchMedia('(min-width: 761px)');
@@ -122,8 +118,7 @@ export function AdminLayout() {
       <aside className="admin-layout__sidebar">
         <AdminNavigation />
         <Link className="admin-layout__app-guide" to={appRoutes.home}>
-          <AdminMenuIcon name="help" />
-          앱 안내
+          <AdminMenuIcon name="help" />앱 안내
         </Link>
       </aside>
 
@@ -134,7 +129,9 @@ export function AdminLayout() {
               {state.storageNotice}
             </p>
           )}
-          <Outlet />
+          <AdminPageNavigation key={`${state.user.id}:${state.expiresAt}`}>
+            <Outlet />
+          </AdminPageNavigation>
         </div>
       </main>
 
@@ -189,7 +186,9 @@ export function AdminLayout() {
           to={appRoutes.adminAccount}
           onClick={() => closeDrawer()}
           aria-label={`${state.user.name} 내 계정`}
-          aria-current={pathname === appRoutes.adminAccount ? 'page' : undefined}
+          aria-current={
+            pathname === appRoutes.adminAccount ? 'page' : undefined
+          }
         >
           <span className="admin-layout__avatar" aria-hidden="true">
             <AdminMenuIcon name="account" />
@@ -214,8 +213,7 @@ export function AdminLayout() {
             to={appRoutes.home}
             onClick={() => closeDrawer()}
           >
-            <AdminMenuIcon name="help" />
-            앱 안내
+            <AdminMenuIcon name="help" />앱 안내
           </Link>
           <button
             className="admin-layout__logout"

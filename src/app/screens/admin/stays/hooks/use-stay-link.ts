@@ -9,6 +9,7 @@ import { ApiRequestError } from '../../../../core/api/api-error';
 import {
   getAdminStayLink,
   issueAdminStayLink,
+  reopenAdminStayLink,
   revokeAdminStayLink,
 } from '../../../../features/admin-stay-links/admin-stay-link-api';
 import type {
@@ -42,6 +43,8 @@ type Workspace = {
   resource: Resource;
   mutation: Mutation;
   receipt: AdminStayLinkIssue | null;
+  reopening?: boolean;
+  reopenMessage?: string;
 };
 const idleMutation: Mutation = { busy: false, blocked: false };
 
@@ -71,10 +74,11 @@ function retainReceipt(
 }
 
 function expiresLocally(status: AdminStayLinkStatus): AdminStayLinkStatus {
-  // Project safe status fields: an issue response also contains its one-time URL.
+  // Keep credential URLs out of status data.
   return {
     stayId: status.stayId,
     issued: status.issued,
+    canReopen: status.canReopen,
     enabled: Boolean(
       status.enabled &&
       status.expiresAt &&
@@ -99,6 +103,7 @@ export function useStayLink(
   const scope = useRef<{ key: string; token: string } | null>({ key, token });
   const readRequest = useRef<AbortController | null>(null);
   const writeRequest = useRef<AbortController | null>(null);
+  const revealRequest = useRef<AbortController | null>(null);
   const locked = useRef(false);
   const unresolvedMutation = useRef(false);
 
@@ -109,6 +114,7 @@ export function useStayLink(
       scope.current = null;
       readRequest.current?.abort();
       writeRequest.current?.abort();
+      revealRequest.current?.abort();
     };
   }, [key, token]);
 
@@ -124,6 +130,8 @@ export function useStayLink(
   const refresh = useCallback(async () => {
     if (!ownsScope() || writeRequest.current) return;
     readRequest.current?.abort();
+    revealRequest.current?.abort();
+    revealRequest.current = null;
     const controller = new AbortController();
     readRequest.current = controller;
     const previous = current.current;
@@ -215,8 +223,7 @@ export function useStayLink(
             '이용 일정과 개인 이용 링크 상태를 확인하지 못했습니다. 다시 불러와 주세요.',
         },
         mutation: { busy: false, blocked: true },
-        // A failed GET cannot prove the invitation changed. Keep its one-time
-        // URL private until a successful refresh verifies the same invitation.
+        // Keep an existing receipt private until a successful status refresh.
         receipt:
           !(error instanceof ApiRequestError && error.status === 404) &&
           receipt?.expiresAt &&
@@ -243,8 +250,27 @@ export function useStayLink(
     return () => {
       readRequest.current?.abort();
       writeRequest.current?.abort();
+      revealRequest.current?.abort();
       readRequest.current = null;
       writeRequest.current = null;
+      revealRequest.current = null;
+    };
+  }, [refresh]);
+
+  useEffect(() => {
+    const revalidate = () => {
+      if (document.visibilityState === 'visible') void refresh();
+    };
+    const restore = (event: PageTransitionEvent) => {
+      if (event.persisted) revalidate();
+    };
+    window.addEventListener('focus', revalidate);
+    window.addEventListener('pageshow', restore);
+    document.addEventListener('visibilitychange', revalidate);
+    return () => {
+      window.removeEventListener('focus', revalidate);
+      window.removeEventListener('pageshow', restore);
+      document.removeEventListener('visibilitychange', revalidate);
     };
   }, [refresh]);
 
@@ -305,6 +331,120 @@ export function useStayLink(
     };
   }, [deadline, expiry, receiptExpiry, key, token, ownsScope, publish]);
 
+  async function reopen() {
+    const previous = current.current;
+    if (
+      !ownsScope() ||
+      locked.current ||
+      readRequest.current ||
+      writeRequest.current ||
+      revealRequest.current ||
+      previous?.key !== key ||
+      previous.owner !== token ||
+      previous.resource.status !== 'ready' ||
+      !previous.resource.data.canReopen ||
+      !previous.resource.data.enabled ||
+      !previous.resource.data.expiresAt ||
+      Date.parse(previous.resource.data.expiresAt) <= Date.now()
+    )
+      return;
+    const status = previous.resource.data;
+    const controller = new AbortController();
+    revealRequest.current = controller;
+    publish({
+      ...previous,
+      receipt: null,
+      reopening: true,
+      reopenMessage: undefined,
+    });
+    try {
+      const receipt = await reopenAdminStayLink(
+        stay.id,
+        status,
+        stay.checkOutAt,
+        token,
+        controller.signal,
+      );
+      if (
+        controller.signal.aborted ||
+        !ownsScope() ||
+        revealRequest.current !== controller
+      )
+        return;
+      const latest = current.current;
+      if (
+        latest?.resource.status !== 'ready' ||
+        !sameStayLinkStatus(latest.resource.data, status)
+      )
+        return;
+      publish({
+        ...latest,
+        receipt: retainReceipt(receipt, status),
+        reopening: false,
+      });
+    } catch (error: unknown) {
+      if (
+        controller.signal.aborted ||
+        !ownsScope() ||
+        revealRequest.current !== controller
+      )
+        return;
+      if (
+        error instanceof ApiRequestError &&
+        (error.status === 401 || error.status === 403)
+      ) {
+        locked.current = true;
+        publish({
+          ...previous,
+          receipt: null,
+          reopening: false,
+          mutation: {
+            busy: false,
+            blocked: true,
+            tone: 'error',
+            message: '다시 로그인해 주세요.',
+          },
+        });
+        rejectSession(token);
+        return;
+      }
+      const stale =
+        error instanceof ApiRequestError &&
+        (error.status === 404 ||
+          error.status === 409 ||
+          error.code === 'INVALID_STAY_LINK_RESPONSE');
+      if (stale) locked.current = true;
+      publish({
+        ...previous,
+        receipt: null,
+        reopening: false,
+        mutation: stale ? { busy: false, blocked: true } : previous.mutation,
+        reopenMessage: stale
+          ? '링크 상태가 변경되었습니다. 새로고침 후 다시 확인해 주세요.'
+          : '링크를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요. 기존 링크는 교체되지 않았습니다.',
+      });
+    } finally {
+      if (revealRequest.current === controller) revealRequest.current = null;
+      const latest = current.current;
+      if (
+        ownsScope() &&
+        latest?.key === key &&
+        latest.owner === token &&
+        latest.reopening &&
+        !revealRequest.current
+      ) {
+        publish({ ...latest, reopening: false });
+      }
+    }
+  }
+
+  function hideReceipt() {
+    const previous = current.current;
+    if (ownsScope() && previous?.key === key && previous.owner === token) {
+      publish({ ...previous, receipt: null, reopenMessage: undefined });
+    }
+  }
+
   async function mutate(
     action: StayLinkAction,
     confirmed: AdminStayLinkStatus,
@@ -315,6 +455,7 @@ export function useStayLink(
       locked.current ||
       readRequest.current ||
       writeRequest.current ||
+      revealRequest.current ||
       previous?.key !== key ||
       previous.owner !== token ||
       previous.resource.status !== 'ready'
@@ -369,7 +510,7 @@ export function useStayLink(
           tone: 'success',
           message:
             action === 'issue'
-              ? '개인 이용 링크를 발급했습니다. 이 화면을 떠나기 전에 주소를 복사해 보관해 주세요.'
+              ? '개인 이용 링크를 발급했습니다.'
               : '개인 이용 링크를 폐기했습니다. 이전 링크와 연결된 작성 중 접근은 사용할 수 없습니다.',
         },
       });
@@ -425,6 +566,10 @@ export function useStayLink(
         ? retainReceipt(visible.receipt, visible.resource.data)
         : null,
     refresh,
+    reopen,
+    hideReceipt,
+    reopening: visible?.reopening ?? false,
+    reopenMessage: visible?.reopenMessage,
     mutate,
     isBusy: () => ownsScope() && writeRequest.current !== null,
     hasPendingChanges: () => {
@@ -435,6 +580,7 @@ export function useStayLink(
           unresolvedMutation.current ||
           (latest?.key === key &&
             latest.owner === token &&
+            !latest.receipt?.canReopen &&
             latest.receipt?.expiresAt &&
             Date.parse(latest.receipt.expiresAt) > Date.now())),
       );
@@ -445,6 +591,7 @@ export function useStayLink(
         ownsScope() &&
         latest?.key === key &&
         latest.owner === token &&
+        !latest.receipt?.canReopen &&
         latest.receipt?.expiresAt &&
         Date.parse(latest.receipt.expiresAt) > Date.now(),
       );

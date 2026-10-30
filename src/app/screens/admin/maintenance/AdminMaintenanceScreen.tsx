@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { AdminBackButton } from '../components/AdminBackButton';
 import { useAdminSession } from '../../../core/session/use-admin-session';
 import { useAdminPropertyOptions } from '../../../features/admin-properties/use-admin-property-options';
 import type { AdminMaintenanceInput } from '../../../features/admin-maintenance/admin-maintenance.types';
@@ -41,7 +42,11 @@ function MaintenanceWorkspace({
 }) {
   const [search, setSearch] = useSearchParams();
   const [filterReset, setFilterReset] = useState(0);
-  const filterFocus = useRef<{ element: HTMLElement; target: string; query: string } | null>(null);
+  const filterFocus = useRef<{
+    element: HTMLElement;
+    target: string;
+    query: string;
+  } | null>(null);
   const filters = readMaintenanceFilters(search);
   const query = maintenanceSearch(filters);
   const invalid = Object.keys(maintenanceFilterErrors(filters)).length > 0;
@@ -54,7 +59,9 @@ function MaintenanceWorkspace({
   const properties = useAdminPropertyOptions(token, rejectSession);
   const appliedFilters = maintenanceAppliedFilters(
     filters,
-    properties.resource.status === 'ready' ? properties.resource.data : undefined,
+    properties.resource.status === 'ready'
+      ? properties.resource.data
+      : undefined,
   );
   const correctedPage =
     resource.status === 'ready' &&
@@ -76,14 +83,20 @@ function MaintenanceWorkspace({
     // Reset state and URL navigation may commit separately. Restore focus after both.
     if (!previous || previous.query !== query) return;
     filterFocus.current = null;
-    if (!previous.element.isConnected && document.activeElement === document.body) {
+    if (
+      !previous.element.isConnected &&
+      document.activeElement === document.body
+    ) {
       document.getElementById(previous.target)?.focus({ preventScroll: true });
     }
   }, [filterReset, query]);
   function rememberFilterFocus(nextQuery: string) {
     filterFocus.current = null;
     const active = document.activeElement;
-    if (active instanceof HTMLElement && active.closest('#maintenance-filters')) {
+    if (
+      active instanceof HTMLElement &&
+      active.closest('#maintenance-filters')
+    ) {
       filterFocus.current = {
         element: active,
         query: nextQuery,
@@ -93,8 +106,15 @@ function MaintenanceWorkspace({
             ? 'maintenance-period-toggle'
             : active.id || 'maintenance-period-toggle',
       };
-    } else if (active instanceof HTMLButtonElement && active.form?.id === 'maintenance-filters') {
-      filterFocus.current = { element: active, target: 'maintenance-period-toggle', query: nextQuery };
+    } else if (
+      active instanceof HTMLButtonElement &&
+      active.form?.id === 'maintenance-filters'
+    ) {
+      filterFocus.current = {
+        element: active,
+        target: 'maintenance-period-toggle',
+        query: nextQuery,
+      };
     }
   }
   function apply(next: AdminMaintenanceInput) {
@@ -105,30 +125,56 @@ function MaintenanceWorkspace({
   function reset() {
     rememberFilterFocus('');
     setFilterReset((value) => value + 1);
-    setSearch(maintenanceSearch({ page: 1, dateField: 'STARTED', view: 'ALL' }));
+    setSearch(
+      maintenanceSearch({ page: 1, dateField: 'STARTED', view: 'ALL' }),
+    );
   }
-  const busy = !invalid && (resource.status === 'loading' || correctedPage !== null);
+  const busy =
+    !invalid && (resource.status === 'loading' || correctedPage !== null);
   return (
     <div className="admin-directory admin-maintenance">
       <header className="maintenance-heading">
-        <h1>청소·정비</h1>
+        <div className="admin-page-heading-title">
+          <AdminBackButton />
+          <h1>청소·정비</h1>
+        </div>
       </header>
       <MaintenanceFilters
         key={`${query}:${filterReset}`}
         input={filters}
-        properties={properties.resource.status === 'ready' ? properties.resource.data : undefined}
+        properties={
+          properties.resource.status === 'ready'
+            ? properties.resource.data
+            : undefined
+        }
         propertiesLoading={properties.resource.status === 'loading'}
         propertyError={properties.resource.status === 'error'}
         onApply={apply}
         onReset={reset}
-        count={!invalid && !busy && resource.status === 'ready' ? resource.data.total : undefined}
+        count={
+          !invalid && !busy && resource.status === 'ready'
+            ? resource.data.total
+            : undefined
+        }
         busy={busy}
-        onRefresh={() => { refresh(); properties.refresh(); }}
+        onRefresh={() => {
+          refresh();
+          properties.refresh();
+        }}
       />
       {properties.resource.status === 'error' && (
-        <div id="maintenance-property-error" className="maintenance-banner" role="alert">
-          <p>휴양소 목록을 불러오지 못했습니다. {properties.resource.message}</p>
-          <Button className="admin-button-secondary" onClick={properties.refresh}>
+        <div
+          id="maintenance-property-error"
+          className="maintenance-banner"
+          role="alert"
+        >
+          <p>
+            휴양소 목록을 불러오지 못했습니다. {properties.resource.message}
+          </p>
+          <Button
+            className="admin-button-secondary"
+            onClick={properties.refresh}
+          >
             다시 불러오기
           </Button>
         </div>
@@ -137,14 +183,20 @@ function MaintenanceWorkspace({
         className={`maintenance-panel${!invalid && !busy && resource.status === 'ready' && resource.data.items.length > 0 ? ' maintenance-panel--workspace' : ''}`}
         aria-labelledby="maintenance-results-title"
       >
-        <h2 id="maintenance-results-title" className="maintenance-sr-only">청소·정비 기록</h2>
+        <h2 id="maintenance-results-title" className="maintenance-sr-only">
+          청소·정비 기록
+        </h2>
         {invalid ? (
           <AdminListState
             title="조회 조건을 확인해 주세요"
             description="표시된 조건을 수정한 뒤 조회해 주세요."
             error
           >
-            <Button type="reset" form="maintenance-filters" className="admin-button-secondary">
+            <Button
+              type="reset"
+              form="maintenance-filters"
+              className="admin-button-secondary"
+            >
               조회 조건 초기화
             </Button>
           </AdminListState>
@@ -169,26 +221,43 @@ function MaintenanceWorkspace({
                 title="조건에 맞는 정비 기록이 없습니다"
                 description="다른 휴양소나 기간을 선택해 주세요."
               >
-                <Button type="reset" form="maintenance-filters" className="admin-button-secondary">
+                <Button
+                  type="reset"
+                  form="maintenance-filters"
+                  className="admin-button-secondary"
+                >
                   조회 조건 초기화
                 </Button>
               </AdminListState>
             ) : (
-              <MaintenanceRows key={query} items={resource.data.items} filters={filters} />
+              <MaintenanceRows
+                key={query}
+                items={resource.data.items}
+                filters={filters}
+              />
             )}
             {resource.data.totalPages > 1 && (
-              <nav className="maintenance-pagination" aria-label="청소·정비 목록 페이지">
+              <nav
+                className="maintenance-pagination"
+                aria-label="청소·정비 목록 페이지"
+              >
                 <Button
                   className="admin-button-secondary"
                   disabled={filters.page <= 1}
                   onClick={() => apply({ ...filters, page: filters.page - 1 })}
-                >이전</Button>
-                <span aria-current="page">{filters.page} / {resource.data.totalPages} 페이지</span>
+                >
+                  이전
+                </Button>
+                <span aria-current="page">
+                  {filters.page} / {resource.data.totalPages} 페이지
+                </span>
                 <Button
                   className="admin-button-secondary"
                   disabled={filters.page >= resource.data.totalPages}
                   onClick={() => apply({ ...filters, page: filters.page + 1 })}
-                >다음</Button>
+                >
+                  다음
+                </Button>
               </nav>
             )}
           </>

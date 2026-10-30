@@ -1,9 +1,11 @@
 import { useEffect, useLayoutEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { appRoutes } from '../../../core/router/routes';
 import { useAdminSession } from '../../../core/session/use-admin-session';
 import { useAdminPropertyOptions } from '../../../features/admin-properties/use-admin-property-options';
 import { Button } from '../../../shared/ui/Button/Button';
 import { PageState } from '../../../shared/ui/PageState/PageState';
+import { AdminBackButton } from '../components/AdminBackButton';
 import { SubmissionListFilters } from './components/SubmissionListFilters';
 import { SubmissionRows } from './components/SubmissionRows';
 import {
@@ -98,7 +100,24 @@ function SubmissionListWorkspace({
   return (
     <div className="admin-submissions">
       <header className="submission-heading">
-        <h1>제출 기록</h1>
+        <div className="admin-page-heading-title">
+          <AdminBackButton fallback={appRoutes.admin} />
+          <h1>제출 기록</h1>
+        </div>
+        <Button
+          className="admin-button-ghost submission-refresh"
+          aria-label="제출 기록 새로고침"
+          title="새로고침"
+          disabled={!invalidFilters && resource.status === 'loading'}
+          onClick={() => {
+            refresh();
+            properties.refresh();
+          }}
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M20 7v5h-5M4 17v-5h5M6.1 7a7 7 0 0 1 11.6-1.5L20 8M4 16l2.3 2.5A7 7 0 0 0 17.9 17" />
+          </svg>
+        </Button>
       </header>
       {input.stayId && (
         <div className="submission-linked-filter">
@@ -164,20 +183,6 @@ function SubmissionListWorkspace({
               <strong role="status">{resource.data.total.toLocaleString('ko-KR')}건</strong>
             )}
           </h2>
-          <Button
-            className="admin-button-ghost submission-refresh"
-            aria-label="제출 기록 새로고침"
-            title="새로고침"
-            disabled={!invalidFilters && resource.status === 'loading'}
-            onClick={() => {
-              refresh();
-              properties.refresh();
-            }}
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path d="M20 7v5h-5M4 17v-5h5M6.1 7a7 7 0 0 1 11.6-1.5L20 8M4 16l2.3 2.5A7 7 0 0 0 17.9 17" />
-            </svg>
-          </Button>
         </div>
         {invalidFilters ? (
           <div className="submission-banner" role="alert">

@@ -10,6 +10,7 @@ import { getAdminProperty } from '../../../../features/admin-properties/admin-pr
 import type { AdminPropertyDto } from '../../../../features/admin-properties/admin-property-management.types';
 import {
   getAdminPropertyQr,
+  getAdminPropertyQrLink,
   rotateAdminPropertyQr,
 } from '../../../../features/admin-property-qr/admin-property-qr-api';
 import type {
@@ -41,20 +42,9 @@ type WorkspaceState = {
   resource: Resource;
   mutation: Mutation;
   receipts: Receipts;
+  openingFlow: QrFlow | null;
 };
 const idleMutation: Mutation = { busyFlow: null, blocked: false };
-
-function reconcileReceipts(receipts: Receipts, qr: PropertyQrStatus): Receipts {
-  if (!qr.propertyIsActive) return {};
-  const retained: Receipts = {};
-  for (const flow of ['GUEST', 'STAFF'] as const) {
-    const issue = receipts[flow];
-    const state = qr[qrFlowKey(flow)];
-    if (issue && state.enabled && issue.rotatedAt === state.rotatedAt)
-      retained[flow] = issue;
-  }
-  return retained;
-}
 
 export function usePropertyQr(
   propertyId: string,
@@ -69,6 +59,7 @@ export function usePropertyQr(
   });
   const readRequest = useRef<AbortController | null>(null);
   const writeRequest = useRef<AbortController | null>(null);
+  const linkRequest = useRef<AbortController | null>(null);
   const locked = useRef(false);
 
   useLayoutEffect(() => {
@@ -77,6 +68,7 @@ export function usePropertyQr(
       scope.current = null;
       readRequest.current?.abort();
       writeRequest.current?.abort();
+      linkRequest.current?.abort();
     };
   }, [propertyId, token]);
 
@@ -93,12 +85,14 @@ export function usePropertyQr(
   const refresh = useCallback(async () => {
     if (!ownsScope() || writeRequest.current) return;
     readRequest.current?.abort();
+    linkRequest.current?.abort();
+    linkRequest.current = null;
     const controller = new AbortController();
     readRequest.current = controller;
     const previous = current.current;
     const sameOwner =
       previous?.propertyId === propertyId && previous.owner === token;
-    const receipts = sameOwner ? previous.receipts : {};
+    const receipts: Receipts = {};
     const mutation = sameOwner ? previous.mutation : idleMutation;
     publish({
       propertyId,
@@ -106,6 +100,7 @@ export function usePropertyQr(
       resource: { status: 'loading' },
       receipts,
       mutation,
+      openingFlow: null,
     });
     try {
       const results = await Promise.allSettled([
@@ -140,8 +135,9 @@ export function usePropertyQr(
           status: 'ready',
           data: { property: propertyResult.value, qr: qrResult.value },
         },
-        receipts: reconcileReceipts(receipts, qrResult.value),
+        receipts,
         mutation: idleMutation,
+        openingFlow: null,
       });
     } catch {
       if (
@@ -160,6 +156,7 @@ export function usePropertyQr(
         },
         receipts,
         mutation,
+        openingFlow: null,
       });
     } finally {
       if (readRequest.current === controller) readRequest.current = null;
@@ -172,8 +169,10 @@ export function usePropertyQr(
     return () => {
       readRequest.current?.abort();
       writeRequest.current?.abort();
+      linkRequest.current?.abort();
       readRequest.current = null;
       writeRequest.current = null;
+      linkRequest.current = null;
     };
   }, [refresh]);
 
@@ -184,6 +183,7 @@ export function usePropertyQr(
       locked.current ||
       readRequest.current ||
       writeRequest.current ||
+      linkRequest.current ||
       previous?.propertyId !== propertyId ||
       previous.owner !== token ||
       previous.resource.status !== 'ready' ||
@@ -220,17 +220,20 @@ export function usePropertyQr(
               [qrFlowKey(flow)]: {
                 issued: true,
                 enabled: true,
+                canReopen: issue.canReopen,
                 rotatedAt: issue.rotatedAt,
               },
             },
           },
         },
-        receipts: { ...previous.receipts, [flow]: issue },
+        receipts: { [flow]: issue },
         mutation: {
           busyFlow: null,
           blocked: false,
           tone: 'success',
-          message: `${qrFlowLabels[flow]} QR을 발급했습니다. 이 화면을 떠나기 전에 주소나 QR 이미지를 보관해 주세요.`,
+          message: issue.canReopen
+            ? `${qrFlowLabels[flow]} QR을 발급했습니다. 다음에도 QR 열기로 다시 확인할 수 있습니다.`
+            : `${qrFlowLabels[flow]} QR을 발급했습니다. 이 주소는 다시 열 수 없으니 지금 복사하거나 QR을 저장해 주세요.`,
         },
       });
     } catch (error: unknown) {
@@ -263,6 +266,90 @@ export function usePropertyQr(
     }
   }
 
+  function closePreview() {
+    linkRequest.current?.abort();
+    linkRequest.current = null;
+    const previous = current.current;
+    if (ownsScope() && previous && previous.owner === token)
+      publish({ ...previous, receipts: {}, openingFlow: null });
+  }
+
+  async function reopen(flow: QrFlow) {
+    const previous = current.current;
+    if (
+      !ownsScope() ||
+      locked.current ||
+      readRequest.current ||
+      writeRequest.current ||
+      linkRequest.current ||
+      previous?.propertyId !== propertyId ||
+      previous.owner !== token ||
+      previous.resource.status !== 'ready'
+    )
+      return;
+    const qrState = previous.resource.data.qr[qrFlowKey(flow)];
+    if (!qrState.enabled || !qrState.canReopen || !qrState.rotatedAt) return;
+    const controller = new AbortController();
+    linkRequest.current = controller;
+    publish({
+      ...previous,
+      receipts: {},
+      openingFlow: flow,
+      mutation: idleMutation,
+    });
+    try {
+      const issue = await getAdminPropertyQrLink(
+        propertyId,
+        flow,
+        qrState.rotatedAt,
+        token,
+        controller.signal,
+      );
+      if (
+        controller.signal.aborted ||
+        !ownsScope() ||
+        linkRequest.current !== controller
+      )
+        return;
+      publish({
+        ...previous,
+        receipts: { [flow]: issue },
+        openingFlow: null,
+        mutation: idleMutation,
+      });
+    } catch (error: unknown) {
+      if (
+        controller.signal.aborted ||
+        !ownsScope() ||
+        linkRequest.current !== controller
+      )
+        return;
+      if (
+        error instanceof ApiRequestError &&
+        (error.status === 401 || error.status === 403)
+      ) {
+        publish({ ...previous, receipts: {}, openingFlow: null });
+        locked.current = true;
+        rejectSession(token);
+        return;
+      }
+      publish({
+        ...previous,
+        receipts: {},
+        openingFlow: null,
+        mutation: {
+          busyFlow: null,
+          blocked: false,
+          tone: 'error',
+          message:
+            'QR을 열지 못했습니다. 최신 상태를 확인한 뒤 다시 열어 주세요. 기존 QR은 자동으로 교체되지 않습니다.',
+        },
+      });
+    } finally {
+      if (linkRequest.current === controller) linkRequest.current = null;
+    }
+  }
+
   const visible =
     state?.propertyId === propertyId && state.owner === token
       ? state
@@ -271,16 +358,19 @@ export function usePropertyQr(
     resource: visible?.resource ?? { status: 'loading' as const },
     mutation: visible?.mutation ?? idleMutation,
     receipts: visible?.receipts ?? {},
+    openingFlow: visible?.openingFlow ?? null,
+    closePreview,
+    reopen,
     refresh,
     rotate,
     isBusy: () => ownsScope() && writeRequest.current !== null,
-    hasReceipts: () => {
+    hasOneTimeReceipt: () => {
       const latest = current.current;
       return Boolean(
         ownsScope() &&
         latest?.propertyId === propertyId &&
         latest.owner === token &&
-        (latest.receipts.GUEST || latest.receipts.STAFF),
+        Object.values(latest.receipts).some((issue) => !issue.canReopen),
       );
     },
     hasPendingChanges: () => {
@@ -291,8 +381,9 @@ export function usePropertyQr(
           (latest?.propertyId === propertyId &&
             latest.owner === token &&
             (latest.mutation.blocked ||
-              latest.receipts.GUEST ||
-              latest.receipts.STAFF))),
+              Object.values(latest.receipts).some(
+                (issue) => !issue.canReopen,
+              )))),
       );
     },
   };

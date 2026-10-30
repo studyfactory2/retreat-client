@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import { AdminBackButton } from '../components/AdminBackButton';
 import { appRoutes } from '../../../core/router/routes';
 import { useAdminSession } from '../../../core/session/use-admin-session';
 import type { StaffDeactivationAudit } from '../../../features/admin-staff/admin-staff-handover.types';
@@ -82,13 +83,13 @@ function HandoverWorkspace({
   return (
     <div className="staff-handover">
       <header className="staff-handover__heading">
-        <Link className="staff-handover__back" to={detailUrl}>
-          ← 직원 정보
-        </Link>
         <div className="staff-handover__title">
-          <h1 ref={heading} tabIndex={-1}>
-            {finished ? '직원 인계 기록' : '담당 인계 · 비활성화'}
-          </h1>
+          <div className="admin-page-heading-title">
+            <AdminBackButton fallback={detailUrl} disabled={flow.busy} />
+            <h1 ref={heading} tabIndex={-1}>
+              {finished ? '직원 인계 기록' : '담당 인계 · 비활성화'}
+            </h1>
+          </div>
           <span>{preview.staff.name}</span>
         </div>
         <p>

@@ -38,7 +38,6 @@ export function SubmissionRows({
                 <span className="submission-row-identity">
                   <strong className="submission-property-name">{item.property.name}</strong>
                   <span className="submission-row-context">
-                    <span className="submission-compact-type">{typeLabel}</span>
                     <time className="submission-compact-date" dateTime={item.visitDate}>{date}</time>
                     <span className="submission-row-author">{item.author.name}</span>
                   </span>
@@ -46,7 +45,7 @@ export function SubmissionRows({
                 <time className="submission-row-date" dateTime={item.visitDate}>{date}</time>
                 <span className="submission-row-status">
                   {item.abnormalItemCount > 0 ? (
-                    <span className="submission-abnormal">이상 응답 {item.abnormalItemCount}</span>
+                    <span className="submission-abnormal">이상 응답 {item.abnormalItemCount.toLocaleString('ko-KR')}</span>
                   ) : (
                     <span className="submission-no-abnormal">없음</span>
                   )}

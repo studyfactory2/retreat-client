@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useRef } from 'react';
 import { Link, useLocation, useSearchParams } from 'react-router-dom';
+import { AdminBackButton } from '../components/AdminBackButton';
 import { appRoutes } from '../../../core/router/routes';
 import { useAdminSession } from '../../../core/session/use-admin-session';
 import { isStaffId } from '../../../features/admin-staff/admin-staff-validation';
@@ -93,9 +94,23 @@ function StaffWorkspace({
   return (
     <div className="admin-directory admin-staff-directory">
       <header className="staff-directory-heading">
-        <h1>직원 관리</h1>
-        <Link className="ui-button" to={appRoutes.adminStaffCreate + returnSearch}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+        <div className="admin-page-heading-title">
+          <AdminBackButton />
+          <h1>직원 관리</h1>
+        </div>
+        <Link
+          className="ui-button"
+          to={appRoutes.adminStaffCreate + returnSearch}
+        >
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            aria-hidden="true"
+          >
+            <path d="M12 5v14M5 12h14" />
+          </svg>
           직원 등록
         </Link>
       </header>
@@ -129,7 +144,10 @@ function StaffWorkspace({
           setSearch(nextSearch);
         }}
       />
-      <section className="staff-directory-panel" aria-labelledby="staff-results-title">
+      <section
+        className="staff-directory-panel"
+        aria-labelledby="staff-results-title"
+      >
         <div className="staff-directory-summary">
           <h2 id="staff-results-title" aria-live="polite">
             {data && correctedPage === null ? (
@@ -149,7 +167,16 @@ function StaffWorkspace({
             disabled={resource.status === 'loading' || correctedPage !== null}
             aria-label="직원 목록 새로고침"
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5" /><path d="M6.1 7a7 7 0 0 1 11.55-2L20 8M4 16l2.35 3A7 7 0 0 0 17.9 17" /></svg>
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              aria-hidden="true"
+            >
+              <path d="M20 7v5h-5M4 17v-5h5" />
+              <path d="M6.1 7a7 7 0 0 1 11.55-2L20 8M4 16l2.35 3A7 7 0 0 0 17.9 17" />
+            </svg>
           </Button>
         </div>
         {resource.status === 'loading' || correctedPage !== null ? (
@@ -203,7 +230,11 @@ function StaffWorkspace({
                   <span>상태</span>
                   <span />
                 </div>
-                <ul className="staff-directory-rows" role="list" aria-label="직원 목록">
+                <ul
+                  className="staff-directory-rows"
+                  role="list"
+                  aria-label="직원 목록"
+                >
                   {resource.data.items.map((staff) => (
                     <li key={staff.id}>
                       <StaffCard
@@ -219,12 +250,16 @@ function StaffWorkspace({
               label="직원 목록 페이지"
               page={filters.page}
               totalPages={resource.data.totalPages}
-              onPage={(page) => setSearch(staffListSearch({ ...filters, page }))}
+              onPage={(page) =>
+                setSearch(staffListSearch({ ...filters, page }))
+              }
             />
           </>
         )}
       </section>
-      <p className="staff-directory-note">담당 휴양소에는 비활성 휴양소도 포함됩니다.</p>
+      <p className="staff-directory-note">
+        담당 휴양소에는 비활성 휴양소도 포함됩니다.
+      </p>
     </div>
   );
 }

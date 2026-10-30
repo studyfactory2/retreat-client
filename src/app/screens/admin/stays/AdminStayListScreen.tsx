@@ -6,6 +6,7 @@ import { useAdminPropertyOptions } from '../../../features/admin-properties/use-
 import type { GetAdminStaysInput } from '../../../features/admin-stays/admin-stay-management.types';
 import { Button } from '../../../shared/ui/Button/Button';
 import { AdminListState } from '../components/AdminListState';
+import { AdminBackButton } from '../components/AdminBackButton';
 import { AdminListPagination } from '../components/AdminListPagination';
 import { StayListCard } from './components/StayListCard';
 import { StayListFilters } from './components/StayListFilters';
@@ -71,7 +72,10 @@ function StayListWorkspace({
     <div className="admin-stay-list admin-directory">
       <header className="stay-list-heading">
         <div>
-          <h1>전체 일정</h1>
+          <div className="admin-page-heading-title">
+            <AdminBackButton />
+            <h1>전체 일정</h1>
+          </div>
         </div>
         <div className="stay-list-heading__actions">
           <Link

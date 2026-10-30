@@ -19,6 +19,8 @@ function readQrState(value: unknown, propertyIsActive: boolean): QrState {
     !isRecord(value) ||
     typeof value.issued !== 'boolean' ||
     typeof value.enabled !== 'boolean' ||
+    (value.canReopen !== undefined && typeof value.canReopen !== 'boolean') ||
+    (value.canReopen === true && !value.issued) ||
     (value.rotatedAt !== null && !isQrTimestamp(value.rotatedAt)) ||
     value.issued !== (value.rotatedAt !== null) ||
     value.enabled !== (propertyIsActive && value.issued)
@@ -27,6 +29,7 @@ function readQrState(value: unknown, propertyIsActive: boolean): QrState {
   return {
     issued: value.issued,
     enabled: value.enabled,
+    canReopen: value.canReopen === true,
     rotatedAt: value.rotatedAt,
   };
 }
@@ -94,6 +97,7 @@ export function readQrIssue(
     value.propertyId.toLowerCase() !== expectedId.toLowerCase() ||
     (expectedFlow !== 'GUEST' && expectedFlow !== 'STAFF') ||
     value.flow !== expectedFlow ||
+    (value.canReopen !== undefined && typeof value.canReopen !== 'boolean') ||
     !isQrTimestamp(value.rotatedAt) ||
     (expectedRotatedAt !== null &&
       (!isQrTimestamp(expectedRotatedAt) ||
@@ -106,5 +110,29 @@ export function readQrIssue(
     flow: expectedFlow,
     url: value.url,
     rotatedAt: value.rotatedAt,
+    canReopen: value.canReopen === true,
   };
+}
+
+export function readCurrentQrIssue(
+  value: unknown,
+  expectedId: string,
+  expectedFlow: QrFlow,
+  expectedRotatedAt: string,
+  expectedFrontendOrigin: string,
+): QrIssue {
+  const issue = readQrIssue(
+    value,
+    expectedId,
+    expectedFlow,
+    null,
+    expectedFrontendOrigin,
+  );
+  if (
+    !isQrTimestamp(expectedRotatedAt) ||
+    issue.rotatedAt !== expectedRotatedAt ||
+    !issue.canReopen
+  )
+    throw invalidQrResponse();
+  return issue;
 }

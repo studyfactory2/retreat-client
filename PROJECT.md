@@ -142,11 +142,13 @@ plus administrator linking of eligible guest QR records to stays. Cleaning and
 maintenance monitoring and read-only issue lists/details/history/photos are available.
 Issue notes, resolution and reopening are available. Staff profile management and
 property staff assignment are available. Property QR status, issuance/replacement,
-local QR images and link copying are available. Property checklist setup, fixed guest template previews,
+reopening of recoverable links, local QR images and link copying are available. Property checklist setup, fixed guest template previews,
 and maintenance template editing are available. Property usage guides support plain-text
 and optional section-template editing, a matching mobile preview, and publication
-controls. Personal stay links support status, issuance/replacement,
-copying and revocation in stay details. Stay details also provide read-only vehicle
+controls. Personal stay links support status, issuance/replacement, reopening,
+copying, local QR image downloads and revocation in stay details. Legacy hash-only
+links remain usable under their existing access rules but cannot be reopened.
+Stay details also provide read-only vehicle
 information with collection status and revision-review warnings. Shared issue categories support search, registration,
 renaming, display order and activation. Excel report downloads provide date/property
 selection and the existing three-sheet workbook. All administrator capabilities
@@ -628,13 +630,16 @@ properties / mobile More navigation group. Property detail supplies its name;
 QR status supplies current activation and issuance. Guest and staff QR states
 are separate. Inactive properties cannot issue or replace either link.
 
-GET `/admin/properties/:id/qr` returns status only. The guest/staff POST
+GET `/admin/properties/:id/qr` returns status only, including per-flow `canReopen`.
+GET `/admin/properties/:id/qr/{guest|staff}/link` returns the current recoverable
+credential to the administrator without rotating it. Reads require an enabled
+current credential; the receipt reader also verifies the exact loaded rotation
+timestamp and requested flow. The guest/staff POST
 `/admin/properties/:id/qr/{guest|staff}/rotate` sends the exact loaded
 `expectedRotatedAt`, including explicit null for first issuance. Confirmation
 explains that replacement invalidates existing copies for that flow only. There
 is no separate QR-disable endpoint; property deactivation suspends both links.
-Issued/enabled is not proof of complete checklist or staff setup. Guest/staff
-frontend forms are still separate work.
+Issued/enabled is not proof of complete checklist or staff setup.
 
 Issuance receipts validate property, flow, a strictly advancing canonical UTC
 timestamp, and an exact configured-frontend-origin `/guest` or `/staff` URL with
@@ -645,30 +650,43 @@ invalid receipt, not rewritten or accepted silently.
 
 Raw links stay only in mounted screen memory and explicit user copies/downloads;
 they are never put in browser storage, request keys, logs or remote QR services.
-The server cannot retrieve prior raw links. Navigating away/reloading loses them;
-the screen warns on its Back action and full-page unload. This is not a global
-SPA navigation blocker. Manual status refresh preserves a receipt only if the
-same rotation is still enabled; changed/inactive credentials are discarded.
-Replacing a flow hides its old receipt while the request is pending. Other-flow
-receipts remain independent. Requests abort and fence late responses on unmount,
-property or credential changes. 401/403 rejects only the requesting credential.
+The updated API stores encrypted recoverable tokens alongside the authorization
+hashes. Compact guest/staff rows select a detail panel; phones stack the panel
+below the rows, and wider screens pair the list and preview. QR 열기, 링크 복사,
+QR 저장 and 이용 화면 열기 do not replace the credential. The raw address is hidden
+until explicitly revealed or selected after clipboard failure. Replacement stays
+inside QR 관리 with the existing confirmation.
+
+Status refresh and changing the selected flow clear the preview. A recoverable
+receipt can be reopened later without a loss-of-link navigation warning. Missing
+`canReopen` from an older API is read as false. Such one-time issuance receipts
+retain copy/download-before-leaving protection through the navigation boundary;
+they must not be silently discarded by a flow switch or local refresh. Existing
+hash-only QR codes are never replaced on load and remain usable under their old
+rules, but their original token cannot be reconstructed from its hash. The legacy
+panel explains this and offers only deliberate replacement. Foreground/BFCache
+status checks preserve one-time receipts and pending confirmations. Requests
+abort and fence late responses on unmount, property or credential changes.
+401/403 rejects only the requesting administrator credential.
 
 Duplicate writes share a synchronous lock. 404/409 and uncertain network,
 timeout, 5xx or malformed-success results block issuance until an explicit status
 reload and fresh confirmation. Never automatically retry rotation: it may have
-committed even when the raw URL response was lost. Reload can confirm state but
-cannot recover a lost URL; a deliberate replacement invalidates the lost link.
+committed even when the raw URL response was lost. Reload confirms the current
+state; when `canReopen` is true, QR 열기 retrieves that same saved credential.
+A lost legacy one-time receipt still requires a deliberate replacement if the
+administrator has no saved copy.
 
 The lazy-loaded `qrcode` dependency creates high-resolution PNGs entirely in the
 browser, with an unmodified link fragment, four-module quiet zone, property name
 and guest/staff label. `@types/qrcode` supplies compile-time types. Copy failure
 selects a read-only link for manual copying; image-generation failure permits
 local retry and link copying without another issuance. Downloaded PNGs can be
-opened and printed. No direct printing integration, backend/schema changes,
-notifications, guest/staff authentication, service worker or repository tests
-are added by this slice.
+opened and printed. There is no remote QR service or direct printing integration.
+Slice 11 adds the paired API encrypted-token migration and retrieval endpoints;
+frontend dependencies and guest/staff authorization rules remain unchanged.
 
-Verification used disposable API/reader and hook/lifecycle probes, the actual
+Original QR implementation verification used disposable API/reader and hook/lifecycle probes, the actual
 backend QR DTOs/services with an in-memory Prisma adapter, and browser tests with
 synthetic authentication. Checks cover issuance/replacement, stale and uncertain
 responses, inactive properties, duplicate clicks, session expiry, and layouts at
@@ -852,7 +870,7 @@ files, database migrations or Git mutations are part of this slice.
 The stay detail screen includes an inline 개인 이용 링크 card between the stay
 information and history. `features/admin-stay-links` separates DTOs, validation,
 runtime response readers and API calls. The stay screen keeps the card,
-confirmation, one-time receipt, request/navigation hooks, model and scoped CSS
+confirmation, share panel, request/navigation hooks, model and scoped CSS
 in its existing components/hooks/model/styles folders. No navigation entry or
 dependency is added. Property QR controls remain a separate feature.
 
@@ -866,32 +884,49 @@ remains available for issued links at inactive properties or cancelled stays.
 Any stay revision change, including notes, invalidates the existing invitation;
 restoring a stay does not revive it. Link writes do not create stay revisions.
 
-Only issuance returns a raw `/guest/stay#token=...` URL. Strict readers verify
-identity, next invitation version, unchanged stay revision, advancing timestamp,
-exact expiry and the configured canonical frontend origin passed by the API.
-The raw address remains only in mounted memory and explicit clipboard copies;
-it never enters browser storage or logs.
-Clipboard failure selects the read-only address for manual copying. Status refresh
-preserves it only for the exact same enabled invitation. A transient failed read
-hides the URL but retains it privately until a matching read succeeds. Expiry,
-scope/auth changes, replaced invitations and uncertain writes discard it.
+GET `/admin/stays/:id/guest-link/current` reopens an enabled recoverable
+`/guest/stay#token=...` URL. It does not issue a token, increment its version or
+extend its expiry. Status includes `canReopen`; a missing field from an older API
+defaults to false. Issuance readers verify identity, next invitation version,
+unchanged stay revision, advancing timestamp and exact expiry. Reopening readers
+instead require the exact current version, revision, issued revision, timestamp
+and expiry. Both require the configured canonical frontend origin and exact
+personal-stay path/fragment.
+
+The compact card shows status and expiry, with QR · 링크 보기 as the normal
+action. Replacement and revocation sit inside 링크 관리 and retain confirmation.
+The share panel includes planned dates, link copying, a locally generated QR PNG,
+safe opening and optional address reveal. The filename uses the stay ID/version,
+not a guest name or telephone number. Clipboard failure selects the read-only
+address for manual copying. The raw address and image stay in mounted memory and
+explicit user copies/downloads; neither enters browser storage, logs or a remote
+image service. Status refresh preserves a receipt only for the exact same enabled
+invitation. A transient failed read hides it until matching status is verified.
+Foreground/BFCache checks revalidate status. Expiry, scope/auth changes, replaced
+invitations and uncertain writes discard the receipt.
+
+Hash-only legacy invitations remain valid under their original expiry/revision
+rules but cannot be reopened. The card explains this without automatic issuance
+or replacement. A receipt from an older API still receives its one-time loss
+warning; recoverable receipts can be closed and reopened without that warning.
 
 Duplicate writes are synchronously blocked. Conflicts and network/5xx/malformed
 success outcomes block further writes until explicit read/review; no automatic
-mutation retry or silent rebasing occurs. A lost issuance response cannot recover
-its raw URL; a deliberate replacement uses refreshed versions. Requests abort and
-fence late responses, and 401/403 rejects only the initiating admin credential.
-Local header Back/refresh/edit/status actions and browser unload warn before losing
-an issued URL; header actions are disabled during writes. Global sidebar, source
-links and browser-back navigation remain outside the local guard.
+mutation retry or silent rebasing occurs. A lost issuance response can be recovered
+after a status refresh when the API reports `canReopen`; a deliberate replacement
+uses refreshed versions. Requests abort and fence late responses, and 401/403
+rejects only the initiating admin credential. Mutation and unresolved-write
+navigation protection remain, including global administrator navigation. Header
+actions remain disabled during writes. Reopening is a read and does not create
+pending changes.
 
-Verification covers typecheck/lint/build, disposable API/hook and actual backend
+Original personal-link implementation verification covered typecheck/lint/build, disposable API/hook and actual backend
 service/DTO probes, and synthetic browser flows for issuance, copying, revocation,
 lost responses, read recovery, changed stay context, duplicate clicks and narrow
 layouts. These checks do not establish live JWT/PostgreSQL concurrency or physical
-device proof. Guest/staff screens remain placeholders; vehicle review and report
-downloads remain separate admin slices. No backend/schema/migration/dependency
-or repository test files were changed. The user controls staging and rollout.
+device proof. That original slice added no backend/schema/migration/dependency
+or repository test files. Slice 11 now depends on the encrypted-token API migration
+and retrieval endpoints described below. The user controls staging and rollout.
 
 ## Administrator stay vehicle review
 
@@ -3202,3 +3237,72 @@ cancellation/retry, stale unmount, date validation and existing Excel downloads.
 These checks do not establish live S3, deployed proxy, physical-device or native
 Excel acceptance. No dependencies, permanent test files, commits or deployment
 were added by the client change.
+
+## Slice 11 — reopenable QR codes and personal links — 2026-10-30
+
+The current property QR and personal stay-link contracts above supersede their
+original one-time-only receipt behavior. Normal use is open, copy or download the
+same credential. Only the separately confirmed replacement/revocation actions
+change access. Existing printed QR codes and shared personal links retain their
+hash-based access rules. No bulk replacement, token backfill or legacy link import
+is introduced; an existing hash cannot reconstruct the original token.
+
+Roll out the API migration and server configuration before the new frontend.
+The paired API change adds nullable encrypted-token columns through a
+Prisma-generated migration. The user applies the migration and configures
+server-only `ACCESS_LINK_ENCRYPTION_KEYS` and `ACCESS_LINK_ACTIVE_KEY_ID` as
+described in the API project reference. These keys are independent of JWT secrets
+and must never become `VITE_` values. Retain older keys when changing the active
+key so existing encrypted links remain reopenable. Missing configuration does
+not invalidate old hash-only credentials; new issuance/retrieval fails safely
+until the server is configured. The frontend never replaces a link to recover
+from a key, network or retrieval error.
+
+The new status/receipt readers treat absent `canReopen` as false for an older
+API, preserve its one-time receipt safeguards and explain why legacy links cannot
+be reopened. Recoverable GET responses are administrator-authenticated and
+`no-store`. They use the configured frontend origin, which must continue matching
+`VITE_FRONTEND_URL`; a future domain migration is a separate deployment concern.
+There are no new frontend dependencies, repository test files, commits, database
+execution or deployments performed by this frontend slice.
+
+### Admin navigation and QR clarity follow-up — 2026-10-30
+
+Inner administrator pages share a compact 44px back-arrow control beside the
+title. The main 운영, 일정, 이상사항 and 더보기 destinations keep their existing
+navigation, and the menu drawer retains its close action. Guest/staff entry and
+unfinished-check navigation are unchanged. Existing guarded return callbacks on
+editors, QR receipts and other mutation screens remain authoritative; replacing a
+text button does not bypass their confirmation or in-flight-write protection.
+
+The session-scoped in-memory administrator page history records accepted route
+changes, keeps the current filter query and scroll position, and treats same-page
+filter changes as updates rather than extra Back steps. The shared control uses a
+known in-app previous destination or a screen-owned parent fallback for direct
+entry, never an unconditional browser-history jump. History resets with the
+administrator session. List/detail return queries continue using their validated
+existing contracts.
+
+Submission rows now emphasize 입실/퇴실/정비 before the property, followed by date
+and author. The full row opens the record; 이상 응답 counts retain checklist-answer
+meaning and do not claim to be unresolved issue counts. Property QR management
+uses equal 이용객/직원 tabs and one purpose/status/action panel. Arrow/Home/End keys
+move tab focus, Enter/Space activates through the existing receipt guard, and
+replacement remains a separate confirmed action. Legacy QR codes remain usable
+under their existing access rules without falsely offering recovery. Desktop QR
+receipts place the image beside copy/download controls; smaller layouts stack them.
+
+The narrow API code ACCESS_LINK_ISSUANCE_UNAVAILABLE at HTTP 503 identifies only
+the server's known pre-write issuance setup failure. The client supplies fixed
+Korean guidance, preserves any existing receipt and allows recovery without
+claiming an uncertain write succeeded. Other 5xx/network errors still require
+status reconciliation before another write. Arbitrary server diagnostics remain
+hidden. This follow-up adds no migration, credentials or automatic QR replacement.
+
+Typecheck, lint, production build, formatting and diff checks passed; the existing
+bundle-size warning remains. Actual-source browser checks used a separate
+fictional API at 320/399/760/907/1024/1440px. QR and submission screens had no
+horizontal overflow; tab keyboard behavior, clipboard URL equality, filtered
+detail return and both known-setup/uncertain-error paths were exercised. Native
+download completion, physical devices and live database/deployment behavior remain
+outside this verification. See MANUAL_ACCEPTANCE.md for the evidence boundary.

@@ -19,6 +19,14 @@ export class ApiRequestError extends Error {
   }
 }
 
+export function isAccessLinkIssuanceUnavailable(error: unknown): boolean {
+  return (
+    error instanceof ApiRequestError &&
+    error.status === 503 &&
+    error.code === 'ACCESS_LINK_ISSUANCE_UNAVAILABLE'
+  );
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
 }
@@ -63,8 +71,12 @@ export async function readApiError(
             : [],
         }
       : null;
-  const message =
-    declared && response.status < 500
+  const issuanceUnavailable =
+    response.status === 503 &&
+    declared?.code === 'ACCESS_LINK_ISSUANCE_UNAVAILABLE';
+  const message = issuanceUnavailable
+    ? '링크 발급 설정이 필요합니다. 서버 설정을 확인해 주세요. 이번 요청으로 기존 링크는 변경되지 않았습니다.'
+    : declared && response.status < 500
       ? declared.message
       : (fallback[response.status] ??
         '요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.');
@@ -73,6 +85,6 @@ export async function readApiError(
     message,
     response.status,
     declared?.code ?? 'HTTP_ERROR',
-    declared?.errors ?? [],
+    response.status >= 500 ? [] : (declared?.errors ?? []),
   );
 }

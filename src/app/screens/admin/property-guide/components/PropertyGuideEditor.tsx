@@ -6,6 +6,7 @@ import { saveAdminPropertyGuide } from '../../../../features/admin-property-guid
 import type { AdminPropertyGuideDto } from '../../../../features/admin-property-guides/admin-property-guide.types';
 import { MAX_WRITABLE_GUIDE_VERSION } from '../../../../features/admin-property-guides/admin-property-guide-validation';
 import { Button } from '../../../../shared/ui/Button/Button';
+import { AdminBackButton } from '../../components/AdminBackButton';
 import { useGuideNavigation } from '../hooks/use-guide-navigation';
 import { useGuideSave } from '../hooks/use-guide-save';
 import {
@@ -171,7 +172,27 @@ export function PropertyGuideEditor({
             {data.property.name}
           </p>
           <div className="property-guide-heading__title">
-            <h1>이용 안내 관리</h1>
+            <div className="admin-page-heading-title">
+              <AdminBackButton
+                fallback={appRoutes.adminPropertyDetail.replace(
+                  ':id',
+                  data.property.id,
+                )}
+                label="휴양소 정보로 돌아가기"
+                disabled={mutation.state.busy || !!navigation.pending}
+                onBack={() =>
+                  navigation.request('return', () =>
+                    navigate(
+                      appRoutes.adminPropertyDetail.replace(
+                        ':id',
+                        data.property.id,
+                      ),
+                    ),
+                  )
+                }
+              />
+              <h1>이용 안내 관리</h1>
+            </div>
             <span
               className="property-guide-saved-state"
               aria-label="현재 저장 상태"
@@ -195,22 +216,6 @@ export function PropertyGuideEditor({
             onClick={openPreview}
           >
             미리보기
-          </Button>
-          <Button
-            className="admin-button-secondary"
-            disabled={mutation.state.busy || !!navigation.pending}
-            onClick={() =>
-              navigation.request('return', () =>
-                navigate(
-                  appRoutes.adminPropertyDetail.replace(
-                    ':id',
-                    data.property.id,
-                  ),
-                ),
-              )
-            }
-          >
-            휴양소 정보
           </Button>
           <Button
             className="admin-button-secondary"

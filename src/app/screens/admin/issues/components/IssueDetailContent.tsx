@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import type { AdminIssueDetailDto } from '../../../../features/admin-issues/admin-issues.types';
 import { Button } from '../../../../shared/ui/Button/Button';
+import { AdminBackButton } from '../../components/AdminBackButton';
 import { useIssueAction } from '../hooks/use-issue-action';
 import { useIssueNavigation } from '../hooks/use-issue-navigation';
 import { useIssueRecurrenceCandidates } from '../hooks/use-issue-recurrence-candidates';
@@ -137,28 +138,6 @@ export function IssueDetailContent({
   const { issue, report } = detail;
   return (
     <div className="issue-detail issue-detail--compact">
-      <div className="issue-workspace-toolbar">
-        <div className="issue-detail-actions">
-          <Link
-            className="ui-button admin-button-secondary"
-            to={returnTo}
-            aria-disabled={busy || undefined}
-            onClick={(event) => {
-              event.preventDefault();
-              navigation.request(() => navigate(returnTo));
-            }}
-          >
-            <span aria-hidden="true">←</span> 목록
-          </Link>
-          <Button
-            className="admin-button-secondary"
-            disabled={busy}
-            onClick={reload}
-          >
-            새로고침
-          </Button>
-        </div>
-      </div>
       {navigation.pending && (
         <IssueNavigationNotice
           onKeep={navigation.keep}
@@ -200,16 +179,30 @@ export function IssueDetailContent({
       <section className="issue-workspace" aria-labelledby="issue-workspace-title">
         <header className="issue-workspace-heading">
           <div>
-            <h1 id="issue-workspace-title">{issue.title}</h1>
+            <div className="admin-page-heading-title">
+              <AdminBackButton
+                label="이상사항 목록으로 돌아가기"
+                disabled={busy || navigation.pending}
+                onBack={() => navigation.request(() => navigate(returnTo))}
+              />
+              <h1 id="issue-workspace-title">{issue.title}</h1>
+            </div>
             <p>{issue.property.name}{issue.property.region && <span> · {issue.property.region}</span>}</p>
+            <div className="issue-detail-badges" aria-label="현재 처리 상태와 긴급도">
+              <span className={`issue-detail-badge issue-detail-badge--${issueStatusTone(issue.status)}`}>
+                {issueStatusLabel(issue.status)}
+              </span>
+              {issue.isUrgent && <span className="issue-detail-badge issue-detail-badge--danger">긴급</span>}
+              {issue.cancelledAt && <span className="issue-detail-badge issue-detail-badge--muted">취소됨</span>}
+            </div>
           </div>
-          <div className="issue-detail-badges" aria-label="현재 처리 상태와 긴급도">
-            <span className={`issue-detail-badge issue-detail-badge--${issueStatusTone(issue.status)}`}>
-              {issueStatusLabel(issue.status)}
-            </span>
-            {issue.isUrgent && <span className="issue-detail-badge issue-detail-badge--danger">긴급</span>}
-            {issue.cancelledAt && <span className="issue-detail-badge issue-detail-badge--muted">취소됨</span>}
-          </div>
+          <Button
+            className="admin-button-secondary"
+            disabled={busy}
+            onClick={reload}
+          >
+            새로고침
+          </Button>
         </header>
         <div className="issue-workspace-tabs" role="tablist" aria-label="이상사항 상세">
           {issueTabs.map((item) => (

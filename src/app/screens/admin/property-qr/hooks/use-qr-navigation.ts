@@ -1,27 +1,28 @@
 import { useRef, useState } from 'react';
 import { useAdminNavigationGuard } from '../../hooks/use-admin-navigation-guard';
 
+export type QrNavigationAction = 'return' | 'refresh' | 'close' | 'select';
+
 export function useQrNavigation({
   isBusy,
-  hasReceipts,
+  hasOneTimeReceipt,
   hasPendingChanges,
 }: {
   isBusy: () => boolean;
-  hasReceipts: () => boolean;
+  hasOneTimeReceipt: () => boolean;
   hasPendingChanges: () => boolean;
 }) {
   const [pending, setPending] = useState<{
-    action: 'return' | 'refresh';
+    action: QrNavigationAction;
     run: () => void;
   } | null>(null);
   const trigger = useRef<HTMLElement | null>(null);
   const runConfirmed = useAdminNavigationGuard(hasPendingChanges);
-
   return {
     pending: pending?.action ?? null,
-    request: (action: 'return' | 'refresh', run: () => void) => {
+    request: (action: QrNavigationAction, run: () => void) => {
       if (isBusy()) return;
-      if (!hasReceipts()) return run();
+      if (!hasOneTimeReceipt()) return run();
       trigger.current =
         document.activeElement instanceof HTMLElement
           ? document.activeElement

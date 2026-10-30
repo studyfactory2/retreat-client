@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import { AdminBackButton } from '../../components/AdminBackButton';
 import { appRoutes } from '../../../../core/router/routes';
 import type { AdminStaffDto } from '../../../../features/admin-staff/admin-staff.types';
 import { Button } from '../../../../shared/ui/Button/Button';
@@ -44,16 +45,31 @@ export function StaffEditor({
       }}
     >
       <header className="staff-heading">
-        <p className="staff-editor__breadcrumb">관리자 <span aria-hidden="true">›</span> 직원</p>
+        <p className="staff-editor__breadcrumb">
+          관리자 <span aria-hidden="true">›</span> 직원
+        </p>
         <div className="staff-heading__title">
-          <h1 id="staff-editor-title">{original ? original.name : '직원 등록'}</h1>
+          <div className="admin-page-heading-title">
+            <AdminBackButton
+              onBack={editor.returnToList}
+              disabled={mutation.busy || !!mutation.blocked || confirming}
+              label="직원 목록으로"
+            />
+            <h1 id="staff-editor-title">
+              {original ? original.name : '직원 등록'}
+            </h1>
+          </div>
           {original && (
-            <span className={`staff-badge${original.isActive ? '' : ' staff-badge--inactive'}`}>
+            <span
+              className={`staff-badge${original.isActive ? '' : ' staff-badge--inactive'}`}
+            >
               {original.isActive ? '활성' : '비활성'}
             </span>
           )}
         </div>
-        {affiliation && <p className="staff-heading__affiliation">{affiliation}</p>}
+        {affiliation && (
+          <p className="staff-heading__affiliation">{affiliation}</p>
+        )}
       </header>
       <div className="staff-editor__body">
         {mutation.message && (
@@ -112,9 +128,11 @@ export function StaffEditor({
             values={editor.values}
             errors={editor.errors}
             editing={!!original}
-            handoverUrl={original?.isActive
-              ? appRoutes.adminStaffHandover.replace(':id', original.id)
-              : undefined}
+            handoverUrl={
+              original?.isActive
+                ? appRoutes.adminStaffHandover.replace(':id', original.id)
+                : undefined
+            }
             busy={mutation.busy}
             blocked={!!mutation.blocked || confirming}
             onChange={editor.change}
@@ -131,7 +149,10 @@ export function StaffEditor({
         )}
         <details className="staff-editor__help">
           <summary>직원 등록 안내</summary>
-          <p>휴양소 배정과 정비 기록을 위한 직원 정보입니다. 관리자 로그인 계정은 생성되지 않습니다.</p>
+          <p>
+            휴양소 배정과 정비 기록을 위한 직원 정보입니다. 관리자 로그인 계정은
+            생성되지 않습니다.
+          </p>
         </details>
       </div>
       <div className="staff-form__actions">
@@ -142,7 +163,10 @@ export function StaffEditor({
             onClick={() => navigation.request(onReload)}
             aria-label="직원 정보 새로고침"
           >
-            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5" /><path d="M6.1 7a7 7 0 0 1 11.55-2L20 8M4 16l2.35 3A7 7 0 0 0 17.9 17" /></svg>
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M20 7v5h-5M4 17v-5h5" />
+              <path d="M6.1 7a7 7 0 0 1 11.55-2L20 8M4 16l2.35 3A7 7 0 0 0 17.9 17" />
+            </svg>
           </Button>
         )}
         <Button
@@ -152,8 +176,16 @@ export function StaffEditor({
         >
           <span aria-hidden="true">←</span> {original ? '취소' : '목록'}
         </Button>
-        <Button type="submit" loading={mutation.busy} disabled={!!mutation.blocked || confirming}>
-          {!mutation.busy && <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m5 12 4 4L19 6" /></svg>}
+        <Button
+          type="submit"
+          loading={mutation.busy}
+          disabled={!!mutation.blocked || confirming}
+        >
+          {!mutation.busy && (
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="m5 12 4 4L19 6" />
+            </svg>
+          )}
           {mutation.busy ? '저장 중' : original ? '변경 저장' : '직원 등록'}
         </Button>
       </div>

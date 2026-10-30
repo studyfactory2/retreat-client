@@ -1,8 +1,9 @@
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { appRoutes } from '../../../core/router/routes';
 import { useAdminSession } from '../../../core/session/use-admin-session';
 import { Button } from '../../../shared/ui/Button/Button';
 import { PageState } from '../../../shared/ui/PageState/PageState';
+import { AdminBackButton } from '../components/AdminBackButton';
 import { ChecklistTypeCard } from './components/ChecklistTypeCard';
 import { useChecklistResource } from './hooks/use-checklist-resource';
 import {
@@ -45,7 +46,13 @@ function ChecklistWorkspace({
       <header className="checklist-heading">
         <div>
           <p className="checklist-heading__eyebrow">휴양소 설정</p>
-          <h1>체크리스트 관리</h1>
+          <div className="admin-page-heading-title">
+            <AdminBackButton
+              fallback={appRoutes.adminPropertyDetail.replace(':id', id)}
+              label="이전 페이지로 돌아가기"
+            />
+            <h1>체크리스트 관리</h1>
+          </div>
           <p>
             {resource.status === 'ready'
               ? resource.data.property.name
@@ -53,12 +60,6 @@ function ChecklistWorkspace({
           </p>
         </div>
         <div className="checklist-actions">
-          <Link
-            className="ui-button admin-button-secondary"
-            to={appRoutes.adminPropertyDetail.replace(':id', id)}
-          >
-            휴양소 정보
-          </Link>
           <Button
             className="admin-button-secondary"
             disabled={resource.status === 'loading'}

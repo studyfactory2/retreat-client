@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { AdminBackButton } from '../components/AdminBackButton';
 import { useSearchParams } from 'react-router-dom';
 import { useAdminSession } from '../../../core/session/use-admin-session';
 import { useAdminPropertyOptions } from '../../../features/admin-properties/use-admin-property-options';
@@ -84,7 +85,10 @@ function ReportsWorkspace({
   return (
     <div className="admin-reports">
       <header className="reports-heading">
-        <h1>운영 보고서</h1>
+        <div className="admin-page-heading-title">
+          <AdminBackButton />
+          <h1>운영 보고서</h1>
+        </div>
       </header>
       <div className="reports-workspace">
         <section

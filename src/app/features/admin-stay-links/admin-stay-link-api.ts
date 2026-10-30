@@ -2,6 +2,7 @@ import { apiRequest } from '../../core/api/api-client';
 import { appConfig } from '../../core/config/environment';
 import {
   readAdminStayLinkIssue,
+  readAdminStayLinkCurrent,
   readAdminStayLinkRevoke,
   readAdminStayLinkStatus,
 } from './admin-stay-link-readers';
@@ -50,6 +51,28 @@ export async function issueAdminStayLink(
         expectedRevision: prior.stayRevision,
         expectedLinkVersion: prior.version,
       },
+    }),
+    stayId,
+    prior,
+    checkOutAt,
+    appConfig.frontendOrigin,
+  );
+}
+
+export async function reopenAdminStayLink(
+  id: string,
+  previous: AdminStayLinkStatus,
+  checkOutAt: string,
+  token: string,
+  signal?: AbortSignal,
+): Promise<AdminStayLinkIssue> {
+  const stayId = requireStayLinkId(id);
+  const prior = readAdminStayLinkStatus(previous, stayId);
+  requireStayLinkCheckOutAt(checkOutAt);
+  return readAdminStayLinkCurrent(
+    await apiRequest<unknown>(`/admin/stays/${stayId}/guest-link/current`, {
+      token,
+      signal,
     }),
     stayId,
     prior,

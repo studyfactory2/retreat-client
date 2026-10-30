@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import {
-  Link,
   useNavigate,
   useParams,
   useSearchParams,
@@ -8,6 +7,7 @@ import {
 import { useAdminSession } from '../../../core/session/use-admin-session';
 import { Button } from '../../../shared/ui/Button/Button';
 import { PageState } from '../../../shared/ui/PageState/PageState';
+import { AdminBackButton } from '../components/AdminBackButton';
 import { SubmissionLifecycle } from './components/SubmissionLifecycle';
 import { submissionLifecycleSavedMessage } from './model/submission-lifecycle-model';
 import { SubmissionCorrection } from './components/SubmissionCorrection';
@@ -114,6 +114,15 @@ function SubmissionWorkspace({
         className="submission-detail"
         role={resource.status === 'error' ? 'alert' : 'status'}
       >
+        <header className="submission-detail-heading">
+          <div className="admin-page-heading-title">
+            <AdminBackButton
+              label={returnLabel}
+              onBack={() => navigate(returnTo)}
+            />
+            <h1>제출 기록 상세</h1>
+          </div>
+        </header>
         <PageState
           title={
             resource.status === 'error'
@@ -129,9 +138,6 @@ function SubmissionWorkspace({
           {resource.status === 'error' && (
             <Button onClick={refresh}>다시 불러오기</Button>
           )}
-          <Link className="ui-button admin-button-secondary" to={returnTo}>
-            {returnLabel}
-          </Link>
         </PageState>
       </div>
     );
@@ -152,18 +158,12 @@ function SubmissionWorkspace({
       className="submission-detail maintenance-submission-detail submission-detail-workspace"
     >
       <header className="submission-detail-heading">
-        <div className="maintenance-detail-breadcrumb">
-          <Link
-            to={returnTo}
-            aria-label={returnLabel}
-            aria-disabled={editState.busy || undefined}
-            onClick={(event) => {
-              event.preventDefault();
-              navigation.request(() => navigate(returnTo));
-            }}
-          >
-            <span aria-hidden="true">←</span> 목록
-          </Link>
+        <div className="admin-page-heading-title">
+          <AdminBackButton
+            label={returnLabel}
+            disabled={editState.busy || navigation.pending}
+            onBack={() => navigation.request(() => navigate(returnTo))}
+          />
           <h1>{recordLabel}</h1>
         </div>
         <div className="submission-detail-actions">

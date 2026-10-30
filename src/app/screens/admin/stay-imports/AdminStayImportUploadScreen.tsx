@@ -8,6 +8,7 @@ import {
   STAY_IMPORT_MAX_FILE_BYTES,
 } from '../../../features/admin-stay-imports/admin-stay-imports-api';
 import { Button } from '../../../shared/ui/Button/Button';
+import { AdminBackButton } from '../components/AdminBackButton';
 import { useAdminNavigationGuard } from '../hooks/use-admin-navigation-guard';
 import {
   validateImportFile,
@@ -187,16 +188,16 @@ function UploadWorkspace({
     <div className="import-upload">
       <header className="import-upload__heading">
         <div>
-          <h1>엑셀 가져오기</h1>
+          <div className="admin-page-heading-title">
+            <AdminBackButton
+              label="일정 목록으로 돌아가기"
+              disabled={state.busy}
+              onBack={() => navigate('/admin/stays')}
+            />
+            <h1>엑셀 가져오기</h1>
+          </div>
           <p>명단을 올리고 이용 일정을 등록하세요.</p>
         </div>
-        <Button
-          className="admin-button-secondary"
-          disabled={state.busy}
-          onClick={() => navigate('/admin/stays')}
-        >
-          일정 목록
-        </Button>
       </header>
 
       <ImportSteps current={0} />

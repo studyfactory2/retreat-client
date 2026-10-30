@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type MouseEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { AdminPropertyDto } from '../../../../features/admin-properties/admin-property-management.types';
 import { Button } from '../../../../shared/ui/Button/Button';
+import { AdminBackButton } from '../../components/AdminBackButton';
 import { useAdminNavigationGuard } from '../../hooks/use-admin-navigation-guard';
 import { usePropertyStaffSave } from '../hooks/use-property-staff-save';
 import {
@@ -103,20 +104,21 @@ export function PropertyStaffAssignment({
       <header className="properties-heading">
         <div>
           <p className="properties-heading__eyebrow">담당 직원 관리</p>
-          <h1>{property.name}</h1>
+          <div className="admin-page-heading-title">
+            <AdminBackButton
+              fallback={returnUrl}
+              label="휴양소 정보로 돌아가기"
+              disabled={mutation.state.busy || confirming || !!leaving}
+              onBack={() => leave('return')}
+            />
+            <h1>{property.name}</h1>
+          </div>
           <p>
             {property.region || '지역 미등록'} ·{' '}
             {property.isActive ? '활성 휴양소' : '비활성 휴양소'}
           </p>
         </div>
         <div className="properties-heading__actions">
-          <Button
-            className="admin-button-secondary"
-            disabled={mutation.state.busy || confirming || !!leaving}
-            onClick={() => leave('return')}
-          >
-            휴양소 정보로 돌아가기
-          </Button>
           <Button
             className="admin-button-secondary"
             disabled={mutation.state.busy || confirming || !!leaving}
@@ -251,8 +253,8 @@ export function PropertyStaffAssignment({
                 {selected?.name ?? '미배정'}
               </p>
               <p id="assignment-confirm-description">
-                변경하면 기존 직원 QR이 해제됩니다. 이전 담당자의 작성 중인
-                정비 기록은 새 담당자에게 이전되지 않으며, 제출된 기록은 유지됩니다.
+                변경하면 기존 직원 QR이 해제됩니다. 이전 담당자의 작성 중인 정비
+                기록은 새 담당자에게 이전되지 않으며, 제출된 기록은 유지됩니다.
                 {selected && ' 저장 후 새 직원 QR을 발급해 전달해 주세요.'}
               </p>
               <div className="properties-heading__actions">

@@ -32,7 +32,8 @@
   overflow-wrap: anywhere;
 }
 
-.checklist-heading h1 + p {
+.checklist-heading h1 + p,
+.checklist-heading .admin-page-heading-title + p {
   margin-top: 8px;
   color: var(--color-muted);
   font-size: 14px;

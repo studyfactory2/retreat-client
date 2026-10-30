@@ -11,6 +11,7 @@ import type {
 } from '../../../../features/admin-checklist-templates/admin-checklist-template.types';
 import { MAX_WRITABLE_CHECKLIST_VERSION } from '../../../../features/admin-checklist-templates/admin-checklist-template-validation';
 import { Button } from '../../../../shared/ui/Button/Button';
+import { AdminBackButton } from '../../components/AdminBackButton';
 import { useChecklistSave } from '../hooks/use-checklist-save';
 import { useChecklistNavigation } from '../hooks/use-checklist-navigation';
 import type { ChecklistWorkspaceData } from '../hooks/use-checklist-resource';
@@ -177,22 +178,23 @@ export function ChecklistEditor({
       <header className="checklist-heading">
         <div>
           <p className="checklist-heading__eyebrow">체크리스트 설정</p>
-          <h1>{checklistTypeLabels[type]}</h1>
+          <div className="admin-page-heading-title">
+            <AdminBackButton
+              fallback={returnUrl}
+              label="체크리스트 목록으로 돌아가기"
+              disabled={mutation.state.busy || !!navigation.pending}
+              onBack={() =>
+                navigation.request('return', () => navigate(returnUrl))
+              }
+            />
+            <h1>{checklistTypeLabels[type]}</h1>
+          </div>
           <p>
             {data.property.name}
             {original ? ` · 버전 ${original.version}` : ' · 새 체크리스트'}
           </p>
         </div>
         <div className="checklist-actions">
-          <Button
-            className="admin-button-secondary"
-            disabled={mutation.state.busy || !!navigation.pending}
-            onClick={() =>
-              navigation.request('return', () => navigate(returnUrl))
-            }
-          >
-            목록
-          </Button>
           <Button
             className="admin-button-secondary"
             disabled={mutation.state.busy || !!navigation.pending}

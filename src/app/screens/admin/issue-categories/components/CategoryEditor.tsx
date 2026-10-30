@@ -6,6 +6,7 @@ import {
 } from '../../../../features/admin-issue-categories/admin-issue-category-api';
 import type { AdminIssueCategoryDto } from '../../../../features/admin-issue-categories/admin-issue-category.types';
 import { Button } from '../../../../shared/ui/Button/Button';
+import { AdminBackButton } from '../../components/AdminBackButton';
 import { useCategoryNavigation } from '../hooks/use-category-navigation';
 import { useCategorySave } from '../hooks/use-category-save';
 import {
@@ -145,23 +146,21 @@ export function CategoryEditor({
       <header className="category-heading">
         <div>
           <p className="category-heading__eyebrow">ISSUE CATEGORY</p>
-          <h1 id="category-editor-title" tabIndex={-1}>
-            {original ? '분류 정보 수정' : '새 분류 등록'}
-          </h1>
+          <div className="admin-page-heading-title">
+            <AdminBackButton
+              label="분류 목록으로 돌아가기"
+              disabled={mutation.state.busy || !!navigation.pending}
+              onBack={() => navigation.request('return', onClose)}
+            />
+            <h1 id="category-editor-title" tabIndex={-1}>
+              {original ? '분류 정보 수정' : '새 분류 등록'}
+            </h1>
+          </div>
           <p>
             {original
               ? `${original.name}의 표시 정보를 관리하세요.`
               : '이용객이 신고할 때 선택할 분류를 추가하세요.'}
           </p>
-        </div>
-        <div className="category-actions">
-          <Button
-            className="admin-button-secondary"
-            disabled={mutation.state.busy || !!navigation.pending}
-            onClick={() => navigation.request('return', onClose)}
-          >
-            분류 목록으로
-          </Button>
         </div>
       </header>
       {navigation.pending && (

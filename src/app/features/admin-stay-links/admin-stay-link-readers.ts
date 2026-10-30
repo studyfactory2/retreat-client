@@ -27,6 +27,8 @@ export function readAdminStayLinkStatus(
     value.stayId.toLowerCase() !== expectedId.toLowerCase() ||
     typeof value.issued !== 'boolean' ||
     typeof value.enabled !== 'boolean' ||
+    (value.canReopen !== undefined && typeof value.canReopen !== 'boolean') ||
+    (value.canReopen === true && !value.issued) ||
     !isStayLinkVersion(value.version) ||
     !isStayLinkRevision(value.stayRevision) ||
     (value.issuedForRevision !== null &&
@@ -49,6 +51,8 @@ export function readAdminStayLinkStatus(
     stayId: value.stayId.toLowerCase(),
     issued: value.issued,
     enabled: value.enabled,
+    // A pre-upgrade server only supports one-time receipts.
+    canReopen: value.canReopen === true,
     version: value.version,
     stayRevision: value.stayRevision,
     issuedForRevision: value.issuedForRevision,
@@ -135,6 +139,38 @@ export function readAdminStayLinkRevoke(
   previous: AdminStayLinkStatus,
 ): AdminStayLinkStatus {
   const status = readChangedStatus(value, expectedId, previous);
-  if (status.issued || status.enabled) throw invalidStayLinkResponse();
+  if (status.issued || status.enabled || status.canReopen)
+    throw invalidStayLinkResponse();
   return status;
+}
+
+export function readAdminStayLinkCurrent(
+  value: unknown,
+  expectedId: string,
+  previous: AdminStayLinkStatus,
+  checkOutAt: string,
+  expectedFrontendOrigin: string,
+): AdminStayLinkIssue {
+  const status = readAdminStayLinkStatus(value, expectedId);
+  const prior = readAdminStayLinkStatus(previous, expectedId);
+  if (
+    !isRecord(value) ||
+    !status.enabled ||
+    !status.canReopen ||
+    !prior.enabled ||
+    !prior.canReopen ||
+    status.version !== prior.version ||
+    status.stayRevision !== prior.stayRevision ||
+    status.issuedForRevision !== prior.issuedForRevision ||
+    status.updatedAt !== prior.updatedAt ||
+    status.expiresAt !== prior.expiresAt ||
+    !isStayLinkTimestamp(checkOutAt) ||
+    !status.expiresAt ||
+    Date.parse(status.expiresAt) !==
+      Date.parse(checkOutAt) + STAY_LINK_GRACE_MS ||
+    Date.parse(status.expiresAt) <= Date.now() ||
+    !isIssuedUrl(value.url, expectedFrontendOrigin)
+  )
+    throw invalidStayLinkResponse();
+  return { ...status, url: value.url };
 }

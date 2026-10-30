@@ -1,5 +1,4 @@
-import { Link } from 'react-router-dom';
-import { appRoutes } from '../../../core/router/routes';
+import { AdminBackButton } from '../components/AdminBackButton';
 import { useAdminSession } from '../../../core/session/use-admin-session';
 import { Button } from '../../../shared/ui/Button/Button';
 import { PageState } from '../../../shared/ui/PageState/PageState';
@@ -32,12 +31,12 @@ function AccountWorkspace({
     <div className="admin-account">
       <header className="account-heading">
         <div>
-          <h1>내 계정</h1>
+          <div className="admin-page-heading-title">
+            <AdminBackButton />
+            <h1>내 계정</h1>
+          </div>
           <p>내 정보와 로그인 비밀번호를 관리하세요.</p>
         </div>
-        <Link className="account-back" to={appRoutes.admin}>
-          <span aria-hidden="true">←</span> 운영 현황
-        </Link>
       </header>
       {resource.status === 'ready' ? (
         <AccountForms

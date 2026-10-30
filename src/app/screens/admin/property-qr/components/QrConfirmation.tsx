@@ -39,7 +39,7 @@ export function QrConfirmation({
       <p id="qr-confirm-description">
         {replacing
           ? `교체하면 이전 ${qrFlowLabels[flow]} QR 주소와 인쇄물은 즉시 무효화됩니다. 새 QR을 내려받은 뒤 기존 인쇄물을 교체해 주세요.`
-          : '새 QR 주소는 발급 직후에만 확인할 수 있습니다. 발급 후 반드시 복사하거나 내려받아 보관해 주세요.'}{' '}
+          : '발급한 QR을 복사하거나 이미지로 저장해 주세요.'}{' '}
         {qrFlowLabels[flow === 'GUEST' ? 'STAFF' : 'GUEST']} QR은 변경되지
         않습니다.
       </p>

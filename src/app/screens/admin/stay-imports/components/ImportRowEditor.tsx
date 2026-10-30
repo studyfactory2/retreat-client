@@ -5,6 +5,7 @@ import type {
   ReviewStayImportRowInput,
 } from '../../../../features/admin-stay-imports/admin-stay-imports.types';
 import { Button } from '../../../../shared/ui/Button/Button';
+import { AdminBackButton } from '../../components/AdminBackButton';
 import { useUnsavedStay } from '../../stays/hooks/use-unsaved-stay';
 import { UnsavedStayNotice } from '../../stays/components/UnsavedStayNotice';
 import { ImportSourceCells } from './ImportSourceCells';
@@ -86,9 +87,16 @@ export function ImportRowEditor({
     <section className="stay-import-editor">
       <header className="stay-import-heading">
         <div>
-          <h1 tabIndex={-1} ref={heading}>
-            이용 정보 검토
-          </h1>
+          <div className="admin-page-heading-title">
+            <AdminBackButton
+              label="명단 검토로 돌아가기"
+              disabled={state.busy || leave.pending}
+              onBack={() => leave.askToLeave(onClose)}
+            />
+            <h1 tabIndex={-1} ref={heading}>
+              이용 정보 검토
+            </h1>
+          </div>
           <p>
             {row.sheetName} · 원본 {row.rowNumber}행
           </p>

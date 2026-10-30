@@ -3,6 +3,7 @@ export type QrFlow = 'GUEST' | 'STAFF';
 export interface QrState {
   issued: boolean;
   enabled: boolean;
+  canReopen: boolean;
   rotatedAt: string | null;
 }
 
@@ -18,4 +19,5 @@ export interface QrIssue {
   flow: QrFlow;
   url: string;
   rotatedAt: string;
+  canReopen: boolean;
 }

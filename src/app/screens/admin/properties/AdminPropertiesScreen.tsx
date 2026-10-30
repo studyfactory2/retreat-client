@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useRef } from 'react';
 import { Link, useLocation, useSearchParams } from 'react-router-dom';
+import { AdminBackButton } from '../components/AdminBackButton';
 import { appRoutes } from '../../../core/router/routes';
 import { useAdminSession } from '../../../core/session/use-admin-session';
 import { isPropertyId } from '../../../features/admin-properties/admin-property-management-validation';
@@ -61,7 +62,9 @@ function PropertiesWorkspace({
     notice !== null &&
     'propertyNotice' in notice &&
     (notice.propertyNotice === 'created' ||
-      notice.propertyNotice === 'updated' || notice.propertyNotice === 'archived' || notice.propertyNotice === 'restored') &&
+      notice.propertyNotice === 'updated' ||
+      notice.propertyNotice === 'archived' ||
+      notice.propertyNotice === 'restored') &&
     'propertyName' in notice &&
     typeof notice.propertyName === 'string' &&
     'propertyId' in notice &&
@@ -118,9 +121,23 @@ function PropertiesWorkspace({
   return (
     <div className="admin-directory admin-property-directory">
       <header className="property-directory-heading">
-        <h1>휴양소 관리</h1>
-        <Link className="ui-button" to={appRoutes.adminPropertyCreate + returnSearch}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+        <div className="admin-page-heading-title">
+          <AdminBackButton />
+          <h1>휴양소 관리</h1>
+        </div>
+        <Link
+          className="ui-button"
+          to={appRoutes.adminPropertyCreate + returnSearch}
+        >
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            aria-hidden="true"
+          >
+            <path d="M12 5v14M5 12h14" />
+          </svg>
           휴양소 등록
         </Link>
       </header>
@@ -128,7 +145,13 @@ function PropertiesWorkspace({
         <div className="admin-directory-notice" role="status">
           <p>
             <strong>{saved.name}</strong> 휴양소가{' '}
-            {saved.action === 'archived' ? '보관되었습니다.' : saved.action === 'restored' ? '운영을 재개했습니다.' : saved.action === 'created' ? '등록되었습니다.' : '수정되었습니다.'}
+            {saved.action === 'archived'
+              ? '보관되었습니다.'
+              : saved.action === 'restored'
+                ? '운영을 재개했습니다.'
+                : saved.action === 'created'
+                  ? '등록되었습니다.'
+                  : '수정되었습니다.'}
           </p>
           <Link to={`${appRoutes.adminProperties}/${saved.id}${returnSearch}`}>
             저장된 정보 확인 →
@@ -136,12 +159,21 @@ function PropertiesWorkspace({
         </div>
       )}
       <PropertyFilters key={returnSearch} input={filters} onApply={select} />
-      <section className="property-directory-panel" aria-labelledby="property-results-title">
+      <section
+        className="property-directory-panel"
+        aria-labelledby="property-results-title"
+      >
         <div className="property-directory-summary">
           <h2 id="property-results-title" aria-live="polite">
             {data && correctedPage === null ? (
               <>
-                {filtered ? '검색 결과' : filters.isActive === false ? '보관된 휴양소' : filters.isActive === true ? '운영 중인 휴양소' : '전체 휴양소'}{' '}
+                {filtered
+                  ? '검색 결과'
+                  : filters.isActive === false
+                    ? '보관된 휴양소'
+                    : filters.isActive === true
+                      ? '운영 중인 휴양소'
+                      : '전체 휴양소'}{' '}
                 <strong>{data.total.toLocaleString('ko-KR')}곳</strong>
               </>
             ) : resource.status === 'error' ? (
@@ -156,7 +188,15 @@ function PropertiesWorkspace({
             onClick={refresh}
             disabled={resource.status === 'loading' || correctedPage !== null}
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5M6.1 7a7 7 0 0 1 11.6-1.5L20 8M4 16l2.3 2.5A7 7 0 0 0 17.9 17" /></svg>
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              aria-hidden="true"
+            >
+              <path d="M20 7v5h-5M4 17v-5h5M6.1 7a7 7 0 0 1 11.6-1.5L20 8M4 16l2.3 2.5A7 7 0 0 0 17.9 17" />
+            </svg>
           </Button>
         </div>
         {resource.status === 'loading' || correctedPage !== null ? (
@@ -182,18 +222,24 @@ function PropertiesWorkspace({
                 title={
                   filtered
                     ? '조건에 맞는 휴양소가 없습니다'
-                    : filters.isActive === false ? '보관된 휴양소가 없습니다' : '운영 중인 휴양소가 없습니다'
+                    : filters.isActive === false
+                      ? '보관된 휴양소가 없습니다'
+                      : '운영 중인 휴양소가 없습니다'
                 }
                 description={
                   filtered
                     ? '검색어나 운영 상태를 변경해 주세요.'
-                    : filters.isActive === false ? '운영을 중지한 휴양소는 이곳에서 확인하고 다시 운영할 수 있습니다.' : '휴양소를 등록하거나 보관됨에서 운영을 재개해 주세요.'
+                    : filters.isActive === false
+                      ? '운영을 중지한 휴양소는 이곳에서 확인하고 다시 운영할 수 있습니다.'
+                      : '휴양소를 등록하거나 보관됨에서 운영을 재개해 주세요.'
                 }
               >
                 {filtered && (
                   <Button
                     className="admin-button-secondary"
-                    onClick={() => select({ page: 1, isActive: filters.isActive })}
+                    onClick={() =>
+                      select({ page: 1, isActive: filters.isActive })
+                    }
                   >
                     조회 조건 초기화
                   </Button>
@@ -201,7 +247,10 @@ function PropertiesWorkspace({
               </AdminListState>
             ) : (
               <div className="property-directory-table">
-                <div className="property-directory-table-head" aria-hidden="true">
+                <div
+                  className="property-directory-table-head"
+                  aria-hidden="true"
+                >
                   <span>휴양소</span>
                   <div className="property-directory-facts">
                     <span>지역</span>
@@ -210,7 +259,11 @@ function PropertiesWorkspace({
                   <span>상태</span>
                   <span />
                 </div>
-                <ul className="property-directory-rows" role="list" aria-label="휴양소 목록">
+                <ul
+                  className="property-directory-rows"
+                  role="list"
+                  aria-label="휴양소 목록"
+                >
                   {resource.data.items.map((property) => (
                     <li key={property.id}>
                       <PropertyCard

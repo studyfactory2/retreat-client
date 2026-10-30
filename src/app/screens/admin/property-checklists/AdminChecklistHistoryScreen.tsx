@@ -14,6 +14,7 @@ import type { ChecklistVersionDetail } from '../../../features/admin-checklist-t
 import { MAX_CHECKLIST_HISTORY_PAGE } from '../../../features/admin-checklist-templates/admin-checklist-history-readers';
 import { Button } from '../../../shared/ui/Button/Button';
 import { PageState } from '../../../shared/ui/PageState/PageState';
+import { AdminBackButton } from '../components/AdminBackButton';
 import { ChecklistPreview } from './components/ChecklistPreview';
 import { useChecklistResource } from './hooks/use-checklist-resource';
 import { useChecklistHistoryRequest } from './hooks/use-checklist-history-request';
@@ -88,7 +89,13 @@ function HistoryWorkspace({
           <p className="checklist-heading__eyebrow">
             {checklistTypeLabels[type]}
           </p>
-          <h1>버전 이력</h1>
+          <div className="admin-page-heading-title">
+            <AdminBackButton
+              fallback={appRoutes.adminPropertyChecklists.replace(':id', id)}
+              label="이전 페이지로 돌아가기"
+            />
+            <h1>버전 이력</h1>
+          </div>
           <p>
             {resource.status === 'ready'
               ? resource.data.property.name
@@ -96,12 +103,6 @@ function HistoryWorkspace({
           </p>
         </div>
         <div className="checklist-actions">
-          <Link
-            className="ui-button admin-button-secondary"
-            to={appRoutes.adminPropertyChecklists.replace(':id', id)}
-          >
-            체크리스트 목록
-          </Link>
           <Link
             className="ui-button admin-button-secondary"
             to={checklistEditorPath(id, type)}

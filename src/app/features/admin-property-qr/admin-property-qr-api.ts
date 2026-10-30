@@ -1,6 +1,10 @@
 import { apiRequest } from '../../core/api/api-client';
 import { appConfig } from '../../core/config/environment';
-import { readPropertyQrStatus, readQrIssue } from './admin-property-qr-readers';
+import {
+  readCurrentQrIssue,
+  readPropertyQrStatus,
+  readQrIssue,
+} from './admin-property-qr-readers';
 import type {
   PropertyQrStatus,
   QrFlow,
@@ -39,6 +43,27 @@ export async function rotateAdminPropertyQr(
     await apiRequest<unknown>(
       `/admin/properties/${propertyId}/qr/${flow.toLowerCase()}/rotate`,
       { method: 'POST', token, signal, body: { expectedRotatedAt } },
+    ),
+    propertyId,
+    flow,
+    expectedRotatedAt,
+    appConfig.frontendOrigin,
+  );
+}
+
+export async function getAdminPropertyQrLink(
+  id: string,
+  flow: QrFlow,
+  expectedRotatedAt: string,
+  token: string,
+  signal?: AbortSignal,
+): Promise<QrIssue> {
+  const propertyId = requirePropertyQrId(id);
+  requireQrRotationInput(flow, expectedRotatedAt);
+  return readCurrentQrIssue(
+    await apiRequest<unknown>(
+      `/admin/properties/${propertyId}/qr/${flow.toLowerCase()}/link`,
+      { token, signal },
     ),
     propertyId,
     flow,

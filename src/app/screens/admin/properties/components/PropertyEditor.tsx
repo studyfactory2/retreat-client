@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { AdminBackButton } from '../../components/AdminBackButton';
 import { appRoutes } from '../../../../core/router/routes';
 import { PropertyOperationDialog } from './PropertyOperationDialog';
 import {
@@ -153,99 +154,116 @@ export function PropertyEditor({
       <header className="properties-heading">
         <p className="properties-heading__eyebrow">휴양소 관리</p>
         <div className="property-editor-title">
-          <h1>{original ? original.name : '휴양소 등록'}</h1>
+          <div className="admin-page-heading-title">
+            <AdminBackButton
+              onBack={() => leave(returnUrl)}
+              disabled={mutation.state.busy || discarding || operationOpen}
+              label="휴양소 목록으로"
+            />
+            <h1>{original ? original.name : '휴양소 등록'}</h1>
+          </div>
           {original && (
-            <span className={`property-editor-badge${original.isActive ? '' : ' property-editor-badge--inactive'}`}>
+            <span
+              className={`property-editor-badge${original.isActive ? '' : ' property-editor-badge--inactive'}`}
+            >
               {original.isActive ? '운영 중' : '보관됨'}
             </span>
           )}
         </div>
-        {original?.region && <p className="property-editor-region">{original.region}</p>}
+        {original?.region && (
+          <p className="property-editor-region">{original.region}</p>
+        )}
       </header>
       <div className="property-editor-body">
-      {mutation.state.message && (
+        {mutation.state.message && (
+          <div
+            className="properties-banner properties-banner--error"
+            role="alert"
+            tabIndex={-1}
+            ref={notice}
+          >
+            <p>{mutation.state.message}</p>
+            {mutation.state.uncertain && (
+              <Button
+                className="admin-button-secondary"
+                onClick={() => navigate(returnUrl)}
+              >
+                목록에서 저장 결과 확인
+              </Button>
+            )}
+          </div>
+        )}
+        {unchanged && (
+          <p className="properties-banner" role="status">
+            변경된 내용이 없습니다.
+          </p>
+        )}
+        {discarding && (
+          <div
+            className="properties-banner"
+            role="alertdialog"
+            tabIndex={-1}
+            ref={discard}
+            aria-labelledby="property-discard-title"
+            aria-describedby="property-discard-description"
+          >
+            <h2 id="property-discard-title">입력 내용을 버릴까요?</h2>
+            <p id="property-discard-description">
+              아직 저장하지 않은 변경 사항이 사라집니다.
+            </p>
+            <div className="properties-heading__actions">
+              <Button
+                onClick={() => {
+                  setDiscarding(false);
+                  requestAnimationFrame(() => {
+                    if (leaveOrigin.current?.isConnected)
+                      leaveOrigin.current.focus();
+                  });
+                }}
+              >
+                계속 작성
+              </Button>
+              <Button
+                className="admin-button-secondary"
+                onClick={() =>
+                  runConfirmed(() => navigate(destination.current))
+                }
+              >
+                입력 버리기
+              </Button>
+            </div>
+          </div>
+        )}
         <div
-          className="properties-banner properties-banner--error"
-          role="alert"
-          tabIndex={-1}
-          ref={notice}
+          className={`property-editor-layout${original ? '' : ' property-editor-layout--create'}`}
         >
-          <p>{mutation.state.message}</p>
-          {mutation.state.uncertain && (
-            <Button
-              className="admin-button-secondary"
-              onClick={() => navigate(returnUrl)}
-            >
-              목록에서 저장 결과 확인
-            </Button>
+          <PropertyForm
+            values={values}
+            onChange={change}
+            errors={{ ...mutation.state.errors, ...errors }}
+            busy={mutation.state.busy}
+            blocked={mutation.state.uncertain || discarding}
+          />
+          {original && (
+            <PropertyManagementCard
+              property={original}
+              returnUrl={returnUrl}
+              disabled={mutation.state.busy || discarding}
+              onNavigate={leave}
+              operationDisabled={dirty || !!mutation.state.uncertain}
+              onOperation={() => setOperationOpen(true)}
+            />
           )}
         </div>
-      )}
-      {unchanged && (
-        <p className="properties-banner" role="status">
-          변경된 내용이 없습니다.
+        <p className="property-editor-save-state" role="status">
+          {mutation.state.busy
+            ? '변경 내용을 저장하고 있습니다.'
+            : mutation.state.uncertain || discarding
+              ? '안내를 확인한 뒤 계속해 주세요.'
+              : dirty
+                ? '저장하지 않은 변경 사항이 있습니다.'
+                : ''}
         </p>
-      )}
-      {discarding && (
-        <div
-          className="properties-banner"
-          role="alertdialog"
-          tabIndex={-1}
-          ref={discard}
-          aria-labelledby="property-discard-title"
-          aria-describedby="property-discard-description"
-        >
-          <h2 id="property-discard-title">입력 내용을 버릴까요?</h2>
-          <p id="property-discard-description">
-            아직 저장하지 않은 변경 사항이 사라집니다.
-          </p>
-          <div className="properties-heading__actions">
-            <Button
-              onClick={() => {
-                setDiscarding(false);
-                requestAnimationFrame(() => {
-                  if (leaveOrigin.current?.isConnected)
-                    leaveOrigin.current.focus();
-                });
-              }}
-            >
-              계속 작성
-            </Button>
-            <Button
-              className="admin-button-secondary"
-              onClick={() => runConfirmed(() => navigate(destination.current))}
-            >
-              입력 버리기
-            </Button>
-          </div>
-        </div>
-      )}
-      <div className={`property-editor-layout${original ? '' : ' property-editor-layout--create'}`}>
-        <PropertyForm
-          values={values}
-          onChange={change}
-          errors={{ ...mutation.state.errors, ...errors }}
-          busy={mutation.state.busy}
-          blocked={mutation.state.uncertain || discarding}
-        />
-        {original && (
-          <PropertyManagementCard
-            property={original}
-            returnUrl={returnUrl}
-            disabled={mutation.state.busy || discarding}
-            onNavigate={leave}
-            operationDisabled={dirty || !!mutation.state.uncertain}
-            onOperation={() => setOperationOpen(true)}
-          />
-        )}
-      </div>
-      <p className="property-editor-save-state" role="status">
-        {mutation.state.busy
-          ? '변경 내용을 저장하고 있습니다.'
-          : mutation.state.uncertain || discarding
-            ? '안내를 확인한 뒤 계속해 주세요.'
-            : dirty ? '저장하지 않은 변경 사항이 있습니다.' : ''}
-      </p>
       </div>
       <div className="property-editor-actions">
         <Button
@@ -255,9 +273,21 @@ export function PropertyEditor({
         >
           <span aria-hidden="true">←</span> 목록
         </Button>
-        <Button type="submit" loading={mutation.state.busy} disabled={!!mutation.state.uncertain || discarding}>
-          {!mutation.state.busy && <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m5 12 4 4L19 6" /></svg>}
-          {mutation.state.busy ? '저장 중' : original ? '변경 저장' : '휴양소 등록'}
+        <Button
+          type="submit"
+          loading={mutation.state.busy}
+          disabled={!!mutation.state.uncertain || discarding}
+        >
+          {!mutation.state.busy && (
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="m5 12 4 4L19 6" />
+            </svg>
+          )}
+          {mutation.state.busy
+            ? '저장 중'
+            : original
+              ? '변경 저장'
+              : '휴양소 등록'}
         </Button>
       </div>
       {operationOpen && original && (
@@ -266,10 +296,22 @@ export function PropertyEditor({
           token={token}
           rejectSession={rejectSession}
           onClose={() => setOperationOpen(false)}
-          onSaved={(saved) => runConfirmed(() => navigate(
-            appRoutes.adminProperties + (saved.isActive ? '' : '?status=inactive'),
-            { replace: true, state: { propertyNotice: saved.isActive ? 'restored' : 'archived', propertyName: saved.name, propertyId: saved.id } },
-          ))}
+          onSaved={(saved) =>
+            runConfirmed(() =>
+              navigate(
+                appRoutes.adminProperties +
+                  (saved.isActive ? '' : '?status=inactive'),
+                {
+                  replace: true,
+                  state: {
+                    propertyNotice: saved.isActive ? 'restored' : 'archived',
+                    propertyName: saved.name,
+                    propertyId: saved.id,
+                  },
+                },
+              ),
+            )
+          }
         />
       )}
     </form>

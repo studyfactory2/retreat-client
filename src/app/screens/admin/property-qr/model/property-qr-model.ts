@@ -1,4 +1,7 @@
-import { ApiRequestError } from '../../../../core/api/api-error';
+import {
+  ApiRequestError,
+  isAccessLinkIssuanceUnavailable,
+} from '../../../../core/api/api-error';
 import type {
   QrFlow,
   QrState,
@@ -15,7 +18,7 @@ export function qrFlowKey(flow: QrFlow): 'guest' | 'staff' {
 
 export function qrStateLabel(state: QrState): string {
   if (!state.issued) return '미발급';
-  return state.enabled ? '발급됨 · 접근 활성' : '발급됨 · 접근 중지';
+  return state.enabled ? '사용 중' : '접근 중지';
 }
 
 const seoulDateTime = new Intl.DateTimeFormat('ko-KR', {
@@ -37,6 +40,12 @@ export function qrMutationFailure(error: unknown): {
   blocked: boolean;
   message: string;
 } {
+  if (isAccessLinkIssuanceUnavailable(error))
+    return {
+      blocked: false,
+      message:
+        'QR 발급 설정이 필요합니다. 서버 설정을 확인해 주세요. 이번 요청으로 기존 QR은 변경되지 않았습니다.',
+    };
   const uncertain =
     !(error instanceof ApiRequestError) ||
     error.status === null ||
@@ -46,7 +55,7 @@ export function qrMutationFailure(error: unknown): {
     return {
       blocked: true,
       message:
-        '발급 결과를 확인하지 못했습니다. 서버에서는 이미 발급되었을 수 있습니다. 최신 상태를 확인해 주세요. 발급이 완료되었다면 응답을 받지 못한 주소는 복구할 수 없으며, 다시 발급하면 이전 QR이 무효화됩니다. 자동으로 재시도하지 않습니다.',
+        '발급 결과를 확인하지 못했습니다. 최신 상태를 확인한 뒤 QR 열기를 눌러 주세요. 다시 교체하면 이전 QR은 무효화됩니다.',
     };
   if (error.status === 404 || error.status === 409)
     return {

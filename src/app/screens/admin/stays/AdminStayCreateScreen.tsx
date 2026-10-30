@@ -5,6 +5,7 @@ import { useAdminPropertyOptions } from '../../../features/admin-properties/use-
 import { createAdminStay } from '../../../features/admin-stays/admin-stays-api';
 import { Button } from '../../../shared/ui/Button/Button';
 import { PageState } from '../../../shared/ui/PageState/PageState';
+import { AdminBackButton } from '../components/AdminBackButton';
 import { StayForm } from './components/StayForm';
 import {
   buildCreateStayInput,
@@ -104,7 +105,14 @@ function CreateWorkspace({
     <div className="admin-stay admin-stay--form">
       <header className="stay-heading">
         <div>
-          <h1>이용 일정 등록</h1>
+          <div className="admin-page-heading-title">
+            <AdminBackButton
+              label={navigation.returnLabel}
+              disabled={mutation.state.busy || leave.pending}
+              onBack={() => leave.askToLeave(() => navigate(navigation.returnTo))}
+            />
+            <h1>이용 일정 등록</h1>
+          </div>
         </div>
       </header>
       {properties.resource.status === 'loading' ? (
