@@ -18,7 +18,6 @@ export function QrDetailPanel({
   issuing,
   reviewRequired,
   onOpen,
-  onClose,
   onIssue,
 }: {
   flow: QrFlow;
@@ -30,57 +29,43 @@ export function QrDetailPanel({
   issuing: boolean;
   reviewRequired: boolean;
   onOpen: () => void;
-  onClose: () => void;
   onIssue: () => void;
 }) {
   const heading = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
-    if (issue) heading.current?.focus();
+    if (issue) heading.current?.focus({ preventScroll: true });
   }, [issue]);
   return (
-    <section
-      id="property-qr-preview"
-      className="property-qr-panel"
-      role="tabpanel"
-      aria-labelledby={`qr-${flow}-select`}
-    >
+    <section className="property-qr-panel" aria-busy={opening || issuing}>
       <div className="property-qr-panel__heading">
-        <h2 id="property-qr-preview-title" ref={heading} tabIndex={-1}>
+        <h3 ref={heading} tabIndex={-1}>
           {flow === 'GUEST' ? '입실 · 퇴실 · 이용 안내' : '청소 · 정비 점검'}
-        </h2>
+        </h3>
         <span
-          className={`property-qr-card__badge${state.enabled ? ' property-qr-card__badge--active' : ''}`}
+          className={
+            'property-qr-card__badge' +
+            (state.enabled ? ' property-qr-card__badge--active' : '')
+          }
         >
           {qrStateLabel(state)}
         </span>
       </div>
-      <div className="property-qr-panel__meta">
-        {state.rotatedAt && (
-          <p className="property-qr-panel__date">
-            최근 발급{' '}
-            <time dateTime={state.rotatedAt}>
-              {formatQrTimestamp(state.rotatedAt)}
-            </time>
-          </p>
-        )}
-        {issue && (
-          <Button
-            className="admin-button-ghost property-qr-panel__close"
-            disabled={disabled}
-            onClick={onClose}
-          >
-            QR 닫기
-          </Button>
-        )}
-      </div>
+      {state.rotatedAt && (
+        <p className="property-qr-panel__date">
+          최근 발급{' '}
+          <time dateTime={state.rotatedAt}>
+            {formatQrTimestamp(state.rotatedAt)}
+          </time>
+        </p>
+      )}
       {issue ? (
         <QrIssuedReceipt
-          key={`${flow}:${issue.rotatedAt}`}
+          key={flow + ':' + issue.rotatedAt}
           issue={issue}
           propertyName={propertyName}
         />
       ) : (
-        <div className="property-qr-panel__empty">
+        <div className="property-qr-panel__empty" role="status">
           <strong>
             {reviewRequired
               ? '최신 상태를 확인해 주세요'
@@ -98,7 +83,7 @@ export function QrDetailPanel({
           </strong>
           <p>
             {reviewRequired
-              ? '새로고침으로 발급 결과를 확인해 주세요.'
+              ? '최신 상태 확인으로 발급 결과를 확인해 주세요.'
               : opening || issuing
                 ? '잠시만 기다려 주세요.'
                 : !state.issued
@@ -111,7 +96,7 @@ export function QrDetailPanel({
           </p>
           {state.issued && state.canReopen && state.enabled && (
             <Button
-              id={`qr-${flow}-open`}
+              id={'qr-' + flow + '-open'}
               disabled={disabled}
               loading={opening}
               onClick={onOpen}
@@ -121,7 +106,7 @@ export function QrDetailPanel({
           )}
           {!state.issued && (
             <Button
-              id={`qr-${flow}-review`}
+              id={'qr-' + flow + '-review'}
               disabled={disabled}
               loading={issuing}
               onClick={onIssue}
@@ -137,7 +122,7 @@ export function QrDetailPanel({
           <div>
             <p>교체하면 이전 QR과 인쇄물은 사용할 수 없습니다.</p>
             <Button
-              id={`qr-${flow}-review`}
+              id={'qr-' + flow + '-review'}
               className="admin-button-secondary"
               disabled={disabled}
               onClick={onIssue}

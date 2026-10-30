@@ -557,3 +557,37 @@ were inspected, but OS download completion/location remain manual checks.
 Physical phones/tablets, real PostgreSQL, live authentication/persistence and
 deployment were not exercised. No database operations, account creation, commits,
 pushes, deployments or environment changes were performed for this follow-up.
+
+### QR list and responsive panel follow-up — 2026-10-30
+
+The compact 이용객/직원 list and modal panel supersede the QR tabs described above.
+The panel is a right drawer above 600px and a bottom sheet at 600px and below, with
+a 320ms entrance, backdrop fade and reduced-motion CSS. Existing hooks, legacy QR
+rules, replacement confirmation and uncertain-write recovery remain in place.
+
+Checks used actual frontend source with a fictional API only:
+
+- Both QR flows opened. Copy produced the exact fictional URL; the PNG download
+  filename was checked.
+- Inactive QR panels blocked receipt opening. Active legacy QR panels explained
+  the existing-code limitation without offering reopening.
+- Normal X and Escape closure restored focus to the originating row. Closing a
+  read delayed by 2500ms aborted the request, removed the modal and restored row
+  focus after the loading state settled. Desktop backdrop dismissal also restored
+  row focus and unlocked page scrolling.
+- Retrieval/status error recovery remained inside the panel. Cancelling replacement
+  confirmation returned focus to its review button. A generic 503 blocked another
+  write until the latest-status refresh reconciled the result.
+- Both Keep and Proceed actions worked in the one-time receipt close warning.
+- List rows and open panels had no horizontal overflow at 320, 399, 760, 907, 1024
+  and 1440px, including long names. The panel body scrolled at 320 × 568px.
+- Native modal background inertness was observed. Keyboard focus wrapping and
+  global browser Back were not verified in this run; the fixture had no prior
+  browser-history entry.
+- Typecheck, lint, production build and diff checks passed. The existing bundle-size
+  warning remains.
+
+This follow-up does not fix or extend receipt lifetime. Physical-device behavior,
+native OS download completion and production behavior remain manual checks. No
+database operations, account creation, commits, pushes or deployments were
+performed for this follow-up.

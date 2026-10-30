@@ -8,7 +8,8 @@ import { PageState } from '../../../shared/ui/PageState/PageState';
 import { AdminBackButton } from '../components/AdminBackButton';
 import { QrConfirmation } from './components/QrConfirmation';
 import { QrDetailPanel } from './components/QrDetailPanel';
-import { QrFlowCard } from './components/QrFlowCard';
+import { QrDrawer } from './components/QrDrawer';
+import { QrFlowRow } from './components/QrFlowRow';
 import { QrNavigationNotice } from './components/QrNavigationNotice';
 import { usePropertyQr } from './hooks/use-property-qr';
 import { useQrNavigation } from './hooks/use-qr-navigation';
@@ -21,7 +22,7 @@ export function AdminPropertyQrScreen() {
   if (state.status !== 'authenticated') return null;
   return (
     <PropertyQrWorkspace
-      key={`${id}:${state.user.id}:${state.expiresAt}`}
+      key={id + ':' + state.user.id + ':' + state.expiresAt}
       id={id}
       token={state.token}
       rejectSession={rejectSession}
@@ -50,8 +51,10 @@ function PropertyQrWorkspace({
     reopen,
     closePreview,
   } = qr;
-  const [selected, setSelected] = useState<QrFlow>('GUEST');
-  const [focusedTab, setFocusedTab] = useState<QrFlow>('GUEST');
+  const [selected, setSelected] = useState<{
+    flow: QrFlow;
+    propertyName: string;
+  } | null>(null);
   const [confirmation, setConfirmation] = useState<{
     flow: QrFlow;
     expectedRotatedAt: string | null;
@@ -65,9 +68,10 @@ function PropertyQrWorkspace({
     mutation.blocked ||
     confirmation !== null ||
     navigation.pending !== null;
+
   useEffect(() => {
     if (mutation.message) notice.current?.focus();
-  }, [mutation.message]);
+  }, [mutation.message, selected]);
   useEffect(() => {
     function revalidate() {
       if (
@@ -99,9 +103,100 @@ function PropertyQrWorkspace({
     const flow = confirmation?.flow;
     setConfirmation(null);
     requestAnimationFrame(() =>
-      document.getElementById(`qr-${flow}-review`)?.focus(),
+      document.getElementById('qr-' + flow + '-review')?.focus(),
     );
   }
+  function closePanel() {
+    if (busy) return;
+    if (navigation.pending) {
+      navigation.keep();
+      return;
+    }
+    if (confirmation) {
+      cancelConfirmation();
+      return;
+    }
+    navigation.request('close', () => {
+      closePreview();
+      setSelected(null);
+    });
+  }
+  function openPanel(flow: QrFlow) {
+    if (resource.status !== 'ready' || busy) return;
+    navigation.request('select', () => {
+      closePreview();
+      setSelected({ flow, propertyName: resource.data.property.name });
+      const state = resource.data.qr[qrFlowKey(flow)];
+      if (state.enabled && state.canReopen && !mutation.blocked)
+        void reopen(flow);
+    });
+  }
+
+  // A native modal makes the page behind it inert; recovery and confirmation
+  // controls belong in the open panel, not behind its backdrop.
+  const notices = (
+    <>
+      {navigation.pending && (
+        <QrNavigationNotice
+          onKeep={navigation.keep}
+          onProceed={navigation.proceed}
+        />
+      )}
+      {mutation.message && (
+        <div
+          className={
+            'property-qr-notice' +
+            (mutation.tone === 'error' ? ' property-qr-notice--error' : '')
+          }
+          role={mutation.tone === 'error' ? 'alert' : 'status'}
+          ref={notice}
+          tabIndex={-1}
+        >
+          <p>{mutation.message}</p>
+          {mutation.blocked && (
+            <Button onClick={refreshStatus}>최신 상태 확인</Button>
+          )}
+        </div>
+      )}
+      {confirmation && resource.status === 'ready' && (
+        <QrConfirmation
+          flow={confirmation.flow}
+          replacing={confirmation.expectedRotatedAt !== null}
+          propertyName={resource.data.property.name}
+          onCancel={cancelConfirmation}
+          onConfirm={() => {
+            if (busy || mutation.blocked || !resource.data.qr.propertyIsActive)
+              return;
+            setConfirmation(null);
+            void rotate(confirmation.flow, confirmation.expectedRotatedAt);
+          }}
+        />
+      )}
+    </>
+  );
+  const resourceState = resource.status !== 'ready' && (
+    <div
+      role={resource.status === 'error' ? 'alert' : 'status'}
+      className="property-qr-resource"
+    >
+      <PageState
+        title={
+          resource.status === 'error'
+            ? 'QR 정보를 불러오지 못했습니다'
+            : 'QR 정보를 확인하는 중'
+        }
+        description={
+          resource.status === 'error'
+            ? resource.message
+            : '잠시만 기다려 주세요.'
+        }
+      >
+        {resource.status === 'error' && (
+          <Button onClick={refreshStatus}>다시 불러오기</Button>
+        )}
+      </PageState>
+    </div>
+  );
 
   return (
     <div className="property-qr">
@@ -126,50 +221,26 @@ function PropertyQrWorkspace({
             )}
           </div>
         </div>
-        <div className="property-qr-actions">
-          <Button
-            className="admin-button-ghost property-qr-refresh"
-            aria-label="QR 상태 새로고침"
-            title="새로고침"
-            disabled={
-              busy ||
-              !!confirmation ||
-              !!navigation.pending ||
-              resource.status === 'loading'
-            }
-            onClick={refreshStatus}
-          >
-            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path d="M20 7v5h-5M4 17v-5h5M6.1 7a7 7 0 0 1 11.6-1.5L20 8M4 16l2.3 2.5A7 7 0 0 0 17.9 17" />
-            </svg>
-          </Button>
-        </div>
+        <Button
+          className="admin-button-ghost property-qr-refresh"
+          aria-label="QR 상태 새로고침"
+          title="새로고침"
+          disabled={
+            busy ||
+            !!confirmation ||
+            !!navigation.pending ||
+            resource.status === 'loading'
+          }
+          onClick={refreshStatus}
+        >
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M20 7v5h-5M4 17v-5h5M6.1 7a7 7 0 0 1 11.6-1.5L20 8M4 16l2.3 2.5A7 7 0 0 0 17.9 17" />
+          </svg>
+        </Button>
       </header>
-      {navigation.pending && (
-        <QrNavigationNotice
-          onKeep={navigation.keep}
-          onProceed={navigation.proceed}
-        />
-      )}
+      {!selected && notices}
       {resource.status !== 'ready' ? (
-        <div role={resource.status === 'error' ? 'alert' : 'status'}>
-          <PageState
-            title={
-              resource.status === 'error'
-                ? 'QR 정보를 불러오지 못했습니다'
-                : 'QR 정보를 확인하는 중'
-            }
-            description={
-              resource.status === 'error'
-                ? resource.message
-                : '잠시만 기다려 주세요.'
-            }
-          >
-            {resource.status === 'error' && (
-              <Button onClick={refreshStatus}>다시 불러오기</Button>
-            )}
-          </PageState>
-        </div>
+        !selected && resourceState
       ) : (
         <>
           {!resource.data.qr.propertyIsActive && (
@@ -180,132 +251,28 @@ function PropertyQrWorkspace({
               </p>
             </div>
           )}
-          {mutation.message && (
-            <div
-              className={`property-qr-notice${mutation.tone === 'error' ? ' property-qr-notice--error' : ''}`}
-              role={mutation.tone === 'error' ? 'alert' : 'status'}
-              ref={notice}
-              tabIndex={-1}
-            >
-              <p>{mutation.message}</p>
-              {mutation.blocked && (
-                <Button
-                  className="admin-button-secondary"
-                  onClick={refreshStatus}
-                >
-                  최신 상태 확인
-                </Button>
-              )}
+          <section aria-labelledby="property-qr-list-title">
+            <div className="property-qr-list-heading">
+              <h2 id="property-qr-list-title">공용 QR</h2>
+              <span>2개</span>
             </div>
-          )}
-          {confirmation && (
-            <QrConfirmation
-              flow={confirmation.flow}
-              replacing={confirmation.expectedRotatedAt !== null}
-              propertyName={resource.data.property.name}
-              onCancel={cancelConfirmation}
-              onConfirm={() => {
-                if (
-                  busy ||
-                  mutation.blocked ||
-                  !resource.data.qr.propertyIsActive
-                )
-                  return;
-                setConfirmation(null);
-                void rotate(confirmation.flow, confirmation.expectedRotatedAt);
-              }}
-            />
-          )}
-          <div className="property-qr-grid">
-            <div
-              className="property-qr-tabs"
-              role="tablist"
-              aria-label="QR 용도 선택"
-              onKeyDown={(event) => {
-                const tabs = Array.from(
-                  event.currentTarget.querySelectorAll<HTMLButtonElement>(
-                    '[role="tab"]:not(:disabled)',
-                  ),
-                );
-                const index = tabs.indexOf(event.target as HTMLButtonElement);
-                if (index < 0) return;
-                const next =
-                  event.key === 'ArrowRight'
-                    ? (index + 1) % tabs.length
-                    : event.key === 'ArrowLeft'
-                      ? (index - 1 + tabs.length) % tabs.length
-                      : event.key === 'Home'
-                        ? 0
-                        : event.key === 'End'
-                          ? tabs.length - 1
-                          : null;
-                if (next !== null) {
-                  event.preventDefault();
-                  tabs[next]?.focus();
-                }
-              }}
-            >
+            <ul className="property-qr-list">
               {(['GUEST', 'STAFF'] as const).map((flow) => (
-                <QrFlowCard
+                <QrFlowRow
                   key={flow}
                   flow={flow}
-                  selected={selected === flow}
-                  tabIndex={focusedTab === flow ? 0 : -1}
-                  onFocus={() => setFocusedTab(flow)}
+                  state={resource.data.qr[qrFlowKey(flow)]}
                   disabled={
                     busy ||
                     openingFlow !== null ||
                     !!confirmation ||
                     !!navigation.pending
                   }
-                  onSelect={() => {
-                    if (selected !== flow) {
-                      navigation.request('select', () => {
-                        closePreview();
-                        setSelected(flow);
-                      });
-                    }
-                  }}
+                  onSelect={() => openPanel(flow)}
                 />
               ))}
-            </div>
-            <QrDetailPanel
-              key={selected}
-              flow={selected}
-              state={resource.data.qr[qrFlowKey(selected)]}
-              issue={
-                busy || mutation.blocked || confirmation
-                  ? undefined
-                  : receipts[selected]
-              }
-              propertyName={resource.data.property.name}
-              disabled={disabled || !resource.data.qr.propertyIsActive}
-              opening={openingFlow === selected}
-              issuing={mutation.busyFlow === selected}
-              reviewRequired={mutation.blocked}
-              onOpen={() => {
-                void reopen(selected);
-              }}
-              onClose={() =>
-                navigation.request('close', () => {
-                  closePreview();
-                  requestAnimationFrame(() => {
-                    (
-                      document.getElementById(`qr-${selected}-open`) ??
-                      document.getElementById(`qr-${selected}-select`)
-                    )?.focus();
-                  });
-                })
-              }
-              onIssue={() =>
-                setConfirmation({
-                  flow: selected,
-                  expectedRotatedAt:
-                    resource.data.qr[qrFlowKey(selected)].rotatedAt,
-                })
-              }
-            />
-          </div>
+            </ul>
+          </section>
           <details className="property-qr-help">
             <summary>QR 이용 안내</summary>
             <p>
@@ -315,6 +282,56 @@ function PropertyQrWorkspace({
             </p>
           </details>
         </>
+      )}
+      {selected && (
+        <QrDrawer
+          flow={selected.flow}
+          propertyName={
+            resource.status === 'ready'
+              ? resource.data.property.name
+              : selected.propertyName
+          }
+          busy={busy}
+          refreshDisabled={
+            busy ||
+            openingFlow !== null ||
+            !!confirmation ||
+            !!navigation.pending ||
+            resource.status === 'loading'
+          }
+          onRefresh={refreshStatus}
+          onClose={closePanel}
+        >
+          {notices}
+          {resource.status !== 'ready' ? (
+            resourceState
+          ) : (
+            <QrDetailPanel
+              flow={selected.flow}
+              state={resource.data.qr[qrFlowKey(selected.flow)]}
+              issue={
+                busy || mutation.blocked || confirmation
+                  ? undefined
+                  : receipts[selected.flow]
+              }
+              propertyName={resource.data.property.name}
+              disabled={disabled || !resource.data.qr.propertyIsActive}
+              opening={openingFlow === selected.flow}
+              issuing={mutation.busyFlow === selected.flow}
+              reviewRequired={mutation.blocked}
+              onOpen={() => {
+                void reopen(selected.flow);
+              }}
+              onIssue={() =>
+                setConfirmation({
+                  flow: selected.flow,
+                  expectedRotatedAt:
+                    resource.data.qr[qrFlowKey(selected.flow)].rotatedAt,
+                })
+              }
+            />
+          )}
+        </QrDrawer>
       )}
     </div>
   );

@@ -3306,3 +3306,28 @@ horizontal overflow; tab keyboard behavior, clipboard URL equality, filtered
 detail return and both known-setup/uncertain-error paths were exercised. Native
 download completion, physical devices and live database/deployment behavior remain
 outside this verification. See MANUAL_ACCEPTANCE.md for the evidence boundary.
+
+### QR list and responsive panel follow-up — 2026-10-30
+
+This follow-up supersedes the QR tabs and side-by-side receipt layout described
+above. Two compact 이용객/직원 rows open a native modal panel; a recoverable active
+QR opens its existing receipt, while legacy, unissued and inactive states retain
+their existing rules. Opening a row never automatically replaces a QR.
+
+Above 600px the panel opens from the right; at 600px and below it opens as a bottom
+sheet. Its header remains visible while the body scrolls, with safe-area spacing.
+The 320ms entrance and backdrop fade respect reduced-motion preferences. QR images
+and sharing controls are grouped vertically inside the panel.
+
+Workspace hooks and API contracts remain unchanged. Confirmation, uncertain-write
+recovery and retrieval/status errors stay inside the modal. Guarded close actions
+preserve one-time receipt warnings; closing an in-flight read aborts it and restores
+focus to an enabled row after the UI update, with a safe back-button fallback.
+This is a layout and interaction follow-up, not a receipt-lifetime change.
+
+Typecheck, lint, production build and diff checks passed; the existing bundle-size
+warning remains. Actual-source checks with a fictional API covered both flows,
+sharing, recovery, guarded closure and responsive layouts from 320px to 1440px.
+No database operations, account creation or deployment were performed. Physical
+devices, native OS download completion and production behavior remain unverified;
+see MANUAL_ACCEPTANCE.md for the precise checks and limits.
