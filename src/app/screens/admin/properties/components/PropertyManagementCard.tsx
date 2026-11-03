@@ -15,6 +15,7 @@ type Props = {
 const actions = [
   { label: '담당 직원', route: appRoutes.adminPropertyStaff, icon: 'staff' },
   { label: 'QR 관리', route: appRoutes.adminPropertyQr, icon: 'qr' },
+  { label: '출입 비밀번호', route: appRoutes.adminPropertyAccess, icon: 'lock' },
   { label: '체크리스트', route: appRoutes.adminPropertyChecklists, icon: 'checklist' },
   { label: '이용 안내', route: appRoutes.adminPropertyGuide, icon: 'guide' },
 ];
@@ -60,6 +61,7 @@ export function PropertyManagementCard({
                 {icon === 'qr' && <><rect x="3" y="3" width="6" height="6" rx="1" /><rect x="15" y="3" width="6" height="6" rx="1" /><rect x="3" y="15" width="6" height="6" rx="1" /><path d="M15 15h2v2h4m-6 4h2m4-8v2m-2 6h2v-2M3 12h3m6-9v3m0 6v3" /></>}
                 {icon === 'checklist' && <><rect x="5" y="4" width="14" height="17" rx="2" /><rect x="9" y="2" width="6" height="4" rx="1" /><path d="m8 11 1 1 2-2m2 1h3m-8 6 1 1 2-2m2 1h3" /></>}
                 {icon === 'guide' && <><path d="M12 5c-3-2-6-2-9-1v15c3-1 6-1 9 1 3-2 6-2 9-1V4c-3-1-6-1-9 1Zm0 0v15M6 8h3m-3 4h3m6-4h3m-3 4h3" /></>}
+                {icon === 'lock' && <><rect x="5" y="10" width="14" height="11" rx="2" /><path d="M8 10V6a4 4 0 0 1 8 0v4m-4 4v3" /></>}
               </svg>
             </span>
             <span>{label}</span>

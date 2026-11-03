@@ -156,3 +156,9 @@ yarn build
 The development connection screen is omitted from the production bundle.
 
 The user owns Git staging, commits, pushes, and deployment.
+
+Property settings now include **출입 비밀번호** (administrator only). The page
+stores the entrance code, fixed/rotating room mode and applicable room/vacancy code.
+Saved values are masked until explicitly revealed. Saving changes the app settings
+only; it does not change a physical lock or publish codes to guests/staff. Apply the
+matching API migration and configure its encryption keys before using this page.

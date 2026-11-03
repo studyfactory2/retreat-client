@@ -23,6 +23,7 @@ export const appRoutes = {
   adminPropertyStaff: '/admin/properties/:id/staff',
   adminPropertyQr: '/admin/properties/:id/qr',
   adminPropertyGuide: '/admin/properties/:id/guide',
+  adminPropertyAccess: '/admin/properties/:id/access-settings',
   adminPropertyChecklists: '/admin/properties/:id/checklists',
   adminChecklistEditor: '/admin/properties/:id/checklists/:type',
   adminChecklistHistory: '/admin/properties/:id/checklists/:type/history',

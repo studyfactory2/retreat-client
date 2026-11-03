@@ -3331,3 +3331,27 @@ sharing, recovery, guarded closure and responsive layouts from 320px to 1440px.
 No database operations, account creation or deployment were performed. Physical
 devices, native OS download completion and production behavior remain unverified;
 see MANUAL_ACCEPTANCE.md for the precise checks and limits.
+
+## Slice 12: administrator property access settings
+
+`/admin/properties/:id/access-settings` is linked from the property management
+card. Two compact sections configure the shared entrance and fixed/rotating room
+code mode. No mode is preselected for an unconfigured property. Fixed mode requires
+a room code; the vacancy code in rotating mode can be entered later. Leading
+zeros and supported `*`/`#` symbols are preserved. Switching mode retains the
+previously saved code for the inactive mode; only edits for the currently selected
+mode are included in the review/save request.
+
+The ordinary admin response contains presence flags, never plaintext codes.
+Explicit authenticated reveal uses a separate POST and validates its kind/version.
+Revealed values and visible new-code inputs hide after 30 seconds, on tab hiding,
+and when entering save review; secrets remain in component memory only. Input
+values are not persisted in browser storage or URLs. Save review lists changed
+fields without codes, confirms that physical locks are unchanged, and handles
+stale or uncertain saves by requiring a reload before another write. The existing
+administrator navigation guard protects unsaved input and pending operations.
+
+This slice does not expose door codes through existing guest/staff QR routes,
+generate reservation codes, physically change locks or send messages. It requires
+the matching backend schema migration and encryption configuration. These remain
+user-run setup tasks; local checks do not verify a production database or device.
