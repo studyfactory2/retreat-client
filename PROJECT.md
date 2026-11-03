@@ -3355,3 +3355,28 @@ This slice does not expose door codes through existing guest/staff QR routes,
 generate reservation codes, physically change locks or send messages. It requires
 the matching backend schema migration and encryption configuration. These remain
 user-run setup tasks; local checks do not verify a production database or device.
+
+## Slice 13: reservation access codes
+
+The existing reservation detail has a compact 예약 비밀번호 card. Rotating-code
+properties offer server-generated six digits (the default) or the saved reservation
+phone's last six digits. Fixed-code properties use their configured room code.
+Nothing is automatically assigned when opening, creating or importing a reservation.
+The administrator reviews and confirms every preparation, replacement or decision
+to keep a saved code. The prepared-number status is separate from a physical lock
+change, and this slice sends no messages or exposes codes to guests or staff.
+
+Metadata reads carry no plaintext. Explicit reveal validates the reservation and
+code version, stays in component memory, and conceals after 30 seconds, when the
+tab is hidden, or when navigating away. Hidden-tab requests are aborted so a late
+response cannot redisplay a secret. Contact changes, restored reservations and
+room-policy or neighboring-code conflicts are shown for review; an existing number
+does not change silently. Cancellation, ended stays and inactive properties prevent
+preparation while keeping administrator-only inspection available.
+
+The feature validates API payloads at runtime and uses all three reservation,
+settings and code versions for writes. Failed/uncertain writes require an explicit
+status reload before another mutation. Its own navigation guard preserves the
+existing personal-link receipt guard; review and pending operations temporarily
+disable adjacent reservation/link/vehicle actions. The matching API migration is
+required and remains a user-run step.

@@ -1,0 +1,396 @@
+.admin-stay .stay-card.stay-access {
+  padding: 22px 24px;
+}
+.stay-access__heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.stay-access__heading > div {
+  min-width: 0;
+}
+.stay-access__badge {
+  flex: 0 0 auto;
+  padding: 5px 9px;
+  border-radius: 7px;
+  background: #f1f4f8;
+  color: var(--color-muted);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.6;
+}
+.stay-access__badge--ready {
+  color: #176d5c;
+  background: #e7f5ee;
+}
+.stay-access__badge--review {
+  color: #8b5716;
+  background: #fff2d9;
+}
+.stay-access .ui-button {
+  min-height: 44px;
+  padding: 9px 15px;
+  font-size: 13px;
+}
+.stay-access__saved {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 8px 24px;
+  margin-top: 18px;
+  padding: 16px 18px;
+  background: #f5f8ff;
+  border: 1px solid #e4ebfa;
+  border-radius: 12px;
+}
+.stay-access__number {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  min-width: 0;
+}
+.stay-access__number-actions {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+  flex: 0 0 auto;
+}
+.stay-access__number-actions .ui-button {
+  padding-inline: 12px;
+}
+.stay-access__digits {
+  min-width: 0;
+  color: var(--color-heading);
+  font-size: 25px;
+  font-weight: 650;
+  letter-spacing: 0.22em;
+  line-height: 1.5;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+.stay-access__digits--visible {
+  letter-spacing: 0.07em;
+}
+.stay-access__meta {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+.stay-access__meta strong {
+  color: var(--color-heading);
+  font-size: 13px;
+  font-weight: 600;
+}
+.stay-access__meta span,
+.stay-access__meta time,
+.stay-access__conceal {
+  color: var(--color-muted);
+  font-size: 11px;
+  line-height: 1.7;
+}
+.stay-access__conceal {
+  grid-column: 1 / -1;
+}
+.stay-access__methods {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  min-width: 0;
+  margin: 18px 0 0;
+  padding: 0;
+  border: 0;
+}
+.stay-access__methods legend {
+  padding: 0 0 10px;
+  color: var(--color-heading);
+  font-size: 12px;
+  font-weight: 600;
+}
+.stay-access__methods label {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  min-width: 0;
+  padding: 13px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  cursor: pointer;
+}
+.stay-access__methods input {
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+  margin: 2px 0 0;
+  accent-color: var(--color-primary);
+}
+.stay-access__methods label span {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+.stay-access__methods strong {
+  color: var(--color-heading);
+  font-size: 13px;
+  font-weight: 600;
+}
+.stay-access__methods small {
+  color: var(--color-muted);
+  font-size: 11px;
+  line-height: 1.6;
+}
+.stay-access__methods .is-selected {
+  border-color: #476fff;
+  background: #f0f4ff;
+}
+.stay-access__methods .is-disabled {
+  background: #f5f6f8;
+  cursor: not-allowed;
+}
+.stay-access__methods .is-disabled strong,
+.stay-access__methods .is-disabled small {
+  color: #69768a;
+}
+.stay-access__methods label:has(input:focus-visible) {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+.stay-access__hint,
+.stay-access__fixed {
+  margin-top: 10px;
+  color: var(--color-muted);
+  font-size: 12px;
+  line-height: 1.7;
+}
+.stay-access__actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+.stay-access__notice {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: #f3f6fb;
+  color: #4b6281;
+  font-size: 12px;
+  line-height: 1.8;
+}
+.stay-access__notice--review {
+  background: #fff8e9;
+  color: #805219;
+}
+.stay-access__notice--error {
+  background: #fff1f3;
+  color: var(--color-danger);
+}
+.stay-access__notice--success {
+  background: #edf8f2;
+  color: #24654e;
+}
+.stay-access__notice ul {
+  margin: 0;
+  padding-left: 17px;
+}
+.stay-access__notice p + p,
+.stay-access__notice ul + p {
+  margin-top: 4px;
+}
+.stay-access__notice .ui-button {
+  margin-top: 9px;
+}
+.stay-access__settings {
+  display: inline-block;
+  margin-top: 4px;
+  padding-block: 8px;
+  color: var(--color-primary);
+  font-weight: 600;
+}
+.stay-access__review {
+  margin-top: 16px;
+  padding: 17px;
+  border: 1px solid #cbd9ff;
+  border-radius: 12px;
+  background: #f7f9ff;
+}
+.stay-access__review h3 {
+  color: var(--color-heading);
+  font-size: 15px;
+  line-height: 1.6;
+}
+.stay-access__review p {
+  margin-top: 9px;
+  color: #506483;
+  font-size: 13px;
+  line-height: 1.8;
+}
+.stay-access__review .stay-access__review-method {
+  color: var(--color-primary);
+  font-size: 12px;
+  font-weight: 600;
+}
+.stay-access__review .stay-access__review-warning {
+  color: #955e16;
+}
+.stay-access__review .stay-access__review-note {
+  margin-top: 13px;
+  padding-top: 11px;
+  border-top: 1px solid var(--color-border);
+  font-size: 12px;
+}
+.stay-access__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 14px;
+}
+.stay-access__footer p {
+  flex: 1;
+  min-width: 0;
+  color: var(--color-muted);
+  font-size: 11px;
+  line-height: 1.7;
+}
+.stay-access__footer .stay-access__refresh {
+  flex: 0 0 auto;
+  border-color: transparent;
+  padding-inline: 8px;
+  background: transparent;
+  color: var(--color-muted);
+  font-size: 12px;
+}
+.stay-access__history {
+  margin-top: 10px;
+  padding-top: 4px;
+  border-top: 1px solid var(--color-border);
+}
+.stay-access__history summary {
+  display: list-item;
+  min-height: 44px;
+  padding-block: 13px;
+  color: var(--color-muted);
+  font-size: 12px;
+  cursor: pointer;
+}
+.stay-access__history ol {
+  display: grid;
+  gap: 11px;
+  padding: 2px 0 0;
+  list-style: none;
+}
+.stay-access__history li {
+  min-width: 0;
+}
+.stay-access__history li > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px 12px;
+  font-size: 12px;
+}
+.stay-access__history strong {
+  color: var(--color-heading);
+  font-weight: 600;
+}
+.stay-access__history span,
+.stay-access__history p {
+  color: var(--color-muted);
+  font-size: 11px;
+  line-height: 1.8;
+}
+.stay-access__history p {
+  margin-top: 2px;
+}
+.admin-stay .stay-access > .stay-access__loading {
+  margin: 18px 0 4px;
+  font-size: 12px;
+}
+@media (min-width: 1000px) {
+  .stay-access__prepare {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+    gap: 8px 16px;
+  }
+  .stay-access__prepare > .stay-access__methods,
+  .stay-access__prepare > .stay-access__fixed {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .stay-access__prepare > .stay-access__actions {
+    grid-column: 2;
+    grid-row: 1;
+    margin-top: 0;
+  }
+  .stay-access__prepare > .stay-access__hint {
+    grid-column: 1 / -1;
+    margin-top: 0;
+  }
+}
+@media (max-width: 650px) {
+  .admin-stay .stay-card.stay-access {
+    padding: 18px 16px;
+  }
+  .admin-stay .stay-access h2 {
+    font-size: 17px;
+  }
+  .stay-access__heading {
+    gap: 8px;
+  }
+  .stay-access__badge {
+    padding-inline: 7px;
+    font-size: 10px;
+  }
+  .stay-access__saved {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 9px;
+    margin-top: 14px;
+    padding: 12px;
+  }
+  .stay-access__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 3px 10px;
+  }
+  .stay-access__digits {
+    font-size: 24px;
+  }
+  .stay-access__methods {
+    gap: 8px;
+  }
+  .stay-access__methods label {
+    gap: 6px;
+    padding: 11px 9px;
+  }
+  .stay-access__methods strong {
+    font-size: 12px;
+  }
+  .stay-access__methods small {
+    font-size: 10px;
+  }
+  .stay-access__actions .ui-button {
+    flex: 1 1 100px;
+    padding-inline: 10px;
+  }
+  .stay-access__review {
+    padding: 13px;
+  }
+}
+@media (max-width: 360px) {
+  .stay-access__methods {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .stay-access__methods label {
+    padding: 12px;
+  }
+  .stay-access__methods label span {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 5px 10px;
+  }
+}

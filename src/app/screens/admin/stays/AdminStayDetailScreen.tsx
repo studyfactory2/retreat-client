@@ -15,6 +15,7 @@ import { StayStatusAction } from './components/StayStatusAction';
 import { StayHistory } from './components/StayHistory';
 import { isStayRevision } from '../../../features/admin-stays/admin-stays-validation';
 import { StayDetails } from './components/StayDetails';
+import { StayAccessCodeCard } from './components/StayAccessCodeCard';
 import { StayLinkCard } from './components/StayLinkCard';
 import { StayVehicleCard } from './components/StayVehicleCard';
 import { StayLinkNavigationNotice } from './components/StayLinkNavigationNotice';
@@ -64,6 +65,7 @@ function DetailWorkspace({
   const linkNavigation = useStayLinkNavigation();
   const [editing, setEditing] = useState(false);
   const [changingStatus, setChangingStatus] = useState(false);
+  const [accessInteraction, setAccessInteraction] = useState(false);
   const location = useLocation();
   const initialNotice: unknown = location.state;
   const [notice, setNotice] = useState<string | null>(() =>
@@ -139,7 +141,7 @@ function DetailWorkspace({
           <div className="admin-page-heading-title">
             <AdminBackButton
               label={navigation.returnLabel}
-              disabled={changingStatus || linkNavigation.busy || linkNavigation.pending}
+              disabled={changingStatus || accessInteraction || linkNavigation.busy || linkNavigation.pending}
               onBack={() =>
                 linkNavigation.request(() => navigate(navigation.returnTo))
               }
@@ -154,7 +156,7 @@ function DetailWorkspace({
           <div className="stay-heading__actions">
             <Button
               className="admin-button-secondary"
-              disabled={linkNavigation.busy || linkNavigation.pending}
+              disabled={accessInteraction || linkNavigation.busy || linkNavigation.pending}
               onClick={() =>
                 linkNavigation.request(() => {
                   setNotice(null);
@@ -167,7 +169,7 @@ function DetailWorkspace({
             {stay.status === 'ACTIVE' &&
               isStayRevision(stay.currentRevision) && (
                 <Button
-                  disabled={linkNavigation.busy || linkNavigation.pending}
+                  disabled={accessInteraction || linkNavigation.busy || linkNavigation.pending}
                   onClick={() => linkNavigation.request(() => setEditing(true))}
                 >
                   수정
@@ -177,6 +179,7 @@ function DetailWorkspace({
               <Button
                 className="admin-button-secondary"
                 disabled={
+                  accessInteraction ||
                   linkNavigation.busy ||
                   linkNavigation.pending ||
                   (stay.status === 'CANCELLED' && !stay.property.isActive)
@@ -237,13 +240,24 @@ function DetailWorkspace({
       )}
       <StayDetails stay={stay} />
       {!changingStatus && (
+        <StayAccessCodeCard
+          key={`${stay.id}:${stay.currentRevision}:${stay.status}:${stay.checkOutAt}:${stay.property.isActive}`}
+          stay={stay}
+          token={token}
+          rejectSession={rejectSession}
+          actionsDisabled={linkNavigation.busy || linkNavigation.pending}
+          onInteractionChange={setAccessInteraction}
+          onReloadStay={() => linkNavigation.request(() => { setNotice(null); refresh(); })}
+        />
+      )}
+      {!changingStatus && (
         <div className="stay-support-grid">
           <StayLinkCard
             stay={stay}
             token={token}
             rejectSession={rejectSession}
             registerGuard={linkNavigation.register}
-            navigationPending={linkNavigation.pending}
+            navigationPending={accessInteraction || linkNavigation.pending}
             onReloadStay={() =>
               linkNavigation.request(() => {
                 setNotice(null);
@@ -255,7 +269,7 @@ function DetailWorkspace({
             stay={stay}
             token={token}
             rejectSession={rejectSession}
-            actionsDisabled={linkNavigation.busy || linkNavigation.pending}
+            actionsDisabled={accessInteraction || linkNavigation.busy || linkNavigation.pending}
             onReloadStay={() =>
               linkNavigation.request(() => {
                 setNotice(null);
