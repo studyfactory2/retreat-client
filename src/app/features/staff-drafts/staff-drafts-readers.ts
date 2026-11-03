@@ -80,6 +80,16 @@ export function readStaffDraft(value: unknown): StaffDraftDto {
     )
   )
     throw invalidStaffDraftResponse();
+  const task =
+    draft.cleaningTask == null ? null : staffDraftObject(draft.cleaningTask);
+  if (
+    task &&
+    (!isStaffEntryId(task.id) ||
+      !isStaffEntryText(task.title, 150) ||
+      !isStaffDraftTimestamp(task.dueAt) ||
+      !isStaffEntryVersion(task.version))
+  )
+    throw invalidStaffDraftResponse();
   let definition;
   try {
     definition = readStaffChecklistDefinition(template.definition);
@@ -90,6 +100,14 @@ export function readStaffDraft(value: unknown): StaffDraftDto {
   // Preserve the server's expiry instead of inventing an exact creation offset.
   return {
     id: draft.id.toLowerCase(),
+    cleaningTask: task
+      ? {
+          id: task.id as string,
+          title: task.title as string,
+          dueAt: task.dueAt as string,
+          version: task.version as number,
+        }
+      : null,
     property: {
       id: property.id.toLowerCase(),
       name: property.name,

@@ -1,3 +1,5 @@
+import { StaffTaskPassword } from './StaffTaskPassword';
+import { taskTime } from '../../../../features/cleaning-tasks/cleaning-tasks-display';
 import { Button } from '../../../../shared/ui/Button/Button';
 import {
   useStaffWorkflow,
@@ -26,6 +28,7 @@ export function StaffDraftForm({
     message,
     heading,
     submission,
+    taskPassword,
     accessReady,
     photos,
     unresolved,
@@ -61,6 +64,11 @@ export function StaffDraftForm({
           {draft.visitDate}
         </span>
       </div>
+      {draft.cleaningTask && (
+        <p className="staff-task-subtitle">
+          {draft.cleaningTask.title} · {taskTime(draft.cleaningTask.dueAt)}
+        </p>
+      )}
       <ol className="staff-flow-steps" aria-label="정비 작성 단계">
         {['점검', '사진', '확인·제출'].map((label, index) => (
           <li
@@ -171,6 +179,7 @@ export function StaffDraftForm({
       <div hidden={step !== 1 || submission.locked || later}>
         <StaffDraftPhotos
           controller={photos}
+          requiredAfter={Boolean(draft.cleaningTask)}
           token={token}
           draftId={draft.id}
           expiresAt={draft.expiresAt}
@@ -195,7 +204,38 @@ export function StaffDraftForm({
         )}
       </div>
       {step === 2 && review && !submission.locked && !later && (
-        <StaffSubmissionReview draft={review.draft} photos={review.inputs} />
+        <>
+          {draft.cleaningTask ? (
+            <>
+              <StaffTaskPassword
+                controller={taskPassword}
+                disabled={disabled}
+              />
+              <details className="staff-task-review-details">
+                <summary>
+                  <strong>제출 내용 확인</strong>
+                  <span>
+                    점검 {review.draft.answers.items.length}개 · 사진{' '}
+                    {review.inputs.length}장
+                    {review.draft.answers.items.some(
+                      (answer) => answer.value === 'ABNORMAL',
+                    ) &&
+                      ` · 이상 ${review.draft.answers.items.filter((answer) => answer.value === 'ABNORMAL').length}개`}
+                  </span>
+                </summary>
+                <StaffSubmissionReview
+                  draft={review.draft}
+                  photos={review.inputs}
+                />
+              </details>
+            </>
+          ) : (
+            <StaffSubmissionReview
+              draft={review.draft}
+              photos={review.inputs}
+            />
+          )}
+        </>
       )}
       {step === 2 && !reviewCurrent && !submission.locked && !later && (
         <p className="staff-flow-notice" role="status">
@@ -220,6 +260,11 @@ export function StaffDraftForm({
               ? '저장 상태를 다시 확인해 주세요'
               : '✓ 점검 내용이 저장되었어요'}
           </p>
+          {draft.cleaningTask && (
+            <p className="staff-draft-hint">
+              직원 QR의 작업 목록에서 같은 작업을 이어 쓸 수 있어요.
+            </p>
+          )}
           <StaffDraftLink
             token={token}
             expiresAt={draft.expiresAt}

@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { StaffAccessState } from './components/StaffAccessState';
 import { StaffFrame } from './components/StaffFrame';
 import { StaffHome } from './components/StaffHome';
+import { StaffTaskList } from './components/StaffTaskList';
 import { StaffStartCard } from './components/StaffStartCard';
 import { useStaffEntry } from './hooks/use-staff-entry';
 import { useStaffStart } from './hooks/use-staff-start';
@@ -57,7 +58,31 @@ export function StaffEntryScreen() {
         <StaffHome
           context={resource.data}
           startCard={
-            <StaffStartCard context={resource.data} form={startForm} />
+            <>
+              {resource.data.assignedStaff ? (
+                <StaffTaskList
+                  token={access.token}
+                  context={resource.data}
+                  rejectAccess={rejectAccess}
+                />
+              ) : (
+                <section
+                  className="staff-task-card"
+                  aria-labelledby="unassigned-tasks-title"
+                >
+                  <header className="staff-task-heading">
+                    <h2 id="unassigned-tasks-title">정비 작업</h2>
+                  </header>
+                  <p className="staff-task-empty">
+                    담당 직원 배정 후 작업을 시작할 수 있어요.
+                  </p>
+                </section>
+              )}
+              <details className="staff-entry-secondary">
+                <summary>추가 정비 기록</summary>
+                <StaffStartCard context={resource.data} form={startForm} />
+              </details>
+            </>
           }
         />
       )}

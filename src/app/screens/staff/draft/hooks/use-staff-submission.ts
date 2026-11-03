@@ -1,3 +1,4 @@
+import type { TaskConfirmation } from '../../../../features/cleaning-tasks/cleaning-tasks.types';
 import {
   useCallback,
   useEffect,
@@ -20,6 +21,7 @@ import type {
 type SubmissionAttempt = {
   draft: StaffDraftDto;
   photos: StaffSubmissionPhotoInput[];
+  taskConfirmation?: TaskConfirmation;
 };
 export type StaffSubmissionState = {
   status:
@@ -256,6 +258,7 @@ export function useStaffSubmission(input: Options) {
           frozen.photos,
           owner.token,
           job.controller.signal,
+          frozen.taskConfirmation,
         );
         if (!active() || !alive()) return;
         accept(receipt);
@@ -300,7 +303,11 @@ export function useStaffSubmission(input: Options) {
     [accept, alive, checkReceipt, owner, publish],
   );
   const submit = useCallback(
-    (photos: StaffSubmissionPhotoInput[], expectedUpdatedAt: string) => {
+    (
+      photos: StaffSubmissionPhotoInput[],
+      expectedUpdatedAt: string,
+      taskConfirmation?: TaskConfirmation,
+    ) => {
       if (
         !alive() ||
         operation.current ||
@@ -314,6 +321,9 @@ export function useStaffSubmission(input: Options) {
       const frozen = {
         draft: structuredClone(options.current.draft),
         photos: photos.map((photo) => ({ ...photo })),
+        ...(taskConfirmation
+          ? { taskConfirmation: { ...taskConfirmation } }
+          : {}),
       };
       void send(frozen, false);
     },

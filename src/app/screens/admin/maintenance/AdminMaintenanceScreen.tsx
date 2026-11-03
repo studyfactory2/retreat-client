@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { AdminBackButton } from '../components/AdminBackButton';
 import { useAdminSession } from '../../../core/session/use-admin-session';
 import { useAdminPropertyOptions } from '../../../features/admin-properties/use-admin-property-options';
@@ -21,6 +21,7 @@ import { maintenanceTime } from './model/maintenance-presentation';
 import '../styles/admin-directory.css';
 import './styles/maintenance.css';
 import './styles/maintenance-records.css';
+import '../cleaning-tasks/styles/cleaning-tasks.css';
 
 export function AdminMaintenanceScreen() {
   const { state, rejectSession } = useAdminSession();
@@ -138,6 +139,9 @@ function MaintenanceWorkspace({
           <AdminBackButton />
           <h1>청소·정비</h1>
         </div>
+        <Link className="cleaning-task-nav-link" to="/admin/cleaning-tasks">
+          정비 작업 →
+        </Link>
       </header>
       <MaintenanceFilters
         key={`${query}:${filterReset}`}

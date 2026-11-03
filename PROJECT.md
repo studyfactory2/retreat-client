@@ -3380,3 +3380,38 @@ status reload before another mutation. Its own navigation guard preserves the
 existing personal-link receipt guard; review and pending operations temporarily
 disable adjacent reservation/link/vehicle actions. The matching API migration is
 required and remains a user-run step.
+
+## Slice 14 — staff QR cleaning tasks — 2026-11-03
+
+Staff QR entry now shows compact pending/completed task rows. Opening the task
+list reconciles checkout-linked tasks through an explicit POST sync; completed
+history uses GET and both lists support pagination. A current assigned staff
+confirmation starts or resumes the same task draft. The server-issued `/draft`
+fragment URL is validated before navigation; existing QR and generic private
+maintenance links retain their original behavior.
+
+Task drafts reuse pinned checklist snapshots, saved answers, private photo
+uploads and uncertain-submit reconciliation. They require at least one
+MAINTENANCE_AFTER photo. The final review loads the current password target:
+next reservation, vacancy, fixed, or administrator review required. Codes use
+explicit reveal, 30-second hiding, and clear on blur/visibility/navigation.
+Departure attestation applies to all tasks; the physical password-change
+checkbox applies only when change is required. Refresh/focus or an access change
+clears confirmation. The exact fingerprint and checkbox values are frozen with
+an attempted submission so an intentional retry replays the same request.
+Blocked code preparation preserves answers/photos and blocks completion.
+
+`/admin/cleaning-tasks`, linked from 청소·정비, provides compact task rows and a
+responsive detail panel for manual registration, rescheduling and cancellation.
+The default filter means pending work. Explicit status filters show completed
+or cancelled history. Registration retains its request key across uncertain
+responses; uncertain writes require a list refresh before another action.
+Completed records link to the existing immutable submission view.
+
+API response readers validate task, draft and password contracts. Administrator,
+staff QR and task-private credentials remain distinct. No code enters local
+storage, ordinary task DTOs, query strings or application logs. No new staff
+accounts, guest code release, message delivery, database operations or Git
+mutations are performed by this frontend change. Local build/typecheck/lint and
+isolated fixture browser checks do not establish real-device, PostgreSQL, S3 or
+production readiness.

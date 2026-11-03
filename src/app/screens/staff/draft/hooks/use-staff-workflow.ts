@@ -12,6 +12,7 @@ import type { StaffSubmissionPhotoInput } from '../../../../features/staff-submi
 import { assertStaffChecklistComplete } from '../../../../features/staff-submissions/staff-submissions-validation';
 import type { useStaffDraft } from './use-staff-draft';
 import { useStaffDraftPhotos } from './use-staff-draft-photos';
+import { useTaskPassword } from './use-task-password';
 import { useStaffSubmission } from './use-staff-submission';
 import { changeStaffDraftDetails } from '../model/staff-draft-model';
 import { formatStaffDraftTime } from '../model/staff-draft-display';
@@ -57,10 +58,20 @@ export function useStaffWorkflow({
       alive.current = false;
     };
   }, []);
+  const taskPassword = useTaskPassword(
+    token,
+    draft.cleaningTask?.id ?? null,
+    step === 2 && session.canEdit && !later,
+    session.rejectAccess,
+  );
   const submission = useStaffSubmission({
     token,
     draft,
-    canSubmit: session.canEdit && !session.dirty && step === 2,
+    canSubmit:
+      session.canEdit &&
+      !session.dirty &&
+      step === 2 &&
+      (!draft.cleaningTask || taskPassword.confirmation !== null),
     onLockChange: session.setSubmissionLocked,
     onSubmitted: session.complete,
     onAccessRejected: session.rejectAccess,
@@ -147,6 +158,13 @@ export function useStaffWorkflow({
       const list = await photos.refresh();
       if (!list || !alive.current) return;
       const inputs = staffPhotoInputs(saved, list.items, assignments);
+      if (
+        draft.cleaningTask &&
+        !inputs.some((photo) => photo.purpose === 'MAINTENANCE_AFTER')
+      )
+        throw new Error(
+          '정비 완료 사진을 1장 이상 추가하고 사진 종류를 정비 후로 선택해 주세요.',
+        );
       setReview({ draft: saved, photos: list.items, inputs });
       go(2);
     } catch (error: unknown) {
@@ -205,8 +223,18 @@ export function useStaffWorkflow({
         );
       }
     } else if (step === 1) void prepareReview();
-    else if (review && reviewCurrent)
-      void submission.submit(review.inputs, review.draft.updatedAt);
+    else if (
+      review &&
+      reviewCurrent &&
+      (!draft.cleaningTask || taskPassword.confirmation)
+    ) {
+      void submission.submit(
+        review.inputs,
+        review.draft.updatedAt,
+        taskPassword.confirmation ?? undefined,
+      );
+      taskPassword.hide();
+    }
   };
   const saveStateLabel = saving
     ? '저장 중…'
@@ -230,6 +258,7 @@ export function useStaffWorkflow({
     message,
     heading,
     submission,
+    taskPassword,
     accessReady,
     photos,
     unresolved,
@@ -243,7 +272,11 @@ export function useStaffWorkflow({
     stepTitle: later ? '이어쓰기 링크를 보관해 주세요' : titles[step],
     saveStateLabel,
     nextDisabled:
-      disabled || (step > 0 && !photoReady) || (step === 2 && !reviewCurrent),
+      disabled ||
+      (step > 0 && !photoReady) ||
+      (step === 2 &&
+        (!reviewCurrent ||
+          Boolean(draft.cleaningTask && !taskPassword.confirmation))),
     nextLabel:
       step === 0
         ? '다음: 사진'

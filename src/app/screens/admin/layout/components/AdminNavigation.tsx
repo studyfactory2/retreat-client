@@ -37,6 +37,11 @@ export function AdminNavigation({
   );
   function activeRoute(to: string): boolean {
     if (
+      pathname === appRoutes.adminCleaningTasks &&
+      to === appRoutes.adminMaintenance
+    )
+      return true;
+    if (
       maintenanceDetail &&
       (to === appRoutes.adminMaintenance || to === appRoutes.adminSubmissions)
     )
@@ -115,11 +120,11 @@ export function AdminNavigation({
           </span>
           <span>메뉴</span>
         </button>
-      ) : presentation === 'sidebar'
-        ? adminSecondaryMenu
-            .filter((item) => item.to === appRoutes.adminAccount)
-            .map(renderLink)
-        : null}
+      ) : presentation === 'sidebar' ? (
+        adminSecondaryMenu
+          .filter((item) => item.to === appRoutes.adminAccount)
+          .map(renderLink)
+      ) : null}
     </nav>
   );
 }

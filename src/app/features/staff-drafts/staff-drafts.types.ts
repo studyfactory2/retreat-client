@@ -17,6 +17,12 @@ export interface StaffDraftAnswers {
 
 export interface StaffDraftDto {
   id: string;
+  cleaningTask?: {
+    id: string;
+    title: string;
+    dueAt: string;
+    version: number;
+  } | null;
   property: { id: string; name: string; region: string | null };
   type: 'MAINTENANCE';
   status: 'DRAFT';

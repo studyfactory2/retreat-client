@@ -1,3 +1,4 @@
+import type { TaskConfirmation } from '../cleaning-tasks/cleaning-tasks.types';
 import { apiRequest } from '../../core/api/api-client';
 import { ApiRequestError } from '../../core/api/api-error';
 import { readStaffDraft } from '../staff-drafts/staff-drafts-readers';
@@ -41,11 +42,20 @@ export async function submitStaffChecklist(
   photos: StaffSubmissionPhotoInput[],
   token: string,
   signal?: AbortSignal,
+  taskConfirmation?: TaskConfirmation,
 ): Promise<StaffSubmissionReceiptDto> {
   requireStaffDraftToken(token);
   const base = readStaffDraft(draft);
   assertStaffChecklistComplete(base);
   const preparedPhotos = prepareStaffSubmissionPhotos(base, photos);
+  if (
+    base.cleaningTask &&
+    (!taskConfirmation ||
+      !taskConfirmation.guestDeparted ||
+      !/^[a-f0-9]{64}$/i.test(taskConfirmation.fingerprint) ||
+      !preparedPhotos.some((photo) => photo.purpose === 'MAINTENANCE_AFTER'))
+  )
+    throw new Error('완료 사진과 비밀번호 확인을 마쳐 주세요.');
   // Submit only saved answers. Receipt lookup, reconciliation and any deliberate
   // exact replay are owned by the screen; never retry a write automatically.
   const receipt = readStaffSubmissionReceipt(
@@ -56,6 +66,9 @@ export async function submitStaffChecklist(
       body: {
         expectedUpdatedAt: base.updatedAt,
         photos: preparedPhotos.map((photo) => ({ ...photo })),
+        ...(taskConfirmation
+          ? { taskConfirmation: { ...taskConfirmation } }
+          : {}),
       },
     }),
   );

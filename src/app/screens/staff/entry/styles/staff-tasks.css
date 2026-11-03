@@ -1,0 +1,325 @@
+.staff-task-card {
+  margin-top: 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  background: #fff;
+  overflow: hidden;
+}
+.staff-task-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px 12px;
+  gap: 12px;
+}
+.staff-task-heading h2 {
+  margin: 0;
+  font-size: 18px;
+}
+.staff-task-heading div > span {
+  display: block;
+  margin-top: 4px;
+  color: var(--color-muted);
+  font-size: 12px;
+}
+.staff-task-heading > button {
+  width: 44px;
+  min-height: 44px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--color-muted);
+  font-size: 24px;
+  cursor: pointer;
+}
+.staff-task-tabs {
+  display: flex;
+  gap: 6px;
+  padding: 0 20px 12px;
+}
+.staff-task-tabs button {
+  min-height: 40px;
+  padding: 8px 16px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--color-muted);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+.staff-task-tabs button[aria-pressed='true'] {
+  background: var(--color-soft);
+  color: var(--color-primary);
+  font-weight: 650;
+}
+.staff-task-list {
+  list-style: none;
+  margin: 0;
+  padding: 0 20px;
+}
+.staff-task-list > li + li {
+  border-top: 1px solid var(--color-border);
+}
+.staff-task-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 16px 0;
+  text-align: left;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  color: var(--color-heading);
+  cursor: pointer;
+}
+.staff-task-date {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 45px;
+  min-height: 48px;
+  border-radius: 11px;
+  background: var(--color-soft);
+  color: var(--color-primary);
+}
+.staff-task-date strong {
+  font-size: 15px;
+}
+.staff-task-date small {
+  font-size: 10px;
+}
+.staff-task-row-main {
+  flex: 1;
+  min-width: 0;
+}
+.staff-task-row-main > strong {
+  display: block;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+.staff-task-row-main > span {
+  display: block;
+  margin-top: 5px;
+  font-size: 12px;
+  color: var(--color-muted);
+}
+.staff-task-badge {
+  flex-shrink: 0;
+  padding: 5px 7px;
+  border-radius: 6px;
+  background: #f1f4f9;
+  color: var(--color-muted);
+  font-size: 11px;
+}
+.staff-task-badge.is-in_progress {
+  background: #edf3ff;
+  color: var(--color-primary);
+}
+.staff-task-badge.is-completed {
+  background: #e6f5ef;
+  color: #17664e;
+}
+.staff-task-badge.is-cancelled {
+  background: #f2f3f5;
+  color: #68788d;
+}
+.staff-task-detail {
+  padding: 0 0 16px 55px;
+  font-size: 13px;
+  color: var(--color-muted);
+  overflow-wrap: anywhere;
+}
+.staff-task-detail p {
+  margin: 0 0 10px;
+  white-space: pre-wrap;
+  line-height: 1.6;
+}
+.staff-task-detail > .ui-button {
+  width: 100%;
+  min-height: 46px;
+}
+.staff-task-confirm {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 44px;
+  margin-bottom: 8px;
+  color: var(--color-heading);
+}
+.staff-task-confirm input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--color-primary);
+}
+.staff-task-attention {
+  display: block;
+  margin-top: 5px;
+  color: #9a5b05;
+  font-size: 12px;
+}
+.staff-task-empty {
+  margin: 0;
+  padding: 28px 20px;
+  text-align: center;
+  color: var(--color-muted);
+  font-size: 14px;
+}
+.staff-task-message {
+  margin: 12px 20px;
+  padding: 12px;
+  border-radius: 10px;
+  background: #fff3f0;
+  font-size: 13px;
+  line-height: 1.7;
+}
+.staff-task-message p {
+  margin: 0;
+}
+.staff-task-message button {
+  min-height: 44px;
+  margin-top: 6px;
+  border: 0;
+  background: transparent;
+  color: var(--color-primary);
+  font: inherit;
+  cursor: pointer;
+}
+.staff-task-footnote {
+  margin: 0;
+  padding: 14px 20px;
+  border-top: 1px solid var(--color-border);
+  color: var(--color-muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+.staff-entry-secondary {
+  margin-top: 18px;
+}
+.staff-entry-secondary > summary {
+  min-height: 44px;
+  padding: 12px 4px;
+  cursor: pointer;
+  color: var(--color-muted);
+  font-size: 13px;
+}
+.staff-entry-secondary > .staff-entry-card {
+  margin-top: 8px;
+}
+.staff-entry-welcome.staff-entry-welcome--tasks {
+  padding: 20px;
+}
+.staff-entry-welcome--tasks .staff-entry-welcome__mark {
+  display: none;
+}
+.staff-entry-welcome--tasks h1 {
+  font-size: 24px;
+}
+.staff-entry-welcome--tasks .staff-entry-assignee {
+  margin-top: 12px;
+}
+@media (max-width: 400px) {
+  .staff-task-heading {
+    padding-inline: 14px;
+  }
+  .staff-task-tabs {
+    padding-inline: 14px;
+  }
+  .staff-task-list {
+    padding-inline: 14px;
+  }
+  .staff-task-row {
+    gap: 8px;
+  }
+  .staff-task-date {
+    flex-basis: 38px;
+  }
+  .staff-task-detail {
+    padding-left: 0;
+  }
+  .staff-task-badge {
+    font-size: 10px;
+  }
+  .staff-task-row-main > strong {
+    font-size: 13px;
+  }
+  .staff-task-row-main > span {
+    font-size: 11px;
+  }
+  .staff-task-footnote {
+    padding-inline: 14px;
+  }
+}
+
+.staff-task-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 20px;
+  border-top: 1px solid var(--color-border);
+  font-size: 12px;
+}
+.staff-task-pagination button {
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--color-heading);
+  font: inherit;
+  cursor: pointer;
+}
+
+.staff-entry .staff-entry-welcome.staff-entry-welcome--tasks {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 7px 12px;
+  padding: 16px 18px;
+  border-radius: 15px;
+}
+.staff-entry .staff-entry-welcome--tasks h1 {
+  grid-column: 1 / -1;
+  grid-row: 1;
+  margin: 0;
+  font-size: 24px;
+  line-height: 1.35;
+}
+.staff-entry .staff-entry-welcome--tasks .staff-entry-eyebrow {
+  grid-column: 1;
+  grid-row: 2;
+  margin: 0;
+  padding: 0;
+  font-size: 11px;
+  align-self: center;
+}
+.staff-entry .staff-entry-welcome--tasks .staff-entry-assignee {
+  grid-column: 2;
+  grid-row: 2;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  gap: 6px;
+  align-self: center;
+}
+.staff-entry .staff-entry-welcome--tasks .staff-entry-assignee span {
+  font-size: 10px;
+}
+.staff-entry .staff-entry-welcome--tasks .staff-entry-assignee strong {
+  font-size: 12px;
+}
+.staff-entry .staff-entry-welcome--tasks .staff-entry-welcome__description {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+@media (max-width: 400px) {
+  .staff-entry .staff-entry-welcome--tasks h1 {
+    font-size: 22px;
+  }
+  .staff-entry .staff-entry-welcome.staff-entry-welcome--tasks {
+    padding: 15px;
+    gap: 7px 8px;
+  }
+}

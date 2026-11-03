@@ -20,6 +20,7 @@ export function StaffDraftPhotos({
   onAccessRejected,
   controller,
   renderAssignment,
+  requiredAfter = false,
 }: {
   token: string;
   draftId: string;
@@ -28,6 +29,7 @@ export function StaffDraftPhotos({
   accessReady: boolean;
   onAccessRejected: () => void;
   controller: StaffDraftPhotosController;
+  requiredAfter?: boolean;
   renderAssignment: (photo: StaffDraftPhotoDto, index: number) => ReactNode;
 }) {
   useNavigationGuard(controller.hasPendingWork);
@@ -46,7 +48,7 @@ export function StaffDraftPhotos({
       <div className="staff-photos-heading">
         <div>
           <h2 id={`${inputId}-title`}>
-            사진 남기기 <span>선택</span>
+            사진 남기기 <span>{requiredAfter ? '완료 사진 필수' : '선택'}</span>
           </h2>
         </div>
         {resource.status === 'ready' && limits && (
@@ -56,7 +58,9 @@ export function StaffDraftPhotos({
         )}
       </div>
       <p className="staff-photos-intro">
-        정비한 곳이나 발견한 문제를 사진으로 남겨 주세요.
+        {requiredAfter
+          ? '정비 후 사진을 1장 이상 남겨 주세요. 사진 종류도 정비 후로 선택해 주세요.'
+          : '정비한 곳이나 발견한 문제를 사진으로 남겨 주세요.'}
       </p>
       {resource.status === 'loading' ? (
         <p className="staff-photos-status" role="status">
@@ -103,7 +107,11 @@ export function StaffDraftPhotos({
                 <path d="m4 17 5-5 4 4 3-3 5 5" />
               </svg>
               <p>아직 첨부한 사진이 없습니다.</p>
-              <span>필요한 사진만 자유롭게 추가해 주세요.</span>
+              <span>
+                {requiredAfter
+                  ? '청소·정비를 마친 모습을 추가해 주세요.'
+                  : '필요한 사진만 자유롭게 추가해 주세요.'}
+              </span>
             </div>
           )}
         </>
