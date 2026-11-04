@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Button } from '../../../../shared/ui/Button/Button';
 import {
   formatStayHistoryTime,
@@ -13,6 +14,7 @@ type Props = {
   currentRevision: number;
   token: string;
   rejectSession: (token: string) => void;
+  onSummaryChange?: (summary: string) => void;
 };
 
 export function StayHistory({
@@ -20,6 +22,7 @@ export function StayHistory({
   currentRevision,
   token,
   rejectSession,
+  onSummaryChange,
 }: Props) {
   const { resource, page, selectPage, refresh } = useStayHistory(
     stayId,
@@ -27,21 +30,27 @@ export function StayHistory({
     token,
     rejectSession,
   );
+  const summary =
+    resource.status === 'loading'
+      ? '불러오는 중'
+      : resource.status === 'error'
+        ? '상태 확인 필요'
+        : `${resource.total.toLocaleString('ko-KR')}건`;
+  useEffect(() => {
+    onSummaryChange?.(summary);
+  }, [onSummaryChange, summary]);
   return (
     <section className="stay-history" aria-labelledby="stay-history-title">
       <header className="stay-history__heading">
         <div>
           <h2 id="stay-history-title">변경 이력</h2>
-          <p>
-            한국 시간 기준
-          </p>
         </div>
         <Button
           className="admin-button-secondary"
           onClick={refresh}
           disabled={resource.status === 'loading'}
         >
-          이력 새로고침
+          새로고침
         </Button>
       </header>
       {resource.status === 'loading' ? (
@@ -63,7 +72,7 @@ export function StayHistory({
       ) : (
         <>
           <p className="stay-history__count">
-            총 {resource.total.toLocaleString('ko-KR')}건 · 최신 변경순
+            {resource.total.toLocaleString('ko-KR')}건 · 최신순 · 한국 시간
           </p>
           {resource.total > currentRevision && (
             <p className="stay-history__notice" role="status">
@@ -170,7 +179,6 @@ function HistoryCard({ entry }: { entry: StayHistoryEntry }) {
       )}
       <details className="stay-history__snapshot">
         <summary>이 시점의 전체 이용 정보</summary>
-        <p>아래 정보는 해당 변경 당시 저장된 기록입니다.</p>
         <dl>
           {staySnapshotDetails(revision.snapshot).map((item) => (
             <div key={item.label}>

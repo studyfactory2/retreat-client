@@ -1,4 +1,4 @@
-import { useId, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import type { AdminStayDto } from '../../../../features/admin-stays/admin-stays.types';
 import type {
   AdminStayLinkStatus,
@@ -25,6 +25,7 @@ export function StayLinkCard({
   registerGuard,
   onReloadStay,
   navigationPending,
+  onSummaryChange,
 }: {
   stay: AdminStayDto;
   token: string;
@@ -32,6 +33,7 @@ export function StayLinkCard({
   registerGuard: (guard: StayLinkNavigationGuard | null) => void;
   onReloadStay: () => void;
   navigationPending: boolean;
+  onSummaryChange?: (summary: string) => void;
 }) {
   const link = useStayLink(stay, token, rejectSession);
   const title = useId();
@@ -43,7 +45,11 @@ export function StayLinkCard({
   const { resource, mutation, receipt, isBusy, hasReceipt, hasPendingChanges } =
     link;
   useLayoutEffect(() => {
-    registerGuard({ isBusy, hasReceipt, hasPendingChanges });
+    registerGuard({
+      isBusy,
+      hasReceipt,
+      hasPendingChanges: () => confirmation !== null || hasPendingChanges(),
+    });
   }, [
     registerGuard,
     isBusy,
@@ -52,6 +58,7 @@ export function StayLinkCard({
     mutation.busy,
     receipt,
     resource.status,
+    confirmation,
   ]);
   useLayoutEffect(() => () => registerGuard(null), [registerGuard]);
 
@@ -60,6 +67,17 @@ export function StayLinkCard({
     requestAnimationFrame(() => heading.current?.focus());
   }
   const current = resource.status === 'ready' ? resource.data : null;
+  const statusLabel =
+    resource.status === 'loading'
+      ? '불러오는 중'
+      : resource.status === 'error' || mutation.blocked
+        ? '상태 확인 필요'
+        : current
+          ? stayLinkStatusLabel(current, stay)
+          : '상태 확인 필요';
+  useEffect(() => {
+    onSummaryChange?.(statusLabel);
+  }, [onSummaryChange, statusLabel]);
   const confirming =
     current &&
     confirmation &&
@@ -87,9 +105,7 @@ export function StayLinkCard({
             <span
               className={`stay-link__status${current.enabled && !mutation.blocked ? ' stay-link__status--active' : ''}`}
             >
-              {mutation.blocked
-                ? '상태 확인 필요'
-                : stayLinkStatusLabel(current, stay)}
+              {statusLabel}
             </span>
           )}
         </div>
@@ -129,32 +145,22 @@ export function StayLinkCard({
       )}
       {current && (
         <>
-          <dl className="stay-link__details">
-            <div>
-              <dt>이용 가능 기한 · 한국 시간</dt>
-              <dd>
-                {current.expiresAt ? (
-                  <time dateTime={current.expiresAt}>
-                    {formatStayLinkTimestamp(current.expiresAt)}
-                  </time>
-                ) : (
-                  '—'
-                )}
-              </dd>
-            </div>
-            <div>
-              <dt>최근 변경</dt>
-              <dd>
-                {current.updatedAt ? (
-                  <time dateTime={current.updatedAt}>
-                    {formatStayLinkTimestamp(current.updatedAt)}
-                  </time>
-                ) : (
-                  '—'
-                )}
-              </dd>
-            </div>
-          </dl>
+          {current.expiresAt && (
+            <dl className="stay-link__details">
+              <div>
+                <dt>링크 이용 기한 · 한국 시간</dt>
+                <dd>
+                  {current.expiresAt ? (
+                    <time dateTime={current.expiresAt}>
+                      {formatStayLinkTimestamp(current.expiresAt)}
+                    </time>
+                  ) : (
+                    '—'
+                  )}
+                </dd>
+              </div>
+            </dl>
+          )}
           {!confirming && !receipt && (
             <div className="stay-link__actions">
               {current.issued && current.canReopen ? (
@@ -291,12 +297,22 @@ export function StayLinkCard({
         />
       )}
       <details className="stay-link__rules">
-        <summary>이용 기한과 링크 변경 안내</summary>
+        <summary>이용 기한 · 링크 안내</summary>
         <p>
-          퇴실 예정 시각부터 7일 후까지 이용할 수 있습니다. 일정 수정·취소, 링크
-          교체·폐기 시 기존 링크는 사용할 수 없습니다. 취소한 일정을 복원해도 새
-          링크가 필요합니다.
+          안내 링크는 퇴실 예정 시각부터 7일 후까지 이용할 수 있으며, 출입
+          비밀번호는 퇴실 시 숨겨집니다. 일정 수정·취소, 링크 교체·폐기 시 기존
+          링크는 사용할 수 없습니다. 취소한 일정을 복원해도 새 링크가
+          필요합니다.
         </p>
+        {current?.updatedAt && (
+          <p>
+            최근 변경 ·{' '}
+            <time dateTime={current.updatedAt}>
+              {formatStayLinkTimestamp(current.updatedAt)}
+            </time>{' '}
+            (한국 시간)
+          </p>
+        )}
       </details>
     </section>
   );

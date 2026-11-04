@@ -1,4 +1,4 @@
-import { useId, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { stayAccessVersions } from '../../../../features/admin-stay-access/admin-stay-access-api';
 import type {
@@ -9,6 +9,7 @@ import type { AdminStayDto } from '../../../../features/admin-stays/admin-stays.
 import { Button } from '../../../../shared/ui/Button/Button';
 import { useAdminNavigationGuard } from '../../hooks/use-admin-navigation-guard';
 import { useStayAccess } from '../hooks/use-stay-access';
+import type { StayLinkNavigationGuard } from '../hooks/use-stay-link-navigation';
 import {
   formatStayCodeTime,
   stayCodeBlockLabel,
@@ -25,6 +26,8 @@ export function StayAccessCodeCard({
   actionsDisabled,
   onInteractionChange,
   onReloadStay,
+  onSummaryChange,
+  registerGuard,
 }: {
   stay: AdminStayDto;
   token: string;
@@ -32,6 +35,8 @@ export function StayAccessCodeCard({
   actionsDisabled: boolean;
   onInteractionChange: (busy: boolean) => void;
   onReloadStay: () => void;
+  onSummaryChange?: (summary: string) => void;
+  registerGuard?: (guard: StayLinkNavigationGuard | null) => void;
 }) {
   const access = useStayAccess(stay, token, rejectSession);
   const [editing, setEditing] = useState(false);
@@ -40,8 +45,36 @@ export function StayAccessCodeCard({
   const title = useId();
   const choices = useId();
   const heading = useRef<HTMLHeadingElement>(null);
-  const { resource, busy, revealing, blocked, secret, message } = access;
+  const requestInFlight = useRef(false);
+  const {
+    resource,
+    busy,
+    revealing,
+    blocked,
+    secret,
+    message,
+    hasPendingRequest,
+  } = access;
   const current = resource.status === 'ready' ? resource.data : null;
+  const statusLabel =
+    resource.status === 'loading'
+      ? '불러오는 중'
+      : resource.status === 'error' || blocked
+        ? '상태 확인 필요'
+        : current?.blockedReason === 'CANCELLED'
+          ? '취소된 예약'
+          : current?.blockedReason === 'ENDED'
+            ? '종료된 예약'
+            : current?.blockedReason
+              ? '설정 확인 필요'
+              : current?.state === 'PREPARED'
+                ? '번호 준비됨'
+                : current?.state === 'REVIEW_REQUIRED'
+                  ? '확인 필요'
+                  : '준비 전';
+  useEffect(() => {
+    onSummaryChange?.(statusLabel);
+  }, [onSummaryChange, statusLabel]);
   const locked = busy || revealing || !!review || editing;
   useLayoutEffect(() => {
     onInteractionChange(locked);
@@ -50,9 +83,15 @@ export function StayAccessCodeCard({
     () => () => onInteractionChange(false),
     [onInteractionChange],
   );
-  useAdminNavigationGuard(
-    () => !!review || editing || access.hasPendingRequest(),
-  );
+  useLayoutEffect(() => {
+    registerGuard?.({
+      isBusy: () => requestInFlight.current || busy || revealing,
+      hasReceipt: () => false,
+      hasPendingChanges: () => !!review || editing || hasPendingRequest(),
+    });
+  }, [registerGuard, busy, revealing, review, editing, hasPendingRequest]);
+  useLayoutEffect(() => () => registerGuard?.(null), [registerGuard]);
+  useAdminNavigationGuard(() => !!review || editing || hasPendingRequest());
   const fixed = current?.propertySettings.roomMode === 'FIXED';
   const selectedMethod = fixed ? 'FIXED' : method;
   const disabled = actionsDisabled || busy || revealing || blocked;
@@ -67,6 +106,13 @@ export function StayAccessCodeCard({
     requestAnimationFrame(() =>
       heading.current?.focus({ preventScroll: true }),
     );
+  }
+  function runRequest(request: () => Promise<void>) {
+    if (requestInFlight.current) return;
+    requestInFlight.current = true;
+    void request().finally(() => {
+      requestInFlight.current = false;
+    });
   }
   function prepareReview(keep = false) {
     if (!current || disabled || current.blockedReason) return;
@@ -101,17 +147,7 @@ export function StayAccessCodeCard({
           <span
             className={`stay-access__badge${current.state === 'PREPARED' && !blocked && !current.blockedReason ? ' stay-access__badge--ready' : current.state === 'REVIEW_REQUIRED' || blocked ? ' stay-access__badge--review' : ''}`}
           >
-            {blocked
-              ? '상태 확인 필요'
-              : current.blockedReason === 'CANCELLED'
-                ? '취소된 예약'
-                : current.blockedReason === 'ENDED'
-                  ? '종료된 예약'
-                  : current.state === 'PREPARED'
-                    ? '번호 준비됨'
-                    : current.state === 'REVIEW_REQUIRED'
-                      ? '확인 필요'
-                      : '준비 전'}
+            {statusLabel}
           </span>
         )}
       </div>
@@ -166,7 +202,7 @@ export function StayAccessCodeCard({
                       actionsDisabled
                     }
                     onClick={() =>
-                      secret ? access.hide() : void access.reveal()
+                      secret ? access.hide() : runRequest(access.reveal)
                     }
                   >
                     {secret ? '숨기기' : '보기'}
@@ -250,7 +286,6 @@ export function StayAccessCodeCard({
                     />
                     <span>
                       <strong>자동 생성</strong>
-                      <small>앱이 6자리 번호 준비</small>
                     </span>
                   </label>
                   <label
@@ -266,7 +301,6 @@ export function StayAccessCodeCard({
                     />
                     <span>
                       <strong>휴대폰 뒤 6자리</strong>
-                      <small>예약 연락처 기준</small>
                     </span>
                   </label>
                 </fieldset>
@@ -341,7 +375,7 @@ export function StayAccessCodeCard({
             const input = review;
             setReview(null);
             setEditing(false);
-            void access.save(input);
+            runRequest(() => access.save(input));
             focusHeading();
           }}
         />
@@ -374,7 +408,7 @@ export function StayAccessCodeCard({
       )}
       {current && !review && !busy && (
         <div className="stay-access__footer">
-          <p>실제 도어락 변경은 직원이 현장에서 진행합니다.</p>
+          <p>실제 도어락은 직원이 현장에서 변경합니다.</p>
           <Button
             className="admin-button-secondary stay-access__refresh"
             disabled={actionsDisabled || revealing || editing}

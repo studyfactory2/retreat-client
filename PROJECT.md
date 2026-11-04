@@ -3472,3 +3472,26 @@ browser fixtures cover timing, delayed responses, revocation, copying and layout
 at 320/390/768/1440px. These are fictional local checks, not live PostgreSQL, EC2,
 physical phone/lock or deployed transport verification. Real iPhone copying remains
 part of device acceptance. Git and deployments remain user-owned.
+
+
+## Compact reservation detail — 2026-11-04
+
+이용 일정 상세 now uses a short guest/date summary and compact rows for reservation
+passwords, personal links, linked checklists, vehicles and history. Company,
+department and registration details are in 예약 정보 더보기. Secondary guidance
+uses disclosures; cancellation/restoration remains in the header more menu with
+the existing required reason and version/conflict checks.
+
+Phones open a bottom sheet, tablets a side sheet, and wide screens show the same
+panel alongside the rows. Resizing keeps the mounted panel and its confirmation
+state. Local close, panel switching, edit, refresh and back actions respect pending
+work, in-flight writes, uncertain results and one-time link receipts. Approved
+close unmounts the panel and clears revealed values. Opening rows never prepares
+a password or replaces a link. Metadata summaries contain only status labels;
+prepared codes remain distinct from physical lock changes.
+
+This is frontend-only. Existing APIs, authorization, explicit reveals, confirmation
+components and versioned writes are reused. Local typecheck/lint/build and isolated
+Chrome fixtures cover responsive widths and navigation/confirmation behavior.
+Fixtures use fictional data and do not establish live backend or physical-device
+verification. No database, deployment or Git mutations are part of this change.

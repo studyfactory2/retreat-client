@@ -11,15 +11,6 @@ import type { AdminStayDto } from '../../../features/admin-stays/admin-stays.typ
 import { Button } from '../../../shared/ui/Button/Button';
 import { PageState } from '../../../shared/ui/PageState/PageState';
 import { AdminBackButton } from '../components/AdminBackButton';
-import { StayStatusAction } from './components/StayStatusAction';
-import { StayHistory } from './components/StayHistory';
-import { isStayRevision } from '../../../features/admin-stays/admin-stays-validation';
-import { StayDetails } from './components/StayDetails';
-import { StayAccessCodeCard } from './components/StayAccessCodeCard';
-import { StayLinkCard } from './components/StayLinkCard';
-import { StayVehicleCard } from './components/StayVehicleCard';
-import { StayLinkNavigationNotice } from './components/StayLinkNavigationNotice';
-import { useStayLinkNavigation } from './hooks/use-stay-link-navigation';
 import { StayForm } from './components/StayForm';
 import {
   buildUpdateStayInput,
@@ -36,6 +27,7 @@ import { useStaySave } from './hooks/use-stay-save';
 import { useUnsavedStay } from './hooks/use-unsaved-stay';
 import { UnsavedStayNotice } from './components/UnsavedStayNotice';
 import { useStayScreenFocus } from './hooks/use-stay-screen-focus';
+import { StayDetailWorkspace } from './components/StayDetailWorkspace';
 import './styles/stays.css';
 
 export function AdminStayDetailScreen() {
@@ -62,10 +54,7 @@ function DetailWorkspace({
   rejectSession: (token: string) => void;
 }) {
   const { resource, refresh } = useAdminStay(id, token, rejectSession);
-  const linkNavigation = useStayLinkNavigation();
   const [editing, setEditing] = useState(false);
-  const [changingStatus, setChangingStatus] = useState(false);
-  const [accessInteraction, setAccessInteraction] = useState(false);
   const location = useLocation();
   const initialNotice: unknown = location.state;
   const [notice, setNotice] = useState<string | null>(() =>
@@ -81,9 +70,9 @@ function DetailWorkspace({
   const navigation = getStayNavigation(search);
   useStayScreenFocus();
   useEffect(() => {
-    if (resource.status === 'ready' && !editing && !changingStatus)
+    if (resource.status === 'ready' && !editing)
       document.getElementById('main-content')?.focus({ preventScroll: true });
-  }, [resource.status, editing, changingStatus]);
+  }, [resource.status, editing]);
 
   if (resource.status !== 'ready')
     return (
@@ -135,157 +124,18 @@ function DetailWorkspace({
     );
 
   return (
-    <div className="admin-stay admin-stay--detail">
-      <header className="stay-heading">
-        <div>
-          <div className="admin-page-heading-title">
-            <AdminBackButton
-              label={navigation.returnLabel}
-              disabled={changingStatus || accessInteraction || linkNavigation.busy || linkNavigation.pending}
-              onBack={() =>
-                linkNavigation.request(() => navigate(navigation.returnTo))
-              }
-            />
-            <h1>{stay.status === 'CANCELLED' ? '취소된 이용 일정' : '이용 일정 상세'}</h1>
-          </div>
-          <p>
-            {stay.property.name} · {stay.guestName}
-          </p>
-        </div>
-        {!changingStatus && (
-          <div className="stay-heading__actions">
-            <Button
-              className="admin-button-secondary"
-              disabled={accessInteraction || linkNavigation.busy || linkNavigation.pending}
-              onClick={() =>
-                linkNavigation.request(() => {
-                  setNotice(null);
-                  refresh();
-                })
-              }
-            >
-              새로고침
-            </Button>
-            {stay.status === 'ACTIVE' &&
-              isStayRevision(stay.currentRevision) && (
-                <Button
-                  disabled={accessInteraction || linkNavigation.busy || linkNavigation.pending}
-                  onClick={() => linkNavigation.request(() => setEditing(true))}
-                >
-                  수정
-                </Button>
-              )}
-            {isStayRevision(stay.currentRevision) && (
-              <Button
-                className="admin-button-secondary"
-                disabled={
-                  accessInteraction ||
-                  linkNavigation.busy ||
-                  linkNavigation.pending ||
-                  (stay.status === 'CANCELLED' && !stay.property.isActive)
-                }
-                onClick={() =>
-                  linkNavigation.request(() => {
-                    setNotice(null);
-                    setChangingStatus(true);
-                  })
-                }
-              >
-                {stay.status === 'ACTIVE' ? '일정 취소' : '일정 복원'}
-              </Button>
-            )}
-          </div>
-        )}
-      </header>
-      {linkNavigation.pending && (
-        <StayLinkNavigationNotice
-          onKeep={linkNavigation.keep}
-          onProceed={linkNavigation.proceed}
-        />
-      )}
-      {notice && (
-        <p className="stay-banner stay-banner--success" role="status">
-          {notice}
-        </p>
-      )}
-      {changingStatus && (
-        <StayStatusAction
-          key={`${stay.id}:${stay.currentRevision}`}
-          stay={stay}
-          token={token}
-          rejectSession={rejectSession}
-          onClose={() => setChangingStatus(false)}
-          onReload={() => {
-            setChangingStatus(false);
-            setNotice(null);
-            refresh();
-          }}
-          onSaved={(saved) => {
-            setChangingStatus(false);
-            setNotice(
-              saved.status === 'CANCELLED'
-                ? '이용 일정이 취소되었습니다. 목록에서 계속 확인할 수 있습니다.'
-                : '이용 일정이 복원되었습니다.',
-            );
-            refresh();
-          }}
-        />
-      )}
-      {stay.status === 'CANCELLED' && (
-        <p className="stay-banner">
-          {stay.property.isActive
-            ? '취소된 일정입니다. 수정하려면 먼저 복원해 주세요.'
-            : '취소된 일정입니다. 복원하려면 휴양소를 먼저 활성화해 주세요.'}
-        </p>
-      )}
-      <StayDetails stay={stay} />
-      {!changingStatus && (
-        <StayAccessCodeCard
-          key={`${stay.id}:${stay.currentRevision}:${stay.status}:${stay.checkOutAt}:${stay.property.isActive}`}
-          stay={stay}
-          token={token}
-          rejectSession={rejectSession}
-          actionsDisabled={linkNavigation.busy || linkNavigation.pending}
-          onInteractionChange={setAccessInteraction}
-          onReloadStay={() => linkNavigation.request(() => { setNotice(null); refresh(); })}
-        />
-      )}
-      {!changingStatus && (
-        <div className="stay-support-grid">
-          <StayLinkCard
-            stay={stay}
-            token={token}
-            rejectSession={rejectSession}
-            registerGuard={linkNavigation.register}
-            navigationPending={accessInteraction || linkNavigation.pending}
-            onReloadStay={() =>
-              linkNavigation.request(() => {
-                setNotice(null);
-                refresh();
-              })
-            }
-          />
-          <StayVehicleCard
-            stay={stay}
-            token={token}
-            rejectSession={rejectSession}
-            actionsDisabled={accessInteraction || linkNavigation.busy || linkNavigation.pending}
-            onReloadStay={() =>
-              linkNavigation.request(() => {
-                setNotice(null);
-                refresh();
-              })
-            }
-          />
-        </div>
-      )}
-      <StayHistory
-        stayId={stay.id}
-        currentRevision={stay.currentRevision}
-        token={token}
-        rejectSession={rejectSession}
-      />
-    </div>
+    <StayDetailWorkspace
+      key={`${stay.id}:${stay.currentRevision}:${stay.status}:${stay.checkOutAt}:${stay.property.isActive}`}
+      stay={stay}
+      token={token}
+      rejectSession={rejectSession}
+      returnLabel={navigation.returnLabel}
+      onBack={() => navigate(navigation.returnTo)}
+      onEdit={() => setEditing(true)}
+      onRefresh={refresh}
+      notice={notice}
+      onNotice={setNotice}
+    />
   );
 }
 

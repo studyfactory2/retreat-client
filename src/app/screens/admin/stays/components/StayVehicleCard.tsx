@@ -1,4 +1,4 @@
-import { useId } from 'react';
+import { useEffect, useId } from 'react';
 import type { AdminStayDto } from '../../../../features/admin-stays/admin-stays.types';
 import { Button } from '../../../../shared/ui/Button/Button';
 import { useStayVehicle } from '../hooks/use-stay-vehicle';
@@ -11,15 +11,32 @@ export function StayVehicleCard({
   rejectSession,
   onReloadStay,
   actionsDisabled,
+  onSummaryChange,
 }: {
   stay: AdminStayDto;
   token: string;
   rejectSession: (token: string) => void;
   onReloadStay: () => void;
   actionsDisabled: boolean;
+  onSummaryChange?: (summary: string) => void;
 }) {
   const title = useId();
   const { resource, refresh } = useStayVehicle(stay, token, rejectSession);
+  const statusLabel =
+    resource.status === 'loading'
+      ? '불러오는 중'
+      : resource.status === 'error'
+        ? '상태 확인 필요'
+        : resource.data.needsReview
+          ? '재확인 필요'
+          : resource.data.vehicle === null
+            ? '미등록'
+            : resource.data.vehicle.plateNumber === null
+              ? '번호 없이 저장됨'
+              : '등록됨';
+  useEffect(() => {
+    onSummaryChange?.(statusLabel);
+  }, [onSummaryChange, statusLabel]);
 
   return (
     <section
