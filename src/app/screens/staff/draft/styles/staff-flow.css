@@ -443,6 +443,27 @@
   font-size: clamp(23px, 5vw, 30px);
   letter-spacing: -0.6px;
 }
+.staff-flow-home-button.ui-button {
+  width: min(100%, 280px);
+  min-height: 48px;
+  margin-top: 22px;
+  gap: 8px;
+}
+.staff-flow-home-button svg {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.staff-flow-receipt .staff-flow-home-message {
+  max-width: 360px;
+  margin: 12px auto 0;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
 .staff-flow-receipt-details .staff-draft-identity {
   margin: 0;
 }
@@ -472,6 +493,9 @@
   margin-top: 14px;
 }
 @media (max-width: 600px) {
+  .staff-flow-home-button.ui-button {
+    width: 100%;
+  }
   .staff-draft .staff-photos-grid {
     grid-template-columns: minmax(0, 1fr);
   }

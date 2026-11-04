@@ -9,6 +9,7 @@ import { GuestGuide } from './components/GuestGuide';
 import { GuestAccessState } from './components/GuestAccessState';
 import { GuestStartForm } from './components/GuestStartForm';
 import { GuestStayVehicleCard } from './components/GuestStayVehicleCard';
+import { GuestAccessCodesCard } from './components/GuestAccessCodesCard';
 import { useGuestStayVehicle } from './hooks/use-guest-stay-vehicle';
 import { useGuestStart } from './hooks/use-guest-start';
 import { getGuestStartType } from './model/guest-start-model';
@@ -21,6 +22,7 @@ import {
 import './styles/guest-entry.css';
 import './styles/guest-start.css';
 import './styles/guest-stay-vehicle.css';
+import './styles/guest-access-codes.css';
 
 export function GuestEntryScreen({ kind }: { kind: GuestAccessKind }) {
   const location = useLocation();
@@ -155,6 +157,15 @@ function GuestEntrySessionScreen({ kind }: { kind: GuestAccessKind }) {
           checkIn={buildGuestViewLocation(kind, location.hash, 'check-in')}
           checkOut={buildGuestViewLocation(kind, location.hash, 'check-out')}
           vehicleCard={<GuestStayVehicleCard form={vehicleForm} />}
+          accessCard={
+            resource.data.entry.kind === 'stay' ? (
+              <GuestAccessCodesCard
+                token={access.token}
+                context={resource.data.entry.context}
+                rejectAccess={rejectAccess}
+              />
+            ) : undefined
+          }
         />
       )}
     </GuestFrame>

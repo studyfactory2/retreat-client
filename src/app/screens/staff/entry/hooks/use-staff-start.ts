@@ -7,6 +7,7 @@ import {
   useState,
 } from 'react';
 import { startStaffDraft } from '../../../../features/staff-drafts/staff-drafts-api';
+import type { StartStaffDraftDto } from '../../../../features/staff-drafts/staff-drafts.types';
 import { getStaffQrContext } from '../../../../features/staff-entry/staff-entry-api';
 import type { StaffQrContextDto } from '../../../../features/staff-entry/staff-entry.types';
 import {
@@ -16,6 +17,7 @@ import {
   staffStartFailure,
   type StaffStartState,
 } from '../model/staff-start-model';
+import { useOpenStaffDraft } from './use-open-staff-draft';
 
 type AccessStatus = 'ready' | 'checking' | 'error' | 'denied';
 type StartRequest = { controller: AbortController; submitted: boolean };
@@ -27,6 +29,7 @@ export function useStaffStart(
   refresh: () => void,
   rejectAccess: () => void,
 ) {
+  const openDraft = useOpenStaffDraft();
   const owner = useMemo(
     () => ({ token, initial: createStaffStartState() }),
     [token],
@@ -36,7 +39,7 @@ export function useStaffStart(
   const callbacks = useRef({ refresh, rejectAccess });
   const request = useRef<StartRequest | null>(null);
   const attempt = useRef<string | null>(null);
-  const issued = useRef<string | null>(null);
+  const issued = useRef<StartStaffDraftDto | null>(null);
   const lastContext = useRef<StaffQrContextDto | null>(null);
   const stateRef = useRef(owner.initial);
   const [result, setResult] = useState<{
@@ -139,7 +142,8 @@ export function useStaffStart(
     if (
       scope.current !== owner ||
       environment.current.accessStatus !== 'ready' ||
-      !issued.current
+      !issued.current ||
+      !token
     )
       return;
     publish({
@@ -148,8 +152,7 @@ export function useStaffStart(
       message: '정비 기록을 만들었습니다. 개인 이어쓰기 화면으로 이동합니다.',
     });
     try {
-      // This URL has already passed the feature's origin/path/token checks.
-      window.location.assign(issued.current);
+      openDraft(issued.current, token);
     } catch {
       publish({
         ...stateRef.current,
@@ -223,7 +226,7 @@ export function useStaffStart(
         active.controller.signal,
       );
       if (!current()) return;
-      issued.current = receipt.url;
+      issued.current = receipt;
       request.current = null;
       openIssued();
     } catch (error: unknown) {

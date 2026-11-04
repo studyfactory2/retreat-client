@@ -14,6 +14,7 @@ import {
 } from '../../../../features/cleaning-tasks/cleaning-tasks-display';
 import type { StaffQrContextDto } from '../../../../features/staff-entry/staff-entry.types';
 import { Button } from '../../../../shared/ui/Button/Button';
+import { useOpenStaffDraft } from '../hooks/use-open-staff-draft';
 import '../styles/staff-tasks.css';
 
 export function StaffTaskList({
@@ -25,6 +26,7 @@ export function StaffTaskList({
   context: StaffQrContextDto;
   rejectAccess: () => void;
 }) {
+  const openDraft = useOpenStaffDraft();
   const [revision, setRevision] = useState(0);
   const [list, setList] = useState<CleaningTaskListDto | null>(null);
   const [loadedFor, setLoadedFor] = useState('');
@@ -112,7 +114,7 @@ export function StaffTaskList({
         task.version,
         controller.signal,
       );
-      if (!controller.signal.aborted) window.location.assign(result.url);
+      if (!controller.signal.aborted) openDraft(result, token);
     } catch (error: unknown) {
       if (controller.signal.aborted) return;
       if (

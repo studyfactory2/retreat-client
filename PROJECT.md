@@ -3415,3 +3415,60 @@ accounts, guest code release, message delivery, database operations or Git
 mutations are performed by this frontend change. Local build/typecheck/lint and
 isolated fixture browser checks do not establish real-device, PostgreSQL, S3 or
 production readiness.
+
+
+## Staff receipt home action — 2026-11-04
+
+The submitted maintenance receipt offers 직원 홈으로 below its confirmation.
+Same-origin scheduled-task and standalone starts now use router navigation and
+retain a bounded in-memory return context tied to submission ID, property ID and
+the private draft token. The home action uses the original staff QR credential;
+returning revalidates normal staff access. Credentials are never stored in browser
+storage or router state. Canonical cross-origin starts retain full navigation.
+
+A directly opened/refreshed receipt, expired context or an older journey without
+return context shows guidance to reopen the property's staff QR/link, preserving
+the receipt. It cannot derive broader staff access from a private submission link.
+The button is full width on phones and bounded on larger screens. Isolated browser
+fixtures covered task and standalone journeys, receipt refresh, context isolation
+and widths 320/390/768/1440. Live accounts, data and deployment were not used.
+
+
+## Slice 15 — guest reservation passwords — 2026-11-04
+
+The personal reservation home includes a compact **출입 비밀번호** card below
+its dates. Shared property QR entry never mounts the card or calls its endpoints.
+Phone layouts stack the room and optional shared-entrance rows; tablet/desktop
+layouts place them side by side. Only the short reservation-code caveat remains
+visible; broader copy/layout cleanup is a separate future task.
+
+`features/guest-access-codes` validates scoped metadata and explicit reveal
+responses from `GET /guest/stays/current/access-codes` and `POST .../reveal`.
+Only the personal reservation token is passed. Metadata contains no code and
+an eligible prepared reservation code is required for both fields. A missing,
+review-required or changed source is handled without disclosing other stays,
+vacancy codes, or administrator details. Fixed mode uses the prepared code.
+
+The server authorizes the exact interval from seven days before check-in
+(inclusive) to checkout (exclusive). Opening performs a fresh metadata read;
+checkout hides the card's values while the existing guide/link grace remains.
+The hook uses monotonic elapsed time anchored to server timestamps, subtracting
+request time conservatively. Scope changes, blur, pagehide, navigation, errors,
+and the earliest thirty-second/checkout/link-expiry deadline clear plaintext and
+abort pending reveals. Late responses cannot restore a hidden code.
+
+Copy makes a fresh reveal request, preserving the browser gesture with a promised
+ClipboardItem when supported. Clipboard failures show the revealed number for
+manual copying. Codes never enter browser storage, URLs, history state or logs.
+A copied/saved number cannot be remotely erased; the separate staff lock-change
+flow remains necessary. The UI describes a prepared reservation number and does
+not certify that staff have changed the physical lock.
+
+No database migration, account, environment or infrastructure change is needed.
+Deploy the API before this frontend. The existing keyring configuration is reused;
+previously deferred origin HTTPS must be verified before real-code deployment.
+Local typecheck/lint/build, strict reader/clipboard probes and actual-component
+browser fixtures cover timing, delayed responses, revocation, copying and layouts
+at 320/390/768/1440px. These are fictional local checks, not live PostgreSQL, EC2,
+physical phone/lock or deployed transport verification. Real iPhone copying remains
+part of device acceptance. Git and deployments remain user-owned.

@@ -13,6 +13,7 @@ export function GuestHome({
   checkOut,
   report,
   vehicleCard,
+  accessCard,
 }: {
   entry: GuestEntryContext;
   guide: To;
@@ -20,10 +21,12 @@ export function GuestHome({
   checkOut: To;
   report?: To;
   vehicleCard?: ReactNode;
+  accessCard?: ReactNode;
 }) {
   return (
     <div className="guest-home">
       <GuestHomeHeader entry={entry} />
+      {entry.kind === 'stay' && accessCard}
       <GuestHomeChecklists
         checklists={entry.context.checklists}
         checkIn={checkIn}

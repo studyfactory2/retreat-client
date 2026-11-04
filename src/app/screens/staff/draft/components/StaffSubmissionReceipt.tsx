@@ -1,4 +1,7 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import type { StaffSubmissionReceiptDto } from '../../../../features/staff-submissions/staff-submissions.types';
+import { staffHomePath } from '../../../../features/staff-entry/staff-home-return';
 import { Button } from '../../../../shared/ui/Button/Button';
 import { useStaffDraftLink } from '../hooks/use-staff-draft-link';
 import { formatStaffDraftTime } from '../model/staff-draft-display';
@@ -10,6 +13,8 @@ export function StaffSubmissionReceipt({
   receipt: StaffSubmissionReceiptDto;
   token: string;
 }) {
+  const navigate = useNavigate();
+  const [homeMessage, setHomeMessage] = useState('');
   const { copy, message, busy } = useStaffDraftLink(
     token,
     receipt.expiresAt,
@@ -28,6 +33,27 @@ export function StaffSubmissionReceipt({
           {receipt.property.name}
         </p>
         <p>체크리스트와 사진이 접수되었습니다.</p>
+        <Button
+          className="staff-flow-home-button"
+          onClick={() => {
+            const path = staffHomePath(receipt.id, receipt.property.id, token);
+            if (path) void navigate(path);
+            else
+              setHomeMessage(
+                '직원 홈으로 이동하려면 이 휴양소의 직원 QR이나 직원용 링크를 다시 열어 주세요.',
+              );
+          }}
+        >
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="m3 10 9-7 9 7M5 9v12h5v-7h4v7h5V9" />
+          </svg>
+          직원 홈으로
+        </Button>
+        {homeMessage && (
+          <p className="staff-flow-home-message" role="status">
+            {homeMessage}
+          </p>
+        )}
       </section>
       <section
         className="staff-draft-card staff-flow-receipt-details"
