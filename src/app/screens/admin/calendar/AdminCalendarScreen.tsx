@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, useLocation, useSearchParams } from 'react-router-dom';
+import { useLocation, useSearchParams } from 'react-router-dom';
 import { appRoutes } from '../../../core/router/routes';
 import { useAdminSession } from '../../../core/session/use-admin-session';
 import {
@@ -18,7 +18,7 @@ import {
   shiftCalendarMonth,
 } from './model/calendar-model';
 import { useAdminCalendar } from './hooks/use-admin-calendar';
-import { StayViewNavigation } from '../stays/components/StayViewNavigation';
+import { StayViewHeader } from '../stays/components/StayViewHeader';
 import { getScheduleViewSearch } from '../stays/model/stay-navigation';
 import { AdminScheduleListScreen } from '../schedule/AdminScheduleListScreen';
 import './styles/calendar.css';
@@ -114,31 +114,9 @@ function CalendarWorkspace({
 
   return (
     <div className="admin-calendar">
-      <header className="calendar-heading">
-        <div>
-          <h1>이용 달력</h1>
-        </div>
-        <div className="calendar-heading__actions">
-          <Link
-            className="ui-button admin-button-secondary"
-            to={appRoutes.adminStayImportCreate}
-          >
-            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path d="M12 16V4m-4 4 4-4 4 4M4 14v6h16v-6" />
-            </svg>
-            엑셀 가져오기
-          </Link>
-          <Link
-            className="ui-button"
-            to={`${appRoutes.adminStayCreate}?${returnQuery}`}
-          >
-            <span aria-hidden="true">＋</span>
-            일정 등록
-          </Link>
-        </div>
-      </header>
-      <StayViewNavigation
+      <StayViewHeader
         view="calendar"
+        createHref={`${appRoutes.adminStayCreate}?${returnQuery}`}
         calendarHref={`${appRoutes.adminCalendar}?${returnQuery}`}
         listHref={appRoutes.adminCalendar + viewContext.listSearch}
         recordsHref={

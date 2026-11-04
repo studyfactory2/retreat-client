@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, useLocation, useSearchParams } from 'react-router-dom';
+import { useLocation, useSearchParams } from 'react-router-dom';
 import { appRoutes } from '../../../core/router/routes';
 import { useAdminSession } from '../../../core/session/use-admin-session';
 import {
@@ -11,7 +11,7 @@ import { Button } from '../../../shared/ui/Button/Button';
 import { AdminListPagination } from '../components/AdminListPagination';
 import { AdminListState } from '../components/AdminListState';
 import { getMonthRange } from '../calendar/model/calendar-model';
-import { StayViewNavigation } from '../stays/components/StayViewNavigation';
+import { StayViewHeader } from '../stays/components/StayViewHeader';
 import { getScheduleViewSearch } from '../stays/model/stay-navigation';
 import { ScheduleFilters } from './components/ScheduleFilters';
 import { ScheduleRow } from './components/ScheduleRow';
@@ -25,6 +25,7 @@ import {
 } from './model/schedule-list-model';
 import '../styles/admin-directory.css';
 import './styles/schedule-list.css';
+import './styles/schedule-rows.css';
 
 export function AdminScheduleListScreen() {
   const { state, rejectSession } = useAdminSession();
@@ -46,9 +47,7 @@ function ScheduleWorkspace({
   rejectSession: (token: string) => void;
 }) {
   const [initialDate] = useState(getSeoulToday);
-  const [filtersOpen, setFiltersOpen] = useState(
-    () => !window.matchMedia('(max-width: 760px)').matches,
-  );
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const [search, setSearch] = useSearchParams();
   const location = useLocation();
   const { filters, error } = readScheduleListFilters(search, initialDate);
@@ -74,9 +73,10 @@ function ScheduleWorkspace({
       ? Math.max(1, data.totalPages)
       : null;
   const currentMonth = getMonthRange(initialDate.slice(0, 7));
-  const listTitle = filters.from === currentMonth.from && filters.to === currentMonth.to
-    ? '이번 달 일정'
-    : '이용 일정';
+  const listTitle =
+    filters.from === currentMonth.from && filters.to === currentMonth.to
+      ? '이번 달 일정'
+      : '이용 일정';
   const propertyName =
     selectedProperty?.name ??
     (filters.propertyId ? '선택한 휴양소' : '전체 휴양소');
@@ -85,13 +85,6 @@ function ScheduleWorkspace({
     typeof notice === 'object' && notice !== null && 'stayNotice' in notice
       ? notice.stayNotice
       : undefined;
-
-  useEffect(() => {
-    const media = window.matchMedia('(max-width: 760px)');
-    const handleChange = () => setFiltersOpen(!media.matches);
-    media.addEventListener('change', handleChange);
-    return () => media.removeEventListener('change', handleChange);
-  }, []);
 
   useEffect(() => {
     if (correctedPage !== null) {
@@ -103,7 +96,18 @@ function ScheduleWorkspace({
   }, [correctedPage, returnSearch, setSearch]);
 
   function select(next: ScheduleListFilters) {
+    const focusInFilters = document.activeElement?.closest(
+      '.schedule-query__body',
+    );
     setSearch(scheduleListSearch(next));
+    setFiltersOpen(false);
+    if (focusInFilters) {
+      requestAnimationFrame(() =>
+        document
+          .querySelector<HTMLElement>('.schedule-query > summary')
+          ?.focus(),
+      );
+    }
   }
   function selectPage(page: number) {
     const summary = document.getElementById('schedule-results-summary');
@@ -123,29 +127,9 @@ function ScheduleWorkspace({
 
   return (
     <div className="admin-directory admin-schedule">
-      <header className="admin-directory-heading schedule-heading">
-        <div>
-          <h1>이용 일정</h1>
-        </div>
-        <div className="schedule-heading__actions">
-          <Link
-            className="ui-button admin-button-secondary"
-            to={appRoutes.adminStayImportCreate}
-          >
-            <ScheduleIcon name="upload" />
-            엑셀 가져오기
-          </Link>
-          <Link
-            className="ui-button"
-            to={appRoutes.adminStayCreate + returnSearch}
-          >
-            <ScheduleIcon name="plus" />
-            일정 등록
-          </Link>
-        </div>
-      </header>
-      <StayViewNavigation
+      <StayViewHeader
         view="list"
+        createHref={appRoutes.adminStayCreate + returnSearch}
         listHref={appRoutes.adminCalendar + returnSearch}
         calendarHref={appRoutes.adminCalendar + viewContext.calendarSearch}
         recordsHref={
@@ -169,7 +153,7 @@ function ScheduleWorkspace({
       >
         <summary>
           <span className="schedule-query__label">
-            <ScheduleIcon name="filter" /> 조회 조건
+            <ScheduleIcon name="filter" /> 필터
           </span>
           <span className="schedule-query__scope">
             {propertyName}
@@ -226,10 +210,6 @@ function ScheduleWorkspace({
         </AdminListState>
       ) : (
         <>
-          <ScheduleStats
-            data={correctedPage === null ? data : undefined}
-            loading={resource.status === 'loading' || correctedPage !== null}
-          />
           <section
             className="schedule-panel"
             aria-labelledby="schedule-list-title"
@@ -266,9 +246,11 @@ function ScheduleWorkspace({
                 <Button
                   className="schedule-button-quiet"
                   aria-label="일정 새로고침"
-                  title={data && correctedPage === null
-                    ? `최근 조회 ${formatSeoulUpdatedAt(data.asOf)} · 새로고침`
-                    : '새로고침'}
+                  title={
+                    data && correctedPage === null
+                      ? `최근 조회 ${formatSeoulUpdatedAt(data.asOf)} · 새로고침`
+                      : '새로고침'
+                  }
                   onClick={refresh}
                   disabled={
                     resource.status === 'loading' || correctedPage !== null
@@ -278,6 +260,10 @@ function ScheduleWorkspace({
                 </Button>
               </div>
             </header>
+            <ScheduleStats
+              data={correctedPage === null ? data : undefined}
+              loading={resource.status === 'loading' || correctedPage !== null}
+            />
             {resource.status === 'loading' || correctedPage !== null ? (
               <AdminListState
                 title="이용 일정을 불러오는 중"

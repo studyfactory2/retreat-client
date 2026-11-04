@@ -3495,3 +3495,71 @@ components and versioned writes are reused. Local typecheck/lint/build and isola
 Chrome fixtures cover responsive widths and navigation/confirmation behavior.
 Fixtures use fictional data and do not establish live backend or physical-device
 verification. No database, deployment or Git mutations are part of this change.
+
+
+## Compact schedule overview — 2026-11-04
+
+The 일정 현황 overview now uses a single heading row, scoped segmented navigation
+and a collapsed filter summary on all widths. Excel import remains directly
+available on wider screens and in the phone header's more menu. Applying or
+resetting filters closes the disclosure and returns focus to its summary when
+focus was inside the form; paging still focuses the results heading.
+
+Three large metric cards are replaced by a small submission strip inside the
+list. The list heading reports the full filtered total; 입실/퇴실 fractions are
+explicitly labelled 이 페이지 제출 and count only the displayed page. Missing
+data does not render fabricated zeros. Phone reservations group retreat, guest,
+short dates and submission badges into compact rows; wide layouts keep aligned
+columns. Exact Seoul times, inactive-property labels, review reasons and linked
+submission records remain available. Submission status still does not assert
+physical arrival/departure.
+
+This is a frontend presentation change using existing read-only APIs. Filters,
+URL return context, pagination, error/retry states and registration/import routes
+are retained. Local typecheck, lint, build and fictional intercepted browser
+fixtures cover phone/tablet/desktop and status/filter interactions. No backend,
+database, messaging integration, Git mutation or deployment is included.
+
+
+## Compact all-stay records — 2026-11-04
+
+The 전체 일정 / 전체 기록 view now matches the compact schedule overview: a
+single heading row, segmented navigation, collapsed search/filter summary and
+compact reservation rows. Excel import stays directly available on wider screens
+and moves into the phone header's more menu. The filter summary shows applied
+search, property and reservation status; query/reset collapse it and preserve
+keyboard focus. Existing URL-backed filters, return links, pagination, page
+clamping, loading, empty and retry states remain intact.
+
+Phone and narrow tablet rows show retreat, guest, dates and reservation status.
+Exact Seoul times and company/department remain in the date disclosure. Every
+row includes the start year because this view covers all history; cross-year
+reservations show both years. Wide containers use aligned columns. Inactive
+retreat labels remain visible; registered/cancelled reservation status does not
+assert actual check-in or checkout.
+
+Frontend presentation only, using the existing read-only list APIs. Verification
+uses local typecheck/lint/build and intercepted browser fixtures with fictional
+data, not production APIs or physical devices. No backend, database, messaging,
+Git mutation or deployment is included.
+
+
+## Unified schedule header and view navigation — 2026-11-04
+
+일정 현황, 달력 and 전체 기록 now render one shared StayViewHeader with the
+이용 일정 heading, registration action and segmented StayViewNavigation. These
+are peer views, so the records header no longer adds a back arrow. Existing
+detail/edit back navigation remains unchanged. Phone Excel import uses the same
+more menu on all three views, with Escape-to-trigger, outside-pointer and
+focus-leave dismissal. Wider screens retain a directly visible import action.
+
+One shared stylesheet owns header/action spacing, typography and selected-tab
+styles; obsolete per-screen overrides are removed. All three page roots use the
+same 1200px maximum width so the header stays aligned when switching views on
+large monitors. Existing calendar container breakpoints, data/filters, tab URL
+context and registration return links remain intact.
+
+This is frontend-only. Local typecheck, lint, production build and fictional
+intercepted browser fixtures verify responsive layout and navigation; these do
+not establish physical-device or production API behavior. No database, backend,
+Git mutation or deployment is included.

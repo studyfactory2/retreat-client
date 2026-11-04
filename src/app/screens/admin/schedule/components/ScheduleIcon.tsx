@@ -9,7 +9,8 @@ export function ScheduleIcon({
     | 'refresh'
     | 'filter'
     | 'chevron'
-    | 'arrow';
+    | 'arrow'
+    | 'more';
 }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -28,6 +29,13 @@ export function ScheduleIcon({
       {name === 'upload' && (
         <>
           <path d="M12 15V3m-4 4 4-4 4 4M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5" />
+        </>
+      )}
+      {name === 'more' && (
+        <>
+          <circle cx="12" cy="5" r="1" />
+          <circle cx="12" cy="12" r="1" />
+          <circle cx="12" cy="19" r="1" />
         </>
       )}
       {name === 'plus' && <path d="M12 5v14M5 12h14" />}

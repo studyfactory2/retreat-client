@@ -27,6 +27,24 @@ function getDateParts(value: string) {
   };
 }
 
+function Chevron({ right = false }: { right?: boolean }) {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d={right ? 'm9 6 6 6-6 6' : 'm6 9 6 6 6-6'} />
+    </svg>
+  );
+}
+
 export function StayListCard({
   stay,
   detailHref,
@@ -36,82 +54,81 @@ export function StayListCard({
 }) {
   const start = getDateParts(stay.checkInAt);
   const end = getDateParts(stay.checkOutAt);
-  const showYear = start.year !== end.year;
-  const startLabel = `${showYear ? `${start.year}. ` : ''}${start.month}.${start.day}`;
-  const endLabel = `${showYear ? `${end.year}. ` : ''}${end.month}.${end.day}`;
-  const affiliation = [stay.company, stay.department].filter(Boolean).join(' · ');
+  // This list spans all history: the year must remain visible for every stay.
+  const startLabel = `${start.year}.${start.month}.${start.day}`;
+  const endLabel = `${start.year !== end.year ? `${end.year}.` : ''}${end.month}.${end.day}`;
+  const hasAffiliation = !!stay.company || !!stay.department;
 
   return (
-    <article className="stay-record">
-      <div className="stay-record__guest">
-        <span className="stay-record__avatar" aria-hidden="true">
-          {[...stay.guestName][0]}
-        </span>
-        <div className="stay-record__identity">
-          <p className="stay-record__name">{stay.guestName}</p>
-          {affiliation && (
-            <p className="stay-record__affiliation">{affiliation}</p>
-          )}
+    <article
+      className="stay-record"
+      aria-label={`${stay.property.name}, ${stay.guestName}`}
+    >
+      <div className="stay-record__headline">
+        <div className="stay-record__property">
+          <h3>{stay.property.name}</h3>
+          {!stay.property.isActive && <span>비활성 휴양소</span>}
         </div>
+        <span
+          className={`stay-record__status${stay.status === 'CANCELLED' ? ' stay-record__status--cancelled' : ''}`}
+        >
+          {stay.status === 'ACTIVE' ? '등록됨' : '취소됨'}
+        </span>
       </div>
-      <div className="stay-record__property">
-        <h3>{stay.property.name}</h3>
-        {!stay.property.isActive && <span>비활성 휴양소</span>}
-      </div>
-      <details className="stay-record__period">
-        <summary aria-label={`${startLabel}부터 ${endLabel}까지, 예정 시간 확인`}>
-          <svg
-            className="stay-record__calendar"
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
+      <div className="stay-record__meta">
+        <span className="stay-record__name">{stay.guestName}</span>
+        <details className="stay-record__period">
+          <summary
+            aria-label={`${startLabel}부터 ${endLabel}까지, 예정 시간${hasAffiliation ? ' 및 이용객 정보' : ''} 확인`}
           >
-            <rect x="3" y="5" width="18" height="16" rx="2" />
-            <path d="M16 3v4M8 3v4M3 11h18M8 15h.01M12 15h.01M16 15h.01M8 18h.01M12 18h.01" />
-          </svg>
-          <span>
-            <time dateTime={stay.checkInAt}>{startLabel}</time>
-            {' – '}
-            <time dateTime={stay.checkOutAt}>{endLabel}</time>
-          </span>
-        </summary>
-        <dl className="stay-record__times">
-          <div>
-            <dt>입실 예정</dt>
-            <dd>
-              <time dateTime={stay.checkInAt}>
-                {dateFormatter.format(new Date(stay.checkInAt))}
-              </time>
-            </dd>
+            <span className="stay-record__range">
+              <time dateTime={stay.checkInAt}>{startLabel}</time>
+              <span aria-hidden="true">–</span>
+              <time dateTime={stay.checkOutAt}>{endLabel}</time>
+            </span>
+            <Chevron />
+          </summary>
+          <div className="stay-record__expanded">
+            <dl className="stay-record__times">
+              <div>
+                <dt>입실 예정</dt>
+                <dd>
+                  <time dateTime={stay.checkInAt}>
+                    {dateFormatter.format(new Date(stay.checkInAt))}
+                  </time>
+                </dd>
+              </div>
+              <div>
+                <dt>퇴실 예정</dt>
+                <dd>
+                  <time dateTime={stay.checkOutAt}>
+                    {dateFormatter.format(new Date(stay.checkOutAt))}
+                  </time>
+                </dd>
+              </div>
+              {stay.company && (
+                <div>
+                  <dt>회사</dt>
+                  <dd>{stay.company}</dd>
+                </div>
+              )}
+              {stay.department && (
+                <div>
+                  <dt>부서</dt>
+                  <dd>{stay.department}</dd>
+                </div>
+              )}
+            </dl>
+            <p className="stay-record__timezone">한국 시간 기준</p>
           </div>
-          <div>
-            <dt>퇴실 예정</dt>
-            <dd>
-              <time dateTime={stay.checkOutAt}>
-                {dateFormatter.format(new Date(stay.checkOutAt))}
-              </time>
-            </dd>
-          </div>
-        </dl>
-        <p className="stay-record__timezone">한국 시간 기준</p>
-      </details>
-      <span
-        className={`stay-record__status${stay.status === 'CANCELLED' ? ' stay-record__status--cancelled' : ''}`}
-      >
-        {stay.status === 'ACTIVE' ? '등록됨' : '취소됨'}
-      </span>
+        </details>
+      </div>
       <Link
         className="stay-record__detail"
         to={detailHref}
         aria-label={`${stay.guestName}, ${stay.property.name} 이용 일정 상세 보기`}
       >
-        <span aria-hidden="true">→</span> 상세
+        <Chevron right />
       </Link>
     </article>
   );

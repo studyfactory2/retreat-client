@@ -1,6 +1,9 @@
 .admin-calendar {
   display: grid;
   gap: 16px;
+  width: 100%;
+  max-width: 1200px;
+  margin-inline: auto;
   min-width: 0;
   container: calendar-workspace / inline-size;
 }
@@ -23,27 +26,6 @@
   margin: 0;
 }
 
-.admin-calendar .calendar-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-}
-
-.admin-calendar .calendar-heading h1 {
-  color: var(--color-heading);
-  font-size: 32px;
-  font-weight: 750;
-  line-height: 1.3;
-  letter-spacing: -1px;
-}
-
-.admin-calendar .calendar-heading__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
 .admin-calendar .ui-button {
   min-height: 44px;
   padding: 10px 16px;
@@ -52,7 +34,7 @@
   text-decoration: none;
 }
 
-.admin-calendar :is(.calendar-heading__actions, .calendar-refresh) svg {
+.admin-calendar .calendar-refresh svg {
   width: 16px;
   height: 16px;
   stroke: currentColor;
@@ -343,26 +325,6 @@
 @media (max-width: 760px) {
   .admin-calendar {
     gap: 14px;
-  }
-
-  .admin-calendar .calendar-heading {
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-
-  .admin-calendar .calendar-heading h1 {
-    font-size: 23px;
-    letter-spacing: -0.8px;
-  }
-
-  .admin-calendar .calendar-heading__actions {
-    gap: 4px;
-  }
-
-  .admin-calendar .calendar-heading__actions > a {
-    padding-inline: 8px;
-    font-size: 12px;
   }
 
   .admin-calendar .calendar-main {

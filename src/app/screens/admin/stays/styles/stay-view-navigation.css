@@ -1,23 +1,27 @@
-.stay-view-navigation {
+.stay-view-header .stay-view-navigation {
   display: flex;
   align-items: stretch;
-  gap: 8px;
+  gap: 4px;
   width: 100%;
+  max-width: 440px;
   min-width: 0;
   margin: 0;
-  padding: 0;
-  border-bottom: 1px solid var(--color-border);
+  padding: 4px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: var(--color-surface);
 }
-
-.stay-view-navigation a {
+.stay-view-header .stay-view-navigation a {
   display: inline-flex;
+  flex: 1;
   align-items: center;
   justify-content: center;
   min-width: 44px;
-  min-height: 48px;
-  margin-bottom: -1px;
-  padding: 12px 16px;
-  border-bottom: 2px solid transparent;
+  min-height: 44px;
+  margin: 0;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 7px;
   color: var(--color-muted);
   font-size: 13px;
   font-weight: 600;
@@ -25,31 +29,25 @@
   text-decoration: none;
   white-space: nowrap;
 }
-
-.stay-view-navigation a[aria-current] {
-  border-bottom-color: var(--color-primary);
+.stay-view-header .stay-view-navigation a[aria-current] {
   color: var(--color-primary);
+  background: #edf3ff;
   font-weight: 700;
 }
-
-.stay-view-navigation a:hover {
+.stay-view-header .stay-view-navigation a:hover {
   color: var(--color-primary);
   background: var(--color-soft);
 }
-
-.stay-view-navigation a:focus-visible {
-  border-radius: 4px;
-  outline: 2px solid var(--color-primary);
-  outline-offset: -4px;
+.stay-view-header .stay-view-navigation a:focus-visible {
+  outline: 3px solid #82aaf1;
+  outline-offset: -3px;
 }
-
 @media (max-width: 760px) {
-  .stay-view-navigation {
-    gap: 4px;
+  .stay-view-header .stay-view-navigation {
+    max-width: none;
   }
-
-  .stay-view-navigation a {
-    padding-inline: 12px;
+  .stay-view-header .stay-view-navigation a {
+    padding-inline: 8px;
     font-size: 12px;
   }
 }
