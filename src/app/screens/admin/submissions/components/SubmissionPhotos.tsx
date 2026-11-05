@@ -187,6 +187,7 @@ function MaintenancePhotoGallery({
     <section className="submission-gallery" aria-label="첨부 사진">
       <div className="submission-gallery__heading">
         <h3>첨부 사진 <span>{revision.photos.length}</span></h3>
+        <span className="submission-gallery__version">버전 {revision.version}</span>
       </div>
       {revision.photos.length === 0 ? (
         <p className="submission-gallery__empty">첨부 사진 없음</p>
@@ -300,7 +301,10 @@ function GalleryPhotoContent({
         </div>
       )}
       <div ref={caption} className="submission-gallery__caption" tabIndex={-1}>
-        <span className="submission-gallery__purpose">{purpose}</span>
+        <div className="submission-gallery__caption-heading">
+          <strong>사진 {index + 1}</strong>
+          <span className="submission-gallery__purpose">{purpose}</span>
+        </div>
         <p>{location}</p>
         <details className="submission-gallery__file">
           <summary>파일 정보</summary>

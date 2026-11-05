@@ -1,5 +1,6 @@
 import { useId, useState } from 'react';
 import { Button } from '../../../../shared/ui/Button/Button';
+import { ScheduleIcon } from '../../schedule/components/ScheduleIcon';
 import { SubmissionRecord } from './SubmissionRecord';
 import { SubmissionPhotos } from './SubmissionPhotos';
 import { SubmissionMetadata } from './SubmissionMetadata';
@@ -79,13 +80,20 @@ function HistoryWorkspace({
         <div>
           <h2 id="submission-history-heading">
             {maintenance ? '변경 이력' : '버전별 기록'}
+            {maintenance && resource.status === 'ready' && (
+              <span className="maintenance-history-count">
+                {resource.data.total}
+              </span>
+            )}
           </h2>
-          <p className="submission-detail-caption">
-            {maintenance ? '한국 시간 기준' : '저장 당시 내용과 사진을 확인하세요.'}
-          </p>
+          {!maintenance && (
+            <p className="submission-detail-caption">
+              저장 당시 내용과 사진을 확인하세요.
+            </p>
+          )}
         </div>
         <Button
-          className="admin-button-secondary"
+          className={`admin-button-secondary${maintenance ? ' maintenance-history-refresh' : ''}`}
           aria-label="이력 새로고침"
           disabled={resource.status === 'loading'}
           onClick={() => {
@@ -93,7 +101,7 @@ function HistoryWorkspace({
             refresh();
           }}
         >
-          {maintenance ? '새로고침' : '이력 새로고침'}
+          {maintenance ? <ScheduleIcon name="refresh" /> : '이력 새로고침'}
         </Button>
       </div>
       {resource.status === 'loading' ? (
@@ -125,7 +133,7 @@ function HistoryWorkspace({
                     <div className="maintenance-history-summary__title">
                       <h3>{submissionActionLabel(revision.action)}</h3>
                       <span className="maintenance-history-version">
-                        버전 {revision.version}
+                        v{revision.version}
                       </span>
                       <span
                         className={`submission-detail-badge ${revision.status === 'CANCELLED' ? 'submission-detail-badge--danger' : 'submission-detail-badge--success'}`}
@@ -142,10 +150,15 @@ function HistoryWorkspace({
                       <time
                         className="maintenance-history-summary__time"
                         dateTime={revision.createdAt}
+                        title="한국 시간 기준"
                       >
                         {submissionTime(revision.createdAt)}
                       </time>
                     </div>
+                    <p className="maintenance-history-summary__counts">
+                      점검 답변 {revision.record.answers.items.length}개 · 사진{' '}
+                      {revision.photos.length}장
+                    </p>
                     {revision.reason && (
                       <p className="maintenance-history-summary__reason">
                         <span>사유</span> {revision.reason}
@@ -182,10 +195,14 @@ function HistoryWorkspace({
                 <Button
                   className={`admin-button-secondary${maintenance ? ' maintenance-history-toggle' : ''}`}
                   aria-expanded={expanded === revision.id}
-                  aria-controls={expanded === revision.id ? `${snapshotId}-${revision.id}` : undefined}
+                  aria-controls={
+                    expanded === revision.id
+                      ? `${snapshotId}-${revision.id}`
+                      : undefined
+                  }
                   aria-label={
                     maintenance
-                      ? `버전 ${revision.version} 내용 ${expanded === revision.id ? '닫기' : '보기'}`
+                      ? `버전 ${revision.version} 당시 내용 ${expanded === revision.id ? '닫기' : '보기'}`
                       : undefined
                   }
                   onClick={() =>
@@ -196,11 +213,12 @@ function HistoryWorkspace({
                 >
                   {maintenance
                     ? expanded === revision.id
-                      ? '내용 닫기'
-                      : '내용 보기'
+                      ? '당시 내용 닫기'
+                      : '당시 내용 보기'
                     : expanded === revision.id
                       ? '저장 내용 닫기'
                       : '이 버전의 전체 내용 보기'}
+                  {maintenance && <ScheduleIcon name="chevron" />}
                 </Button>
                 {expanded === revision.id && (
                   <div
@@ -210,10 +228,10 @@ function HistoryWorkspace({
                     <p className="submission-detail-notice">
                       {revision.version === currentRevision
                         ? maintenance
-                          ? `현재 버전 ${revision.version}의 저장 내용입니다.`
+                          ? `현재 저장 내용 · 버전 ${revision.version}`
                           : '현재 버전의 저장 내용입니다.'
                         : maintenance
-                          ? `버전 ${revision.version}의 과거 기록입니다. 현재 내용과 다를 수 있습니다.`
+                          ? `과거 저장 내용 · 버전 ${revision.version}. 현재 내용과 다를 수 있습니다.`
                           : `버전 ${revision.version}에 저장된 과거 기록입니다. 현재 제출 내용과 다를 수 있습니다.`}
                     </p>
                     {maintenance ? (

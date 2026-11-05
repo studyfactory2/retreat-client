@@ -23,7 +23,7 @@ export function SubmissionRecord({
     <div className="submission-record">
       <section
         className="submission-detail-card"
-        aria-label={presentation === 'maintenance' ? '체크 내용' : undefined}
+        aria-label={presentation === 'maintenance' ? '점검 내용' : undefined}
       >
         {presentation !== 'maintenance' && (
           <div className="submission-detail-section-heading">
@@ -39,7 +39,7 @@ export function SubmissionRecord({
               <div className="maintenance-check-section-heading">
                 <h3>{section.title}</h3>
                 {index === 0 && (
-                  <p>{record.answers.items.length} / {itemCount}항목 응답</p>
+                  <p>응답 {record.answers.items.length} / {itemCount}</p>
                 )}
               </div>
             ) : <h4>{section.title}</h4>}
@@ -61,7 +61,7 @@ export function SubmissionRecord({
                             ? answer.value === 'NORMAL'
                               ? '정상'
                               : presentation === 'maintenance'
-                                ? '이상 응답'
+                                ? '이상 있음'
                                 : '이상'
                             : '미응답'}
                         </span>
@@ -75,7 +75,7 @@ export function SubmissionRecord({
                             긴급
                           </span>
                         )}
-                        {answer?.repairReported && (
+                        {answer?.repairReported && presentation !== 'maintenance' && (
                           <span className="submission-detail-badge">
                             {presentation === 'maintenance'
                               ? '조치 기록'
@@ -99,6 +99,9 @@ export function SubmissionRecord({
                         <p className="submission-detail-text">
                           {answer.repairNote || '조치 내용 미입력'}
                         </p>
+                        {presentation === 'maintenance' && (
+                          <p className="submission-repair-note__caption">이상사항 해결 상태와 별도</p>
+                        )}
                       </div>
                     )}
                   </li>
@@ -107,18 +110,16 @@ export function SubmissionRecord({
             </ul>
           </section>
         ))}
-        {record.answers.items.some((answer) => answer.repairReported) && (
+        {presentation !== 'maintenance' && record.answers.items.some((answer) => answer.repairReported) && (
           <p className="submission-detail-caption">
-            {presentation === 'maintenance'
-              ? '직원 조치 기록과 이상사항 처리 상태는 별도로 관리됩니다.'
-              : '현장 조치는 직원이 남긴 기록이며, 이상사항의 처리 상태와 별개입니다.'}
+            현장 조치는 직원이 남긴 기록이며, 이상사항의 처리 상태와 별개입니다.
           </p>
         )}
       </section>
       <section className={`submission-detail-card submission-general-note${presentation === 'maintenance' && !record.answers.generalNote ? ' submission-general-note--empty' : ''}`}>
-        <h3>{presentation === 'maintenance' ? '메모' : '전체 메모'}</h3>
+        <h3>전체 메모</h3>
         <p className="submission-detail-text">
-          {record.answers.generalNote || (presentation === 'maintenance' ? '메모 없음' : '작성된 메모가 없습니다.')}
+          {record.answers.generalNote || (presentation === 'maintenance' ? '없음' : '작성된 메모가 없습니다.')}
         </p>
       </section>
       {includeMetadata && (

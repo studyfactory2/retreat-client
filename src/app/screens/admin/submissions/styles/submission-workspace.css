@@ -39,25 +39,8 @@
 .submission-detail-workspace .submission-report-view { min-width: 0; }
 .submission-detail-workspace .submission-report-view[hidden],
 .submission-detail-workspace .submission-management[hidden] { display: none; }
-.submission-detail-workspace .maintenance-report { padding: 24px; }
-.submission-detail-workspace .maintenance-report__heading { padding-bottom: 16px; }
-.submission-detail-workspace .maintenance-report__heading h2 { font-size: 22px; line-height: 1.45; letter-spacing: -.6px; }
-.submission-detail-workspace .maintenance-report__heading p { margin-top: 6px; gap: 2px 16px; }
 .submission-report-kicker { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-bottom: 8px; color: var(--color-muted); font-size: 12px; line-height: 1.5; }
 .submission-report-kicker > span:first-child { color: var(--color-primary); font-weight: 600; }
-.submission-detail-workspace .maintenance-report__tabs { margin-bottom: 20px; }
-.submission-detail-workspace .maintenance-report__panel--information > .maintenance-record-facts--compact { margin: 0; padding: 0; border: 0; gap: 0; }
-.submission-detail-workspace .maintenance-current-record .submission-record { gap: 18px; }
-.submission-detail-workspace .maintenance-current-record .submission-check-item { padding: 14px 0; }
-.submission-detail-workspace .maintenance-current-record .submission-check-item__heading {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: start;
-  gap: 10px 16px;
-}
-.submission-detail-workspace .maintenance-current-record .submission-check-badges { max-width: 180px; }
-.submission-detail-workspace .maintenance-current-record .submission-check-item__heading > strong { min-width: 0; font-size: 14px; }
-.submission-detail-workspace .maintenance-current-record .submission-general-note { padding-top: 0; }
 .submission-detail-workspace .submission-management {
   gap: 18px;
   padding: 24px;
@@ -79,17 +62,8 @@
 .submission-detail-workspace .submission-stay-link .submission-stay-intro { max-width: 680px; }
 .submission-detail-workspace .submission-stay-link > .submission-detail-caption { margin-top: 12px; }
 @container maintenance-detail (max-width: 600px) {
-  .submission-detail-workspace .maintenance-report,
   .submission-detail-workspace .submission-management { padding: 20px 16px; border-radius: 14px; }
-  .submission-detail-workspace .maintenance-report__heading h2,
   .submission-detail-workspace .maintenance-management-heading h2 { font-size: 19px; }
-  .submission-detail-workspace .maintenance-report__tabs { gap: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin-bottom: 16px; }
-  .submission-detail-workspace .maintenance-report__tabs > button { font-size: 12px; }
-  .submission-detail-workspace .maintenance-current-record .submission-check-badges { max-width: 110px; gap: 4px; }
-  .submission-detail-workspace .maintenance-current-record .submission-detail-badge { font-size: 10px; padding: 3px 6px; }
-  .submission-detail-workspace .maintenance-current-record .submission-check-item__heading { gap: 10px; }
-  .submission-detail-workspace .maintenance-current-record .submission-check-item__heading > strong { font-size: 13px; }
-  .submission-detail-workspace .maintenance-check-section-heading > p { font-size: 11px; }
   .submission-detail-workspace .maintenance-management-heading > button { padding-inline: 10px; font-size: 12px; }
   .submission-detail-workspace .submission-management-toolbar { gap: 6px; }
   .submission-detail-workspace .submission-management-toolbar > .ui-button { padding-inline: 9px; font-size: 12px; }
@@ -99,7 +73,4 @@
   .submission-detail-workspace .maintenance-detail-breadcrumb h1 { font-size: 12px; }
   .submission-detail-workspace > .submission-detail-heading { gap: 8px; }
   .submission-detail-workspace > .submission-detail-heading > .submission-detail-actions { gap: 4px; }
-  .submission-detail-workspace .maintenance-report__heading { flex-wrap: nowrap; }
-  .submission-detail-workspace .maintenance-report__heading h2 { font-size: 18px; }
-  .submission-detail-workspace .maintenance-current-record .submission-check-badges { max-width: 70px; }
 }

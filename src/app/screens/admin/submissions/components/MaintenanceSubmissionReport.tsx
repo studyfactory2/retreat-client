@@ -4,6 +4,7 @@ import { SubmissionRecord } from './SubmissionRecord';
 import { SubmissionMetadata } from './SubmissionMetadata';
 import { SubmissionPhotos } from './SubmissionPhotos';
 import { SubmissionHistory } from './SubmissionHistory';
+import { ScheduleIcon } from '../../schedule/components/ScheduleIcon';
 import {
   submissionActionLabel,
   submissionRoleLabel,
@@ -31,7 +32,7 @@ export function MaintenanceSubmissionReport({
   const { revision } = detail;
   const { record } = revision;
   const labels: Record<ReportTab, string> = {
-    answers: '체크 내용',
+    answers: '점검 내용',
     photos: `사진 ${revision.photos.length}`,
     history: '변경 이력',
     information: '기록 정보',
@@ -55,26 +56,27 @@ export function MaintenanceSubmissionReport({
   return (
     <section className="maintenance-report" aria-labelledby="maintenance-report-title">
       <header className="maintenance-report__heading">
-        <div>
+        <div className="maintenance-report__summary-top">
           <div className="submission-report-kicker">
             <span>{submissionTypeLabel(record.type)}</span>
-            <span>버전 {detail.currentRevision}</span>
+            <span aria-label={`버전 ${detail.currentRevision}`}>v{detail.currentRevision}</span>
           </div>
-          <h2 id="maintenance-report-title">{record.property.name}</h2>
-          <p>
-            <span>방문일 {record.visitDate.replaceAll('-', '.')}</span>
-            <span>작성자 {record.author.name}</span>
-          </p>
+          <span className={`submission-detail-badge ${detail.status === 'CANCELLED' ? 'submission-detail-badge--muted' : 'submission-detail-badge--success'}`}>
+            {detail.status === 'CANCELLED' ? '취소됨' : '제출됨'}
+          </span>
         </div>
-        <span className={`submission-detail-badge ${detail.status === 'CANCELLED' ? 'submission-detail-badge--muted' : 'submission-detail-badge--success'}`}>
-          {detail.status === 'CANCELLED' ? '취소됨' : '제출됨'}
-        </span>
-      </header>
-      {detail.status === 'CANCELLED' && (
-        <p className="submission-detail-notice maintenance-report__cancelled">
-          취소된 기록입니다. 답변과 사진은 보존되어 있습니다.
+        <h2 id="maintenance-report-title">{record.property.name}</h2>
+        <p className="maintenance-report__meta">
+          <span aria-label={`방문일 ${record.visitDate}`}><ScheduleIcon name="calendar" />{record.visitDate.replaceAll('-', '.')}</span>
+          <span className="maintenance-report__meta-divider" aria-hidden="true">·</span>
+          <span aria-label={`작성자 ${record.author.name}`}>{record.author.name}</span>
         </p>
-      )}
+        {detail.status === 'CANCELLED' && (
+          <p className="submission-detail-notice maintenance-report__cancelled">
+            취소된 기록입니다. 답변과 사진은 보존되어 있습니다.
+          </p>
+        )}
+      </header>
       <div className="maintenance-report__tabs" role="tablist" aria-label="제출 기록 내용">
         {tabOrder.map((value) => (
           <button
