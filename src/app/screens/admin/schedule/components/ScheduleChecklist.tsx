@@ -25,52 +25,84 @@ type ChecklistProps = {
   checklist: CalendarChecklistDto;
 };
 
+function hasScheduleChecklistDetails(checklist: CalendarChecklistDto) {
+  return checklist.reviewReasons.length > 0 || checklist.submissionCount > 0;
+}
+
 function ScheduleChecklistBadge({ label, checklist }: ChecklistProps) {
   return (
-    <span className="schedule-checklist__summary">
-      <span className="schedule-checklist__label">{label}</span>
+    <>
+      <span className="schedule-visually-hidden">{label} </span>
       <span
         className={`schedule-checklist__badge schedule-checklist__badge--${checklist.status.toLowerCase()}`}
       >
         {statusLabels[checklist.status]}
       </span>
-    </span>
+    </>
   );
 }
 
 export function ScheduleChecklist({
   label,
   checklist,
-  stayId,
-}: ChecklistProps & { stayId: string }) {
-  if (checklist.reviewReasons.length === 0 && checklist.submissionCount === 0) {
-    return <ScheduleChecklistBadge label={label} checklist={checklist} />;
+  expanded,
+  panelId,
+  triggerId,
+  onToggle,
+}: ChecklistProps & {
+  expanded: boolean;
+  panelId: string;
+  triggerId: string;
+  onToggle: () => void;
+}) {
+  if (!hasScheduleChecklistDetails(checklist)) {
+    return (
+      <span className="schedule-checklist__cell">
+        <ScheduleChecklistBadge label={label} checklist={checklist} />
+      </span>
+    );
   }
 
   return (
-    <details className="schedule-checklist">
-      <summary>
-        <ScheduleChecklistBadge label={label} checklist={checklist} />
-        <ScheduleIcon name="chevron" />
-      </summary>
-      <div className="schedule-checklist__body">
-        {checklist.reviewReasons.length > 0 && (
-          <ul className="schedule-checklist__reasons">
-            {checklist.reviewReasons.map((reason) => (
-              <li key={reason}>{reasonLabels[reason]}</li>
-            ))}
-          </ul>
-        )}
-        {checklist.submissionCount > 0 && (
-          <Link
-            className="schedule-checklist__records"
-            to={`/admin/submissions?${new URLSearchParams({ stayId, type: checklist.type, status: 'SUBMITTED' })}`}
-          >
-            {label} 기록 {checklist.submissionCount.toLocaleString('ko-KR')}건 보기
-            <ScheduleIcon name="arrow" />
-          </Link>
-        )}
-      </div>
-    </details>
+    <button
+      type="button"
+      id={triggerId}
+      className="schedule-checklist__toggle"
+      aria-expanded={expanded}
+      aria-controls={panelId}
+      onClick={onToggle}
+    >
+      <ScheduleChecklistBadge label={label} checklist={checklist} />
+      <span className="schedule-visually-hidden"> 상세</span>
+    </button>
+  );
+}
+
+export function ScheduleChecklistDetails({
+  label,
+  checklist,
+  stayId,
+}: ChecklistProps & { stayId: string }) {
+  return (
+    <div className="schedule-checklist__body">
+      <h3>{label} 체크리스트</h3>
+      {checklist.reviewReasons.length > 0 && (
+        <ul className="schedule-checklist__reasons">
+          {checklist.reviewReasons.map((reason) => (
+            <li key={reason}>{reasonLabels[reason]}</li>
+          ))}
+        </ul>
+      )}
+      {checklist.submissionCount > 0 && (
+        <Link
+          className="schedule-checklist__records"
+          to={`/admin/submissions?${new URLSearchParams({ stayId, type: checklist.type, status: 'SUBMITTED' })}`}
+        >
+          {label} 기록 {checklist.submissionCount.toLocaleString('ko-KR')}건
+          보기
+          <ScheduleIcon name="arrow" />
+        </Link>
+      )}
+    </div>
   );
 }

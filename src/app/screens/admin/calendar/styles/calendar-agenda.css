@@ -1,6 +1,6 @@
 .admin-calendar .calendar-selected {
   min-width: 0;
-  padding: 18px 20px;
+  padding: 20px;
   border: 1px solid var(--color-border);
   border-radius: 14px;
   background: var(--color-surface);
@@ -415,7 +415,7 @@
   }
 }
 
-@media (max-width: 760px) {
+@container calendar-workspace (max-width: 640px) {
   .admin-calendar .calendar-selected {
     padding: 16px;
   }

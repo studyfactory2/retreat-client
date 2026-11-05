@@ -30,9 +30,9 @@ export function StayVehicleDetails({ data }: { data: AdminStayVehicleDto }) {
             className={vehicle?.plateNumber ? 'stay-vehicle__plate' : undefined}
           >
             {vehicle === null
-              ? '등록된 차량 정보가 없습니다.'
+              ? '미등록'
               : vehicle.plateNumber === null
-                ? '차량번호가 비어 있습니다.'
+                ? '번호 없음'
                 : vehicle.plateNumber}
           </dd>
         </div>

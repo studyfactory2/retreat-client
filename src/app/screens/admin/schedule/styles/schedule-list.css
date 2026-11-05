@@ -3,6 +3,8 @@
   width: 100%;
   max-width: 1200px;
   margin-inline: auto;
+  min-width: 0;
+  container: schedule-workspace / inline-size;
   word-break: keep-all;
   overflow-wrap: anywhere;
 }
@@ -29,7 +31,7 @@
   align-items: center;
   gap: 16px;
   min-height: 58px;
-  padding: 10px 18px;
+  padding: 12px 20px;
   border-radius: 12px;
   list-style: none;
   cursor: pointer;
@@ -78,7 +80,7 @@
 }
 
 .admin-schedule .schedule-query__body {
-  padding: 18px;
+  padding: 20px;
   border-top: 1px solid var(--color-border);
 }
 
@@ -231,13 +233,11 @@
   font-weight: 400;
 }
 
-/* The list shares one inset surface across phone, tablet, and desktop. */
+/* Count, column headings, and each reservation have independent surfaces. */
 .admin-schedule .schedule-panel {
+  display: grid;
+  gap: 10px;
   min-width: 0;
-  padding: 24px;
-  border: 1px solid var(--color-border);
-  border-radius: 16px;
-  background: var(--color-surface);
 }
 
 .admin-schedule .schedule-summary {
@@ -245,7 +245,11 @@
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: 8px;
+  min-height: 60px;
+  padding: 8px 20px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-surface);
   scroll-margin-top: 88px;
 }
 
@@ -266,7 +270,8 @@
 }
 
 .admin-schedule .schedule-summary h2 span {
-  font-size: 16px;
+  color: var(--color-primary);
+  font-size: 13px;
   font-weight: 600;
   letter-spacing: 0;
 }
@@ -277,38 +282,55 @@
 }
 
 .admin-schedule .schedule-table {
+  --schedule-columns: minmax(0, 1fr) 62px 62px 44px;
+  --schedule-column-gap: 6px;
+  --schedule-card-inset: 16px;
+  display: grid;
+  gap: 8px;
   min-width: 0;
   container: schedule-list / inline-size;
 }
 
 .admin-schedule .schedule-table__head {
-  display: none;
-  border-bottom: 1px solid var(--color-border);
-  background: #f6f8fc;
+  display: grid;
+  grid-template-columns: var(--schedule-columns);
+  align-items: center;
+  gap: var(--schedule-column-gap);
+  min-height: 44px;
+  padding: 8px var(--schedule-card-inset);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: var(--color-surface);
   color: var(--color-muted);
-  font-size: 11px;
+  font-size: 12px;
+  font-weight: 600;
   line-height: 1.6;
 }
 
-.admin-schedule .schedule-rows {
-  list-style: none;
-  padding: 0;
+.admin-schedule .schedule-table__head > :nth-child(2),
+.admin-schedule .schedule-table__head > :nth-child(3) {
+  text-align: center;
 }
 
-.admin-schedule .schedule-rows > li + li {
-  border-top: 1px solid var(--color-border);
+.admin-schedule .schedule-rows {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
 .admin-schedule .schedule-panel .admin-directory-pagination {
-  padding: 20px 24px;
-  border-top: 1px solid var(--color-border);
+  padding: 12px 0 0;
+  border: 0;
 }
 
 .admin-schedule .schedule-panel .admin-directory-state {
   padding: 36px 16px;
-  border: 0;
-  border-top: 1px solid var(--color-border);
-  border-radius: 0 0 16px 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-surface);
 }
 
 .admin-schedule .schedule-footnote {
@@ -355,7 +377,7 @@
   white-space: nowrap;
 }
 
-@media (max-width: 1100px) {
+@container schedule-workspace (max-width: 820px) {
   .admin-schedule .schedule-filters {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
   }
@@ -365,16 +387,10 @@
   }
 }
 
-@media (max-width: 760px) {
-  .admin-directory.admin-schedule {
-    gap: 14px;
-  }
+@container schedule-workspace (max-width: 640px) {
   .admin-schedule .schedule-query > summary {
     gap: 10px;
-    padding: 10px 14px;
-  }
-  .admin-schedule .schedule-query__label {
-    font-size: 12px;
+    padding: 12px 16px;
   }
   .admin-schedule .schedule-query__label svg {
     width: 16px;
@@ -383,15 +399,14 @@
   .admin-schedule .schedule-query__scope {
     display: grid;
     gap: 2px;
-    font-size: 11px;
     text-align: right;
   }
   .admin-schedule .schedule-query__body {
-    padding: 16px 14px;
+    padding: 16px;
   }
   .admin-schedule .schedule-filters {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 14px 12px;
+    gap: 16px 12px;
   }
   .admin-schedule .schedule-filters__actions {
     grid-column: 1 / -1;
@@ -407,35 +422,50 @@
   .admin-schedule .schedule-filters__date input {
     padding-inline: 8px;
   }
-  .admin-schedule .schedule-panel {
-    padding: 12px 16px;
-    border-radius: 14px;
-  }
   .admin-schedule .schedule-summary {
     gap: 8px;
-    padding: 0;
-    margin-bottom: 4px;
+    padding: 8px 16px;
   }
   .admin-schedule .schedule-summary__refresh {
     flex-shrink: 0;
   }
-  .admin-schedule .schedule-panel .admin-directory-pagination {
-    padding: 14px 0;
-  }
 }
-@media (max-width: 360px) {
-  .admin-schedule .schedule-panel {
-    padding-inline: 12px;
+@container schedule-workspace (max-width: 340px) {
+  .admin-schedule .schedule-filters {
+    grid-template-columns: minmax(0, 1fr);
   }
   .admin-schedule .schedule-stats {
     gap: 6px 12px;
     padding-inline: 10px;
-    font-size: 11px;
-  }
-  .admin-schedule .schedule-query__scope {
-    font-size: 10px;
   }
   .admin-schedule .schedule-query__label {
     gap: 5px;
   }
+}
+
+@container schedule-workspace (min-width: 660px) {
+  .admin-schedule .schedule-table {
+    --schedule-columns: minmax(0, 1fr) 96px 96px 44px;
+    --schedule-column-gap: 12px;
+    --schedule-card-inset: 20px;
+  }
+}
+
+@container schedule-workspace (max-width: 340px) {
+  .admin-schedule .schedule-table {
+    --schedule-columns: minmax(0, 1fr) 54px 54px 44px;
+    --schedule-column-gap: 4px;
+    --schedule-card-inset: 12px;
+  }
+  .admin-schedule .schedule-table__head {
+    font-size: 11px;
+  }
+  .admin-schedule .schedule-summary {
+    padding-inline: 12px;
+  }
+}
+
+.admin-schedule .schedule-footnote .schedule-stats {
+  width: fit-content;
+  margin: 4px 0 12px 17px;
 }

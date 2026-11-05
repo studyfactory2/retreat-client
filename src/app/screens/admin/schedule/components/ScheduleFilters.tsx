@@ -102,15 +102,13 @@ export function ScheduleFilters({
         />
       </div>
       <div className="schedule-filters__actions">
-        <Button type="submit">
-          조회
-        </Button>
+        <Button type="submit">조회</Button>
         <Button type="reset" className="schedule-button-quiet">
           초기화
         </Button>
       </div>
       <p id="schedule-range-hint" className="schedule-filters__hint">
-        한국 시간 · 선택 기간과 겹치는 등록 일정 · 최대 62일
+        한국 시간 · 기간과 겹치는 등록 일정 · 최대 62일
       </p>
       {error && (
         <p

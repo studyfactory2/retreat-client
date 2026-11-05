@@ -42,7 +42,7 @@
   outline: 3px solid #82aaf1;
   outline-offset: -3px;
 }
-@media (max-width: 760px) {
+@container stay-view (max-width: 640px) {
   .stay-view-header .stay-view-navigation {
     max-width: none;
   }

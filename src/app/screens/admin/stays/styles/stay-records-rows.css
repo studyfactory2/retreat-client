@@ -5,7 +5,7 @@
   border-bottom: 1px solid var(--color-border);
   color: var(--color-muted);
   background: #f6f8fc;
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.6;
 }
 .admin-stay-list .stay-record {
@@ -14,7 +14,7 @@
   align-items: start;
   gap: 0 8px;
   min-width: 0;
-  padding: 14px 0;
+  padding: 12px 0;
   color: var(--color-text);
   font-size: 13px;
   line-height: 1.6;
@@ -142,7 +142,7 @@
   gap: 8px;
   margin: 0;
   color: var(--color-muted);
-  font-size: 11px;
+  font-size: 12px;
 }
 .admin-stay-list .stay-record__times > div {
   min-width: 0;
@@ -161,7 +161,7 @@
 .admin-stay-list .stay-record__timezone {
   margin-top: 8px;
   color: var(--color-muted);
-  font-size: 10px;
+  font-size: 12px;
 }
 .admin-stay-list .stay-record__detail {
   display: grid;
@@ -191,7 +191,7 @@
     padding-inline: 12px;
   }
   .admin-stay-list .stay-record {
-    min-height: 78px;
+    min-height: 72px;
     padding-block: 12px;
   }
   .admin-stay-list .stay-record__headline,

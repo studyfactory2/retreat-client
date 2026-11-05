@@ -43,7 +43,7 @@ export function StayListFilters({
           id="stay-list-search"
           name="search"
           type="search"
-          placeholder="이름, 회사, 부서 또는 연락처"
+          placeholder="이름·회사·부서·연락처"
           value={search}
           onChange={(event) => setSearch(event.target.value)}
         />
@@ -104,7 +104,7 @@ export function StayListFilters({
           className="stay-list-filters__notice"
           role="status"
         >
-          휴양소 선택 목록을 불러오고 있습니다.
+          휴양소 불러오는 중…
         </p>
       )}
     </form>

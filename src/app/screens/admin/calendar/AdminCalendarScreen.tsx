@@ -225,7 +225,7 @@ function CalendarWorkspace({
                       : '일정을 다시 불러와 주세요.'}
                   {data && (
                     <time dateTime={data.asOf}>
-                      최근 조회 {formatSeoulUpdatedAt(data.asOf)}
+                      조회 {formatSeoulUpdatedAt(data.asOf)}
                     </time>
                   )}
                 </p>
@@ -233,12 +233,20 @@ function CalendarWorkspace({
                   className="calendar-refresh"
                   onClick={calendar.refresh}
                   disabled={calendar.resource.status === 'loading'}
-                  aria-label="이용 달력 새로고침"
+                  aria-label={
+                    data
+                      ? `이용 달력 새로고침. 최근 조회 ${formatSeoulUpdatedAt(data.asOf)}, 한국 시간`
+                      : '이용 달력 새로고침'
+                  }
+                  title={
+                    data
+                      ? `최근 조회 ${formatSeoulUpdatedAt(data.asOf)} · 한국 시간`
+                      : '새로고침'
+                  }
                 >
                   <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                     <path d="M20 7v5h-5M4 17v-5h5M6 7a7 7 0 0 1 12-1l2 3M4 15l2 3a7 7 0 0 0 12-1" />
                   </svg>
-                  새로고침
                 </Button>
               </div>
             </>

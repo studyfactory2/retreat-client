@@ -220,9 +220,8 @@
 
 .admin-calendar .calendar-meta .calendar-refresh {
   flex-shrink: 0;
-  gap: 6px;
-  padding-inline: 8px;
-  font-size: 12px;
+  width: 44px;
+  padding: 10px;
 }
 
 .admin-calendar .calendar-error {
@@ -322,14 +321,9 @@
   outline-offset: 3px;
 }
 
-@media (max-width: 760px) {
-  .admin-calendar {
-    gap: 14px;
-  }
-
+@container calendar-workspace (max-width: 640px) {
   .admin-calendar .calendar-main {
-    gap: 12px;
-    padding: 12px;
+    padding: 16px;
     border-radius: 14px;
   }
 
@@ -365,16 +359,15 @@
   .admin-calendar .calendar-meta {
     align-items: center;
     margin-top: -8px;
-    padding-top: 4px;
-    font-size: 11px;
+    padding-top: 8px;
   }
 
   .admin-calendar .calendar-meta time {
-    width: 100%;
+    display: none;
   }
 }
 
-@media (max-width: 360px) {
+@container calendar-workspace (max-width: 340px) {
   .admin-calendar .calendar-filters__advanced-body {
     grid-template-columns: minmax(0, 1fr);
   }

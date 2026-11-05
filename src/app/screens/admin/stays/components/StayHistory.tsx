@@ -55,7 +55,7 @@ export function StayHistory({
       </header>
       {resource.status === 'loading' ? (
         <p className="stay-history__state" role="status">
-          변경 이력을 불러오는 중입니다.
+          변경 이력 불러오는 중…
         </p>
       ) : resource.status === 'error' ? (
         <div
@@ -67,7 +67,7 @@ export function StayHistory({
         </div>
       ) : resource.entries.length === 0 ? (
         <p className="stay-history__state" role="status">
-          등록된 변경 이력이 없습니다.
+          변경 이력이 없습니다.
         </p>
       ) : (
         <>
@@ -147,13 +147,9 @@ function HistoryCard({ entry }: { entry: StayHistoryEntry }) {
           <span>{revision.reason}</span>
         </p>
       )}
-      {changes === null ? (
+      {changes === null ? null : changes.length === 0 ? (
         <p className="stay-history__initial">
-          이용 일정이 처음 등록되었습니다.
-        </p>
-      ) : changes.length === 0 ? (
-        <p className="stay-history__initial">
-          이용 정보의 변경 없이 처리 내역이 기록되었습니다.
+          이용 정보 변경 없이 처리 내역만 기록되었습니다.
         </p>
       ) : (
         <ul className="stay-history__changes">

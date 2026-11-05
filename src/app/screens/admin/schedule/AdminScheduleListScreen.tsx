@@ -260,10 +260,6 @@ function ScheduleWorkspace({
                 </Button>
               </div>
             </header>
-            <ScheduleStats
-              data={correctedPage === null ? data : undefined}
-              loading={resource.status === 'loading' || correctedPage !== null}
-            />
             {resource.status === 'loading' || correctedPage !== null ? (
               <AdminListState
                 title="이용 일정을 불러오는 중"
@@ -301,10 +297,9 @@ function ScheduleWorkspace({
                     aria-label="예정 일정과 체크리스트 현황"
                   >
                     <div className="schedule-table__head" aria-hidden="true">
-                      <span>이용객</span>
-                      <span>휴양소</span>
-                      <span>이용 기간</span>
-                      <span>체크리스트</span>
+                      <span>휴양소 · 이용객</span>
+                      <span>입실</span>
+                      <span>퇴실</span>
                       <span className="schedule-visually-hidden">상세</span>
                     </div>
                     <ul className="schedule-rows" role="list">
@@ -330,6 +325,10 @@ function ScheduleWorkspace({
           </section>
           <details className="schedule-footnote">
             <summary>일정 표시 안내</summary>
+            <ScheduleStats
+              data={correctedPage === null ? data : undefined}
+              loading={resource.status === 'loading' || correctedPage !== null}
+            />
             <p>
               취소되지 않은 예정 일정이며 비활성 휴양소도 포함됩니다. 체크리스트
               제출은 실제 입·퇴실이나 정비 완료를 뜻하지 않습니다. 과거 날짜도

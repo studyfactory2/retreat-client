@@ -1,7 +1,6 @@
-import type { CSSProperties } from 'react';
-import { Link } from 'react-router-dom';
 import type { CalendarDay } from '../model/calendar-model';
 import { buildCalendarWeeks, getPropertyColor } from '../model/calendar-lanes';
+import { CalendarMonthGrid } from './CalendarMonthGrid';
 import '../styles/calendar-panels.css';
 
 type CalendarMonthProps = {
@@ -20,20 +19,6 @@ type CalendarMonthProps = {
   state?: 'ready' | 'loading' | 'error';
 };
 
-const weekdays = ['일', '월', '화', '수', '목', '금', '토'];
-const dateFormatter = new Intl.DateTimeFormat('ko-KR', {
-  timeZone: 'UTC',
-  year: 'numeric',
-  month: 'long',
-  day: 'numeric',
-  weekday: 'long',
-});
-
-function getDayLabel(day: CalendarDay, today: string) {
-  const label = dateFormatter.format(new Date(`${day.date}T00:00:00Z`));
-  return `${label}${day.date === today ? ', 오늘' : ''}, 일정 ${day.stays.length}건, 입실 예정 ${day.arrivals}건, 퇴실 예정 ${day.departures}건`;
-}
-
 export function CalendarMonth({
   month,
   days,
@@ -50,7 +35,8 @@ export function CalendarMonth({
   state = 'ready',
 }: CalendarMonthProps) {
   const [year, monthNumber] = month.split('-');
-  const weeks = buildCalendarWeeks(month, days);
+  const compactWeeks = buildCalendarWeeks(month, days, 2);
+  const wideWeeks = buildCalendarWeeks(month, days, 3);
   const properties = [
     ...new Map(
       days.flatMap((day) =>
@@ -59,6 +45,22 @@ export function CalendarMonth({
     ).values(),
   ].sort((left, right) => left.name.localeCompare(right.name, 'ko'));
   const selected = days.find((day) => day.date === selectedDate);
+  const propertyLegend = (
+    <ul
+      className={`calendar-month__legend${properties.length === 1 ? ' calendar-month__legend--inline' : ''}`}
+      aria-label="휴양소별 색상"
+    >
+      {properties.map((property) => (
+        <li key={property.id}>
+          <i
+            style={{ background: getPropertyColor(property.id) }}
+            aria-hidden="true"
+          />
+          {property.name}
+        </li>
+      ))}
+    </ul>
+  );
 
   function inspect(date: string) {
     onSelect(date);
@@ -99,165 +101,34 @@ export function CalendarMonth({
       </div>
       {state === 'ready' ? (
         <>
-          <div
-            className="calendar-month__grid calendar-month__grid--compact"
-            role="group"
-            aria-label="날짜와 이용 일정 선택"
-          >
-            <div className="calendar-month__weekdays" aria-hidden="true">
-              {weekdays.map((weekday) => (
-                <span key={weekday}>{weekday}</span>
-              ))}
-            </div>
-            {weeks.map((week, index) => (
-              <div className="calendar-month__compact-week" key={index}>
-                {week.days.map((day, column) =>
-                  day ? (
-                    <button
-                      className="calendar-month__compact-day"
-                      type="button"
-                      key={day.date}
-                      onClick={() => onSelect(day.date)}
-                      aria-label={getDayLabel(day, today)}
-                      aria-pressed={day.date === selectedDate}
-                      aria-current={day.date === today ? 'date' : undefined}
-                      aria-controls="calendar-selected-title"
-                    >
-                      <span
-                        className="calendar-month__number"
-                        aria-hidden="true"
-                      >
-                        {day.day}
-                      </span>
-                      {day.stays.length > 0 && (
-                        <span
-                          className="calendar-month__day-count"
-                          aria-hidden="true"
-                        >
-                          {day.stays.length.toLocaleString('ko-KR')}건
-                        </span>
-                      )}
-                    </button>
-                  ) : (
-                    <span
-                      className="calendar-month__compact-blank"
-                      key={`blank-${column}`}
-                      aria-hidden="true"
-                    />
-                  ),
-                )}
-              </div>
-            ))}
-          </div>
-          <div
-            className="calendar-month__grid calendar-month__grid--wide"
-            role="group"
-            aria-label="날짜와 이용 일정 선택"
-          >
-            <div className="calendar-month__weekdays" aria-hidden="true">
-              {weekdays.map((weekday) => (
-                <span key={weekday}>{weekday}</span>
-              ))}
-            </div>
-            {weeks.map((week, index) => (
-              <div
-                className="calendar-month__week"
-                key={index}
-                style={{
-                  gridTemplateRows: `44px${week.laneCount ? ` repeat(${week.laneCount}, var(--calendar-bar-height))` : ''}${week.overflow.some(Boolean) ? ' 44px' : ''}`,
-                }}
-              >
-                {week.days.map((day, column) =>
-                  day ? (
-                    <button
-                      className="calendar-month__day"
-                      type="button"
-                      key={day.date}
-                      style={{ gridColumn: column + 1 }}
-                      onClick={() => onSelect(day.date)}
-                      aria-label={getDayLabel(day, today)}
-                      aria-pressed={day.date === selectedDate}
-                      aria-current={day.date === today ? 'date' : undefined}
-                      aria-controls="calendar-selected-title"
-                    >
-                      <span
-                        className="calendar-month__number"
-                        aria-hidden="true"
-                      >
-                        {day.day}
-                      </span>
-                    </button>
-                  ) : (
-                    <span
-                      className="calendar-month__blank"
-                      key={`blank-${column}`}
-                      style={{ gridColumn: column + 1 }}
-                      aria-hidden="true"
-                    />
-                  ),
-                )}
-                {week.segments.map((segment) => {
-                  const label = `${segment.stay.property.name}, ${segment.stay.checkIn.expectedDate}부터 ${segment.stay.checkOut.expectedDate}까지`;
-                  return (
-                    <Link
-                      className={`calendar-month__bar${segment.continuesBefore ? ' calendar-month__bar--before' : ''}${segment.continuesAfter ? ' calendar-month__bar--after' : ''}`}
-                      key={segment.stay.id}
-                      to={`/admin/stays/${segment.stay.id}${returnSearch}`}
-                      title={label}
-                      aria-label={`${label}, 이용 일정 상세 보기`}
-                      style={
-                        {
-                          gridColumn: `${segment.start + 1} / ${segment.end + 2}`,
-                          gridRow: segment.lane + 2,
-                          '--property-color': getPropertyColor(
-                            segment.stay.property.id,
-                          ),
-                        } as CSSProperties
-                      }
-                    >
-                      <span>{segment.stay.property.name}</span>
-                    </Link>
-                  );
-                })}
-                {week.overflow.map((count, column) =>
-                  count > 0 ? (
-                    <button
-                      className="calendar-month__overflow"
-                      key={column}
-                      type="button"
-                      style={{
-                        gridColumn: column + 1,
-                        gridRow: week.laneCount + 2,
-                      }}
-                      onClick={() => inspect(week.days[column]!.date)}
-                      aria-label={`${week.days[column]!.date}, 추가 일정 ${count}건 포함 전체 일정 보기`}
-                      aria-controls="calendar-selected-title"
-                    >
-                      +{count}
-                    </button>
-                  ) : null,
-                )}
-              </div>
-            ))}
-          </div>
-          {properties.length > 0 && (
+          <CalendarMonthGrid
+            weeks={compactWeeks}
+            variant="compact"
+            selectedDate={selectedDate}
+            today={today}
+            returnSearch={returnSearch}
+            onSelect={onSelect}
+            onInspect={inspect}
+          />
+          <CalendarMonthGrid
+            weeks={wideWeeks}
+            variant="wide"
+            selectedDate={selectedDate}
+            today={today}
+            returnSearch={returnSearch}
+            onSelect={onSelect}
+            onInspect={inspect}
+          />
+          {properties.length === 1 ? (
+            propertyLegend
+          ) : properties.length > 1 ? (
             <details className="calendar-month__legend-disclosure">
               <summary>
                 휴양소별 색상 <span>{properties.length}곳</span>
               </summary>
-              <ul className="calendar-month__legend" aria-label="휴양소별 색상">
-                {properties.map((property) => (
-                  <li key={property.id}>
-                    <i
-                      style={{ background: getPropertyColor(property.id) }}
-                      aria-hidden="true"
-                    />
-                    {property.name}
-                  </li>
-                ))}
-              </ul>
+              {propertyLegend}
             </details>
-          )}
+          ) : null}
           <div className="calendar-month__footer">
             <p className="calendar-month__note">예정 일정 · 한국 시간</p>
             <button

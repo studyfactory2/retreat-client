@@ -1,4 +1,5 @@
 .stay-view-header {
+  container: stay-view / inline-size;
   display: grid;
   gap: 16px;
   min-width: 0;
@@ -16,7 +17,7 @@
 .stay-view-header .stay-view-header__heading h1 {
   margin: 0;
   color: var(--color-heading);
-  font-size: clamp(23px, 2.4vw, 28px);
+  font-size: clamp(26px, 3vw, 32px);
   font-weight: 700;
   line-height: 1.4;
   letter-spacing: -1px;
@@ -100,15 +101,12 @@
   outline: 3px solid #82aaf1;
   outline-offset: 3px;
 }
-@media (max-width: 760px) {
-  .stay-view-header {
-    gap: 14px;
-  }
+@container stay-view (max-width: 640px) {
   .stay-view-header .stay-view-header__heading {
     gap: 8px;
   }
   .stay-view-header .stay-view-header__heading h1 {
-    font-size: 23px;
+    font-size: 26px;
   }
   .stay-view-header .stay-view-header__actions {
     gap: 4px;
@@ -125,9 +123,9 @@
     display: block;
   }
 }
-@media (max-width: 360px) {
+@container stay-view (max-width: 320px) {
   .stay-view-header .stay-view-header__heading h1 {
-    font-size: 22px;
+    font-size: 24px;
   }
   .stay-view-header .stay-view-header__actions .ui-button {
     padding-inline: 10px;
