@@ -1,11 +1,6 @@
 .issue-actions {
   min-width: 0;
-}
-.issue-actions__intro {
-  margin: 0 0 14px;
-  color: var(--color-muted);
-  font-size: 13px;
-  line-height: 1.65;
+  container: issue-action-controls / inline-size;
 }
 .issue-actions__choices {
   min-width: 0;
@@ -17,13 +12,16 @@
   padding: 0;
   margin-bottom: 8px;
   color: var(--color-muted);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 650;
 }
 .issue-actions__choices > div {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  gap: 4px;
+  padding: 3px;
+  border: 1px solid var(--color-border);
+  border-radius: 11px;
+  background: var(--color-background);
 }
 .issue-actions__choices label {
   display: flex;
@@ -31,22 +29,20 @@
   position: relative;
   align-items: center;
   justify-content: center;
-  gap: 8px;
   min-width: 0;
-  padding: 10px;
-  border: 1px solid var(--color-border);
-  border-radius: 9px;
+  padding: 8px 6px;
+  border: 1px solid transparent;
+  border-radius: 8px;
   min-height: 44px;
   cursor: pointer;
 }
 .issue-actions__choices label.is-selected {
   border-color: var(--color-primary);
-  background: var(--color-soft);
-  box-shadow: inset 0 0 0 1px var(--color-primary);
+  background: var(--color-surface);
 }
 .issue-actions__choices label:focus-within {
   outline: 3px solid var(--color-primary);
-  outline-offset: 3px;
+  outline-offset: 2px;
 }
 .issue-actions__choices input,
 .issue-actions__choices label > span > span {
@@ -69,16 +65,27 @@
   word-break: keep-all;
   overflow-wrap: anywhere;
 }
+.issue-actions__choices label.is-selected strong {
+  color: var(--color-primary);
+}
 .issue-actions__choices:disabled label {
   cursor: default;
+  opacity: 0.65;
 }
 .issue-actions__note {
   display: grid;
-  gap: 9px;
+  gap: 8px;
+}
+.issue-actions__note-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 12px;
 }
 .issue-actions__note label {
   color: var(--color-heading);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 650;
 }
 .issue-actions__note label > span {
@@ -88,13 +95,14 @@
 }
 .issue-actions__note textarea {
   width: 100%;
-  min-height: 124px;
+  min-height: 96px;
   padding: 10px 12px;
   border: 1px solid var(--color-input-border);
   border-radius: var(--radius-sm);
   color: var(--color-text);
   background: var(--color-surface);
   font: inherit;
+  font-size: 14px;
   line-height: 1.65;
   resize: vertical;
 }
@@ -111,6 +119,11 @@
   color: var(--color-muted);
   font-size: 12px;
   line-height: 1.65;
+  font-variant-numeric: tabular-nums;
+}
+.issue-actions__note-heading .issue-actions__hint {
+  margin-left: auto;
+  white-space: nowrap;
 }
 .issue-actions__error {
   margin: 0;
@@ -119,23 +132,25 @@
   line-height: 1.65;
 }
 .issue-actions__choices + .issue-actions__error {
-  margin: -12px 0 18px;
+  margin: -6px 0 12px;
 }
 .issue-action-buttons {
   display: flex;
   justify-content: flex-end;
   flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 20px;
+  gap: 8px;
+  margin-top: 12px;
 }
 .issue-action-buttons > .ui-button {
   min-height: 44px;
+  padding: 10px 14px;
+  font-size: 13px;
 }
 .issue-action-confirmation,
 .issue-action-notice {
   min-width: 0;
-  margin-top: 14px;
-  padding: 14px;
+  margin-top: 12px;
+  padding: 12px;
   border: 1px solid #c8d9fc;
   border-radius: var(--radius-sm);
   background: #f4f7ff;
@@ -147,13 +162,18 @@
 }
 .issue-action-confirmation h3 {
   margin-bottom: 8px;
+  font-size: 15px;
+  line-height: 1.5;
 }
 .issue-action-confirmation p,
 .issue-action-notice p {
-  margin: 10px 0 0;
+  margin: 8px 0 0;
   color: var(--color-muted);
   font-size: 13px;
   line-height: 1.65;
+}
+.issue-action-notice p:first-child {
+  margin-top: 0;
 }
 .issue-action-confirmation__subject {
   color: var(--color-heading) !important;
@@ -165,8 +185,8 @@
   font-weight: 700;
 }
 .issue-action-confirmation__note {
-  margin-top: 16px;
-  padding: 14px;
+  margin-top: 12px;
+  padding: 10px;
   border: 1px solid var(--color-border);
   border-radius: 8px;
   background: var(--color-surface);
@@ -177,7 +197,7 @@
   color: var(--color-text);
 }
 .issue-action-notice .ui-button {
-  margin-top: 16px;
+  margin-top: 12px;
 }
 .issue-action-sr-only {
   position: absolute;
@@ -188,12 +208,6 @@
   white-space: nowrap;
 }
 @media (max-width: 680px) {
-  .issue-actions__choices > div {
-    gap: 8px;
-  }
-  .issue-actions__choices label {
-    padding: 10px;
-  }
   .issue-actions__note textarea {
     font-size: 16px;
   }
@@ -210,6 +224,24 @@
     padding: 10px;
   }
 }
+@container issue-action-controls (max-width: 480px) {
+  .issue-actions__note textarea {
+    font-size: 16px;
+  }
+  .issue-action-buttons {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .issue-action-buttons .ui-button {
+    min-width: 0;
+    padding-inline: 8px;
+  }
+}
+@container issue-action-controls (max-width: 280px) {
+  .issue-action-confirmation .issue-action-buttons {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
 @media (max-width: 360px) {
   .issue-action-confirmation .issue-action-buttons {
     grid-template-columns: minmax(0, 1fr);
@@ -219,4 +251,58 @@
 .issue-actions__note textarea:focus-visible {
   outline: 3px solid #adc7f6;
   outline-offset: 2px;
+}
+
+.issue-actions--focused .issue-actions__heading {
+  margin: 0 0 16px;
+  color: var(--color-heading);
+  font-size: 17px;
+  line-height: 1.5;
+}
+.issue-actions form[hidden] {
+  display: none;
+}
+.issue-actions--focused .issue-action-confirmation {
+  margin-top: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+.issue-action-confirmation__transition {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 10px;
+  background: var(--color-background);
+}
+.issue-action-confirmation__transition > span[aria-hidden] {
+  color: var(--color-muted);
+}
+.issue-actions--focused .issue-action-confirmation__note {
+  padding: 12px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--color-background);
+}
+.issue-action-confirmation__note p:first-child {
+  margin-top: 0;
+}
+.issue-actions--focused .issue-action-confirmation__note p {
+  margin-top: 0;
+}
+.issue-actions--focused .issue-action-buttons {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr);
+  gap: 8px;
+  margin-top: 16px;
+}
+.issue-actions--focused .issue-actions__note textarea {
+  min-height: 116px;
+}
+@container issue-action-controls (max-width: 280px) {
+  .issue-actions--focused .issue-action-buttons {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }

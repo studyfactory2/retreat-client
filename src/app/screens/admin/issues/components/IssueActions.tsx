@@ -12,7 +12,6 @@ import {
   type IssueActionMutation,
   type IssueActionSelection,
 } from '../model/issue-action-model';
-import { issueNextStep } from '../model/issue-detail-summary';
 import {
   IssueActionConfirmation,
   type IssueActionConfirmationState,
@@ -22,31 +21,39 @@ import '../styles/issue-actions.css';
 export function IssueActions({
   issue,
   mutation,
+  selection,
   onSubmit,
   onReload,
   onDirtyChange,
+  onClose,
 }: {
   issue: AdminIssueRecordDto;
   mutation: IssueActionMutation;
+  selection?: IssueActionSelection;
   onSubmit: (command: IssueActionCommand) => void;
   onReload: () => void;
   onDirtyChange: (dirty: boolean) => void;
+  onClose?: () => void;
 }) {
-  const [selection, setSelection] = useState<IssueActionSelection>('NOTE');
+  const [pickedAction, setPickedAction] =
+    useState<IssueActionSelection>('NOTE');
+  const action = selection ?? pickedAction;
   const [note, setNote] = useState('');
   const [validation, setValidation] = useState<IssueActionError>();
   const [confirmation, setConfirmation] =
     useState<IssueActionConfirmationState>();
   const form = useRef<HTMLFormElement>(null);
+  const heading = useRef<HTMLHeadingElement>(null);
   const noteInput = useRef<HTMLTextAreaElement>(null);
   const notice = useRef<HTMLDivElement>(null);
-  const confirmationTrigger = useRef<'reset' | 'status'>('status');
+  const confirmationTrigger = useRef<'reset' | 'note' | 'status'>('status');
   const headingId = useId();
   const noteId = useId();
   const errorId = useId();
   const actionErrorId = useId();
   const hintId = useId();
-  const dirty = note.length > 0 || selection !== 'NOTE';
+  const dirty =
+    note.length > 0 || (selection === undefined && pickedAction !== 'NOTE');
   const busy = mutation.status === 'saving';
   const blocked =
     mutation.status === 'conflict' || mutation.status === 'unknown';
@@ -54,23 +61,28 @@ export function IssueActions({
     issue.cancelledAt !== null || issue.currentVersion > 2_147_483_646;
   const locked = busy || blocked || unavailable;
   useAdminNavigationGuard(dirty || busy || blocked);
-  const noteRequired = issueActionNoteRequired(issue.status, selection);
-  const noteLabel = issueActionNoteLabel(issue.status, selection);
+  const noteRequired = issueActionNoteRequired(issue.status, action);
+  const noteLabel = issueActionNoteLabel(issue.status, action);
+  const actionLabel =
+    issueActionOptions(issue.status).find((option) => option.value === action)
+      ?.label ?? '조치 기록';
   const count = [...note.trim()].length;
-  const nextStep = issueNextStep(issue.status);
 
   useEffect(() => {
     onDirtyChange(dirty);
     return () => onDirtyChange(false);
   }, [dirty, onDirtyChange]);
   useEffect(() => {
+    if (selection !== undefined)
+      heading.current?.focus({ preventScroll: true });
+  }, [selection]);
+  useEffect(() => {
     if (
       mutation.status === 'error' ||
       mutation.status === 'conflict' ||
       mutation.status === 'unknown'
-    ) {
+    )
       notice.current?.focus();
-    }
   }, [mutation.status, mutation.message]);
 
   function beginConfirmation(next: IssueActionConfirmationState) {
@@ -87,13 +99,14 @@ export function IssueActions({
       form.current?.querySelector<HTMLButtonElement>(selector)?.focus();
     });
   }
-  function validateAndSubmit() {
+  function validateAndReview() {
     if (locked || confirmation) return;
-    const prepared = prepareIssueAction(issue, selection, note);
+    const prepared = prepareIssueAction(issue, action, note);
     if (prepared.error) {
       setValidation(prepared.error);
       requestAnimationFrame(() => {
         if (prepared.error.field === 'note') noteInput.current?.focus();
+        else if (selection !== undefined) heading.current?.focus();
         else
           form.current
             ?.querySelector<HTMLInputElement>(
@@ -104,13 +117,16 @@ export function IssueActions({
       return;
     }
     setValidation(undefined);
-    if (prepared.command.kind === 'note') onSubmit(prepared.command);
-    else beginConfirmation({ kind: 'status', command: prepared.command });
+    if (prepared.command.kind === 'note') {
+      beginConfirmation({ kind: 'note', command: prepared.command });
+    } else {
+      beginConfirmation({ kind: 'status', command: prepared.command });
+    }
   }
   function confirmAction() {
     if (locked || !confirmation) return;
     if (confirmation.kind === 'reset') {
-      setSelection('NOTE');
+      setPickedAction('NOTE');
       setNote('');
       setValidation(undefined);
       setConfirmation(undefined);
@@ -123,11 +139,21 @@ export function IssueActions({
   if (issue.cancelledAt !== null) return null;
   return (
     <section
-      className="issue-detail-card issue-actions"
+      className={`issue-detail-card issue-actions${selection !== undefined ? ' issue-actions--focused' : ''}`}
       aria-labelledby={headingId}
     >
-      <h3 id={headingId} className="issue-action-sr-only">조치 기록</h3>
-      <p className="issue-actions__intro">{nextStep.description}</p>
+      <h3
+        id={headingId}
+        ref={heading}
+        tabIndex={-1}
+        className={
+          selection === undefined || confirmation
+            ? 'issue-action-sr-only'
+            : 'issue-actions__heading'
+        }
+      >
+        {selection === undefined ? '조치 기록' : actionLabel}
+      </h3>
       {unavailable ? (
         <p className="issue-detail-notice">
           이 기록에는 더 이상 변경 내용을 추가할 수 없습니다. 저장된 내용과
@@ -137,51 +163,50 @@ export function IssueActions({
         <>
           <form
             ref={form}
+            hidden={!!confirmation}
             noValidate
             onSubmit={(event) => {
               event.preventDefault();
-              validateAndSubmit();
+              validateAndReview();
             }}
           >
-            <fieldset
-              className="issue-actions__choices"
-              disabled={locked || !!confirmation}
-              aria-describedby={
-                validation?.field === 'action' ? actionErrorId : undefined
-              }
-            >
-              <legend>처리 방법</legend>
-              <div>
-                {issueActionOptions(issue.status).map((option) => (
-                  <label
-                    key={option.value}
-                    className={selection === option.value ? 'is-selected' : ''}
-                  >
-                    <input
-                      type="radio"
-                      name="issue-action"
-                      value={option.value}
-                      checked={selection === option.value}
-                      aria-invalid={validation?.field === 'action' || undefined}
-                      onChange={() => {
-                        setSelection(option.value);
-                        setValidation(undefined);
-                      }}
-                    />
-                    <span>
-                      <strong>{option.label}</strong>
+            {selection === undefined && (
+              <fieldset
+                className="issue-actions__choices"
+                disabled={locked || !!confirmation}
+                aria-describedby={
+                  validation?.field === 'action' ? actionErrorId : undefined
+                }
+              >
+                <legend>처리 방법</legend>
+                <div>
+                  {issueActionOptions(issue.status).map((option) => (
+                    <label
+                      key={option.value}
+                      className={action === option.value ? 'is-selected' : ''}
+                    >
+                      <input
+                        type="radio"
+                        name="issue-action"
+                        value={option.value}
+                        checked={action === option.value}
+                        aria-invalid={
+                          validation?.field === 'action' || undefined
+                        }
+                        onChange={() => {
+                          setPickedAction(option.value);
+                          setValidation(undefined);
+                        }}
+                      />
                       <span>
-                        {option.value === nextStep.selection
-                          ? '다음 처리'
-                          : option.value === 'NOTE'
-                            ? '상태 유지'
-                            : '처리 완료'}
+                        <strong>{option.label}</strong>
+                        <span>{option.description}</span>
                       </span>
-                    </span>
-                  </label>
-                ))}
-              </div>
-            </fieldset>
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+            )}
             {validation?.field === 'action' && (
               <p
                 className="issue-actions__error"
@@ -192,14 +217,32 @@ export function IssueActions({
               </p>
             )}
             <div className="issue-actions__note">
-              <label htmlFor={noteId}>
-                {noteLabel} <span>{noteRequired ? '필수' : '선택'}</span>
-              </label>
+              <div className="issue-actions__note-heading">
+                <label htmlFor={noteId}>
+                  {noteLabel} <span>{noteRequired ? '필수' : '선택'}</span>
+                </label>
+                <p id={hintId} className="issue-actions__hint">
+                  <span className="issue-action-sr-only">입력 </span>
+                  <span
+                    className={
+                      count > 2000 ? 'issue-actions__error' : undefined
+                    }
+                  >
+                    {count.toLocaleString('ko-KR')}
+                  </span>
+                  {' / '}
+                  <span className="issue-action-sr-only">최대 </span>2,000자
+                </p>
+              </div>
               <textarea
                 id={noteId}
                 ref={noteInput}
-                rows={3}
-                placeholder="확인한 내용과 조치 사항을 남겨 주세요."
+                rows={4}
+                placeholder={
+                  action === 'RESOLVED'
+                    ? '확인한 결과와 해결 내용을 남겨 주세요.'
+                    : '확인한 내용이나 조치 계획을 남겨 주세요.'
+                }
                 value={note}
                 disabled={locked || !!confirmation}
                 aria-required={noteRequired}
@@ -210,14 +253,6 @@ export function IssueActions({
                   setValidation(undefined);
                 }}
               />
-              <p id={hintId} className="issue-actions__hint">
-                최대 2000자 ·{' '}
-                <span
-                  className={count > 2000 ? 'issue-actions__error' : undefined}
-                >
-                  {count.toLocaleString('ko-KR')}자
-                </span>
-              </p>
               {validation?.field === 'note' && (
                 <p className="issue-actions__error" id={errorId} role="alert">
                   {validation.message}
@@ -257,18 +292,26 @@ export function IssueActions({
             )}
             {!blocked && !confirmation && (
               <div className="issue-action-buttons">
-                <Button
-                  className="admin-button-secondary"
-                  data-issue-reset
-                  disabled={busy || !dirty}
-                  onClick={() => beginConfirmation({ kind: 'reset' })}
-                >
-                  입력 초기화
-                </Button>
+                {onClose ? (
+                  <Button
+                    className="admin-button-secondary"
+                    disabled={busy}
+                    onClick={onClose}
+                  >
+                    돌아가기
+                  </Button>
+                ) : (
+                  <Button
+                    className="admin-button-secondary"
+                    data-issue-reset
+                    disabled={busy || !dirty}
+                    onClick={() => beginConfirmation({ kind: 'reset' })}
+                  >
+                    입력 초기화
+                  </Button>
+                )}
                 <Button type="submit" loading={busy}>
-                  {selection === 'NOTE'
-                    ? '메모 저장'
-                    : `${issueActionOptions(issue.status).find((option) => option.value === selection)?.label} 확인`}
+                  내용 확인
                 </Button>
               </div>
             )}
