@@ -3563,3 +3563,51 @@ This is frontend-only. Local typecheck, lint, production build and fictional
 intercepted browser fixtures verify responsive layout and navigation; these do
 not establish physical-device or production API behavior. No database, backend,
 Git mutation or deployment is included.
+
+
+## Slice 16 — compact 안내 메시지 — 2026-11-05
+
+Stay details include an 안내 메시지 row in the existing responsive detail panel;
+selected cleaning tasks include a compact disclosure for their staff notices.
+Both use the administrator messaging contract with seven guest/staff kinds.
+Choosing a kind loads a transient preview of its recipient, message and button
+labels. Preview buttons are visual samples and never navigate to private links.
+Opening or previewing never creates links, prepares codes or changes locks.
+
+The server's per-kind blockers and canSend decision control eligibility. The
+whole-system status also reports missing provider/template setup, but an unrelated
+missing template does not override an otherwise eligible selected kind. Real
+sending remains disabled by default in the API. A separate explicit confirmation
+is required for every fresh manual attempt. Pending work protects local editor
+changes and navigation. A timeout, network failure or malformed success retains
+that attempt's requestKey and previewKey for an explicit same-request retry;
+known stale-preview conflicts require fresh review. Closing the panel clears its
+transient preview. Unresolved history prevents a blind fresh send of that kind.
+No preview, phone, private link, request credential or message body is written to
+browser storage or logs.
+
+History maps server states to 요청접수, 전달완료, 실패 and 결과확인필요.
+Acceptance is never displayed as delivery. The first five records stay visible;
+older returned records remain available in a disclosure so unresolved attempts
+can still be checked. Provider delivery checks are explicit and manual. Separate
+automation status shows scheduled jobs and concise reason disclosures, distinguishes
+an enabled configuration awaiting activation, and has its own retry; its loading
+failure does not block manual previews. There is no browser polling, Socket.IO,
+SMS fallback, automatic frontend retry or automation enable switch.
+
+Reads and writes validate subject-bound DTOs, abort on teardown, fence stale
+responses, and reject only the administrator token which made an unauthorized
+request. Local typecheck and lint pass. A production Vite build passes using
+fictional public HTTPS origins and the runner config loader. The ordinary
+`yarn build` command cannot write TypeScript build-info through this staging
+copy's read-only node_modules symlink; typecheck plus the production Vite build
+verify the source without changing the actual repository.
+
+Temporary Chrome fixtures outside the repository verify actual stay and cleaning
+screens at 390, 768 and 1440px, disabled prerequisites, explicit confirmation,
+accepted-versus-delivered status, manual refresh, same-key retry after uncertain
+results, stale previews, resizing and automation failure isolation. These use
+fictional intercepted API responses and do not establish SOLAPI/Kakao delivery,
+physical-device behavior, live accounts or database correctness. No new repository
+test files, credentials, .env changes, database operations, Git mutations or
+deployment are part of this frontend slice.

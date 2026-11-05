@@ -1,0 +1,343 @@
+.admin-messaging {
+  min-width: 0;
+  font-size: 13px;
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+}
+.admin-messaging__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.admin-messaging__channel {
+  color: var(--color-heading);
+  font-weight: 650;
+}
+.admin-messaging button:not(.ui-button) {
+  min-height: 44px;
+  border: 0;
+  background: transparent;
+  color: var(--color-primary);
+  font: inherit;
+  cursor: pointer;
+  padding: 8px 0;
+}
+.admin-messaging button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.admin-messaging__status,
+.admin-messaging__warning {
+  padding: 10px 12px;
+  margin: 0 0 14px;
+  border-radius: 9px;
+  background: var(--color-soft);
+  color: var(--color-heading);
+}
+.admin-messaging__warning {
+  background: #fff7eb;
+  color: #8b540b;
+}
+.admin-messaging__muted {
+  color: var(--color-muted);
+  font-size: 12px;
+  margin: 10px 0;
+}
+.admin-messaging .admin-messaging__kind {
+  display: grid;
+  gap: 7px;
+  margin: 0 0 15px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.admin-messaging__kind > label {
+  margin: 0;
+  font: inherit;
+}
+.admin-messaging .admin-messaging__kind select {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 9px;
+  background: var(--color-surface);
+  color: var(--color-heading);
+  font: inherit;
+  font-size: 14px;
+}
+.admin-messaging__recipient {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+  margin-bottom: 12px;
+}
+.admin-messaging__recipient > span {
+  color: var(--color-muted);
+  font-size: 12px;
+  margin-right: auto;
+}
+.admin-messaging__recipient strong {
+  font-weight: 600;
+}
+.admin-messaging__recipient small {
+  color: var(--color-muted);
+  font-size: 12px;
+}
+.admin-messaging__preview {
+  padding: 15px;
+  border: 1px solid #e0e8f4;
+  border-radius: 12px;
+  background: #f6f9fd;
+}
+.admin-messaging__preview > span {
+  font-size: 11px;
+  color: var(--color-muted);
+}
+.admin-messaging__preview p {
+  margin: 10px 0 0;
+  white-space: pre-wrap;
+  line-height: 1.8;
+}
+.admin-messaging__preview-button {
+  padding: 9px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 7px;
+  background: var(--color-surface);
+  text-align: center;
+  margin-top: 12px;
+  color: var(--color-heading);
+  font-size: 12px;
+}
+.admin-messaging__blockers {
+  color: #8b540b;
+  font-size: 12px;
+  margin: 12px 0;
+}
+.admin-messaging__blockers p {
+  margin: 0;
+}
+.admin-messaging__blockers summary {
+  cursor: pointer;
+  min-height: 36px;
+  padding-top: 8px;
+}
+.admin-messaging__blockers ul {
+  padding-left: 18px;
+  margin: 0;
+}
+.admin-messaging .ui-button {
+  min-height: 44px;
+  font-size: 13px;
+  padding: 10px 13px;
+}
+.admin-messaging .admin-messaging__send {
+  width: 100%;
+  margin-top: 15px;
+}
+.admin-messaging__confirm,
+.admin-messaging__uncertain {
+  padding: 14px;
+  margin-top: 16px;
+  border: 1px solid #cbdcf8;
+  border-radius: 11px;
+  background: var(--color-soft);
+}
+.admin-messaging__confirm h3 {
+  font-size: 14px;
+  color: var(--color-heading);
+  margin: 0;
+}
+.admin-messaging__confirm p,
+.admin-messaging__uncertain p {
+  margin: 7px 0 12px;
+  color: var(--color-muted);
+  font-size: 12px;
+}
+.admin-messaging__confirm > div {
+  display: flex;
+  gap: 8px;
+}
+.admin-messaging__confirm > div > button {
+  flex: 1;
+}
+.admin-messaging__history {
+  border-top: 1px solid var(--color-border);
+  padding-top: 17px;
+  margin-top: 22px;
+}
+.admin-messaging__history h3 {
+  margin: 0 0 9px;
+  color: var(--color-heading);
+  font-size: 13px;
+  font-weight: 650;
+}
+.admin-messaging__history h3 small {
+  display: inline;
+  margin-left: 6px;
+  color: var(--color-muted);
+  font-size: 11px;
+  font-weight: 400;
+}
+.admin-messaging__older {
+  margin-top: 10px;
+}
+.admin-messaging__older > summary {
+  min-height: 44px;
+  padding-top: 10px;
+  font-size: 12px;
+  color: var(--color-muted);
+  cursor: pointer;
+}
+.admin-messaging__history ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.admin-messaging__history li {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+.admin-messaging__history li:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+.admin-messaging__history li > div:first-child {
+  min-width: 0;
+}
+.admin-messaging__history strong {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+}
+.admin-messaging__history small {
+  display: block;
+  font-size: 11px;
+  color: var(--color-muted);
+  margin-top: 4px;
+}
+.admin-messaging__history-state {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+.admin-messaging__history-state > span {
+  font-size: 11px;
+  color: var(--color-primary);
+}
+.admin-messaging__history-state > span[data-state='DELIVERED'] {
+  color: #17664e;
+}
+.admin-messaging__history-state > span[data-state='FAILED'],
+.admin-messaging__history-state > span[data-state='UNKNOWN'] {
+  color: #935600;
+}
+.admin-messaging .admin-messaging__history-state button {
+  min-height: 36px;
+  font-size: 11px;
+  padding: 5px 0;
+}
+.cleaning-task-messaging {
+  border-top: 1px solid var(--color-border);
+  margin-top: 18px;
+  padding-top: 5px;
+}
+.cleaning-task-messaging > summary {
+  min-height: 54px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  list-style: none;
+  cursor: pointer;
+  color: var(--color-heading);
+  font-size: 13px;
+  font-weight: 600;
+}
+.cleaning-task-messaging > summary::-webkit-details-marker {
+  display: none;
+}
+.cleaning-task-messaging > summary small {
+  margin-left: auto;
+  color: var(--color-muted);
+  font-size: 11px;
+  font-weight: 400;
+}
+.cleaning-task-messaging > summary::after {
+  content: '›';
+  color: var(--color-muted);
+  font-size: 20px;
+}
+.cleaning-task-messaging[open] > summary::after {
+  transform: rotate(90deg);
+}
+.cleaning-task-messaging[open] > summary {
+  margin-bottom: 8px;
+}
+.admin-messaging__automation {
+  margin-top: 18px;
+  padding-top: 9px;
+  border-top: 1px solid var(--color-border);
+}
+.admin-messaging__automation > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 44px;
+  cursor: pointer;
+  font-size: 12px;
+}
+.admin-messaging__automation > summary span {
+  color: var(--color-muted);
+  font-size: 11px;
+}
+.admin-messaging__automation ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.admin-messaging__automation li {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 0;
+  font-size: 11px;
+}
+.admin-messaging__automation li strong {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+}
+.admin-messaging__automation li small {
+  display: block;
+  color: var(--color-muted);
+}
+.admin-messaging__automation li > span {
+  flex-shrink: 0;
+  color: var(--color-muted);
+}
+.admin-messaging__job-reason summary {
+  min-height: 36px;
+  padding-top: 6px;
+  cursor: pointer;
+  color: var(--color-primary);
+}
+.admin-messaging__job-reason p {
+  margin: 0 0 6px;
+  color: var(--color-muted);
+  font-size: 11px;
+}
+@media (max-width: 600px) {
+  .admin-messaging .admin-messaging__kind select {
+    font-size: 16px;
+  }
+}

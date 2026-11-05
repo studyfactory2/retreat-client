@@ -8,12 +8,17 @@ import {
   taskTime,
 } from '../../../../features/cleaning-tasks/cleaning-tasks-display';
 import { Button } from '../../../../shared/ui/Button/Button';
+import { AdminMessagingPanel } from '../../components/AdminMessagingPanel';
 
 export function CleaningTaskEditor({
   task,
   properties,
   pending,
   locked,
+  token,
+  rejectSession,
+  messagingBusy,
+  onMessagingInteractionChange,
   onCreate,
   onUpdate,
   onCancel,
@@ -23,6 +28,10 @@ export function CleaningTaskEditor({
   properties: AdminPropertyOption[];
   pending: boolean;
   locked: boolean;
+  token: string;
+  rejectSession: (token: string) => void;
+  messagingBusy: boolean;
+  onMessagingInteractionChange: (busy: boolean, pending: boolean) => void;
   onCreate: (data: {
     requestKey: string;
     propertyId: string;
@@ -48,8 +57,9 @@ export function CleaningTaskEditor({
   const [cancelling, setCancelling] = useState(false);
   const [reason, setReason] = useState('');
   const [error, setError] = useState('');
+  const [messageSummary, setMessageSummary] = useState('미리보기 · 발송 기록');
   const closed = task?.status === 'COMPLETED' || task?.status === 'CANCELLED';
-  const disabled = pending || locked;
+  const disabled = pending || locked || messagingBusy;
   return (
     <section
       className="cleaning-task-editor"
@@ -60,7 +70,7 @@ export function CleaningTaskEditor({
         <button
           type="button"
           aria-label="작업 상세 닫기"
-          disabled={pending}
+          disabled={pending || messagingBusy}
           onClick={onClose}
         >
           ×
@@ -222,6 +232,26 @@ export function CleaningTaskEditor({
             </>
           )}
         </div>
+      )}
+      {task && (
+        <details className="cleaning-task-messaging">
+          <summary
+            onClick={(event) => {
+              if (messagingBusy) event.preventDefault();
+            }}
+          >
+            안내 메시지 <small>{messageSummary}</small>
+          </summary>
+          <AdminMessagingPanel
+            subjectType="TASK"
+            subjectId={task.id}
+            token={token}
+            rejectSession={rejectSession}
+            disabled={pending || locked}
+            onSummaryChange={setMessageSummary}
+            onInteractionChange={onMessagingInteractionChange}
+          />
+        </details>
       )}
     </section>
   );

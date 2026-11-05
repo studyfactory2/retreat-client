@@ -4,6 +4,7 @@ import type { AdminStayDto } from '../../../../features/admin-stays/admin-stays.
 import { isStayRevision } from '../../../../features/admin-stays/admin-stays-validation';
 import { Button } from '../../../../shared/ui/Button/Button';
 import { AdminBackButton } from '../../components/AdminBackButton';
+import { AdminMessagingPanel } from '../../components/AdminMessagingPanel';
 import { useStayDetailNavigation } from '../hooks/use-stay-detail-navigation';
 import { useStayDetailSummaries } from '../hooks/use-stay-detail-summaries';
 import { StayAccessCodeCard } from './StayAccessCodeCard';
@@ -17,10 +18,11 @@ import { StayStatusAction } from './StayStatusAction';
 import { StayVehicleCard } from './StayVehicleCard';
 import '../styles/stay-detail.css';
 
-type Panel = 'password' | 'link' | 'vehicle' | 'history' | 'info';
+type Panel = 'password' | 'link' | 'message' | 'vehicle' | 'history' | 'info';
 const titles: Record<Panel, string> = {
   password: '예약 비밀번호',
   link: '개인 이용 링크',
+  message: '안내 메시지',
   vehicle: '차량 정보',
   history: '변경 이력',
   info: '예약 정보',
@@ -55,6 +57,7 @@ export function StayDetailWorkspace({
   );
   const [changingStatus, setChangingStatus] = useState(false);
   const [historySummary, setHistorySummary] = useState('기록 보기');
+  const [messageSummary, setMessageSummary] = useState('미리보기 · 발송 기록');
   const menu = useRef<HTMLDetailsElement>(null);
   const navigate = useNavigate();
   const navigation = useStayDetailNavigation();
@@ -92,7 +95,12 @@ export function StayDetailWorkspace({
     navigation.request(() => setSelected(panel));
   }
   function row(panel: Exclude<Panel, 'info'>, secondary = false) {
-    const label = panel === 'history' ? historySummary : summaries[panel];
+    const label =
+      panel === 'history'
+        ? historySummary
+        : panel === 'message'
+          ? messageSummary
+          : summaries[panel];
     return (
       <button
         type="button"
@@ -244,6 +252,7 @@ export function StayDetailWorkspace({
             <div className="stay-detail-rows">
               {row('password')}
               {row('link')}
+              {row('message')}
             </div>
             <div className="stay-detail-extras">
               <button
@@ -308,6 +317,17 @@ export function StayDetailWorkspace({
                     actionsDisabled={!!navigation.pending}
                     onSummaryChange={vehicleSummary}
                     onReloadStay={() => navigation.request(refresh)}
+                  />
+                )}
+                {selected === 'message' && (
+                  <AdminMessagingPanel
+                    subjectType="STAY"
+                    subjectId={stay.id}
+                    token={token}
+                    rejectSession={rejectSession}
+                    disabled={!!navigation.pending}
+                    registerGuard={navigation.register}
+                    onSummaryChange={setMessageSummary}
                   />
                 )}
                 {selected === 'history' && (

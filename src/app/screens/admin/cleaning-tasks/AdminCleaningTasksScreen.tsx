@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ApiRequestError } from '../../../core/api/api-error';
 import { useAdminSession } from '../../../core/session/use-admin-session';
@@ -55,6 +55,29 @@ function CleaningTasksWorkspace({
   const [selected, setSelected] = useState<CleaningTaskDto | null>(null);
   const [creating, setCreating] = useState(false);
   const [pending, setPending] = useState(false);
+  const [messagingBusy, setMessagingBusy] = useState(false);
+  const [messagingProtected, setMessagingProtected] = useState(false);
+  const messagingPending = useRef(false);
+  const onMessagingInteractionChange = useCallback(
+    (busy: boolean, hasPending: boolean) => {
+      setMessagingBusy(busy);
+      setMessagingProtected(hasPending);
+      messagingPending.current = hasPending;
+    },
+    [],
+  );
+  const controlsDisabled = pending || messagingBusy;
+  function changeEditor(action: () => void) {
+    if (controlsDisabled) return;
+    if (
+      messagingPending.current &&
+      !window.confirm(
+        '안내 메시지 확인을 닫을까요? 이미 요청한 발송은 취소되지 않습니다.',
+      )
+    )
+      return;
+    action();
+  }
   const [uncertain, setUncertain] = useState(false);
   const mutation = useRef(false);
   const alive = useRef(false);
@@ -161,11 +184,13 @@ function CleaningTasksWorkspace({
           </div>
         </div>
         <Button
-          disabled={pending}
-          onClick={() => {
-            setCreating(true);
-            setSelected(null);
-          }}
+          disabled={controlsDisabled}
+          onClick={() =>
+            changeEditor(() => {
+              setCreating(true);
+              setSelected(null);
+            })
+          }
         >
           ＋ 작업 등록
         </Button>
@@ -179,11 +204,14 @@ function CleaningTasksWorkspace({
           <span>휴양소</span>
           <select
             value={propertyId}
-            disabled={pending}
+            disabled={controlsDisabled}
             onChange={(e) => {
-              setPropertyId(e.target.value);
-              setPage(1);
-              setSelected(null);
+              const value = e.target.value;
+              changeEditor(() => {
+                setPropertyId(value);
+                setPage(1);
+                setSelected(null);
+              });
             }}
           >
             <option value="">전체 휴양소</option>
@@ -200,11 +228,14 @@ function CleaningTasksWorkspace({
           <span>상태</span>
           <select
             value={status}
-            disabled={pending}
+            disabled={controlsDisabled}
             onChange={(e) => {
-              setStatus(e.target.value as CleaningTaskStatus | '');
-              setPage(1);
-              setSelected(null);
+              const value = e.target.value as CleaningTaskStatus | '';
+              changeEditor(() => {
+                setStatus(value);
+                setPage(1);
+                setSelected(null);
+              });
             }}
           >
             <option value="">할 일</option>
@@ -217,8 +248,8 @@ function CleaningTasksWorkspace({
         </label>
         <button
           type="button"
-          disabled={pending || loading}
-          onClick={refresh}
+          disabled={controlsDisabled || loading}
+          onClick={() => changeEditor(refresh)}
           aria-label="정비 작업 새로고침"
         >
           ↻
@@ -233,7 +264,10 @@ function CleaningTasksWorkspace({
         <div className="cleaning-task-banner" role="status">
           <p>{message}</p>
           {uncertain && (
-            <Button disabled={pending || loading} onClick={refresh}>
+            <Button
+              disabled={controlsDisabled || loading}
+              onClick={() => changeEditor(refresh)}
+            >
               목록 다시 확인
             </Button>
           )}
@@ -252,11 +286,15 @@ function CleaningTasksWorkspace({
             </h2>
             <button
               type="button"
-              disabled={pending || loading || uncertain}
+              disabled={controlsDisabled || loading || uncertain}
               onClick={() =>
-                void run(
-                  () => syncAdminCleaningTasks(token, propertyId || undefined),
-                  '퇴실 일정과 작업 목록을 동기화했습니다.',
+                changeEditor(
+                  () =>
+                    void run(
+                      () =>
+                        syncAdminCleaningTasks(token, propertyId || undefined),
+                      '퇴실 일정과 작업 목록을 동기화했습니다.',
+                    ),
                 )
               }
             >
@@ -281,11 +319,13 @@ function CleaningTasksWorkspace({
                   <button
                     type="button"
                     className={selected?.id === task.id ? 'is-selected' : ''}
-                    disabled={pending}
-                    onClick={() => {
-                      setSelected(task);
-                      setCreating(false);
-                    }}
+                    disabled={controlsDisabled}
+                    onClick={() =>
+                      changeEditor(() => {
+                        setSelected(task);
+                        setCreating(false);
+                      })
+                    }
                   >
                     <span>
                       <strong>{task.property.name}</strong>
@@ -312,8 +352,8 @@ function CleaningTasksWorkspace({
               aria-label="정비 작업 페이지"
             >
               <button
-                disabled={pending || loading || page <= 1}
-                onClick={() => setPage((v) => v - 1)}
+                disabled={controlsDisabled || loading || page <= 1}
+                onClick={() => changeEditor(() => setPage((v) => v - 1))}
               >
                 이전
               </button>
@@ -321,8 +361,10 @@ function CleaningTasksWorkspace({
                 {page} / {list.totalPages}
               </span>
               <button
-                disabled={pending || loading || page >= list.totalPages}
-                onClick={() => setPage((v) => v + 1)}
+                disabled={
+                  controlsDisabled || loading || page >= list.totalPages
+                }
+                onClick={() => changeEditor(() => setPage((v) => v + 1))}
               >
                 다음
               </button>
@@ -339,11 +381,17 @@ function CleaningTasksWorkspace({
                 : []
             }
             pending={pending}
+            token={token}
+            rejectSession={rejectSession}
+            messagingBusy={messagingBusy || messagingProtected}
+            onMessagingInteractionChange={onMessagingInteractionChange}
             locked={uncertain || loading}
-            onClose={() => {
-              setCreating(false);
-              setSelected(null);
-            }}
+            onClose={() =>
+              changeEditor(() => {
+                setCreating(false);
+                setSelected(null);
+              })
+            }
             onCreate={(input) =>
               run(
                 () => createCleaningTask(token, input),
