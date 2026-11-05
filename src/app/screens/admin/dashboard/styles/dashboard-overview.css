@@ -1,7 +1,7 @@
 .admin-dashboard .dashboard-overview {
   display: grid;
   min-width: 0;
-  gap: 24px;
+  gap: var(--dashboard-gap);
 }
 
 .admin-dashboard .dashboard-metrics {
@@ -11,6 +11,8 @@
 }
 
 .admin-dashboard .dashboard-metric {
+  display: flex;
+  flex-direction: column;
   min-width: 0;
   padding: 24px;
   border: 1px solid var(--color-border);
@@ -23,7 +25,8 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 20px;
+  min-height: 40px;
+  margin-bottom: 12px;
 }
 
 .admin-dashboard .dashboard-metric__heading h2 {
@@ -74,7 +77,7 @@
 }
 
 .admin-dashboard .dashboard-metric > p {
-  margin: 12px 0 0;
+  margin: 8px 0 0;
   color: var(--color-muted);
   font-size: 12px;
   line-height: 1.6;
@@ -84,8 +87,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px 24px;
-  padding: 20px 24px;
+  gap: 12px 20px;
+  padding: 16px 20px;
   border: 1px solid #dce7ff;
   border-radius: var(--radius-md);
   background: #edf3ff;
@@ -97,6 +100,7 @@
 }
 
 .admin-dashboard .dashboard-attention h2 {
+  margin: 0;
   color: var(--color-heading);
   font-size: 15px;
   font-weight: 650;
@@ -144,8 +148,8 @@
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  min-height: 64px;
-  padding: 20px 24px;
+  min-height: 56px;
+  padding: 16px 20px;
   border-radius: var(--radius-lg);
   color: var(--color-heading);
   font-size: 14px;
@@ -452,7 +456,7 @@
   margin-top: 8px;
 }
 
-@media (max-width: 1000px) {
+@container dashboard (max-width: 900px) {
   .admin-dashboard .dashboard-metrics {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -466,12 +470,12 @@
   }
 }
 
-@media (max-width: 760px) {
+@container dashboard (max-width: 760px) {
   .admin-dashboard .dashboard-attention {
     align-items: flex-start;
     flex-wrap: wrap;
     gap: 12px;
-    padding: 20px;
+    padding: 16px 20px;
   }
 
   .admin-dashboard .dashboard-attention > a {
@@ -487,7 +491,7 @@
   }
 }
 
-@media (max-width: 480px) {
+@container dashboard (max-width: 480px) {
   .admin-dashboard .dashboard-overview {
     gap: 16px;
   }
@@ -497,18 +501,19 @@
   }
 
   .admin-dashboard .dashboard-metric {
+    min-height: 148px;
     padding: 16px;
     border-radius: 16px;
   }
 
   .admin-dashboard .dashboard-metric__heading {
     align-items: flex-start;
-    min-height: 38px;
+    min-height: 40px;
     margin-bottom: 8px;
   }
 
   .admin-dashboard .dashboard-metric__heading h2 {
-    font-size: 12px;
+    font-size: 13px;
   }
 
   .admin-dashboard .dashboard-metric__heading svg {
@@ -523,7 +528,7 @@
 
   .admin-dashboard .dashboard-metric > p {
     margin-top: 8px;
-    font-size: 11px;
+    font-size: 12px;
   }
 
   .admin-dashboard .dashboard-attention {
@@ -543,7 +548,7 @@
   }
 
   .admin-dashboard .dashboard-aggregate > summary {
-    min-height: 60px;
+    min-height: 56px;
     padding: 16px;
   }
 

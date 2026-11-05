@@ -121,19 +121,19 @@ export function DashboardOverview({
         <Metric
           title={`${dayLabel} 입실`}
           value={data.stays.arrivals}
-          note={`입실 체크 ${data.checklists.checkIn.submitted.toLocaleString('ko-KR')}건 제출`}
+          note={`체크 제출 ${data.checklists.checkIn.submitted.toLocaleString('ko-KR')}건`}
           icon="arrival"
         />
         <Metric
           title={`${dayLabel} 퇴실`}
           value={data.stays.departures}
-          note={`퇴실 체크 ${data.checklists.checkOut.submitted.toLocaleString('ko-KR')}건 제출`}
+          note={`체크 제출 ${data.checklists.checkOut.submitted.toLocaleString('ko-KR')}건`}
           icon="departure"
         />
         <Metric
           title="정비 완료"
           value={data.maintenance.completed}
-          note={`${dayLabel} 제출 기록 기준`}
+          note={`${dayLabel} 제출 기록`}
           icon="maintenance"
         />
         <Metric
@@ -150,14 +150,14 @@ export function DashboardOverview({
           aria-labelledby="dashboard-attention-title"
         >
           <div className="dashboard-attention__copy">
-            <h2 id="dashboard-attention-title">확인이 필요한 이상사항</h2>
+            <h2 id="dashboard-attention-title">미처리 이상사항</h2>
             <p>
-              신규 접수 {data.issues.new.toLocaleString('ko-KR')}건 · 처리 중{' '}
+              신규 {data.issues.new.toLocaleString('ko-KR')}건 · 처리 중{' '}
               {data.issues.inProgress.toLocaleString('ko-KR')}건
             </p>
           </div>
           <Link to={hasNewIssues ? issueLinks.new : issueLinks.inProgress}>
-            {hasNewIssues ? '접수 보기' : '처리 중 보기'}
+            {hasNewIssues ? '신규 보기' : '처리 중 보기'}
             <span aria-hidden="true">→</span>
           </Link>
         </aside>

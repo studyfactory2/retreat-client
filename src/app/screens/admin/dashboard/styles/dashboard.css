@@ -1,4 +1,6 @@
 .admin-dashboard {
+  container: dashboard / inline-size;
+  --dashboard-gap: 20px;
   min-width: 0;
   max-width: 1200px;
   margin-inline: auto;
@@ -45,12 +47,12 @@
 }
 
 .admin-dashboard .dashboard-welcome {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 8px 16px;
-  margin-block: 12px 24px;
+  gap: 8px 12px;
+  margin-block: 6px 16px;
 }
 
 .admin-dashboard .dashboard-heading__date {
@@ -63,11 +65,19 @@
 .admin-dashboard .dashboard-welcome__updated {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
   color: var(--color-muted);
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.6;
   font-variant-numeric: tabular-nums;
+}
+
+.admin-dashboard .dashboard-welcome__timestamp {
+  white-space: nowrap;
+}
+
+.admin-dashboard .dashboard-welcome__short-time {
+  display: none;
 }
 
 .admin-dashboard .dashboard-refresh.ui-button {
@@ -107,7 +117,7 @@
   align-items: center;
   gap: 12px;
   min-height: 56px;
-  padding: 12px 20px;
+  padding: 10px 20px;
   border-radius: 14px;
   list-style: none;
   cursor: pointer;
@@ -130,6 +140,7 @@
   color: var(--color-muted);
   font-size: 12px;
   line-height: 1.6;
+  text-align: right;
 }
 
 .admin-dashboard .dashboard-query summary svg {
@@ -220,7 +231,7 @@
 }
 
 .admin-dashboard .dashboard-results {
-  margin-top: 24px;
+  margin-top: var(--dashboard-gap);
 }
 
 .admin-dashboard .dashboard-state {
@@ -277,7 +288,7 @@
   }
 }
 
-@media (max-width: 760px) {
+@container dashboard (max-width: 760px) {
   .admin-dashboard .dashboard-filters {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   }
@@ -288,7 +299,27 @@
   }
 }
 
+@container dashboard (max-width: 600px) {
+  .admin-dashboard .dashboard-welcome__full-time {
+    display: none;
+  }
+
+  .admin-dashboard .dashboard-welcome__short-time {
+    display: inline;
+  }
+
+  .admin-dashboard .dashboard-heading__date {
+    font-size: 13px;
+  }
+}
+
 @media (max-width: 480px) {
+  .admin-dashboard {
+    --dashboard-gap: 16px;
+  }
+}
+
+@container dashboard (max-width: 480px) {
   .admin-dashboard .dashboard-heading {
     gap: 12px;
   }
@@ -299,17 +330,12 @@
   }
 
   .admin-dashboard .dashboard-welcome {
-    margin-block: 12px 16px;
-    gap: 0 8px;
+    margin-block: 4px 12px;
+    gap: 4px 8px;
   }
 
   .admin-dashboard .dashboard-heading__date {
     font-size: 13px;
-  }
-
-  .admin-dashboard .dashboard-welcome__updated {
-    width: 100%;
-    justify-content: space-between;
   }
 
   .admin-dashboard .dashboard-query > summary {

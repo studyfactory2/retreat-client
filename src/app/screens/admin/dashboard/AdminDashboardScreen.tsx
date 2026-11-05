@@ -19,9 +19,16 @@ import './styles/dashboard.css';
 const dashboardDateFormatter = new Intl.DateTimeFormat('ko-KR', {
   timeZone: 'UTC',
   year: 'numeric',
-  month: 'long',
+  month: 'numeric',
   day: 'numeric',
-  weekday: 'long',
+  weekday: 'short',
+});
+
+const dashboardRefreshFormatter = new Intl.DateTimeFormat('ko-KR', {
+  timeZone: 'Asia/Seoul',
+  hour: '2-digit',
+  minute: '2-digit',
+  hourCycle: 'h23',
 });
 
 export function AdminDashboardScreen() {
@@ -81,25 +88,33 @@ function DashboardWorkspace({
 
       <div className="dashboard-welcome">
         <time className="dashboard-heading__date" dateTime={selectedDate}>
-          {dashboardDateFormatter.format(
-            new Date(`${selectedDate}T00:00:00Z`),
-          )}
+          {dashboardDateFormatter.format(new Date(`${selectedDate}T00:00:00Z`))}
         </time>
         <div className="dashboard-welcome__updated">
           {data && (
-            <span>
-              최근 조회{' '}
-              <time dateTime={data.asOf}>
-                {formatSeoulUpdatedAt(data.asOf)}
+            <span className="dashboard-welcome__timestamp">
+              조회{' '}
+              <time
+                dateTime={data.asOf}
+                title={`최근 조회 ${formatSeoulUpdatedAt(data.asOf)} · 한국 시간`}
+                aria-label={`최근 조회 ${formatSeoulUpdatedAt(data.asOf)} · 한국 시간`}
+              >
+                <span className="dashboard-welcome__full-time">
+                  {formatSeoulUpdatedAt(data.asOf)}
+                </span>
+                <span
+                  className="dashboard-welcome__short-time"
+                  aria-hidden="true"
+                >
+                  {dashboardRefreshFormatter.format(new Date(data.asOf))}
+                </span>
               </time>
             </span>
           )}
           <Button
             className="dashboard-refresh admin-button-secondary"
             onClick={dashboard.refresh}
-            disabled={
-              !!filterError || dashboard.resource.status === 'loading'
-            }
+            disabled={!!filterError || dashboard.resource.status === 'loading'}
             aria-label="운영 현황 새로고침"
             title="새로고침"
           >

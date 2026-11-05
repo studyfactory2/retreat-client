@@ -28,7 +28,7 @@ function ActivityHeading({
 }: {
   id: string;
   title: string;
-  subtitle: string;
+  subtitle?: string;
   total?: number;
   href: string;
   linkLabel: string;
@@ -36,8 +36,15 @@ function ActivityHeading({
   return (
     <header className="dashboard-activity__heading">
       <div>
-        <h2 id={id}>{title}</h2>
-        <p>{subtitle}</p>
+        <h2 id={id}>
+          {title}
+          {total !== undefined && (
+            <span className="dashboard-activity__total">
+              {total.toLocaleString('ko-KR')}건
+            </span>
+          )}
+        </h2>
+        {subtitle && <p>{subtitle}</p>}
       </div>
       <Link
         className="dashboard-activity__all-link"
@@ -45,7 +52,6 @@ function ActivityHeading({
         aria-label={`${title} 전체${total === undefined ? '' : ` ${total.toLocaleString('ko-KR')}건`} 보기`}
       >
         {linkLabel}
-        {total !== undefined && ` ${total.toLocaleString('ko-KR')}건`}
         <span aria-hidden="true">→</span>
       </Link>
     </header>
@@ -167,11 +173,10 @@ export function DashboardActivity({
       >
         <ActivityHeading
           id="dashboard-stays-heading"
-          title={date === today ? '오늘의 이용 일정' : '선택일 이용 일정'}
-          subtitle={`${date.replaceAll('-', '. ')} · 한국 시간`}
+          title={date === today ? '오늘 이용 일정' : '선택일 이용 일정'}
           total={stayData?.total}
           href={appRoutes.adminCalendar + staySearch}
-          linkLabel="전체 일정"
+          linkLabel="전체"
         />
         {stayData && stayData.items.length > 0 ? (
           <>
@@ -203,7 +208,7 @@ export function DashboardActivity({
           <ActivityHeading
             id="dashboard-maintenance-activity-heading"
             title="정비 진행"
-            subtitle={`선택일 시작 기록${maintenanceData?.items.length ? ` · 최근 ${Math.min(RECORD_PREVIEW_SIZE, maintenanceData.items.length)}건` : ''}`}
+            subtitle={`${date === today ? '오늘' : '선택일'} 시작 기록${maintenanceData?.items.length ? ` · 최근 ${Math.min(RECORD_PREVIEW_SIZE, maintenanceData.items.length)}건` : ''}`}
             total={maintenanceData?.total}
             href={
               appRoutes.adminMaintenance + maintenanceSearch(maintenanceInput)
