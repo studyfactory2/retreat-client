@@ -1,15 +1,11 @@
 .import-upload {
-  max-width: 980px;
+  container: import-upload / inline-size;
+  max-width: 760px;
   min-width: 0;
   margin-inline: auto;
 }
 .import-upload__heading {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 24px;
+  margin-bottom: 18px;
 }
 .import-upload__heading h1 {
   color: var(--color-heading);
@@ -18,37 +14,13 @@
   line-height: 1.4;
   letter-spacing: -0.045em;
 }
-.import-upload__heading h1 + p {
-  margin-top: 7px;
-  color: var(--color-muted);
-  font-size: 13px;
-}
 .import-upload .ui-button {
   min-height: 44px;
   padding: 10px 17px;
   font-size: 13px;
 }
-.import-upload__guide {
-  margin-bottom: 24px;
-  padding: 17px 20px;
-  border: 1px solid #dbe5fa;
-  border-radius: 12px;
-  background: var(--color-soft);
-  color: var(--color-heading);
-  font-size: 13px;
-  line-height: 1.8;
-}
-.import-upload__guide strong {
-  display: block;
-  font-weight: 600;
-}
-.import-upload__guide p {
-  margin-top: 2px;
-  color: var(--color-muted);
-  font-size: 12px;
-}
 .import-upload__notice {
-  margin-bottom: 24px;
+  margin-bottom: 16px;
   padding: 20px;
   border: 1px solid #eac4c9;
   border-radius: 12px;
@@ -78,7 +50,7 @@
 }
 .import-upload__fields {
   display: grid;
-  gap: 18px;
+  gap: 12px;
   min-width: 0;
   margin: 0;
   padding: 0;
@@ -95,54 +67,31 @@
 }
 .import-upload__card {
   min-width: 0;
-  padding: 20px;
+  padding: 22px;
   border: 1px solid var(--color-border);
-  border-radius: 14px;
+  border-radius: 15px;
   background: var(--color-surface);
 }
 .import-upload__section-heading {
-  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
 }
 .import-upload__section-heading h2 {
   color: var(--color-heading);
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 650;
   letter-spacing: -0.025em;
 }
-.import-upload__section-heading small {
-  display: inline-block;
-  margin-left: 6px;
-  padding: 2px 7px;
-  border-radius: 5px;
-  background: var(--color-background);
-  color: var(--color-muted);
+.import-upload__required {
+  color: var(--color-primary);
   font-size: 11px;
-  font-weight: 400;
-  vertical-align: middle;
 }
-.import-upload__section-heading p {
-  margin-top: 7px;
-  color: var(--color-muted);
-  font-size: 12px;
-  line-height: 1.7;
-}
-.import-upload__file-field,
-.import-upload__field {
+.import-upload__file-field {
   display: grid;
   gap: 8px;
   min-width: 0;
-}
-.import-upload__file-field label,
-.import-upload__field label {
-  color: var(--color-heading);
-  font-size: 12px;
-  font-weight: 600;
-}
-.import-upload__file-field label span {
-  margin-left: 6px;
-  color: var(--color-primary);
-  font-size: 10px;
-  font-weight: 400;
 }
 .import-upload input,
 .import-upload select {
@@ -156,26 +105,7 @@
   color: var(--color-text);
   font-size: 14px;
 }
-.import-upload input[type='file'] {
-  padding: 22px;
-  border: 1px dashed #9eafd0;
-  background: #f8faff;
-  font-size: 13px;
-  line-height: 1.7;
-}
-.import-upload input::file-selector-button {
-  min-height: 44px;
-  margin-right: 12px;
-  padding: 10px 15px;
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  background: var(--color-surface);
-  color: var(--color-primary);
-  font: inherit;
-  font-weight: 600;
-  cursor: pointer;
-}
-.import-upload :is(input, select, button):focus-visible {
+.import-upload :is(input, select, button, a, summary):focus-visible {
   outline: 3px solid var(--color-primary);
   outline-offset: 3px;
 }
@@ -189,178 +119,163 @@
 .import-upload [aria-invalid='true'] {
   border-color: var(--color-danger);
 }
-.import-upload__hint,
-.import-upload__file-info {
+.import-upload__picker {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 180px;
+  padding: 20px;
+  border: 1px dashed #a9bde1;
+  border-radius: 11px;
+  background: #f8faff;
+  text-align: center;
+}
+.import-upload__picker:focus-within {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 3px;
+}
+.import-upload__picker:has(input:not(:disabled)):hover {
+  border-color: var(--color-primary);
+  background: var(--color-soft);
+}
+.import-upload__picker--invalid {
+  border-color: var(--color-danger);
+}
+.import-upload__file-icon {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  flex: none;
+  border-radius: 11px;
+  background: #eaf0ff;
+  color: var(--color-primary);
+}
+.import-upload__file-icon svg {
+  width: 23px;
+  height: 23px;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.import-upload__file-description {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+.import-upload__file-description strong {
+  color: var(--color-heading);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.import-upload__file-description > span {
   color: var(--color-muted);
   font-size: 12px;
-  line-height: 1.8;
 }
-.import-upload__file-info {
-  margin-top: 4px;
-  padding: 12px 14px;
-  border-radius: 8px;
-  background: var(--color-background);
+.import-upload__choose {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 10px 18px;
+  border: 1px solid #d5e0f7;
+  border-radius: 9px;
+  background: var(--color-surface);
+  color: var(--color-primary);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
 }
-.import-upload__file-info strong {
-  color: var(--color-heading);
-  font-weight: 500;
-  overflow-wrap: anywhere;
+.import-upload__picker--selected {
+  flex-direction: row;
+  justify-content: flex-start;
+  gap: 12px;
+  min-height: 92px;
+  padding: 16px;
+  border-style: solid;
+  text-align: left;
+}
+.import-upload__picker--selected .import-upload__file-description {
+  flex: 1;
+}
+.import-upload__picker--selected .import-upload__file-description strong {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+.import-upload__picker--selected .import-upload__choose {
+  padding-inline: 12px;
+}
+.import-upload .import-upload__file-input,
+.import-upload .import-upload__file-input:disabled {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.import-upload .import-upload__file-input:disabled {
+  cursor: not-allowed;
+}
+.import-upload__fields:disabled .import-upload__choose {
+  color: var(--color-muted);
+}
+.import-upload__hint {
+  color: var(--color-muted);
+  font-size: 12px;
+  line-height: 1.7;
 }
 .import-upload__error {
   color: var(--color-danger);
   font-size: 12px;
   line-height: 1.7;
 }
-.import-upload__mapping-guide {
-  margin-bottom: 20px;
-  color: var(--color-muted);
-  font-size: 12px;
-  line-height: 1.8;
-}
-.import-upload__mapping-guide p + p {
-  margin-top: 4px;
-}
-.import-upload__property-state {
-  margin-bottom: 18px;
-  padding: 14px 16px;
-  border: 1px solid var(--color-border);
-  border-radius: 9px;
-  background: var(--color-background);
-  color: var(--color-muted);
-  font-size: 12px;
-  line-height: 1.8;
-}
-.import-upload__property-state .ui-button {
-  margin-top: 10px;
-}
-.import-upload__empty {
-  margin: 14px 0;
-  color: var(--color-muted);
-  font-size: 12px;
-}
-.import-upload__mappings {
-  display: grid;
-  gap: 16px;
-}
-.import-upload__mapping {
-  min-width: 0;
-  margin: 0;
-  padding: 18px;
-  border: 1px solid var(--color-border);
-  border-radius: 12px;
-  background: #fafbfd;
-}
-.import-upload__mapping legend {
-  padding: 0 7px;
-  color: var(--color-muted);
-  font-size: 11px;
-  font-weight: 600;
-}
-.import-upload__mapping-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
-  align-items: start;
-  gap: 14px;
-}
-.import-upload__remove {
-  margin-top: 27px;
-}
-.import-upload__mapping-footer {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 12px 20px;
-  margin-top: 20px;
-}
-.import-upload__mapping-footer span {
-  color: var(--color-muted);
-  font-size: 11px;
-  line-height: 1.8;
-}
 .import-upload__actions {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-top: 18px;
+  margin-top: 20px;
 }
 .import-upload__actions p {
-  flex: 1 1 220px;
   color: var(--color-muted);
   font-size: 12px;
+  line-height: 1.7;
 }
 .import-upload__actions > .ui-button {
-  min-width: 160px;
+  flex: none;
+  min-width: 180px;
   min-height: 48px;
 }
-.import-upload__resume {
-  margin-top: 20px;
-  color: var(--color-muted);
-  font-size: 12px;
-  line-height: 1.8;
-}
-@media (max-width: 700px) {
-  .import-upload__heading {
-    align-items: flex-start;
-  }
-  .import-upload__card {
-    padding: 18px;
-  }
-  .import-upload__mapping-grid {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 14px;
-  }
-  .import-upload__remove {
-    justify-self: end;
-    margin-top: 0;
-  }
-}
-@media (max-width: 520px) {
-  .import-upload__heading {
-    gap: 14px;
-  }
-  .import-upload__heading h1 {
-    font-size: 26px;
-  }
-  .import-upload__heading > .ui-button {
-    padding-inline: 13px;
-  }
+@container import-upload (max-width: 560px) {
   .import-upload__card,
-  .import-upload__guide,
   .import-upload__notice {
     padding: 16px;
-  }
-  .import-upload__fields {
-    gap: 18px;
-  }
-  .import-upload__section-heading {
-    margin-bottom: 12px;
-  }
-  .import-upload__section-heading h2 {
-    font-size: 17px;
-  }
-  .import-upload input,
-  .import-upload select {
-    font-size: 16px;
-  }
-  .import-upload input[type='file'] {
-    padding: 16px 12px;
-    font-size: 12px;
-  }
-  .import-upload__mapping {
-    padding: 14px;
-  }
-  .import-upload__mapping-footer {
-    align-items: stretch;
-    flex-direction: column;
   }
   .import-upload__actions {
     flex-direction: column;
     align-items: stretch;
-    margin-top: 22px;
+    gap: 8px;
   }
-  .import-upload__actions p {
-    flex: none;
+  .import-upload__picker--selected {
+    gap: 9px;
+    padding: 12px;
+  }
+}
+@media (max-width: 700px) {
+  .import-upload input,
+  .import-upload select {
+    font-size: 16px;
   }
 }

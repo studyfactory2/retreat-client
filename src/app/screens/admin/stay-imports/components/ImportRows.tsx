@@ -1,179 +1,121 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
 import type { AdminPropertyOption } from '../../../../features/admin-properties/admin-properties.types';
 import type { StayImportRowDto } from '../../../../features/admin-stay-imports/admin-stay-imports.types';
-import { Button } from '../../../../shared/ui/Button/Button';
-import { ImportSourceDialog } from './ImportSourceDialog';
-import { importRowStatus, importTime } from '../model/import-review-model';
+import { ScheduleIcon } from '../../schedule/components/ScheduleIcon';
+import { importRowStatus } from '../model/import-review-model';
+import {
+  importRowActionBadge,
+  importRowPeriod,
+} from '../model/import-row-presentation';
+import '../styles/import-review-list.css';
 
 export function ImportRows({
   rows,
   properties,
-  editable,
   busy,
-  onEdit,
-  onSkip,
+  onSelect,
+  selectedId,
+  sharedYear,
 }: {
   rows: StayImportRowDto[];
   properties: AdminPropertyOption[];
-  editable: boolean;
   busy: boolean;
-  onEdit: (row: StayImportRowDto) => void;
-  onSkip: (row: StayImportRowDto) => void;
+  onSelect: (row: StayImportRowDto) => void;
+  selectedId?: string;
+  sharedYear?: string;
 }) {
-  const [sourceId, setSourceId] = useState<string | null>(null);
-  const source = rows.find((row) => row.id === sourceId);
   return (
-    <>
-      <div className="stay-import-table-wrap">
-        <table className="stay-import-table" role="table">
-          <caption className="stay-import-sr-only">명단 행별 검토 결과</caption>
-          <thead role="rowgroup">
-            <tr role="row">
-              <th scope="col" role="columnheader">
-                원본 · 이용객
-              </th>
-              <th scope="col" role="columnheader">
-                휴양소 · 이용 기간
-              </th>
-              <th scope="col" role="columnheader">
-                검토 결과
-              </th>
-              <th scope="col" role="columnheader">
-                처리
-              </th>
-            </tr>
-          </thead>
-          <tbody role="rowgroup">
-            {rows.map((row) => (
-              <tr key={row.id} role="row">
-                <td className="stay-import-row__guest" role="cell">
-                  <p className="stay-import-row-source">
-                    {row.sheetName} · {row.rowNumber}행
-                  </p>
-                  <strong>
-                    {row.normalizedData?.guestName ||
-                      (row.normalizedData
-                        ? '이름 확인 필요'
-                        : '안내 / 기타 행')}
-                  </strong>
-                  <p>
-                    {[
-                      row.normalizedData?.company,
-                      row.normalizedData?.department,
-                    ]
-                      .filter(Boolean)
-                      .join(' · ')}
-                  </p>
-                  <button
-                    type="button"
-                    className="stay-import-source-button"
-                    onClick={() => setSourceId(row.id)}
-                    aria-haspopup="dialog"
-                    aria-label={`${row.rowNumber}행 원본 셀 보기`}
-                  >
-                    원본 보기
-                  </button>
-                </td>
-                <td className="stay-import-row__stay" role="cell">
-                  <strong>
-                    {row.propertyId
-                      ? (properties.find(
-                          (property) => property.id === row.propertyId,
-                        )?.name ?? '연결된 휴양소')
-                      : row.normalizedData
-                        ? '휴양소 연결 필요'
-                        : '—'}
-                  </strong>
-                  {row.normalizedData && (
-                    <dl className="stay-import-period">
-                      <div>
-                        <dt>입실</dt>
-                        <dd>
-                          {row.normalizedData.checkInAt
-                            ? importTime(row.normalizedData.checkInAt)
-                            : `${row.normalizedData.checkInDate ?? '날짜 확인 필요'} · 시간 확인 필요`}
-                        </dd>
-                      </div>
-                      <div>
-                        <dt>퇴실</dt>
-                        <dd>
-                          {row.normalizedData.checkOutAt
-                            ? importTime(row.normalizedData.checkOutAt)
-                            : `${row.normalizedData.checkOutDate ?? '날짜 확인 필요'} · 시간 확인 필요`}
-                        </dd>
-                      </div>
-                    </dl>
-                  )}
-                </td>
-                <td className="stay-import-row__result" role="cell">
-                  <span
-                    className={`stay-import-badge stay-import-badge--${row.action === 'SKIP' ? 'skip' : row.validationStatus.toLowerCase()}`}
-                  >
-                    {importRowStatus(row)}
+    <ul className="import-review-list" aria-label="명단 행별 검토 결과">
+      {rows.map((row) => {
+        const data = row.normalizedData;
+        const guest =
+          data?.guestName || (data ? '이름 확인 필요' : '안내 / 기타 행');
+        const property = row.propertyId
+          ? (properties.find((item) => item.id === row.propertyId)?.name ??
+            '연결된 휴양소')
+          : data
+            ? '휴양소 연결 필요'
+            : '원본 행';
+        const status = importRowStatus(row);
+        const tone = row.stayId
+          ? 'ready'
+          : row.action === 'SKIP'
+            ? 'skipped'
+            : row.action === 'UPDATE' || row.validationStatus === 'INVALID'
+              ? 'invalid'
+              : row.validationStatus === 'NEEDS_REVIEW'
+                ? 'review'
+                : 'ready';
+        const badge = importRowActionBadge(row);
+        const start = data
+          ? importRowPeriod(data.checkInAt, data.checkInDate, sharedYear)
+          : '';
+        const end = data
+          ? importRowPeriod(data.checkOutAt, data.checkOutDate, sharedYear)
+          : '';
+        const label = [
+          guest,
+          property,
+          `${row.sheetName} · 원본 ${row.rowNumber}행`,
+          ...(data
+            ? [
+                `입실 ${importRowPeriod(data.checkInAt, data.checkInDate)}${!data.checkInAt ? ' · 시간 확인 필요' : ''}`,
+                `퇴실 ${importRowPeriod(data.checkOutAt, data.checkOutDate)}${!data.checkOutAt ? ' · 시간 확인 필요' : ''}`,
+                '한국 시간 기준',
+              ]
+            : []),
+          status,
+          ...row.validationMessages.map((message) => message.message),
+          badge.label,
+          '상세 보기',
+        ].join(' · ');
+        return (
+          <li key={row.id}>
+            <button
+              type="button"
+              className={`import-review-row${selectedId === row.id ? ' is-selected' : ''}`}
+              disabled={busy}
+              aria-current={selectedId === row.id ? true : undefined}
+              aria-label={label}
+              onClick={() => onSelect(row)}
+            >
+              <span className="import-review-row__content">
+                <span className="import-review-row__heading">
+                  <span className="import-review-row__identity">
+                    <strong>{guest}</strong>
                   </span>
-                  {row.validationMessages.length > 0 && (
-                    <ul className="stay-import-messages">
-                      {row.validationMessages.map((message, index) => (
-                        <li key={`${message.code}:${index}`}>
-                          {message.message}
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                  {row.normalizedData?.review && (
-                    <p className="stay-import-reviewer">
-                      최근 검토: {row.normalizedData.review.actor.name}
-                      <br />
-                      {importTime(row.normalizedData.review.at)}
-                    </p>
-                  )}
-                </td>
-                <td className="stay-import-row__actions" role="cell">
-                  <div className="stay-import-row-actions">
-                    {row.stayId ? (
-                      <Link
-                        className="ui-button admin-button-secondary"
-                        to={`/admin/stays/${row.stayId}?view=list`}
-                        aria-label={`${row.rowNumber}행 등록된 일정 보기`}
+                  <span
+                    className={`import-review-status import-review-status--${tone}`}
+                  >
+                    {badge.label}
+                    {badge.additional > 0 && (
+                      <span
+                        className="import-review-status__more"
+                        aria-label={`추가 확인 ${badge.additional}건`}
                       >
-                        일정 보기
-                      </Link>
-                    ) : editable && row.normalizedData ? (
-                      <>
-                        <Button
-                          disabled={busy}
-                          onClick={() => onEdit(row)}
-                          aria-label={`${row.rowNumber}행 ${row.action === 'SKIP' ? '다시 포함 검토' : '검토'}`}
-                        >
-                          {row.action === 'SKIP' ? '다시 포함 검토' : '검토'}
-                        </Button>
-                        {row.action !== 'SKIP' && (
-                          <Button
-                            disabled={busy}
-                            className="admin-button-secondary"
-                            onClick={() => onSkip(row)}
-                            aria-label={`${row.rowNumber}행 제외`}
-                          >
-                            제외
-                          </Button>
-                        )}
-                      </>
-                    ) : (
-                      <span className="stay-import-muted">
-                        {row.action === 'SKIP' ? '제외된 행' : '읽기 전용'}
+                        +{badge.additional}
                       </span>
                     )}
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      {source && (
-        <ImportSourceDialog row={source} onClose={() => setSourceId(null)} />
-      )}
-    </>
+                  </span>
+                </span>
+                {data ? (
+                  <span className="import-review-row__period">
+                    <span>{start}</span>
+                    <span aria-hidden="true">→</span>
+                    <span>{end}</span>
+                  </span>
+                ) : (
+                  <span className="import-review-row__source">
+                    {row.sheetName} · {row.rowNumber}행
+                  </span>
+                )}
+              </span>
+              <span className="import-review-row__arrow" aria-hidden="true">
+                <ScheduleIcon name="chevron" />
+              </span>
+            </button>
+          </li>
+        );
+      })}
+    </ul>
   );
 }

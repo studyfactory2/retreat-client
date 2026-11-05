@@ -8,6 +8,7 @@ import {
 } from '../../../features/admin-stay-imports/admin-stay-imports-api';
 import type {
   StayImportRowDto,
+  GetStayImportInput,
   ReviewStayImportRowInput,
 } from '../../../features/admin-stay-imports/admin-stay-imports.types';
 import { isStayRevision } from '../../../features/admin-stays/admin-stays-validation';
@@ -15,8 +16,14 @@ import { Button } from '../../../shared/ui/Button/Button';
 import { PageState } from '../../../shared/ui/PageState/PageState';
 import { AdminBackButton } from '../components/AdminBackButton';
 import { useAdminNavigationGuard } from '../hooks/use-admin-navigation-guard';
-import { ImportRowEditor } from './components/ImportRowEditor';
+import {
+  ImportRowEditor,
+  type ImportEditorNavigation,
+} from './components/ImportRowEditor';
+import { ImportReviewPanel } from './components/ImportReviewPanel';
+import { ScheduleIcon } from '../schedule/components/ScheduleIcon';
 import { ImportRows } from './components/ImportRows';
+import { importRowsYear } from './model/import-row-presentation';
 import { ImportMutationNotice } from './components/ImportMutationNotice';
 import {
   readImportFilters,
@@ -28,6 +35,7 @@ import { ImportRowFilters } from './components/ImportRowFilters';
 import { ImportConfirmation } from './components/ImportConfirmation';
 import { ImportSteps } from './components/ImportSteps';
 import './styles/stay-import.css';
+import './styles/import-review-workspace.css';
 
 export function AdminStayImportReviewScreen() {
   const { state, rejectSession } = useAdminSession();
@@ -68,15 +76,11 @@ function ImportWorkspace({
     row: StayImportRowDto;
     version: number;
   } | null>(null);
-  const [skip, setSkip] = useState<{
-    row: StayImportRowDto;
-    version: number;
-  } | null>(null);
+  const editorNavigation = useRef<ImportEditorNavigation>(null);
+  const rowTrigger = useRef<HTMLElement | null>(null);
   const [confirming, setConfirming] = useState(false);
   const [notice, setNotice] = useState('');
-  useAdminNavigationGuard(
-    () => mutation.hasPendingChanges() || skip !== null || confirming,
-  );
+  useAdminNavigationGuard(() => mutation.hasPendingChanges() || confirming);
   const confirmation = useRef<HTMLDivElement>(null);
   const properties =
     options.resource.status === 'ready' ? options.resource.data : [];
@@ -97,16 +101,19 @@ function ImportWorkspace({
       );
   }, [clampedPage, query, setSearch]);
   useEffect(() => {
-    if (confirming || skip) confirmation.current?.focus();
-  }, [confirming, skip]);
+    if (confirming) confirmation.current?.focus();
+  }, [confirming]);
   useEffect(() => {
-    if (resource.status === 'ready' && !editor)
-      document.getElementById('main-content')?.focus({ preventScroll: true });
+    if (resource.status === 'ready' && !editor) {
+      const target = rowTrigger.current?.isConnected
+        ? rowTrigger.current
+        : document.getElementById('main-content');
+      target?.focus({ preventScroll: true });
+    }
   }, [resource.status, editor]);
 
   function reload() {
     setEditor(null);
-    setSkip(null);
     setConfirming(false);
     setNotice('');
     mutation.reset();
@@ -124,70 +131,75 @@ function ImportWorkspace({
         ),
       () => {
         setEditor(null);
-        setSkip(null);
         setConfirming(false);
         setNotice('검토 내용을 저장하고 명단 전체를 다시 확인했습니다.');
         refresh();
       },
     );
   }
-  if (editor)
-    return (
-      <div className="stay-import">
-        {options.resource.status === 'error' && (
-          <div
-            className="stay-import-notice stay-import-notice--error"
-            role="alert"
-          >
-            <p>{options.resource.message}</p>
-            <Button onClick={options.refresh}>휴양소 다시 불러오기</Button>
-          </div>
-        )}
-        {options.resource.status === 'loading' && (
-          <p role="status">휴양소 목록을 불러오는 중입니다.</p>
-        )}
-        <ImportRowEditor
-          key={`${editor.row.id}:${editor.version}`}
-          row={editor.row}
-          properties={properties}
-          propertiesReady={options.resource.status === 'ready'}
-          state={mutation.state}
-          onSave={(input) => saveRow(input, editor.version)}
-          onClose={() => {
-            setEditor(null);
-          }}
-          onReload={reload}
-        />
-      </div>
-    );
+  function requestTransition(proceed: () => void) {
+    if (mutation.state.busy) return;
+    if (editor && editorNavigation.current)
+      editorNavigation.current.requestLeave(proceed);
+    else proceed();
+  }
+  function changeFilters(next: GetStayImportInput) {
+    requestTransition(() => {
+      setEditor(null);
+      setConfirming(false);
+      setSearch(importFilterSearch(next));
+    });
+  }
+  function selectRow(row: StayImportRowDto, version: number) {
+    if (editor?.row.id === row.id) return;
+    const trigger = document.activeElement;
+    requestTransition(() => {
+      rowTrigger.current = trigger instanceof HTMLElement ? trigger : null;
+      setNotice('');
+      setConfirming(false);
+      setEditor({ row, version });
+    });
+  }
 
   return (
-    <div className="stay-import">
+    <div className="stay-import import-review-workspace">
       <header className="stay-import-heading">
         <div>
           <div className="admin-page-heading-title">
             <AdminBackButton
               label="일정 목록으로 돌아가기"
               disabled={mutation.state.busy}
-              onBack={() => navigate('/admin/stays')}
+              onBack={() => requestTransition(() => navigate('/admin/stays'))}
             />
-            <h1>{resource.status === 'ready' && resource.data.batch.status === 'CONFIRMED' ? '엑셀 가져오기 완료' : '엑셀 명단 검토'}</h1>
+            <h1>
+              {resource.status === 'ready' &&
+              resource.data.batch.status === 'CONFIRMED'
+                ? '엑셀 가져오기 완료'
+                : '엑셀 명단 검토'}
+            </h1>
           </div>
-          <p>{resource.status === 'ready' && resource.data.batch.status === 'CONFIRMED' ? '등록된 이용 일정을 확인해 주세요.' : '휴양소와 이용 정보를 확인해 주세요.'}</p>
         </div>
         <div className="stay-import-actions">
           <Button
-            className="admin-button-secondary"
+            className="admin-button-secondary import-review-refresh"
+            aria-label="명단 새로고침"
             disabled={mutation.state.busy || resource.status === 'loading'}
-            onClick={reload}
+            onClick={() => requestTransition(reload)}
           >
-            새로고침
+            <ScheduleIcon name="refresh" />
           </Button>
         </div>
       </header>
       <ImportSteps
-        current={confirming || (resource.status === 'ready' && resource.data.batch.status === 'CONFIRMED') ? 2 : 1}
-        complete={resource.status === 'ready' && resource.data.batch.status === 'CONFIRMED'}
+        current={
+          confirming ||
+          (resource.status === 'ready' &&
+            resource.data.batch.status === 'CONFIRMED')
+            ? 2
+            : 1
+        }
+        complete={resource.status === 'ready' &&
+              resource.data.batch.status === 'CONFIRMED'}
       />
       {notice && (
         <p
@@ -197,11 +209,13 @@ function ImportWorkspace({
           {notice}
         </p>
       )}
-      <ImportMutationNotice
-        state={mutation.state}
-        rows={resource.status === 'ready' ? resource.data.rows.items : []}
-        onReload={reload}
-      />
+      {!editor && (
+        <ImportMutationNotice
+          state={mutation.state}
+          rows={resource.status === 'ready' ? resource.data.rows.items : []}
+          onReload={reload}
+        />
+      )}
       {resource.status === 'loading' || clampedPage !== null ? (
         <div role="status">
           <PageState
@@ -227,6 +241,7 @@ function ImportWorkspace({
       ) : (
         (() => {
           const { batch, rows } = resource.data;
+          const sharedYear = importRowsYear(rows.items);
           const editable =
             batch.status === 'PREVIEW' && isStayRevision(batch.version);
           const summary = batch.summary;
@@ -238,8 +253,13 @@ function ImportWorkspace({
             !locked;
           return (
             <>
-              <ImportBatchSummary batch={batch} />
-              {options.resource.status === 'error' && (
+              <ImportBatchSummary
+                batch={batch}
+                input={filters}
+                disabled={locked || confirming}
+                onChange={changeFilters}
+              />
+              {!editor && options.resource.status === 'error' && (
                 <div
                   className="stay-import-notice stay-import-notice--error"
                   role="alert"
@@ -256,131 +276,137 @@ function ImportWorkspace({
               <ImportRowFilters
                 input={filters}
                 total={rows.total}
-                disabled={mutation.state.busy || !!skip || confirming}
-                onChange={(next) => setSearch(importFilterSearch(next))}
+                disabled={locked || confirming}
+                onChange={changeFilters}
               />
-              {skip && (
-                <div
-                  className="stay-import-notice"
-                  role="alertdialog"
-                  aria-labelledby="import-skip-heading"
-                  tabIndex={-1}
-                  ref={confirmation}
+              <div className="import-review-columns">
+                <section
+                  className="import-review-results"
+                  aria-label="검토할 명단"
                 >
-                  <h2 id="import-skip-heading">
-                    이 행을 가져오기에서 제외할까요?
-                  </h2>
-                  <p>
-                    {skip.row.sheetName} · {skip.row.rowNumber}행 ·{' '}
-                    {skip.row.normalizedData?.guestName ?? '이름 미입력'}
-                  </p>
-                  <p>확정 전에는 다시 포함할 수 있습니다.</p>
-                  <div className="stay-import-actions">
-                    <Button
-                      disabled={mutation.state.busy}
-                      className="admin-button-secondary"
-                      onClick={() => setSkip(null)}
-                    >
-                      돌아가기
-                    </Button>
-                    <Button
-                      disabled={locked}
-                      loading={mutation.state.busy}
-                      onClick={() =>
-                        saveRow(
-                          { id: skip.row.id, action: 'SKIP' },
-                          skip.version,
-                        )
-                      }
-                    >
-                      이 행 제외
-                    </Button>
+                  <div className="import-review-results__heading">
+                    <h2>
+                      명단 <span>{rows.total.toLocaleString('ko-KR')}건</span>
+                    </h2>
+                    <span>
+                      {sharedYear
+                        ? `${sharedYear}년 · 한국 시간`
+                        : '입·퇴실 · 한국 시간'}
+                    </span>
                   </div>
-                </div>
-              )}
-              {rows.items.length ? (
-                <ImportRows
-                  rows={rows.items}
-                  properties={properties}
-                  editable={editable}
-                  busy={locked || !!skip || confirming}
-                  onEdit={(row) => {
-                    setNotice('');
-                    setEditor({ row, version: batch.version });
-                  }}
-                  onSkip={(row) => {
-                    setNotice('');
-                    setSkip({ row, version: batch.version });
-                  }}
-                />
-              ) : (
-                <div className="stay-import-card">
-                  <h2>조건에 맞는 행이 없습니다.</h2>
-                  <p>필터를 변경해 다른 행을 확인해 주세요.</p>
-                  <Button
-                    className="admin-button-secondary"
-                    disabled={mutation.state.busy}
-                    onClick={() => setSearch({})}
-                  >
-                    전체 행 보기
-                  </Button>
-                </div>
-              )}
-              {rows.totalPages > 1 && (
-                <nav
-                  className="stay-import-pagination"
-                  aria-label="명단 행 페이지"
-                >
-                  <Button
-                    className="admin-button-secondary"
-                    disabled={
-                      filters.page <= 1 || locked || !!skip || confirming
-                    }
-                    onClick={() =>
-                      setSearch(
-                        importFilterSearch({
-                          ...filters,
-                          page: filters.page - 1,
-                        }),
-                      )
-                    }
-                  >
-                    이전
-                  </Button>
-                  <span>
-                    {filters.page} / {rows.totalPages} 페이지
-                  </span>
-                  <Button
-                    className="admin-button-secondary"
-                    disabled={
-                      filters.page >= rows.totalPages ||
-                      locked ||
-                      !!skip ||
-                      confirming
-                    }
-                    onClick={() =>
-                      setSearch(
-                        importFilterSearch({
-                          ...filters,
-                          page: filters.page + 1,
-                        }),
-                      )
+                  {rows.items.length ? (
+                    <ImportRows
+                      rows={rows.items}
+                      sharedYear={sharedYear}
+                      properties={properties}
+                      busy={locked || confirming}
+                      selectedId={editor?.row.id}
+                      onSelect={(row) => selectRow(row, batch.version)}
+                    />
+                  ) : (
+                    <div className="stay-import-card">
+                      <h2>조건에 맞는 행이 없습니다.</h2>
+                      <p>필터를 변경해 다른 행을 확인해 주세요.</p>
+                      <Button
+                        className="admin-button-secondary"
+                        disabled={mutation.state.busy}
+                        onClick={() => changeFilters({ page: 1 })}
+                      >
+                        전체 행 보기
+                      </Button>
+                    </div>
+                  )}
+                  {rows.totalPages > 1 && (
+                    <nav
+                      className="stay-import-pagination"
+                      aria-label="명단 행 페이지"
+                    >
+                      <Button
+                        className="admin-button-secondary"
+                        disabled={filters.page <= 1 || locked || confirming}
+                        onClick={() =>
+                          changeFilters({ ...filters, page: filters.page - 1 })
+                        }
+                      >
+                        이전
+                      </Button>
+                      <span>
+                        {filters.page} / {rows.totalPages} 페이지
+                      </span>
+                      <Button
+                        className="admin-button-secondary"
+                        disabled={
+                          filters.page >= rows.totalPages ||
+                          locked ||
+                          confirming
+                        }
+                        onClick={() =>
+                          changeFilters({ ...filters, page: filters.page + 1 })
+                        }
+                      >
+                        다음
+                      </Button>
+                    </nav>
+                  )}
+                </section>
+                {editor ? (
+                  <ImportReviewPanel
+                    onRequestClose={() =>
+                      requestTransition(() => setEditor(null))
                     }
                   >
-                    다음
-                  </Button>
-                </nav>
-              )}
+                    {options.resource.status === 'error' && (
+                      <div
+                        className="stay-import-notice stay-import-notice--error"
+                        role="alert"
+                      >
+                        <p>{options.resource.message}</p>
+                        <Button
+                          onClick={options.refresh}
+                          disabled={mutation.state.busy}
+                        >
+                          휴양소 다시 불러오기
+                        </Button>
+                      </div>
+                    )}
+                    {options.resource.status === 'loading' && (
+                      <p className="stay-import-muted" role="status">
+                        휴양소 목록을 불러오는 중입니다.
+                      </p>
+                    )}
+                    <ImportRowEditor
+                      key={`${editor.row.id}:${editor.version}`}
+                      row={editor.row}
+                      editable={editable && !editor.row.stayId}
+                      properties={properties}
+                      propertiesReady={options.resource.status === 'ready'}
+                      state={mutation.state}
+                      navigationRef={editorNavigation}
+                      onSave={(input) => saveRow(input, editor.version)}
+                      onClose={() => setEditor(null)}
+                      onReload={reload}
+                    />
+                  </ImportReviewPanel>
+                ) : (
+                  <div className="import-review-placeholder">
+                    <ScheduleIcon name="check" />
+                    <h2>검토할 이용객을 선택하세요</h2>
+                    <p>정보를 확인하고 수정하거나 제외할 수 있습니다.</p>
+                  </div>
+                )}
+              </div>
               {editable && (
                 <ImportConfirmation
                   summary={summary}
                   confirming={confirming}
                   busy={mutation.state.busy}
-                  canConfirm={canConfirm && !skip}
+                  canConfirm={canConfirm && !editor}
                   confirmationRef={confirmation}
                   onOpen={() => {
-                    setNotice('');
-                    setConfirming(true);
+                    requestTransition(() => {
+                      setNotice('');
+                      setConfirming(true);
+                    });
                   }}
                   onClose={() => setConfirming(false)}
                   onConfirm={() => {

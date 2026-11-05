@@ -1,44 +1,37 @@
 import '../styles/import-preparation.css';
 
-export function ImportPreparation() {
+export function ImportTemplateLinks() {
   return (
-    <section
-      className="import-preparation"
-      aria-labelledby="import-preparation-title"
-    >
-      <div className="import-preparation__heading">
-        <div>
-          <h2 id="import-preparation-title">명단 양식 준비</h2>
-          <p>빈 양식에 이용객과 입·퇴실 일시를 입력해 주세요.</p>
-        </div>
+    <div className="import-preparation__downloads">
+      <span>양식이 필요하신가요?</span>
+      <div>
         <a
-          href="/downloads/stay-import-guide.html"
-          target="_blank"
-          rel="noreferrer"
-        >
-          작성 안내 <span className="import-preparation__new-tab">(새 창)</span>{' '}
-          ↗
-        </a>
-      </div>
-      <div className="import-preparation__downloads">
-        <a
-          className="ui-button admin-button-secondary"
           href="/downloads/stay-roster-template.xls"
           download="휴양소_이용자명단_빈양식.xls"
+          aria-label="빈 양식 다운로드"
         >
-          빈 양식 다운로드
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M12 3v12m-4-4 4 4 4-4M5 17v3h14v-3" />
+          </svg>
+          빈 양식
         </a>
         <a
-          className="ui-button admin-button-secondary"
           href="/downloads/stay-roster-example.xls"
           download="휴양소_이용자명단_작성예시.xls"
+          aria-label="작성 예시 다운로드"
         >
-          작성 예시 다운로드
+          작성 예시
         </a>
-        <span>.xls · 예시 파일은 가상 정보입니다.</span>
       </div>
-      <details className="import-preparation__help">
-        <summary>입력 방법과 날짜·시간 예시</summary>
+    </div>
+  );
+}
+
+export function ImportPreparation() {
+  return (
+    <details className="import-preparation">
+      <summary>작성 도움말</summary>
+      <div className="import-preparation__body">
         <dl>
           <div>
             <dt>D열 · 이동전화</dt>
@@ -64,14 +57,22 @@ export function ImportPreparation() {
           </div>
         </dl>
         <p>
-          한국 시간 · 24시간제로 입력하세요. 위 시간은 예시이며, 실제 이용
-          시간을 입력해야 합니다.
+          한국 시간 · 24시간제로 실제 이용 시간을 입력하세요. 작성 예시 파일은
+          가상 정보입니다.
         </p>
         <p>
           시트 이름과 1행의 제목·열 순서를 유지하세요. 날짜만 입력한 행은 검토
           단계에서 시간을 추가해야 합니다.
         </p>
-      </details>
-    </section>
+        <p>미리보기 주소를 보관하면 같은 주소에서 검토를 이어갈 수 있습니다.</p>
+        <a
+          href="/downloads/stay-import-guide.html"
+          target="_blank"
+          rel="noreferrer"
+        >
+          전체 작성 안내 <span>(새 창) ↗</span>
+        </a>
+      </div>
+    </details>
   );
 }

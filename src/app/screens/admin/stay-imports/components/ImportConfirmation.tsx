@@ -67,7 +67,7 @@ export function ImportConfirmation({
         </div>
       ) : (
         <Button disabled={!canConfirm} onClick={onOpen}>
-          최종 확인
+          등록 내용 확인
         </Button>
       )}
       {busy && (

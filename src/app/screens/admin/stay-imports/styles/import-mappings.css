@@ -1,0 +1,192 @@
+.import-mappings {
+  min-width: 0;
+  border: 1px solid var(--color-border);
+  border-radius: 15px;
+  background: var(--color-surface);
+}
+.import-mappings > summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 58px;
+  padding: 16px;
+  border-radius: inherit;
+  list-style: none;
+  cursor: pointer;
+}
+.import-mappings > summary::-webkit-details-marker {
+  display: none;
+}
+.import-mappings > summary:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 3px;
+}
+.import-mappings svg {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.import-mappings__label {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.import-mappings__label > svg {
+  color: var(--color-muted);
+}
+.import-mappings__label strong {
+  color: var(--color-heading);
+  font-size: 13px;
+  font-weight: 600;
+}
+.import-mappings__optional,
+.import-mappings__count {
+  color: var(--color-muted);
+  font-size: 11px;
+  white-space: nowrap;
+}
+.import-mappings__count {
+  color: var(--color-primary);
+}
+.import-mappings__chevron {
+  display: flex;
+  color: var(--color-muted);
+  transition: transform 0.18s ease;
+}
+.import-mappings[open] > summary .import-mappings__chevron {
+  transform: rotate(180deg);
+}
+.import-mappings__body {
+  padding: 0 16px 16px;
+}
+.import-mappings__intro {
+  margin: 0 0 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-border);
+  color: var(--color-muted);
+  font-size: 12px;
+  line-height: 1.7;
+}
+.import-mappings__property-state {
+  margin-bottom: 14px;
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 9px;
+  background: var(--color-background);
+  color: var(--color-muted);
+  font-size: 12px;
+  line-height: 1.7;
+}
+.import-mappings__property-state .ui-button {
+  margin-top: 8px;
+}
+.import-mappings__rows {
+  display: grid;
+  gap: 12px;
+}
+.import-mappings__row {
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: var(--color-background);
+}
+.import-mappings__row-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 36px;
+  margin-top: -6px;
+  margin-bottom: 6px;
+  color: var(--color-muted);
+  font-size: 11px;
+}
+.import-upload .import-mappings .import-mappings__remove {
+  display: grid;
+  place-items: center;
+  min-width: 36px;
+  min-height: 36px;
+  margin-right: -6px;
+  padding: 8px;
+  border: 0;
+  background: transparent;
+  color: var(--color-muted);
+  box-shadow: none;
+}
+.import-upload .import-mappings .import-mappings__remove:hover:not(:disabled) {
+  background: var(--color-soft);
+  color: var(--color-heading);
+}
+.import-mappings__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 10px;
+}
+.import-mappings__field {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  min-width: 0;
+}
+.import-mappings__field label {
+  color: var(--color-heading);
+  font-size: 12px;
+  font-weight: 600;
+}
+.import-upload .import-mappings :is(input, select) {
+  min-height: 44px;
+  padding: 9px 11px;
+  border-radius: 8px;
+}
+.import-mappings__footer {
+  display: grid;
+  gap: 4px;
+  margin-top: 12px;
+}
+.import-upload .import-mappings .import-mappings__add {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  margin-bottom: 6px;
+  border-radius: 8px;
+  font-size: 12px;
+}
+.import-mappings__footer p {
+  color: var(--color-muted);
+  font-size: 11px;
+  line-height: 1.7;
+}
+@media (max-width: 700px) {
+  .import-mappings__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 360px) {
+  .import-mappings > summary,
+  .import-mappings__label {
+    gap: 5px;
+  }
+  .import-mappings__label strong {
+    font-size: 12px;
+  }
+}
+@media (pointer: coarse) {
+  .import-upload .import-mappings .import-mappings__remove {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .import-mappings__chevron {
+    transition: none;
+  }
+}

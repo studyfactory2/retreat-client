@@ -196,12 +196,10 @@ function UploadWorkspace({
             />
             <h1>엑셀 가져오기</h1>
           </div>
-          <p>명단을 올리고 이용 일정을 등록하세요.</p>
         </div>
       </header>
 
       <ImportSteps current={0} />
-      <ImportPreparation />
 
       {state.message && (
         <div
@@ -297,17 +295,14 @@ function UploadWorkspace({
           <p>
             {state.busy
               ? '미리보기를 만들고 있습니다. 업로드가 끝날 때까지 화면을 유지해 주세요.'
-              : '업로드 후 검토하고 최종 확정해야 일정이 등록됩니다.'}
+              : '최종 확인 후 일정이 등록됩니다.'}
           </p>
           <Button type="submit" loading={state.busy} disabled={state.uncertain}>
             {state.busy ? '미리보기 만드는 중' : '명단 검토하기'}
           </Button>
         </div>
       </form>
-      <p className="import-upload__resume">
-        미리보기가 열리면 화면 주소를 보관해 주세요. 같은 주소로 다시 접속하면
-        검토를 이어갈 수 있습니다.
-      </p>
+      <ImportPreparation />
     </div>
   );
 }

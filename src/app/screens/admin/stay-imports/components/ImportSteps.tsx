@@ -7,7 +7,7 @@ export function ImportSteps({
   current: 0 | 1 | 2;
   complete?: boolean;
 }) {
-  const labels = ['파일 업로드', '명단 검토', complete ? '등록 완료' : '등록 확인'];
+  const labels = ['파일 선택', '명단 검토', complete ? '등록 완료' : '등록 확인'];
   return (
     <ol className="import-steps" aria-label="엑셀 가져오기 진행 단계">
       {labels.map((label, index) => (
