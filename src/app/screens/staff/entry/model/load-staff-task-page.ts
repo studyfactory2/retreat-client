@@ -1,5 +1,8 @@
 import { ApiRequestError } from '../../../../core/api/api-error';
-import { getStaffCleaningTasks } from '../../../../features/cleaning-tasks/cleaning-tasks-api';
+import {
+  getStaffCleaningTasks,
+  getStaffCompletions,
+} from '../../../../features/cleaning-tasks/cleaning-tasks-api';
 
 const syncIntervalMs = 60_000;
 
@@ -18,19 +21,24 @@ export async function loadStaffTaskPage(
   await Promise.resolve();
   signal.throwIfAborted();
 
+  if (completed) {
+    const list = await getStaffCompletions(token, page, signal);
+    return { kind: 'completed' as const, list, syncDeferred: false };
+  }
+
   const now = Date.now();
   for (const [id, window] of syncWindows) {
     if (window.until <= now) syncWindows.delete(id);
   }
   let window = syncWindows.get(propertyId);
 
-  if (!completed && page === 1 && !window) {
+  if (page === 1 && !window) {
     window = { until: now + syncIntervalMs, deferred: true };
     syncWindows.set(propertyId, window);
     try {
       const list = await getStaffCleaningTasks(token, true, signal, page);
       window.deferred = false;
-      return { list, syncDeferred: false };
+      return { kind: 'active' as const, list, syncDeferred: false };
     } catch (error) {
       signal.throwIfAborted();
       if (!(error instanceof ApiRequestError) || error.status !== 429) {
@@ -41,12 +49,10 @@ export async function loadStaffTaskPage(
     }
   }
 
-  const list = await getStaffCleaningTasks(
-    token,
-    false,
-    signal,
-    page,
-    completed,
-  );
-  return { list, syncDeferred: !completed && window?.deferred === true };
+  const list = await getStaffCleaningTasks(token, false, signal, page);
+  return {
+    kind: 'active' as const,
+    list,
+    syncDeferred: window?.deferred === true,
+  };
 }

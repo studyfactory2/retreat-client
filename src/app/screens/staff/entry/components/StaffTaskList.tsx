@@ -1,20 +1,18 @@
 import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import { ApiRequestError } from '../../../../core/api/api-error';
 import { startCleaningTask } from '../../../../features/cleaning-tasks/cleaning-tasks-api';
-import type {
-  CleaningTaskDto,
-  CleaningTaskListDto,
-} from '../../../../features/cleaning-tasks/cleaning-tasks.types';
+import type { CleaningTaskDto } from '../../../../features/cleaning-tasks/cleaning-tasks.types';
 import type { StaffQrContextDto } from '../../../../features/staff-entry/staff-entry.types';
 import { useOpenStaffDraft } from '../hooks/use-open-staff-draft';
 import {
   agendaTime,
-  groupStaffTasks,
+  groupStaffAgenda,
   staffTaskName,
   staffTaskStatus,
 } from '../model/staff-task-agenda';
 import { loadStaffTaskPage } from '../model/load-staff-task-page';
 import { StaffIcon } from './StaffIcon';
+import { StaffCompletionList } from './StaffCompletionList';
 import { StaffTaskDetail } from './StaffTaskDetail';
 import '../styles/staff-tasks.css';
 
@@ -41,8 +39,11 @@ export function StaffTaskList({
   const detailId = useId();
   const openDraft = useOpenStaffDraft();
   const [wide, setWide] = useState(() => window.matchMedia(wideQuery).matches);
-  const [list, setList] = useState<CleaningTaskListDto | null>(null);
-  const [syncDeferred, setSyncDeferred] = useState(false);
+  const [result, setResult] = useState<Awaited<
+    ReturnType<typeof loadStaffTaskPage>
+  > | null>(null);
+  const list = result?.list;
+  const syncDeferred = result?.syncDeferred;
   const [loadedFor, setLoadedFor] = useState('');
   const [message, setMessage] = useState('');
   const [startError, setStartError] = useState<{
@@ -79,15 +80,14 @@ export function StaffTaskList({
       showCompleted,
       controller.signal,
     ).then(
-      ({ list: result, syncDeferred }) => {
+      (pageResult) => {
         if (controller.signal.aborted) return;
-        const lastPage = Math.max(1, result.totalPages);
+        const lastPage = Math.max(1, pageResult.list.totalPages);
         if (page > lastPage) {
           callbacks.current.onViewChange({ showCompleted, page: lastPage });
           return;
         }
-        setList(result);
-        setSyncDeferred(syncDeferred);
+        setResult(pageResult);
         setLoadedFor(owner);
         setMessage('');
       },
@@ -99,7 +99,7 @@ export function StaffTaskList({
         ) {
           callbacks.current.rejectAccess();
         }
-        setList(null);
+        setResult(null);
         setLoadedFor(owner);
         setMessage(
           error instanceof ApiRequestError && error.status === 429
@@ -114,14 +114,12 @@ export function StaffTaskList({
   }, [token, owner, context.property.id, page, showCompleted]);
 
   const tasks =
-    !loading && list
-      ? list.items.filter((task) =>
-          showCompleted
-            ? task.status === 'COMPLETED' || task.status === 'CANCELLED'
-            : task.status === 'PLANNED' || task.status === 'IN_PROGRESS',
+    !loading && result?.kind === 'active'
+      ? result.list.items.filter(
+          (task) => task.status === 'PLANNED' || task.status === 'IN_PROGRESS',
         )
       : [];
-  const groups = groupStaffTasks(tasks);
+  const groups = groupStaffAgenda(tasks, (task) => task.dueAt);
   const current =
     tasks.find((task) => task.id === selected) ?? (wide ? tasks[0] : undefined);
   const confirmationKey = current
@@ -243,12 +241,15 @@ export function StaffTaskList({
           주세요.
         </p>
       )}
-      {!loading && list && !tasks.length && (
+      {!loading && list && !list.items.length && (
         <p className="staff-task-empty" role="status">
           {showCompleted
             ? '완료된 작업이 없습니다.'
             : '예정된 작업이 없습니다.'}
         </p>
+      )}
+      {!loading && result?.kind === 'completed' && (
+        <StaffCompletionList entries={result.list.items} />
       )}
       {tasks.length > 0 && (
         <div className="staff-task-workspace">

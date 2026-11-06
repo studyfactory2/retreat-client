@@ -8,6 +8,7 @@ import type {
   CleaningTaskDto,
   CleaningTaskListDto,
   TaskPasswordDto,
+  StaffCompletionDto,
 } from './cleaning-tasks.types';
 
 export function invalidTaskResponse(): ApiRequestError {
@@ -76,7 +77,10 @@ export function readCleaningTask(value: unknown): CleaningTaskDto {
     requiresReview: t.requiresReview,
   };
 }
-export function readCleaningTaskList(value: unknown): CleaningTaskListDto {
+function readTaskPage<T extends { id: string }>(
+  value: unknown,
+  readItem: (item: unknown) => T,
+): CleaningTaskListDto<T> {
   const list = taskObject(value);
   if (
     !Array.isArray(list.items) ||
@@ -88,7 +92,7 @@ export function readCleaningTaskList(value: unknown): CleaningTaskListDto {
     Number(list.limit) < 1
   )
     throw invalidTaskResponse();
-  const items = list.items.map(readCleaningTask);
+  const items = list.items.map(readItem);
   if (new Set(items.map((item) => item.id)).size !== items.length)
     throw invalidTaskResponse();
   return {
@@ -99,6 +103,50 @@ export function readCleaningTaskList(value: unknown): CleaningTaskListDto {
     totalPages: Number(list.totalPages),
   };
 }
+export function readCleaningTaskList(value: unknown) {
+  return readTaskPage(value, readCleaningTask);
+}
+
+function readStaffCompletion(value: unknown): StaffCompletionDto {
+  const item = taskObject(value);
+  if (
+    !isStaffEntryId(item.id) ||
+    !isStaffDraftTimestamp(item.completedAt) ||
+    typeof item.requiresReview !== 'boolean'
+  )
+    throw invalidTaskResponse();
+  const common = {
+    id: item.id,
+    completedAt: item.completedAt,
+    requiresReview: item.requiresReview,
+  };
+  if (item.source === 'STANDALONE' && item.schedule === null)
+    return { ...common, source: 'STANDALONE', schedule: null };
+  if (item.source !== 'AUTO' && item.source !== 'MANUAL')
+    throw invalidTaskResponse();
+  const schedule = taskObject(item.schedule);
+  if (
+    !isStaffDraftTimestamp(schedule.dueAt) ||
+    (schedule.checkOutAt !== null &&
+      !isStaffDraftTimestamp(schedule.checkOutAt)) ||
+    (schedule.note !== null && !text(schedule.note, 500))
+  )
+    throw invalidTaskResponse();
+  return {
+    ...common,
+    source: item.source,
+    schedule: {
+      dueAt: schedule.dueAt,
+      checkOutAt: schedule.checkOutAt,
+      note: schedule.note,
+    },
+  };
+}
+
+export function readStaffCompletionList(value: unknown) {
+  return readTaskPage(value, readStaffCompletion);
+}
+
 export function readTaskPassword(
   value: unknown,
   taskId: string,

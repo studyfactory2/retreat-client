@@ -11,6 +11,7 @@ import {
   invalidTaskResponse,
   readCleaningTask,
   readCleaningTaskList,
+  readStaffCompletionList,
   readTaskPassword,
   taskObject,
 } from './cleaning-tasks-readers';
@@ -120,6 +121,19 @@ export async function getStaffCleaningTasks(
         { token, signal },
       );
   return readCleaningTaskList(result);
+}
+export async function getStaffCompletions(
+  token: string,
+  page: number,
+  signal: AbortSignal,
+) {
+  requireStaffQrToken(token);
+  return readStaffCompletionList(
+    await apiRequest<unknown>(
+      `/staff/cleaning-tasks/completed?page=${page}&limit=20`,
+      { token, signal },
+    ),
+  );
 }
 export async function startCleaningTask(
   token: string,

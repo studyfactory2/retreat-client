@@ -39,7 +39,9 @@ export function agendaTime(value: string) {
   return clock.format(new Date(value));
 }
 
-export function staffTaskName(task: CleaningTaskDto) {
+export function staffTaskName(task: {
+  source: CleaningTaskDto['source'] | 'STANDALONE';
+}) {
   return task.source === 'AUTO' ? '퇴실 후 청소·정비' : '추가 정비';
 }
 
@@ -49,16 +51,20 @@ export function staffTaskStatus(task: CleaningTaskDto) {
   return taskStatusLabel[task.status];
 }
 
-export function groupStaffTasks(tasks: CleaningTaskDto[], now = new Date()) {
+export function groupStaffAgenda<T>(
+  tasks: T[],
+  timestamp: (task: T) => string,
+  now = new Date(),
+) {
   const today = getSeoulToday(now);
   const tomorrow = getSeoulToday(new Date(now.getTime() + 86_400_000));
   const groups = new Map<
     string,
-    { date: string; label: string; relative: string; tasks: CleaningTaskDto[] }
+    { date: string; label: string; relative: string; tasks: T[] }
   >();
 
   for (const task of tasks) {
-    const due = new Date(task.dueAt);
+    const due = new Date(timestamp(task));
     const date = getSeoulToday(due);
     let group = groups.get(date);
     if (!group) {

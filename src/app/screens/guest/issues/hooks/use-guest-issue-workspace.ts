@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { appRoutes } from '../../../../core/router/routes';
 import { buildGuestViewLocation } from '../../entry/model/guest-entry-model';
 import type { GuestIssueReportController } from './use-guest-issue-report';
 import { useGuestIssuePhotos } from './use-guest-issue-photos';
@@ -48,7 +49,8 @@ export function useGuestIssueWorkspace({
     const allowed = [home, guide, report].map(
       (to) => `${to.pathname}${to.search}${to.hash}`,
     );
-    if (!allowed.includes(href)) return false;
+    if (href === appRoutes.home && !ready) return true;
+    if (href !== appRoutes.home && !allowed.includes(href)) return false;
     if (href === allowed[2]) return true;
     if (navigationLocked) {
       setLeave({

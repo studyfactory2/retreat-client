@@ -84,14 +84,17 @@ export function StaffSubmissionReceipt({
                   receipt.property.id,
                   token,
                 );
-                if (path) void navigate(path);
-                else setReturnExpired(true);
+                if (path) {
+                  void navigate(path, { state: { showCompleted: true } });
+                } else {
+                  setReturnExpired(true);
+                }
               }}
             >
-              작업 목록으로
+              완료 목록 보기
             </Button>
           ) : (
-            <p>작업 목록은 이 휴양소의 직원 QR에서 열어 주세요.</p>
+            <p>이 휴양소의 직원 QR에서 완료 목록을 확인할 수 있어요.</p>
           )}
           <details className="staff-finish-disclosure">
             <summary>제출 확인 링크 보관</summary>

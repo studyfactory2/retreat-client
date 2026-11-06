@@ -1,4 +1,5 @@
 import { Link, type To } from 'react-router-dom';
+import { appRoutes } from '../../../core/router/routes';
 import { BrandLogo } from '../../../shared/ui/BrandLogo/BrandLogo';
 import { GuestIcon } from '../entry/components/GuestIcon';
 import '../styles/guest-page-header.css';
@@ -25,11 +26,16 @@ export function GuestPageHeader({ home, refresh }: GuestPageHeaderProps) {
         ) : (
           <div className="guest-page-header__brand">{brand}</div>
         )}
-        {refresh && (
-          <button type="button" onClick={refresh.onClick} disabled={refresh.disabled} aria-label="안내 새로고침">
-            <GuestIcon name="refresh" />
-          </button>
-        )}
+        <div className="guest-page-header__actions">
+          <Link className="guest-page-header__landing" to={appRoutes.home}>
+            서비스 홈
+          </Link>
+          {refresh && (
+            <button type="button" onClick={refresh.onClick} disabled={refresh.disabled} aria-label="안내 새로고침">
+              <GuestIcon name="refresh" />
+            </button>
+          )}
+        </div>
       </div>
     </header>
   );

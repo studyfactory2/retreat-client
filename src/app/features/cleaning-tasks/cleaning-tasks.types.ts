@@ -24,8 +24,23 @@ export interface CleaningTaskDto {
   canStart: boolean;
   requiresReview: boolean;
 }
-export interface CleaningTaskListDto {
-  items: CleaningTaskDto[];
+export type StaffCompletionDto = {
+  id: string;
+  completedAt: string;
+  requiresReview: boolean;
+} & (
+  | { source: 'STANDALONE'; schedule: null }
+  | {
+      source: 'AUTO' | 'MANUAL';
+      schedule: {
+        dueAt: string;
+        checkOutAt: string | null;
+        note: string | null;
+      };
+    }
+);
+export interface CleaningTaskListDto<T = CleaningTaskDto> {
+  items: T[];
   total: number;
   page: number;
   limit: number;

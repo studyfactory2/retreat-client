@@ -11,8 +11,6 @@ import { readStaffAccess } from './model/staff-entry-model';
 import './styles/staff-entry.css';
 import './styles/staff-start.css';
 
-const initialTaskView: StaffTaskView = { showCompleted: false, page: 1 };
-
 export function StaffEntryScreen() {
   const location = useLocation();
   const access = readStaffAccess(location.hash);
@@ -80,7 +78,10 @@ export function StaffEntryScreen() {
                 view={
                   taskView?.scope === taskScope
                     ? taskView.view
-                    : initialTaskView
+                    : {
+                        showCompleted: location.state?.showCompleted === true,
+                        page: 1,
+                      }
                 }
                 onViewChange={(view) => setTaskView({ scope: taskScope, view })}
                 onRefreshContext={refresh}
