@@ -13,7 +13,7 @@ export function GuestIssueReview({
       aria-labelledby="issue-review-title"
     >
       <div className="guest-issue-section-heading">
-        <h2 id="issue-review-title">보낼 내용을 확인해 주세요</h2>
+        <h2 id="issue-review-title">{body.title}</h2>
         <span
           className={`guest-issue-badge${body.isUrgent ? ' is-urgent' : ''}`}
         >
@@ -30,14 +30,11 @@ export function GuestIssueReview({
           <dd>{body.guestName}</dd>
         </div>
       </dl>
-      <div className="guest-issue-review__content">
-        <h3>{body.title}</h3>
-        <p
-          className={body.description ? 'guest-issue-text' : 'guest-issue-hint'}
-        >
-          {body.description || '추가 내용 없음'}
-        </p>
-      </div>
+      {body.description && (
+        <div className="guest-issue-review__content">
+          <p className="guest-issue-text">{body.description}</p>
+        </div>
+      )}
       <p className="guest-issue-hint">
         {body.photos.length > 0
           ? `사진 ${body.photos.length}장과 함께 접수합니다.`

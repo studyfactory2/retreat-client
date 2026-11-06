@@ -1,5 +1,33 @@
+summary.guest-home-resource {
+  list-style: none;
+}
+summary.guest-home-resource::-webkit-details-marker {
+  display: none;
+}
+.guest-vehicle summary > .guest-icon:last-child {
+  transform: rotate(90deg);
+}
+.guest-vehicle[open] summary > .guest-icon:last-child {
+  transform: rotate(-90deg);
+}
+.guest-vehicle-status {
+  max-width: 45%;
+  color: var(--color-muted);
+  font-size: 12px;
+  font-weight: 500;
+}
+.guest-vehicle-body {
+  padding: 0 12px 14px;
+  border: 1px solid var(--color-border);
+  border-top: 0;
+  border-radius: 0 0 10px 10px;
+}
+.guest-vehicle[open] summary {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
 .guest-vehicle {
-  margin-top: 24px;
+  min-width: 0;
   overflow-wrap: anywhere;
 }
 .guest-vehicle-intro {
@@ -11,8 +39,8 @@
 .guest-vehicle-saved {
   display: grid;
   gap: 7px;
-  margin-top: 22px;
-  padding: 18px;
+  margin-top: 12px;
+  padding: 12px;
   border-radius: 12px;
   background: var(--color-soft);
 }
@@ -30,7 +58,7 @@
 }
 .guest-vehicle-notice,
 .guest-vehicle-confirm {
-  margin-top: 18px;
+  margin-top: 12px;
   padding: 16px;
   border: 1px solid #e8c98d;
   border-radius: 12px;
@@ -40,7 +68,7 @@
   line-height: 1.9;
 }
 .guest-vehicle-feedback:not(:empty) {
-  margin-top: 18px;
+  margin-top: 12px;
   color: var(--color-heading);
   font-size: 13px;
   line-height: 1.9;
@@ -49,7 +77,7 @@
   display: grid;
   gap: 8px;
   min-width: 0;
-  margin-top: 22px;
+  margin-top: 12px;
 }
 .guest-vehicle-field label {
   color: var(--color-heading);
@@ -85,7 +113,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  margin-top: 18px;
+  margin-top: 12px;
 }
 .guest-vehicle-actions > .ui-button {
   flex: 1 1 180px;
@@ -97,7 +125,7 @@
 }
 .guest-vehicle-reload {
   width: 100%;
-  margin-top: 18px;
+  margin-top: 12px;
 }
 .guest-vehicle .guest-vehicle-secondary {
   border-color: #b6c6e1;
@@ -108,16 +136,11 @@
   background: var(--color-soft);
 }
 .guest-vehicle-leave-hint {
-  margin-top: 18px;
+  margin-top: 12px;
 }
 .guest-vehicle-disabled {
   margin-top: 24px;
   color: var(--color-muted);
   font-size: 13px;
   line-height: 1.9;
-}
-@media (max-width: 600px) {
-  .guest-vehicle {
-    padding: 24px 18px;
-  }
 }

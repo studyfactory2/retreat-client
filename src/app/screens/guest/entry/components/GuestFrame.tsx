@@ -1,11 +1,9 @@
-import { BrandLogo } from '../../../../shared/ui/BrandLogo/BrandLogo';
-import { APP_BRAND } from '../../../../core/config/brand';
 import type { ReactNode, RefObject } from 'react';
-import { Link, type To } from 'react-router-dom';
+import type { To } from 'react-router-dom';
 import type { GuestView } from '../model/guest-entry-model';
 import { isPublicContactTel } from '../../../../features/property-contact/public-contact';
 import { GuestNavigation } from '../../components/GuestNavigation';
-import { GuestIcon } from './GuestIcon';
+import { GuestPageHeader } from '../../components/GuestPageHeader';
 import '../styles/guest-home.css';
 import '../../draft/styles/guest-journey-edge.css';
 
@@ -64,39 +62,12 @@ export function GuestFrame({
       >
         본문으로 바로가기
       </button>
-      <header className="guest-header">
-        <div className="guest-header__inner">
-          {ready ? (
-            <Link
-              className="guest-brand"
-              to={home}
-              aria-label={`${APP_BRAND.appName} 이용 안내 홈`}
-            >
-              <BrandLogo />
-              <span>휴양소 이용 안내</span>
-            </Link>
-          ) : (
-            <div className="guest-brand">
-              <BrandLogo />
-              <span>휴양소 이용 안내</span>
-            </div>
-          )}
-          <div className="guest-header__tools">
-            {!journeyPresentation && <span>이용객 안내</span>}
-            {onRefresh && (
-              <button
-                type="button"
-                className="guest-refresh"
-                onClick={onRefresh}
-                disabled={refreshing}
-                aria-label="안내 새로고침"
-              >
-                <GuestIcon name="refresh" />
-              </button>
-            )}
-          </div>
-        </div>
-      </header>
+      <GuestPageHeader
+        home={ready ? home : undefined}
+        refresh={
+          onRefresh ? { onClick: onRefresh, disabled: refreshing } : undefined
+        }
+      />
       <main
         ref={mainRef}
         className="guest-main"
@@ -106,9 +77,13 @@ export function GuestFrame({
       >
         {children}
       </main>
-      <footer className="guest-footer">{APP_BRAND.appName}</footer>
       {ready && (
-        <GuestNavigation home={home} guide={guide} report={report} view={view} />
+        <GuestNavigation
+          home={home}
+          guide={guide}
+          report={report}
+          view={view}
+        />
       )}
     </div>
   );

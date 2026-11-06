@@ -83,17 +83,17 @@ export function useGuestWorkflow(
   }
   const mapped = Object.values(assignments).some(Boolean);
   useNavigationGuard(
-    () => photos.hasPendingWork() || operation.current || mapped,
+    () => later ? 'private-draft-link' : photos.hasPendingWork() || operation.current || mapped,
   );
   useEffect(() => {
-    if (!mapped && !preparing) return;
+    if (!later && !mapped && !preparing) return;
     const warn = (event: BeforeUnloadEvent) => {
       event.preventDefault();
       event.returnValue = '';
     };
     window.addEventListener('beforeunload', warn);
     return () => window.removeEventListener('beforeunload', warn);
-  }, [mapped, preparing]);
+  }, [later, mapped, preparing]);
   useEffect(() => {
     heading.current?.focus({ preventScroll: true });
     window.scrollTo(0, 0);
@@ -129,6 +129,7 @@ export function useGuestWorkflow(
     setMessage('');
     setReview(null);
     try {
+      if (answered < required.length) go(0);
       assertGuestChecklistComplete(editableDraft);
       guestPhotoInputs(editableDraft, photos.items, assignments);
       const saved = await session.save();
@@ -169,7 +170,6 @@ export function useGuestWorkflow(
     try {
       const saved = await session.save();
       if (saved && generation.current === owner) {
-        setReview(null);
         setLater(true);
       }
     } finally {
@@ -226,7 +226,7 @@ export function useGuestWorkflow(
       go(step === 2 ? 1 : 0);
     },
     resume: () => {
-      if (!disabled) go(step === 2 ? 1 : step);
+      if (!disabled) go(step === 2 && !reviewCurrent ? 1 : step);
     },
     assign: (id: string, value: string) => {
       if (disabled || step !== 1 || photos.hasPendingWork()) return;
@@ -257,7 +257,7 @@ export function useGuestWorkflow(
           : access !== 'ready'
             ? '연결 확인 후 계속할 수 있습니다.'
             : session.dirty
-              ? '저장하지 않은 변경 사항이 있습니다. 자동 저장되지 않습니다.'
+              ? '저장 전 변경 사항이 있어요. 나가려면 먼저 임시 저장해 주세요.'
               : `최근 저장 ${formatGuestStayTimestamp(draft.updatedAt)} · 한국 시간`,
   };
 }

@@ -1,9 +1,10 @@
+import { GuestIcon } from './GuestIcon';
 import { getSeoulToday } from '../../../../core/dates/seoul-date';
 import type { GuestEntryContext } from '../../../../features/guest-entry/guest-entry.types';
 
 const scheduleDay = new Intl.DateTimeFormat('ko-KR', {
   timeZone: 'Asia/Seoul',
-  month: 'long',
+  month: 'numeric',
   day: 'numeric',
   weekday: 'short',
 });
@@ -53,20 +54,20 @@ export function GuestHomeHeader({ entry }: { entry: GuestEntryContext }) {
   return (
     <section className="guest-home-header" aria-labelledby="guest-home-title">
       <div className="guest-home-header__identity">
+        {property.region && (
+          <p className="guest-home-header__region">
+            <GuestIcon name="pin" />
+            {property.region}
+          </p>
+        )}
         <h1 id="guest-home-title">{property.name}</h1>
         <p className="guest-home-header__meta">
-          {property.region && (
-            <>
-              <span>{property.region}</span>
-              <span aria-hidden="true">·</span>
-            </>
-          )}
-          <span>{stay ? `${stay.guestName}님의 예약` : '공용 이용 안내'}</span>
+          {stay ? `${stay.guestName}님의 예약` : '공용 QR · 이용객 안내'}
         </p>
       </div>
       {stay && (
         <div className="guest-home-schedule">
-          <dl aria-label="나의 예정 일정 · 한국 시간">
+          <dl aria-label="나의 한국 시간 기준">
             <StayScheduleRow
               label="입실 예정"
               value={stay.checkInAt}

@@ -1,6 +1,6 @@
 .guest-access-codes {
-  margin-top: 16px;
-  padding: 16px;
+  container-type: inline-size;
+  padding: 9px clamp(15px, 2.7vw, 20px) 12px;
   border: 1px solid var(--color-border);
   border-radius: 14px;
   background: white;
@@ -36,11 +36,6 @@
   stroke-width: 1.7;
   stroke-linecap: round;
 }
-.guest-access-codes__badge {
-  color: #416083;
-  font-size: 11px;
-  white-space: nowrap;
-}
 .guest-access-codes button {
   min-height: 44px;
   border: 0;
@@ -67,14 +62,13 @@
 }
 .guest-access-codes__rows {
   display: grid;
-  gap: 14px;
-  margin-top: 14px;
+  margin-top: 4px;
 }
 .guest-access-code {
   min-width: 0;
 }
 .guest-access-code + .guest-access-code {
-  padding-top: 14px;
+  padding-top: 4px;
   border-top: 1px solid #e8edf4;
 }
 .guest-access-code__label {
@@ -87,7 +81,7 @@
   grid-template-columns: minmax(0, 1fr) auto auto;
   align-items: center;
   gap: 5px;
-  margin-top: 7px;
+  margin-block: 3px;
 }
 .guest-access-code__value {
   padding-right: 4px;
@@ -127,8 +121,8 @@
   line-height: 1.7;
 }
 .guest-access-codes__note {
-  margin-top: 14px;
-  padding-top: 12px;
+  margin-top: 6px;
+  padding-top: 8px;
   border-top: 1px solid #e8edf4;
 }
 .guest-access-codes__empty {
@@ -142,17 +136,11 @@
   margin-top: 10px;
   color: #355b99;
 }
-@media (min-width: 600px) {
-  .guest-access-codes {
-    padding: 18px 22px;
-  }
-  .guest-access-codes__rows--pair {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 22px;
-  }
-  .guest-access-codes__rows--pair .guest-access-code + .guest-access-code {
-    padding: 0 0 0 22px;
-    border-top: 0;
-    border-left: 1px solid #e8edf4;
+@container (min-width: 260px) {
+  .guest-access-code {
+    display: grid;
+    grid-template-columns: 5em minmax(0, 1fr);
+    align-items: center;
+    gap: 6px;
   }
 }

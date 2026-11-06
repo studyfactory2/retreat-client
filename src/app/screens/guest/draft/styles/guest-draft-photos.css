@@ -1,8 +1,15 @@
-.guest-flow .guest-draft-card.guest-photos {
-  margin: 0;
-  padding: 0;
-  border: 0;
-  box-shadow: none;
+.guest-photos__intro,
+.guest-photos__empty {
+  margin-block: 12px;
+  color: var(--color-muted);
+  font-size: 14px;
+  line-height: 1.65;
+}
+.guest-photos__empty {
+  padding: 11px 13px;
+  border-radius: 8px;
+  background: var(--color-soft);
+  color: var(--color-heading);
 }
 .guest-photos__guide {
   margin-top: 8px;
@@ -30,8 +37,8 @@
 }
 .guest-photos__count {
   flex-shrink: 0;
-  padding: 6px 10px;
-  border-radius: 30px;
+  padding: 4px 8px;
+  border-radius: 6px;
   background: var(--color-soft);
   color: var(--color-primary);
   font-size: 12px;
@@ -178,7 +185,7 @@
 .guest-photos__refresh {
   display: block;
   min-height: 44px;
-  margin: 14px auto -8px;
+  margin: 4px 0 0;
   padding: 8px;
   border: 0;
   background: transparent;

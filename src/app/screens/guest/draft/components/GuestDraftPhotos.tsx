@@ -12,16 +12,29 @@ export function GuestDraftPhotos({
   controller,
   renderAssignment,
   checkIn,
+  hasIssues,
 }: {
+  hasIssues: boolean;
   checkIn: boolean;
   controller: GuestDraftPhotosController;
   renderAssignment?: (photo: GuestDraftPhotoDto, index: number) => ReactNode;
 }) {
   const { resource, queue, items, limits, busy, locked, removal } = controller;
   const disabled = locked || busy || controller.blocked;
+  const canAttach = checkIn || hasIssues;
   const remaining = Math.max(0, (limits?.maxPhotos ?? 40) - items.length);
   const paused =
     queue.length > 0 && queue.every((entry) => entry.status === 'queued');
+  let guidance = '이상으로 표시한 항목이 없어요. 사진 없이 계속할 수 있어요.';
+  if (checkIn) {
+    guidance = hasIssues
+      ? '객실 상태 사진을 남기거나 이상 항목에 연결할 수 있어요. 사진은 선택이에요.'
+      : '입실 당시 객실 모습을 남길 수 있어요. 사진 없이 계속할 수 있어요.';
+  } else if (hasIssues) {
+    guidance = '사진은 선택이에요. 첨부한 사진마다 해당하는 이상 항목을 선택해 주세요.';
+  } else if (items.length > 0) {
+    guidance = '연결할 이상 항목이 없어요. 시설 확인에서 답변을 변경하거나 사진을 삭제해 주세요.';
+  }
   return (
     <section
       className="guest-draft-card guest-photos"
@@ -29,11 +42,7 @@ export function GuestDraftPhotos({
       aria-busy={busy}
     >
       <div className="guest-photos__heading">
-        <p>
-          {checkIn
-            ? '입실 당시 객실 모습을 남길 수 있어요. 사진은 선택입니다.'
-            : '사진은 선택입니다. 첨부하면 이상 항목에 연결해 주세요.'}
-        </p>
+        <h3>{checkIn ? '객실 사진' : '이상 항목 사진'}</h3>
         {resource.status === 'ready' && (
           <span className="guest-photos__count">
             {items.length} / {limits?.maxPhotos ?? 40}장
@@ -60,6 +69,9 @@ export function GuestDraftPhotos({
         </div>
       ) : (
         <>
+          <p className={canAttach ? 'guest-photos__intro' : 'guest-photos__empty'}>
+            {guidance}
+          </p>
           {items.length > 0 && (
             <div className="guest-photos__grid">
               {items.map((photo, index) => (
@@ -76,8 +88,8 @@ export function GuestDraftPhotos({
             </div>
           )}
           <GuestPhotoPicker
-            label={checkIn ? '객실 상태 사진 추가' : '사진 추가'}
-            disabled={disabled || remaining === 0}
+            label={checkIn ? '객실 상태 사진 추가' : '이상 사진 추가'}
+            disabled={disabled || remaining === 0 || !canAttach}
             onPick={(files) =>
               controller.uploadFiles(files, checkIn ? ROOM_PHOTO : undefined)
             }
@@ -93,14 +105,18 @@ export function GuestDraftPhotos({
               MiB. HEIC·HEIF는 JPEG로 변환해 주세요.
             </p>
             <p>사진은 즉시 업로드됩니다. 사진 용도와 이상 항목 연결은 최종 제출 시 저장됩니다.</p>
-          </details>
-          {items.length > 0 && (
-            <p className="guest-photos__help">
-              {checkIn
+            {items.length > 0 && (
+              <p>{checkIn
                 ? '링크를 다시 열면 사진 용도를 확인해 주세요.'
-                : '링크를 다시 열면 이상 항목을 다시 선택해 주세요.'}
-            </p>
-          )}
+                : '링크를 다시 열면 이상 항목을 다시 선택해 주세요.'}</p>
+            )}
+            {!queue.length && !removal && (
+              <button className="guest-photos__refresh" type="button" disabled={busy}
+                onClick={() => { void controller.refresh(); }}>
+                사진 목록 새로고침
+              </button>
+            )}
+          </details>
         </>
       )}
       {controller.notice && (
@@ -229,18 +245,6 @@ export function GuestDraftPhotos({
             )}
           </div>
         </div>
-      )}
-      {resource.status === 'ready' && !queue.length && !removal && (
-        <button
-          className="guest-photos__refresh"
-          type="button"
-          disabled={busy}
-          onClick={() => {
-            void controller.refresh();
-          }}
-        >
-          사진 목록 새로고침
-        </button>
       )}
     </section>
   );

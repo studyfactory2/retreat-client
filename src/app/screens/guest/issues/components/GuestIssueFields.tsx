@@ -24,34 +24,34 @@ export function GuestIssueFields({
       <div className="guest-issue-section-heading">
         <h2 id="issue-fields-title">불편 내용</h2>
       </div>
-      <fieldset disabled={disabled} className="guest-issue-fieldset">
-        <legend>
+      <div className="guest-issue-field">
+        <label htmlFor="issue-category">
           분류 <span className="guest-issue-required">필수</span>
-        </legend>
-        <div className="guest-issue-categories">
+        </label>
+        <select
+          id="issue-category"
+          required
+          disabled={disabled}
+          value={form.categoryId}
+          onChange={(event) => {
+            const categoryId = event.currentTarget.value;
+            edit((current) => ({ ...current, categoryId }));
+          }}
+        >
+          <option value="">분류 선택</option>
           {categories.map((category) => (
-            <button
-              key={category.id}
-              type="button"
-              aria-pressed={form.categoryId === category.id}
-              onClick={() =>
-                edit((current) => ({ ...current, categoryId: category.id }))
-              }
-            >
-              <span aria-hidden="true" className="guest-issue-category-check">
-                {form.categoryId === category.id ? '✓' : ''}
-              </span>
-              <span>{category.name}</span>
-            </button>
+            <option key={category.id} value={category.id}>
+              {category.name}
+            </option>
           ))}
-        </div>
+        </select>
         {form.categoryId &&
           !categories.some((category) => category.id === form.categoryId) && (
             <p className="guest-issue-field-error">
-              이전에 선택한 분류를 사용할 수 없습니다. 다시 선택해 주세요.
+              이전 분류가 변경됐어요. 다시 선택해 주세요.
             </p>
           )}
-      </fieldset>
+      </div>
       <div className="guest-issue-field">
         <label htmlFor="issue-guest-name">
           이름 <span className="guest-issue-required">필수</span>
@@ -100,9 +100,7 @@ export function GuestIssueFields({
             edit((current) => ({ ...current, description: event.target.value }))
           }
         />
-        <p className="guest-issue-hint">
-          최대 2,000자 · 문제가 생긴 위치와 상황을 알려주세요.
-        </p>
+        <p className="guest-issue-hint">최대 2,000자</p>
       </div>
       <label className="guest-issue-urgency">
         <input

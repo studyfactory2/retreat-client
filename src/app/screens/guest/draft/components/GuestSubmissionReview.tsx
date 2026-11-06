@@ -68,118 +68,121 @@ export function GuestSubmissionReview({
       className="guest-draft-card guest-saved-review"
       aria-label="제출할 내용"
     >
-      <dl className="guest-saved-review__counts">
-        <div>
-          <dt>이용객</dt>
-          <dd>{draft.author.name}</dd>
-        </div>
-        <div>
-          <dt>{draft.type === 'CHECK_IN' ? '입실일' : '퇴실일'}</dt>
-          <dd>{draft.visitDate.replaceAll('-', '.')}</dd>
-        </div>
-        <div>
-          <dt>시설 점검</dt>
-          <dd>답변 {draft.answers.items.length}개 · 이상 {abnormal.length}개</dd>
-        </div>
-        <div>
-          <dt>첨부 사진</dt>
-          <dd>{photos.length ? `${photos.length}장` : '없음'}</dd>
-        </div>
-      </dl>
-      <details className="guest-saved-review__answers" open={abnormal.length > 0}>
-        <summary>항목별 답변 보기</summary>
-        {draft.template.definition.sections.map((section) => (
-          <section key={section.id} className="guest-saved-review__section">
-            <h3>{section.title}</h3>
-            <ul>
-              {section.items.map((item) => {
-                const answer = draft.answers.items.find(
-                  (entry) => entry.itemId.toLowerCase() === item.id.toLowerCase(),
+      <div className="guest-flow-panel">
+        <header className="guest-flow-panel__head"><h3>제출 내용</h3></header>
+        <dl className="guest-saved-review__counts">
+          <div>
+            <dt>이용객</dt>
+            <dd>{draft.author.name}</dd>
+          </div>
+          <div>
+            <dt>{draft.type === 'CHECK_IN' ? '입실일' : '퇴실일'}</dt>
+            <dd>{draft.visitDate.replaceAll('-', '.')}</dd>
+          </div>
+          <div>
+            <dt>시설 점검</dt>
+            <dd>답변 {draft.answers.items.length}개 · 이상 {abnormal.length}개</dd>
+          </div>
+          <div>
+            <dt>첨부 사진</dt>
+            <dd>{photos.length ? `${photos.length}장` : '없음'}</dd>
+          </div>
+        </dl>
+        <details className="guest-saved-review__answers">
+          <summary>항목별 답변 보기</summary>
+          {draft.template.definition.sections.map((section) => (
+            <section key={section.id} className="guest-saved-review__section">
+              <h3>{section.title}</h3>
+              <ul>
+                {section.items.map((item) => {
+                  const answer = draft.answers.items.find(
+                    (entry) => entry.itemId.toLowerCase() === item.id.toLowerCase(),
+                  );
+                  return (
+                    <li key={item.id}>
+                      <div>
+                        <span>{item.label}</span>
+                        <strong
+                          className={
+                            answer?.value === 'ABNORMAL' ? 'is-abnormal' : ''
+                          }
+                        >
+                          {answer?.value === 'ABNORMAL'
+                            ? '이상'
+                            : answer
+                              ? '정상'
+                              : item.required
+                                ? '미응답 · 필수'
+                                : '미응답 · 선택'}
+                        </strong>
+                      </div>
+                      {answer?.description && <p>{answer.description}</p>}
+                      {answer?.isUrgent && (
+                        <p className="is-abnormal">긴급한 문제예요</p>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+          ))}
+        </details>
+        {draft.answers.generalNote && (
+          <div className="guest-saved-review__note">
+            <h3>추가 전달 사항</h3>
+            <p>{draft.answers.generalNote}</p>
+          </div>
+        )}
+        {photos.length > 0 && (
+          <details className="guest-saved-review__photos">
+            <summary>첨부 사진 {photos.length}장</summary>
+            <ol>
+              {photos.map((photo, index) => {
+                const assignment = assignments.find(
+                  (entry) =>
+                    entry.attachmentId.toLowerCase() === photo.id.toLowerCase(),
                 );
+                const item =
+                  assignment?.purpose === 'DEFECT' &&
+                  abnormal.find(
+                    (entry) => entry.id.toLowerCase() === assignment.itemId.toLowerCase(),
+                  );
                 return (
-                  <li key={item.id}>
-                    <div>
-                      <span>{item.label}</span>
-                      <strong
-                        className={
-                          answer?.value === 'ABNORMAL' ? 'is-abnormal' : ''
-                        }
-                      >
-                        {answer?.value === 'ABNORMAL'
-                          ? '이상'
-                          : answer
-                            ? '정상'
-                            : item.required
-                              ? '미응답 · 필수'
-                              : '미응답 · 선택'}
-                      </strong>
-                    </div>
-                    {answer?.description && <p>{answer.description}</p>}
-                    {answer?.isUrgent && (
-                      <p className="is-abnormal">긴급한 문제예요</p>
-                    )}
+                  <li key={photo.id}>
+                    <strong>사진 {index + 1}</strong>
+                    <span>{photo.filename}</span>
+                    <p>
+                      {assignment?.purpose === 'ROOM_CONDITION'
+                        ? '객실 상태 사진'
+                        : item
+                          ? `${item.section} · ${item.label}`
+                          : '이상 항목 연결을 다시 확인해 주세요.'}
+                    </p>
                   </li>
                 );
               })}
-            </ul>
-          </section>
-        ))}
-      </details>
-      {draft.answers.generalNote && (
-        <div className="guest-saved-review__note">
-          <h3>추가 전달 사항</h3>
-          <p>{draft.answers.generalNote}</p>
-        </div>
-      )}
-      {photos.length > 0 && (
-        <details className="guest-saved-review__photos">
-          <summary>첨부 사진 {photos.length}장</summary>
-          <ol>
-            {photos.map((photo, index) => {
-              const assignment = assignments.find(
-                (entry) =>
-                  entry.attachmentId.toLowerCase() === photo.id.toLowerCase(),
-              );
-              const item =
-                assignment?.purpose === 'DEFECT' &&
-                abnormal.find(
-                  (entry) => entry.id.toLowerCase() === assignment.itemId.toLowerCase(),
-                );
-              return (
-                <li key={photo.id}>
-                  <strong>사진 {index + 1}</strong>
-                  <span>{photo.filename}</span>
-                  <p>
-                    {assignment?.purpose === 'ROOM_CONDITION'
-                      ? '객실 상태 사진'
-                      : item
-                        ? `${item.section} · ${item.label}`
-                        : '이상 항목 연결을 다시 확인해 주세요.'}
-                  </p>
-                </li>
-              );
-            })}
-          </ol>
-        </details>
-      )}
-      {!allMapped && (
-        <p className="guest-saved-review__warning" role="alert">
-          사진 연결을 확인할 수 없어요. 사진 단계로 돌아가 다시 확인해 주세요.
-        </p>
-      )}
-      <label className="guest-saved-review__confirm">
-        <input
-          type="checkbox"
-          checked={confirmed}
-          disabled={disabled || submitting || !allMapped}
-          onChange={(event) =>
-            setConfirmation(
-              event.target.checked ? { draft, photos, assignments } : null,
-            )
-          }
-        />
-        <span>답변과 사진을 확인했습니다.</span>
-      </label>
+            </ol>
+          </details>
+        )}
+        {!allMapped && (
+          <p className="guest-saved-review__warning" role="alert">
+            사진 연결을 확인할 수 없어요. 사진 단계로 돌아가 다시 확인해 주세요.
+          </p>
+        )}
+        <label className="guest-saved-review__confirm">
+          <input
+            type="checkbox"
+            checked={confirmed}
+            disabled={disabled || submitting || !allMapped}
+            onChange={(event) =>
+              setConfirmation(
+                event.target.checked ? { draft, photos, assignments } : null,
+              )
+            }
+          />
+          <span>점검 내용과 사진을 확인했어요.</span>
+        </label>
+      </div>
       <div className="guest-saved-review__actions">
         <Button
           className="guest-draft-secondary"

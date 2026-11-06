@@ -54,7 +54,6 @@ export function GuestGuide({
         <Link to={home}>
           <span aria-hidden="true">←</span> 홈으로
         </Link>
-        <span>휴양소 이용 안내</span>
       </div>
       <header className="guest-guide-heading">
         <p className="guest-guide-heading__property">{data.property.name}</p>
@@ -71,43 +70,42 @@ export function GuestGuide({
           )}
         </div>
       </header>
-      <div
-        className={`guest-guide-context${entry.kind === 'stay' ? ' guest-guide-context--stay' : ''}`}
-      >
-        {entry.kind === 'stay' && (
-          <section
-            className="guest-guide-stay"
-            aria-label="나의 예정 이용 일정"
-          >
-            <div className="guest-guide-stay__heading">
-              <h2>나의 이용 일정</h2>
-              <span>예정 · 한국 시간</span>
-            </div>
-            <dl>
-              <PlannedTime label="입실 예정" at={entry.context.checkInAt} />
-              <PlannedTime label="퇴실 예정" at={entry.context.checkOutAt} />
-            </dl>
+      <div className="guest-guide-layout">
+        {data.guide === null ? (
+          <section className="guest-guide-empty">
+            <GuestIcon name="guide" />
+            <h2>아직 등록된 이용 안내가 없어요</h2>
+            <Button onClick={onRefresh}>다시 확인</Button>
           </section>
+        ) : (
+          <article className="guest-guide-sheet" aria-label="이용 안내 내용">
+            <PropertyGuideContent
+              key={`${data.property.id}:${data.guide.version}`}
+              content={data.guide.content}
+            />
+          </article>
         )}
-        <GuestManagerContact
-          phone={entry.context.property.publicContactPhone}
-        />
-      </div>
-      {data.guide === null ? (
-        <section className="guest-guide-empty">
-          <GuestIcon name="guide" />
-          <h2>아직 등록된 이용 안내가 없어요</h2>
-          <p>안내가 게시되면 이곳에서 확인할 수 있습니다.</p>
-          <Button onClick={onRefresh}>다시 확인</Button>
-        </section>
-      ) : (
-        <article className="guest-guide-sheet" aria-label="이용 안내 내용">
-          <PropertyGuideContent
-            key={`${data.property.id}:${data.guide.version}`}
-            content={data.guide.content}
+        <div className="guest-guide-context">
+          {entry.kind === 'stay' && (
+            <section
+              className="guest-guide-stay"
+              aria-label="나의 예정 이용 일정"
+            >
+              <div className="guest-guide-stay__heading">
+                <h2>나의 이용 일정</h2>
+                <span>예정 · 한국 시간</span>
+              </div>
+              <dl>
+                <PlannedTime label="입실 예정" at={entry.context.checkInAt} />
+                <PlannedTime label="퇴실 예정" at={entry.context.checkOutAt} />
+              </dl>
+            </section>
+          )}
+          <GuestManagerContact
+            phone={entry.context.property.publicContactPhone}
           />
-        </article>
-      )}
+        </div>
+      </div>
     </div>
   );
 }

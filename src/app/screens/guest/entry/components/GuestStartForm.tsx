@@ -72,7 +72,11 @@ export function GuestStartForm({
   return (
     <div className="guest-start">
       <header className="guest-start-heading">
-        <Link to={home} className="guest-start-back" aria-label="홈으로 돌아가기">
+        <Link
+          to={home}
+          className="guest-start-back"
+          aria-label="홈으로 돌아가기"
+        >
           <GuestIcon name="arrow" />
         </Link>
         <div>
@@ -82,12 +86,12 @@ export function GuestStartForm({
       </header>
       {!checklist && !opening ? (
         <section className="guest-card guest-empty">
-          <h2>체크리스트를 준비하고 있습니다</h2>
-          <p>현재 {title}를 시작할 수 없습니다. 관리자에게 문의해 주세요.</p>
+          <h2>체크리스트 준비 중</h2>
+          <p>{title}가 필요하면 관리자에게 문의해 주세요.</p>
         </section>
       ) : (
         <form
-          className="guest-card guest-start-form"
+          className="guest-start-form"
           noValidate
           onSubmit={(event) => {
             event.preventDefault();
@@ -96,86 +100,97 @@ export function GuestStartForm({
           }}
         >
           <GuestChecklistProgress step={1} />
-          {entry.kind === 'stay' ? (
-            <>
-              <dl className="guest-start-summary" aria-label="예약 정보 · 한국 시간">
-                <div>
-                  <dt>이용객</dt>
-                  <dd>{entry.context.guestName}</dd>
+          <div className="guest-card guest-start-panel">
+            {entry.kind === 'stay' ? (
+              <>
+                <dl
+                  className="guest-start-summary"
+                  aria-label="예약 정보 · 한국 시간"
+                >
+                  <div>
+                    <dt>이용객</dt>
+                    <dd>{entry.context.guestName}</dd>
+                  </div>
+                  <div>
+                    <dt>
+                      {type === 'CHECK_IN' ? '입실 예정일' : '퇴실 예정일'}
+                    </dt>
+                    <dd>
+                      {reservationDate.format(
+                        new Date(
+                          type === 'CHECK_IN'
+                            ? entry.context.checkInAt
+                            : entry.context.checkOutAt,
+                        ),
+                      )}
+                    </dd>
+                  </div>
+                </dl>
+                <p className="guest-hint">
+                  예약 정보 변경은 관리자에게 문의해 주세요.
+                </p>
+              </>
+            ) : (
+              <fieldset disabled={locked} className="guest-start-fields">
+                <legend className="guest-start-sr-only">
+                  이용객 정보 입력
+                </legend>
+                <div className="guest-start-field">
+                  <label htmlFor="guest-start-guestName">
+                    이름 <span>필수</span>
+                  </label>
+                  <input
+                    {...inputProps('guestName')}
+                    type="text"
+                    autoComplete="name"
+                    required
+                    placeholder="이용객 이름"
+                  />
+                  {error('guestName')}
                 </div>
-                <div>
-                  <dt>{type === 'CHECK_IN' ? '입실 예정일' : '퇴실 예정일'}</dt>
-                  <dd>
-                    {reservationDate.format(
-                      new Date(
-                        type === 'CHECK_IN'
-                          ? entry.context.checkInAt
-                          : entry.context.checkOutAt,
-                      ),
-                    )}
-                  </dd>
+                <div className="guest-start-field">
+                  <label htmlFor="guest-start-visitDate">
+                    {type === 'CHECK_IN' ? '입실일' : '퇴실일'}{' '}
+                    <span>필수 · 한국 시간</span>
+                  </label>
+                  <input
+                    {...inputProps('visitDate')}
+                    type="date"
+                    min="1900-01-01"
+                    max="2100-12-31"
+                    required
+                  />
+                  {error('visitDate')}
                 </div>
-              </dl>
-              <p className="guest-hint">
-                예약 정보 변경은 관리자에게 문의해 주세요.
-              </p>
-            </>
-          ) : (
-            <fieldset disabled={locked} className="guest-start-fields">
-              <legend className="guest-start-sr-only">이용객 정보 입력</legend>
-              <div className="guest-start-field">
-                <label htmlFor="guest-start-guestName">
-                  이름 <span>필수</span>
-                </label>
-                <input
-                  {...inputProps('guestName')}
-                  type="text"
-                  autoComplete="name"
-                  required
-                  placeholder="이용객 이름"
-                />
-                {error('guestName')}
-              </div>
-              <div className="guest-start-field">
-                <label htmlFor="guest-start-visitDate">
-                  {type === 'CHECK_IN' ? '입실일' : '퇴실일'}{' '}
-                  <span>필수 · 한국 시간</span>
-                </label>
-                <input
-                  {...inputProps('visitDate')}
-                  type="date"
-                  min="1900-01-01"
-                  max="2100-12-31"
-                  required
-                />
-                {error('visitDate')}
-              </div>
-              <details
-                className="guest-start-optional-fields"
-                open={optionalOpen || optionalHasErrors}
-                onToggle={(event) => setOptionalOpen(event.currentTarget.open)}
-              >
-                <summary>
-                  회사 · 부서 · 연락처 <span>선택</span>
-                </summary>
-                <div>
-                  {optionalFields.map((field) => (
-                    <div className="guest-start-field" key={field.name}>
-                      <label htmlFor={`guest-start-${field.name}`}>
-                        {field.label}
-                      </label>
-                      <input
-                        {...inputProps(field.name)}
-                        type={field.name === 'phone' ? 'tel' : 'text'}
-                        autoComplete={field.autoComplete}
-                      />
-                      {error(field.name)}
-                    </div>
-                  ))}
-                </div>
-              </details>
-            </fieldset>
-          )}
+                <details
+                  className="guest-start-optional-fields"
+                  open={optionalOpen || optionalHasErrors}
+                  onToggle={(event) =>
+                    setOptionalOpen(event.currentTarget.open)
+                  }
+                >
+                  <summary>
+                    회사 · 부서 · 연락처 <span>선택</span>
+                  </summary>
+                  <div>
+                    {optionalFields.map((field) => (
+                      <div className="guest-start-field" key={field.name}>
+                        <label htmlFor={`guest-start-${field.name}`}>
+                          {field.label}
+                        </label>
+                        <input
+                          {...inputProps(field.name)}
+                          type={field.name === 'phone' ? 'tel' : 'text'}
+                          autoComplete={field.autoComplete}
+                        />
+                        {error(field.name)}
+                      </div>
+                    ))}
+                  </div>
+                </details>
+              </fieldset>
+            )}
+          </div>
           {state.message && (
             <div
               className={`guest-start-feedback${state.status === 'uncertain' ? ' guest-start-feedback--uncertain' : ''}`}
@@ -213,7 +228,8 @@ export function GuestStartForm({
                 ? '이용 정보 확인 중'
                 : state.status === 'starting'
                   ? '체크리스트 시작 중'
-                  : '다음 · 시설 확인'}
+                  : '시설 확인하기'}
+            {!pending && <GuestIcon name="arrow" />}
           </Button>
         </form>
       )}

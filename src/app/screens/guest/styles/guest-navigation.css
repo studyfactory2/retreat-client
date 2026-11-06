@@ -32,7 +32,7 @@
   align-items: center;
   justify-content: center;
   gap: 4px;
-  min-height: 58px;
+  min-height: 46px;
   border-radius: 14px;
   color: var(--color-muted);
   font-size: 12px;
@@ -61,4 +61,15 @@
 }
 .guest-draft:has(.guest-record-navigation) .guest-draft-main :is(a, button, input, select, textarea, summary) {
   scroll-margin-bottom: calc(76px + env(safe-area-inset-bottom, 0px));
+}
+
+@media (min-width: 700px) {
+  .guest-navigation > div {
+    max-width: 520px;
+  }
+  .guest-navigation a {
+    flex-direction: row;
+    gap: 8px;
+    font-size: 13px;
+  }
 }

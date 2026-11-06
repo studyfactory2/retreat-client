@@ -19,6 +19,7 @@ import {
   NavigationActionsContext,
   NavigationGuardContext,
   NavigationHistoryContext,
+  type NavigationGuard,
 } from './use-navigation-guard';
 import {
   reviewNavigation,
@@ -37,7 +38,8 @@ export function NavigationBoundary({ children }: { children: ReactNode }) {
     pending: null,
     restoring: false,
   }));
-  const guards = useRef(new Set<() => boolean>());
+  const guards = useRef(new Set<NavigationGuard>());
+  const [privateDraftLink, setPrivateDraftLink] = useState(false);
   const approved = useRef<{ url: string; key: unknown } | null>(null);
   const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
   const current = useRef(state);
@@ -70,10 +72,12 @@ export function NavigationBoundary({ children }: { children: ReactNode }) {
   }, []);
   const requestAction = useCallback((operation: () => void) => {
     if (current.current.pending || current.current.restoring) return () => {};
-    if (![...guards.current].some((check) => check())) {
+    const reasons = [...guards.current].map((check) => check());
+    if (!reasons.some(Boolean)) {
       operation();
       return () => {};
     }
+    setPrivateDraftLink(reasons.includes('private-draft-link'));
     setPendingAction(() => operation);
     return () =>
       setPendingAction((pending) => (pending === operation ? null : pending));
@@ -82,7 +86,7 @@ export function NavigationBoundary({ children }: { children: ReactNode }) {
     () => ({ runConfirmed, requestAction }),
     [runConfirmed, requestAction],
   );
-  const register = useCallback((check: () => boolean) => {
+  const register = useCallback((check: NavigationGuard) => {
     guards.current.add(check);
     return () => {
       guards.current.delete(check);
@@ -99,7 +103,9 @@ export function NavigationBoundary({ children }: { children: ReactNode }) {
         location.pathname + location.search + location.hash &&
       approved.current.key === location.key;
     approved.current = null;
-    const blocked = [...guards.current].some((check) => check());
+    const reasons = [...guards.current].map((check) => check());
+    const blocked = reasons.some(Boolean);
+    setPrivateDraftLink(reasons.includes('private-draft-link'));
     setState((current) =>
       allowed
         ? { accepted: next, pending: null, restoring: false }
@@ -141,6 +147,7 @@ export function NavigationBoundary({ children }: { children: ReactNode }) {
         {(state.pending || pendingAction) && (
           <NavigationLeaveDialog
             restoring={state.restoring}
+            privateDraftLink={privateDraftLink}
             admin={state.accepted.location.pathname.startsWith('/admin')}
             loggingOut={!!pendingAction}
             onStay={() => {

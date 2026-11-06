@@ -13,6 +13,7 @@ export function GuestChecklistStep({
   draft,
   answers,
   disabled,
+  showMissing,
   edit,
   onIssuePhotos,
   photoPickerDisabled,
@@ -23,20 +24,22 @@ export function GuestChecklistStep({
   onOpenPhotos: () => void;
   onIssuePhotos?: (files: FileList, itemId: string) => void;
   photoPickerDisabled: boolean;
+  showMissing: boolean;
   draft: GuestDraftDto;
   answers: GuestDraftAnswers;
   disabled: boolean;
   edit: (change: (answers: GuestDraftAnswers) => GuestDraftAnswers) => void;
 }) {
+  const sections = draft.template.definition.sections;
   return (
     <div className="guest-draft-form">
-      {draft.template.definition.sections.map((section) => (
+      {sections.map((section) => (
         <section
           className="guest-draft-section"
           key={section.id}
-          aria-labelledby={`draft-section-${section.id}`}
+          aria-labelledby={sections.length === 1 ? 'guest-checklist-title' : `draft-section-${section.id}`}
         >
-          <h3 id={`draft-section-${section.id}`}>{section.title}</h3>
+          {sections.length > 1 && <h4 id={`draft-section-${section.id}`}>{section.title}</h4>}
           {section.items.map((item) => {
             const status = onIssuePhotos && photoStatus(item.id);
             return (
@@ -44,6 +47,7 @@ export function GuestChecklistStep({
                 <DraftAnswerField
                   item={item}
                   disabled={disabled}
+                  showMissing={showMissing}
                   onIssuePhotos={onIssuePhotos}
                   photoPickerDisabled={photoPickerDisabled}
                   answer={answers.items.find((answer) => answer.itemId === item.id)}

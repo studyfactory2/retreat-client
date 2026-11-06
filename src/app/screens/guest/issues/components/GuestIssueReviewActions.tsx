@@ -26,10 +26,12 @@ export function GuestIssueReviewActions({
     <section className="guest-issue-review-actions" aria-label="신고 접수 확인">
       <div className="guest-issue-note">
         <p>접수 후에는 신고 내용이나 사진을 수정할 수 없습니다.</p>
-        <p>
-          긴급 표시는 관리자 확인 우선순위입니다. 알림이나 전화가 자동으로
-          전달되지는 않아요.
-        </p>
+        {body.isUrgent && (
+          <p>
+            긴급 표시는 관리자 확인용입니다. 바로 도움이 필요하면 관리자에게
+            전화해 주세요.
+          </p>
+        )}
       </div>
       <GuestManagerContact
         phone={resource.context.property.publicContactPhone}
@@ -60,7 +62,7 @@ export function GuestIssueReviewActions({
               disabled={disabled}
               onClick={onBack}
             >
-              이전: 내용 작성
+              내용 수정
             </Button>
             <Button
               disabled={disabled || photoBlocked || !confirmed}
@@ -68,7 +70,7 @@ export function GuestIssueReviewActions({
                 if (!disabled && !photoBlocked && confirmed) onSubmit();
               }}
             >
-              신고 접수하기
+              신고 접수
             </Button>
           </div>
         </>

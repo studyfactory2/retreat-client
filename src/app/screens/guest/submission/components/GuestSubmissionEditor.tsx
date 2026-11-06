@@ -22,18 +22,19 @@ export function GuestSubmissionEditor({
   setReason: (value: string) => void;
 }) {
   return (
-    <div>
-      <aside className="guest-submitted-notice">
+    <div className="guest-correction-editor">
+      <details className="guest-record-card guest-record-disclosure guest-correction-help">
+        <summary>수정할 수 있는 내용</summary>
         <p>
-          답변과 메모를 수정할 수 있습니다. 사진 추가·교체·직접 삭제는 지원하지
-          않습니다.
+          답변과 메모를 수정할 수 있어요. 제출한 사진은 새로 추가하거나 교체할
+          수 없어요.
         </p>
         <p>
-          이상 항목을 정상으로 바꾸거나 선택 해제하면 해당 사진은 현재 제출
-          내용에서 제외됩니다. 과거 기록은 보관되며, 다시 이상으로 바꿔도 사진은
-          자동으로 돌아오지 않습니다.
+          이상 답변을 정상으로 바꾸거나 선택을 해제하면 연결한 사진은 이전
+          기록에만 보관돼요. 다시 이상으로 바꿔도 사진은 자동으로 돌아오지
+          않아요.
         </p>
-      </aside>
+      </details>
       {detail.template.definition.sections.map((section) => (
         <section className="guest-draft-card" key={section.id}>
           <h2>{section.title}</h2>
@@ -57,7 +58,7 @@ export function GuestSubmissionEditor({
         <label htmlFor="correction-note">전체 메모 · 선택</label>
         <textarea
           id="correction-note"
-          rows={4}
+          rows={3}
           maxLength={4000}
           disabled={disabled}
           value={answers.generalNote ?? ''}
@@ -71,7 +72,7 @@ export function GuestSubmissionEditor({
         <label htmlFor="correction-reason">수정 사유 · 선택</label>
         <textarea
           id="correction-reason"
-          rows={3}
+          rows={2}
           maxLength={1000}
           disabled={disabled}
           value={reason}
@@ -79,8 +80,7 @@ export function GuestSubmissionEditor({
           onChange={(event) => setReason(event.target.value)}
         />
         <p className="guest-submitted-hint">
-          수정 사유만으로는 저장되지 않습니다. 저장 전에 변경 내용을 한 번 더
-          확인합니다. 화면을 떠나면 저장하지 않은 입력이 사라질 수 있습니다.
+          답변이나 메모를 바꾼 뒤 변경 내용을 검토해 주세요.
         </p>
       </section>
     </div>

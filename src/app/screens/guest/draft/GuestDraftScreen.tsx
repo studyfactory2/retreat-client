@@ -1,12 +1,11 @@
-import { BrandLogo } from '../../../shared/ui/BrandLogo/BrandLogo';
-import { APP_BRAND } from '../../../core/config/brand';
 import { useEffect, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useNavigationGuard } from '../../../core/router/navigation/use-navigation-guard';
 import { Button } from '../../../shared/ui/Button/Button';
 import { guestDraftOrigin } from '../../../features/guest-entry/guest-draft-origin';
 import { GuestRecordNavigation } from '../components/GuestRecordNavigation';
-import { readGuestAccess } from '../entry/model/guest-entry-model';
+import { GuestPageHeader } from '../components/GuestPageHeader';
+import { buildGuestViewLocation, readGuestAccess } from '../entry/model/guest-entry-model';
 import { GuestSubmissionScreen } from '../submission';
 import { GuestDraftForm } from './components/GuestDraftForm';
 import { GuestSubmissionReceipt } from './components/GuestSubmissionReceipt';
@@ -25,6 +24,7 @@ export function GuestDraftScreen() {
 }
 
 function GuestDraftSessionScreen() {
+  const navigate = useNavigate();
   const location = useLocation();
   const access = readGuestAccess(location.hash);
   const token = access.status === 'ready' ? access.token : null;
@@ -42,6 +42,7 @@ function GuestDraftSessionScreen() {
     : resource.status === 'ready' && resource.access === 'ready' ? resource.draft
     : null;
   const origin = token && draftRecord ? guestDraftOrigin(draftRecord, token) : null;
+  const home = origin ? buildGuestViewLocation(origin.kind, origin.hash, 'home') : undefined;
   return (
     <div className="guest-draft guest-draft--journey">
       <button
@@ -53,14 +54,7 @@ function GuestDraftSessionScreen() {
       >
         본문으로 바로가기
       </button>
-      <header className="guest-draft-header">
-        <div>
-          <div className="guest-draft-brand">
-            <BrandLogo />
-            <span>휴양소 이용 안내</span>
-          </div>
-        </div>
-      </header>
+      <GuestPageHeader />
       <main
         ref={main}
         tabIndex={-1}
@@ -82,7 +76,6 @@ function GuestDraftSessionScreen() {
         ) : draft.resource.status === 'loading' ? (
           <section className="guest-draft-card guest-draft-state" role="status">
             <h1>체크리스트를 불러오고 있습니다</h1>
-            <p>잠시만 기다려 주세요.</p>
           </section>
         ) : draft.resource.status === 'error' ? (
           <section className="guest-draft-card guest-draft-state" role="alert">
@@ -104,13 +97,14 @@ function GuestDraftSessionScreen() {
           />
         ) : (
           <GuestDraftForm
+            key={access.token}
+            onHome={home ? () => navigate(home) : undefined}
             session={draft}
             resource={draft.resource}
             token={access.token}
           />
         )}
       </main>
-      <footer className="guest-draft-footer">{APP_BRAND.appName}</footer>
       {token && draftRecord && (
         <GuestRecordNavigation
           origin={origin}

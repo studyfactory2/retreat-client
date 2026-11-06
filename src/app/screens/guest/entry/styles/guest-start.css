@@ -62,23 +62,6 @@
 .guest-check-action--unavailable strong {
   color: var(--color-muted);
 }
-.guest-entry.guest-entry--journey .guest-header__inner {
-  max-width: 680px;
-  min-height: 60px;
-  padding-block: 8px;
-}
-.guest-entry--journey .guest-brand {
-  flex-direction: row;
-  align-items: center;
-  gap: 10px;
-}
-.guest-entry--journey .guest-brand span {
-  margin: 0;
-  padding-left: 10px;
-  border-left: 1px solid var(--color-border);
-  color: var(--color-muted);
-  font-size: 12px;
-}
 .guest-start {
   width: 100%;
   max-width: 640px;
@@ -119,13 +102,25 @@
   font-size: 13px;
   line-height: 1.5;
 }
-.guest-start .guest-start-form {
-  padding: clamp(16px, 3.2vw, 24px);
+.guest-start-form {
+  display: grid;
+  gap: 14px;
+}
+.guest-start .guest-start-panel {
+  padding: clamp(16px, 3vw, 22px);
   border-radius: 15px;
   box-shadow: none;
 }
-.guest-start-form > .guest-checklist-progress {
-  margin-bottom: 18px;
+.guest-start-form .guest-checklist-progress h2 {
+  font-size: 21px;
+}
+.guest-start-form .guest-checklist-progress li {
+  height: 3px;
+}
+@media (min-width: 481px) {
+  .guest-start {
+    padding-top: 4px;
+  }
 }
 .guest-start-fields {
   display: grid;
@@ -202,7 +197,6 @@
   overflow-wrap: anywhere;
 }
 .guest-start-feedback {
-  margin-top: 16px;
   padding: 14px;
   border: 1px solid #d7e3fa;
   border-radius: 12px;
@@ -224,8 +218,12 @@
 }
 .guest-start .guest-start-submit {
   width: 100%;
-  min-height: 46px;
-  margin-top: 12px;
+  min-height: 48px;
+  font-size: 15px;
+}
+.guest-start-submit .guest-icon {
+  width: 17px;
+  height: 17px;
 }
 .guest-start-optional-fields {
   min-width: 0;

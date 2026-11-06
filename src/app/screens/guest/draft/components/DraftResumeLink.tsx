@@ -25,6 +25,7 @@ export function DraftResumeLink({
   const [result, setResult] = useState<{
     owner: typeof owner;
     message: string;
+    failed?: boolean;
   } | null>(null);
   useEffect(() => {
     scope.current = owner;
@@ -33,80 +34,95 @@ export function DraftResumeLink({
       scope.current = null;
     };
   }, [owner]);
+  const privateUrl = `${appConfig.frontendOrigin}/draft#token=${token}`;
+  const linkLabel = completed
+    ? '제출 확인 링크'
+    : guided
+      ? '이어쓰기 링크'
+      : '작성 링크';
   const copy = async () => {
     if (disabled || busy.current || scope.current !== owner) return;
     busy.current = true;
     try {
       if (!navigator.clipboard?.writeText)
         throw new Error('Clipboard unavailable');
-      await navigator.clipboard.writeText(
-        `${appConfig.frontendOrigin}/draft#token=${token}`,
-      );
+      await navigator.clipboard.writeText(privateUrl);
       if (scope.current === owner)
         setResult({
           owner,
-          message: `${completed ? '제출 확인' : guided ? '이어쓰기' : '작성'} 링크를 복사했습니다. 안전한 곳에 보관해 주세요.`,
+          message: `${linkLabel}를 복사했어요.`,
         });
     } catch {
       if (scope.current === owner)
         setResult({
           owner,
-          message: '링크를 복사하지 못했습니다. 브라우저 권한을 확인해 주세요.',
+          failed: true,
+          message: '아래 주소를 길게 누르거나 선택해서 복사해 주세요.',
         });
     } finally {
       if (scope.current === owner) busy.current = false;
     }
   };
+  const linkDetails = (
+    <>
+      <p>
+        <time dateTime={expiresAt}>{formatGuestStayTimestamp(expiresAt)}</time>
+        까지 · 한국 시간
+      </p>
+      <p>이용 정보가 바뀌면 기한 전에 만료될 수 있어요.</p>
+      {showHomeHelp && (
+        <p>이용 안내 홈은 처음 사용한 QR이나 개인 이용 링크에서 열어 주세요.</p>
+      )}
+      <Button
+        className="guest-draft-secondary"
+        disabled={disabled}
+        onClick={() => void copy()}
+      >
+        {linkLabel} 복사
+      </Button>
+      <p className="guest-draft-copy-status" role="status">
+        {result?.owner === owner ? result.message : ''}
+      </p>
+      {!disabled && result?.owner === owner && result.failed && (
+        <input
+          className="guest-private-link-input"
+          aria-label={`직접 복사할 ${linkLabel}`}
+          type="text"
+          readOnly
+          value={privateUrl}
+          onFocus={(event) => event.currentTarget.select()}
+        />
+      )}
+    </>
+  );
+  if (completed) {
+    return (
+      <details className="guest-private-receipt-link">
+        <summary>제출 확인 링크 보관</summary>
+        <div>
+          <p>
+            링크를 가진 사람은 제출 내용을 볼 수 있어요. 본인만 보관해 주세요.
+          </p>
+          {linkDetails}
+        </div>
+      </details>
+    );
+  }
   return (
     <section
       className={`guest-draft-card guest-draft-resume${guided ? ' guest-resume-guided' : ''}`}
       aria-labelledby="draft-resume-title"
     >
-      <div>
-        <h2 id="draft-resume-title">
-          {completed
-            ? '제출 확인 링크 보관하기'
-            : guided
-              ? '이어쓰기 링크 보관하기'
-              : '나중에 이어서 작성하기'}
-        </h2>
-        <p>
-          {completed
-            ? '이 링크에서 제출 확인을 다시 열 수 있습니다.'
-            : '이 링크에서 임시 저장한 내용을 다시 열 수 있습니다.'}{' '}
-          링크를 가진 사람은 내용을 볼 수 있으니 다른 사람에게 공유하지 마세요.
-        </p>
-        {showHomeHelp && (
-          <p>이용 안내 홈은 처음 사용한 이용객 QR이나 개인 이용 링크에서 열어 주세요.</p>
-        )}
-        {guided && !completed && (
-          <p className="guest-resume-guided-qr">
-            공용 QR을 다시 스캔해도 이 작성 내용은 열리지 않아요. 반드시 이 개인
-            링크로 이어서 작성해 주세요.
-          </p>
-        )}
-        <p>
-          사용 기한: {formatGuestStayTimestamp(expiresAt)} · 한국 시간
-          <br />
-          이용 정보 변경 등에 따라 기한 전에 사용할 수 없게 될 수 있습니다.
-        </p>
-      </div>
-      <Button
-        className="guest-draft-secondary"
-        disabled={disabled}
-        onClick={() => {
-          void copy();
-        }}
-      >
-        {completed
-          ? '제출 확인 링크 복사'
-          : guided
-            ? '이어쓰기 링크 복사'
-            : '작성 링크 복사'}
-      </Button>
-      <p className="guest-draft-copy-status" role="status">
-        {result?.owner === owner ? result.message : ''}
+      <h2 id="draft-resume-title">
+        {guided ? '이어쓰기 링크' : '나중에 이어서 작성하기'}
+      </h2>
+      <p>
+        {guided
+          ? '공용 QR 대신 이 링크로 이어서 작성해 주세요.'
+          : '이 링크로 임시 저장한 내용을 다시 열 수 있어요.'}{' '}
+        링크를 가진 사람은 내용을 볼 수 있으니 본인만 보관해 주세요.
       </p>
+      {linkDetails}
     </section>
   );
 }

@@ -4,7 +4,7 @@ import { GuestIcon } from './GuestIcon';
 
 const windowDate = new Intl.DateTimeFormat('ko-KR', {
   timeZone: 'Asia/Seoul',
-  month: 'numeric',
+  month: 'long',
   day: 'numeric',
   hour: '2-digit',
   minute: '2-digit',
@@ -24,15 +24,6 @@ export function GuestAccessCodesCard({
   const { snapshot, codes, pendingKind } = access;
   const available =
     access.status === 'ready' && snapshot?.state === 'AVAILABLE';
-  const stateLabel =
-    snapshot?.state === 'SCHEDULED'
-      ? '공개 예정'
-      : snapshot?.state === 'ENDED'
-        ? '안내 종료'
-        : available
-          ? '예약용 번호'
-          : null;
-
   return (
     <section
       className="guest-access-codes"
@@ -46,9 +37,6 @@ export function GuestAccessCodesCard({
           </svg>
         </span>
         <h2 id="guest-access-title">출입 비밀번호</h2>
-        {stateLabel && (
-          <span className="guest-access-codes__badge">{stateLabel}</span>
-        )}
         <button
           type="button"
           className="guest-access-codes__refresh"
@@ -62,10 +50,8 @@ export function GuestAccessCodesCard({
 
       {available && snapshot ? (
         <>
-          <div
-            className={`guest-access-codes__rows${snapshot.entranceAvailable ? ' guest-access-codes__rows--pair' : ''}`}
-          >
-            {(['ROOM', 'ENTRANCE'] as const)
+          <div className="guest-access-codes__rows">
+            {(['ENTRANCE', 'ROOM'] as const)
               .filter((kind) => kind === 'ROOM' || snapshot.entranceAvailable)
               .map((kind) => {
                 const label = kind === 'ROOM' ? '객실 출입문' : '공동현관';
@@ -110,11 +96,14 @@ export function GuestAccessCodesCard({
                 );
               })}
           </div>
-          {snapshot.roomMode === 'ROTATING' && (
-            <p className="guest-access-codes__note">
-              입실에 사용할 번호입니다. 현장 도어락은 변경 전일 수 있어요.
-            </p>
-          )}
+          <p className="guest-access-codes__note">
+            <time dateTime={snapshot.closesAt}>
+              {windowDate.format(new Date(snapshot.closesAt))}
+            </time>
+            까지 확인할 수 있어요.
+            {snapshot.roomMode === 'ROTATING' &&
+              ' 현장 도어락은 변경 전일 수 있어요.'}
+          </p>
         </>
       ) : (
         <p className="guest-access-codes__empty">
@@ -128,7 +117,7 @@ export function GuestAccessCodesCard({
               부터 확인할 수 있어요.
             </>
           ) : snapshot?.state === 'ENDED' ? (
-            '퇴실 시간이 지나 비밀번호 안내가 종료되었습니다.'
+            '퇴실 시각이 지나 비밀번호 공개가 끝났어요.'
           ) : access.status === 'error' ? (
             '비밀번호를 불러오지 못했습니다.'
           ) : (

@@ -1,23 +1,7 @@
-.guest-issues .guest-header__inner {
-  max-width: 720px;
-  min-height: 64px;
-  padding: 12px 20px;
-}
-.guest-issues .guest-brand {
-  font-size: 23px;
-  letter-spacing: -0.6px;
-}
-.guest-issues .guest-brand span {
-  font-size: 10px;
-  letter-spacing: 0;
-}
 .guest-issues .guest-main {
   max-width: 720px;
   padding: 22px 20px 16px;
   overflow-wrap: anywhere;
-}
-.guest-issues .guest-footer {
-  padding-block: 16px 24px;
 }
 .guest-issues [hidden] {
   display: none !important;
@@ -44,11 +28,6 @@
   color: var(--color-primary);
   font-size: 13px;
   font-weight: 600;
-  line-height: 1.7;
-}
-.guest-issue-intro > p:last-child {
-  color: var(--color-muted);
-  font-size: 13px;
   line-height: 1.7;
 }
 .guest-issue-progress {
@@ -111,17 +90,11 @@
   margin-bottom: 18px;
 }
 .guest-issue-section-heading h2 {
+  min-width: 0;
   color: var(--color-heading);
   font-size: 17px;
   line-height: 1.6;
 }
-.guest-issue-fieldset {
-  min-width: 0;
-  border: 0;
-  padding: 0;
-  margin: 0 0 18px;
-}
-.guest-issue-fieldset legend,
 .guest-issue-field label {
   display: block;
   color: var(--color-heading);
@@ -141,47 +114,11 @@
   color: var(--color-muted);
   margin-left: 5px;
 }
-.guest-issue-categories {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-.guest-issue-categories button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-  max-width: 100%;
-  min-width: 72px;
-  min-height: 44px;
-  padding: 9px 13px;
-  background: #f8faff;
-  border: 1px solid #cdd8ec;
-  border-radius: 10px;
-  color: var(--color-heading);
-  font: inherit;
-  font-size: 14px;
-  line-height: 1.65;
-  cursor: pointer;
-  overflow-wrap: anywhere;
-}
-.guest-issue-category-check:empty {
-  display: none;
-}
-.guest-issue-categories button[aria-pressed='true'] {
-  color: white;
-  background: var(--color-primary);
-  border-color: var(--color-primary);
-  font-weight: 650;
-}
-.guest-issue-categories button:disabled {
-  cursor: default;
-  opacity: 0.65;
-}
 .guest-issue-field + .guest-issue-field {
   margin-top: 18px;
 }
 .guest-issue-field input,
+.guest-issue-field select,
 .guest-issue-field textarea {
   display: block;
   width: 100%;
@@ -200,6 +137,7 @@
   resize: vertical;
 }
 .guest-issue-field input:disabled,
+.guest-issue-field select:disabled,
 .guest-issue-field textarea:disabled {
   background: var(--color-background);
   color: var(--color-muted);
@@ -405,6 +343,7 @@
   margin: 0;
 }
 .guest-issue-receipt__heading {
+  color: var(--color-heading);
   display: flex;
   align-items: center;
   gap: 12px;
@@ -417,8 +356,8 @@
   width: 42px;
   height: 42px;
   border-radius: 50%;
-  background: var(--color-primary);
-  color: white;
+  background: #daf3e8;
+  color: #18644e;
   font-size: 23px;
 }
 .guest-issue-receipt h1 {
@@ -455,14 +394,12 @@
   min-height: 48px;
   margin-top: 2px;
 }
-.guest-issues :where(button, input, textarea, a, summary):focus-visible {
+.guest-issues
+  :where(button, input, select, textarea, a, summary):focus-visible {
   outline: 3px solid #3772e0;
   outline-offset: 3px;
 }
 @media (max-width: 480px) {
-  .guest-issues .guest-header__inner {
-    padding-inline: 16px;
-  }
   .guest-issues .guest-main {
     padding: 18px 14px 14px;
   }
@@ -477,6 +414,7 @@
 }
 @media (max-width: 360px) {
   .guest-issue-receipt__heading {
+    color: var(--color-heading);
     gap: 10px;
   }
   .guest-issue-receipt__mark {

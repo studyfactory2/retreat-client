@@ -1,5 +1,4 @@
-import { BrandLogo } from '../../../shared/ui/BrandLogo/BrandLogo';
-import { APP_BRAND } from '../../../core/config/brand';
+import { GuestPageHeader } from '../components/GuestPageHeader';
 import { useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useNavigationGuard } from '../../../core/router/navigation/use-navigation-guard';
@@ -20,9 +19,10 @@ export function GuestSubmissionScreen() {
   const controller = useGuestSubmission(token);
   useNavigationGuard(controller.hasPendingWork);
   const { resource } = controller;
-  const origin = token && resource.status === 'ready'
-    ? guestDraftOrigin(resource.detail, token)
-    : null;
+  const origin =
+    token && resource.status === 'ready'
+      ? guestDraftOrigin(resource.detail, token)
+      : null;
   const main = useRef<HTMLElement>(null);
   const mode = resource.status === 'ready' ? resource.mode : resource.status;
   useEffect(() => {
@@ -37,14 +37,7 @@ export function GuestSubmissionScreen() {
       >
         본문으로 바로가기
       </button>
-      <header className="guest-draft-header">
-        <div>
-          <div className="guest-draft-brand">
-            <BrandLogo /><span>휴양소 이용 안내</span>
-          </div>
-          <span>제출한 체크리스트</span>
-        </div>
-      </header>
+      <GuestPageHeader />
       <main
         ref={main}
         tabIndex={-1}
@@ -85,16 +78,19 @@ export function GuestSubmissionScreen() {
             resource={resource}
             token={access.token}
             onReceipt={
-              origin ? () => navigate({ pathname: '/draft', hash: location.hash }) : undefined
+              origin
+                ? () => navigate({ pathname: '/draft', hash: location.hash })
+                : undefined
             }
           />
         )}
       </main>
-      <footer className="guest-draft-footer">
-        {APP_BRAND.appName}
-      </footer>
       {token && resource.status === 'ready' && resource.access === 'ready' && (
-        <GuestRecordNavigation origin={origin} token={token} page="submission" />
+        <GuestRecordNavigation
+          origin={origin}
+          token={token}
+          page="submission"
+        />
       )}
     </div>
   );

@@ -102,7 +102,7 @@ export function GuestSubmissionPhoto({
           status: 'error',
           message:
             error instanceof ApiRequestError && error.status === 404
-              ? '사진 연결이 변경되었을 수 있습니다. 위의 최신 내용 확인을 눌러 주세요.'
+              ? '사진 연결이 변경되었을 수 있습니다. 최신 내용 확인을 눌러 주세요.'
               : '사진을 표시하지 못했습니다. 잠시 후 다시 열어 주세요.',
         },
       });
@@ -141,8 +141,8 @@ export function GuestSubmissionPhoto({
   return (
     <div className="guest-record-photo">
       <div>
-        <strong>{photo.filename}</strong>
-        {photo.areaLabel && <p>{photo.areaLabel}</p>}
+        <strong>{label}</strong>
+        <p>{[photo.areaLabel, photo.filename].filter(Boolean).join(' · ')}</p>
       </div>
       {preview.status === 'ready' ? (
         <>

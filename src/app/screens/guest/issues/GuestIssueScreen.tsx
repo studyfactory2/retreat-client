@@ -97,15 +97,14 @@ export function GuestIssueScreen() {
                     .filter(Boolean)
                     .join(' · ')}
                 </p>
-                <h1>불편사항 신고</h1>
-                <p>
-                  {resource.mode === 'review'
-                    ? '작성한 내용과 사진을 확인한 뒤 접수해 주세요.'
-                    : '이용 중 불편했던 점을 알려주세요.'}
-                </p>
+                <h1>
+                  {resource.mode === 'review' ? '신고 내용 확인' : '불편 신고'}
+                </h1>
               </header>
             )}
-            <GuestIssueProgress mode={resource.mode} />
+            {resource.mode !== 'received' && (
+              <GuestIssueProgress mode={resource.mode} />
+            )}
             {visibleLeave && (
               <GuestIssueLeaveNotice
                 message={visibleLeave.message}
@@ -159,8 +158,7 @@ export function GuestIssueScreen() {
                   {resource.mode === 'edit' ? (
                     <div className="guest-issue-writing-actions">
                       <p className="guest-issue-hint">
-                        자동 저장되지 않습니다. 접수 전까지 이 창을 유지해
-                        주세요.
+                        작성 중인 내용은 이 창에서만 유지됩니다.
                       </p>
                       <Button
                         disabled={
@@ -173,7 +171,7 @@ export function GuestIssueScreen() {
                           controller.review(photos.getReadyClaims())
                         }
                       >
-                        다음: 내용 확인
+                        신고 내용 확인
                       </Button>
                     </div>
                   ) : (

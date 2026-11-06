@@ -37,11 +37,6 @@ export function GuestIssuePhotos({
           {photos.length} / {maxPhotos}장
         </span>
       </div>
-      {!readOnly && (
-        <p className="guest-issue-photos__intro">
-          불편한 부분을 보여 주세요. 사진 없이도 신고할 수 있어요.
-        </p>
-      )}
       {photos.length ? (
         <div className="guest-issue-photos__grid">
           {photos.map((entry, index) => (
@@ -65,11 +60,9 @@ export function GuestIssuePhotos({
             />
           ))}
         </div>
-      ) : (
-        <div className="guest-issue-photos__empty">
-          <p>{readOnly ? '첨부한 사진 없음' : '아직 첨부한 사진이 없어요.'}</p>
-        </div>
-      )}
+      ) : readOnly ? (
+        <p className="guest-issue-photos__help">첨부한 사진 없음</p>
+      ) : null}
       {readOnly && photos.some((entry) => entry.status !== 'ready') && (
         <p className="guest-issue-photos__help">
           사용할 수 없는 사진은 작성 화면으로 돌아가 확인해 주세요.

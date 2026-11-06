@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
-import { Button } from '../../../../shared/ui/Button/Button';
 import type { GuestSubmissionReceiptDto } from '../../../../features/guest-submissions/guest-submissions.types';
+import { Button } from '../../../../shared/ui/Button/Button';
+import { GuestIcon } from '../../entry/components/GuestIcon';
 import { formatGuestStayTimestamp } from '../../entry/model/guest-entry-model';
 import { DraftResumeLink } from './DraftResumeLink';
 import '../styles/guest-journey-edge.css';
@@ -15,40 +16,41 @@ export function GuestSubmissionReceipt({
   showHomeHelp: boolean;
 }) {
   const navigate = useNavigate();
-  const title = receipt.type === 'CHECK_IN' ? '입실 체크' : '퇴실 체크';
+  const checkIn = receipt.type === 'CHECK_IN';
   return (
-    <div className="guest-receipt">
+    <section className="guest-receipt" aria-labelledby="guest-receipt-title">
       <header className="guest-receipt-heading">
         <span className="guest-receipt-check" aria-hidden="true">
           ✓
         </span>
-        <div>
-          <p className="guest-draft-eyebrow">제출 완료</p>
-          <h1>{title}를 제출했어요</h1>
-        </div>
+        <h1 id="guest-receipt-title">
+          {checkIn ? '입실' : '퇴실'} 체크 제출 완료
+        </h1>
+        <p>
+          {[receipt.property.name, receipt.property.region]
+            .filter(Boolean)
+            .join(' · ')}
+        </p>
       </header>
-      <section
-        className="guest-receipt-summary"
-        aria-labelledby="guest-receipt-property"
-      >
-        <p className="guest-receipt-region">{receipt.property.region}</p>
-        <h2 id="guest-receipt-property">{receipt.property.name}</h2>
+      <div className="guest-receipt-body">
         <dl className="guest-receipt-dates">
           <div>
-            <dt>{receipt.type === 'CHECK_IN' ? '입실일' : '퇴실일'}</dt>
-            <dd>{receipt.visitDate.replaceAll('-', '.')}</dd>
+            <dt>{checkIn ? '입실일' : '퇴실일'}</dt>
+            <dd>{receipt.visitDate.replaceAll('-', '. ')}</dd>
           </div>
           <div>
-            <dt>제출 일시</dt>
+            <dt>제출 시각</dt>
             <dd>
-              {formatGuestStayTimestamp(receipt.submittedAt)}
-              <small>한국 시간 기준</small>
+              <time dateTime={receipt.submittedAt}>
+                {formatGuestStayTimestamp(receipt.submittedAt)}
+              </time>{' '}
+              · 한국 시간
             </dd>
           </div>
         </dl>
-        <dl className="guest-receipt-counts">
+        <dl className="guest-receipt-counts" aria-label="최초 제출 요약">
           <div>
-            <dt>답변</dt>
+            <dt>응답</dt>
             <dd>{receipt.answeredItemCount}개</dd>
           </div>
           <div>
@@ -61,10 +63,14 @@ export function GuestSubmissionReceipt({
           </div>
         </dl>
         <p className="guest-receipt-original">
-          최초 제출 내역입니다. 이후 답변을 수정해도 이 내역은 유지됩니다.
+          최초 제출 기록이에요. 최신 답변은 제출 내용에서 확인하세요.
         </p>
-      </section>
-      <section className="guest-receipt-next" aria-label="제출 후 확인">
+        {receipt.reportedIssueCount > 0 && (
+          <p className="guest-receipt-attention">
+            이상 항목을 관리자에게 전달했어요. 긴급한 경우 관리자에게 직접
+            연락해 주세요.
+          </p>
+        )}
         <Button
           onClick={() =>
             navigate({
@@ -74,24 +80,16 @@ export function GuestSubmissionReceipt({
             })
           }
         >
-          제출 내용 보기
+          <GuestIcon name="receipt" /> 제출 내용 보기
         </Button>
-        <p>최신 답변과 사진을 확인하고 답변을 수정할 수 있어요.</p>
-        {receipt.reportedIssueCount > 0 && (
-          <p className="guest-receipt-attention">
-            이상으로 표시한 항목은 관리자에게 전달되었습니다. 긴급한 도움이
-            필요하면 관리자에게 직접 연락해 주세요.
-          </p>
-        )}
-      </section>
-      <DraftResumeLink
-        token={token}
-        expiresAt={receipt.expiresAt}
-        disabled={false}
-        completed
-        showHomeHelp={showHomeHelp}
-        guided
-      />
-    </div>
+        <DraftResumeLink
+          token={token}
+          expiresAt={receipt.expiresAt}
+          disabled={false}
+          completed
+          showHomeHelp={showHomeHelp}
+        />
+      </div>
+    </section>
   );
 }

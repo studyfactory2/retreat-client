@@ -30,7 +30,8 @@ export type ReadyGuestIssueReport = {
   reviewPhotos: GuestIssueReportPhotoSnapshot[];
   reviewCategory: GuestIssueCategoryDto | null;
   attempt: GuestIssueReportAttempt | null;
-  receipt: GuestIssueReceiptDto | null;
+  receipt:
+    (GuestIssueReceiptDto & { title: string; photoCount: number }) | null;
   confirmation: 'cancel' | 'reload' | null;
   message: string;
 };

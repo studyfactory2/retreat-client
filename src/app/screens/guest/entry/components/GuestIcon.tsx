@@ -1,7 +1,17 @@
 export function GuestIcon({
   name,
 }: {
-  name: 'home' | 'guide' | 'arrow' | 'refresh' | 'notice' | 'enter' | 'leave' | 'receipt';
+  name:
+    | 'home'
+    | 'guide'
+    | 'arrow'
+    | 'refresh'
+    | 'notice'
+    | 'enter'
+    | 'leave'
+    | 'receipt'
+    | 'pin'
+    | 'car';
 }) {
   return (
     <svg
@@ -10,6 +20,17 @@ export function GuestIcon({
       aria-hidden="true"
       className="guest-icon"
     >
+      {name === 'pin' && (
+        <>
+          <path d="M19 10c0 5-7 11-7 11S5 15 5 10a7 7 0 1 1 14 0Z" />
+          <circle cx="12" cy="10" r="2.4" />
+        </>
+      )}
+      {name === 'car' && (
+        <>
+          <path d="m4 10 2-5h12l2 5m-16 0h16v8H4Zm2 8v2m12-2v2M7 14h2m6 0h2" />
+        </>
+      )}
       {name === 'home' && (
         <path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1V10Z" />
       )}

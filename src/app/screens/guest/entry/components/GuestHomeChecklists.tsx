@@ -16,21 +16,19 @@ export function GuestHomeChecklists({
       className="guest-home-checklists"
       aria-labelledby="guest-check-title"
     >
-      <h2 id="guest-check-title">입실·퇴실 체크</h2>
+      <h2 id="guest-check-title">이용 체크</h2>
       <div className="guest-home-checklists__grid">
         {(
           [
             {
               type: 'CHECK_IN',
               title: '입실 체크',
-              description: '이용 전 시설 확인',
               to: checkIn,
               icon: 'enter',
             },
             {
               type: 'CHECK_OUT',
               title: '퇴실 체크',
-              description: '떠나기 전 마무리 확인',
               to: checkOut,
               icon: 'leave',
             },
@@ -42,13 +40,8 @@ export function GuestHomeChecklists({
           const content = (
             <>
               <GuestIcon name={action.icon} />
-              <span>
-                <strong>{action.title}</strong>
-                <small>
-                  {available ? action.description : '체크리스트 준비 중'}
-                </small>
-              </span>
-              {available && <GuestIcon name="arrow" />}
+              <span>{action.title}</span>
+              {!available && <small>준비 중</small>}
             </>
           );
           return available ? (

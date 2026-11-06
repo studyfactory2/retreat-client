@@ -9,13 +9,14 @@ export const NavigationActionsContext = createContext<NavigationActions | null>(
   null,
 );
 
-type RegisterGuard = (hasPendingWork: () => boolean) => () => void;
+export type NavigationGuard = () => boolean | 'private-draft-link';
+type RegisterGuard = (hasPendingWork: NavigationGuard) => () => void;
 export const NavigationGuardContext = createContext<RegisterGuard | null>(null);
 export const NavigationHistoryContext = createContext<FragmentHistory | null>(
   null,
 );
 
-export function useNavigationGuard(hasPendingWork: () => boolean): void {
+export function useNavigationGuard(hasPendingWork: NavigationGuard): void {
   const register = useContext(NavigationGuardContext);
   if (!register)
     throw new Error('Navigation guard requires NavigationBoundary.');

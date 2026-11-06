@@ -59,11 +59,7 @@ export function GuestSubmissionReview({
       className="guest-draft-card guest-submitted-review"
       aria-labelledby="correction-review-title"
     >
-      <p className="guest-draft-eyebrow">저장 전 마지막 확인</p>
-      <h2 id="correction-review-title">수정 내용을 확인해 주세요</h2>
-      <p className="guest-submitted-hint">
-        {detail.revision}차 제출 내용을 기준으로 수정합니다.
-      </p>
+      <h2 id="correction-review-title">변경한 내용</h2>
       {changes.map(({ item, section, before, after }) => (
         <article className="guest-submitted-change" key={item.id}>
           <h3>
@@ -109,14 +105,11 @@ export function GuestSubmissionReview({
         {dropped.length > 0 && (
           <p>
             <strong>현재 첨부에서 사진 {dropped.length}장이 제외됩니다.</strong>{' '}
-            과거 기록의 사진은 유지되며, 다시 이상으로 바꿔도 자동 복구되지
-            않습니다.
+            사진은 이전 기록에 보관돼요. 다시 이상으로 바꿔도 자동으로 돌아오지
+            않아요.
           </p>
         )}
-        <p>
-          이전에 접수한 이상사항의 처리 상태는 바뀌지 않습니다. 관리자가 확인한
-          해결·취소 상태를 이 수정으로 변경할 수 없습니다.
-        </p>
+        <p>이전에 접수한 이상사항의 처리 상태는 유지돼요.</p>
       </aside>
       {!pending && (
         <>
@@ -127,7 +120,7 @@ export function GuestSubmissionReview({
               disabled={disabled}
               onChange={(event) => setConfirmed(event.target.checked)}
             />
-            <span>수정 내용과 사진 처리 안내를 확인했습니다.</span>
+            <span>수정 내용과 사진 처리를 확인했어요.</span>
           </label>
           <div className="guest-submitted-actions">
             <Button

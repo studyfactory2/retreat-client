@@ -356,7 +356,11 @@ export function useGuestIssueReport(token: string | null) {
           reviewed: null,
           reviewPhotos: [],
           reviewCategory: null,
-          receipt,
+          receipt: {
+            ...receipt,
+            title: attempt.body.title,
+            photoCount: attempt.body.photos.length,
+          },
           confirmation: null,
           message: '신고가 접수되었습니다.',
         });

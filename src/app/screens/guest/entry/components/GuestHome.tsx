@@ -26,45 +26,47 @@ export function GuestHome({
   return (
     <div className="guest-home">
       <GuestHomeHeader entry={entry} />
-      {entry.kind === 'stay' && accessCard}
-      <GuestHomeChecklists
-        checklists={entry.context.checklists}
-        checkIn={checkIn}
-        checkOut={checkOut}
-      />
-      <section className="guest-home-resources" aria-label="이용 안내와 도움">
-        <Link className="guest-home-resource" to={guide}>
-          <span className="guest-home-resource__icon">
-            <GuestIcon name="guide" />
-          </span>
-          <span>
-            <strong>휴양소 이용 안내</strong>
-            <small>시설 이용 방법과 안내사항</small>
-          </span>
-          <GuestIcon name="arrow" />
-        </Link>
-        {entry.kind === 'qr' && report && (
-          <Link className="guest-home-resource" to={report} reloadDocument>
-            <span className="guest-home-resource__icon">
-              <GuestIcon name="notice" />
-            </span>
-            <span>
-              <strong>불편사항 신고</strong>
-              <small>고장이나 이용 중 불편을 알려주세요</small>
-            </span>
-            <GuestIcon name="arrow" />
-          </Link>
-        )}
-      </section>
-      <GuestManagerContact phone={entry.context.property.publicContactPhone} />
-      {entry.kind === 'stay' &&
-        entry.context.property.vehicleRegistrationEnabled &&
-        vehicleCard}
-      <p className="guest-home-note">
-        {entry.kind === 'qr'
-          ? '개인 이용 일정은 전달받은 개인 이용 링크에서 확인해 주세요.'
-          : '다시 방문할 때도 전달받은 개인 이용 링크를 열어 주세요.'}
-      </p>
+      <div className="guest-home-columns">
+        <div className="guest-home-column">
+          {entry.kind === 'stay' && accessCard}
+          <GuestHomeChecklists
+            checklists={entry.context.checklists}
+            checkIn={checkIn}
+            checkOut={checkOut}
+          />
+        </div>
+        <div className="guest-home-column">
+          <section
+            className="guest-home-resources"
+            aria-labelledby="guest-resources-title"
+          >
+            <h2 id="guest-resources-title">이용 안내</h2>
+            <Link className="guest-home-resource" to={guide}>
+              <GuestIcon name="guide" />
+              <span>휴양소 안내</span>
+              <GuestIcon name="arrow" />
+            </Link>
+            {entry.kind === 'stay' &&
+              entry.context.property.vehicleRegistrationEnabled &&
+              vehicleCard}
+            {entry.kind === 'qr' && report && (
+              <Link className="guest-home-resource" to={report} reloadDocument>
+                <GuestIcon name="notice" />
+                <span>불편 신고</span>
+                <GuestIcon name="arrow" />
+              </Link>
+            )}
+            <GuestManagerContact
+              phone={entry.context.property.publicContactPhone}
+            />
+            <p className="guest-home-note">
+              {entry.kind === 'qr'
+                ? '예약 일정은 개인 이용 링크에서 확인해 주세요.'
+                : '불편 신고는 현장의 이용객 QR을 스캔해 주세요.'}
+            </p>
+          </section>
+        </div>
+      </div>
     </div>
   );
 }
