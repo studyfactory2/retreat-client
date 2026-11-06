@@ -135,11 +135,6 @@
   background: #fff4ed;
   color: #954128;
 }
-.staff-draft-choices .staff-draft-clear {
-  padding-inline: 12px;
-  color: var(--color-muted);
-  font-size: 12px;
-}
 .staff-draft fieldset:disabled button,
 .staff-draft textarea:disabled {
   cursor: default;
@@ -210,34 +205,6 @@
   color: var(--color-heading);
   font-weight: 600;
 }
-.staff-draft-savebar {
-  position: sticky;
-  bottom: 0;
-  z-index: 5;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 14px;
-  margin-top: 20px;
-  padding: 16px 20px max(16px, env(safe-area-inset-bottom, 0px));
-  border: 1px solid #d9e5fa;
-  border-radius: 16px;
-  background: #fff;
-  box-shadow: 0 -4px 24px #1026470a;
-}
-.staff-draft-savebar strong {
-  display: block;
-  font-size: 14px;
-}
-.staff-draft-savebar span {
-  display: block;
-  margin-top: 4px;
-  font-size: 11px;
-  color: var(--color-muted);
-}
-.staff-draft-savebar .ui-button {
-  flex: 0 0 auto;
-}
 .staff-draft-state {
   padding-block: 44px;
   text-align: center;
@@ -250,12 +217,6 @@
   font-size: 14px;
   color: var(--color-muted);
   line-height: 1.85;
-}
-.staff-draft-footer {
-  padding: 24px 20px max(32px, env(safe-area-inset-bottom, 0px));
-  font-size: 11px;
-  color: var(--color-muted);
-  text-align: center;
 }
 .staff-draft-skip {
   position: fixed;
@@ -282,11 +243,5 @@
   }
   .staff-draft-abnormal {
     padding: 14px;
-  }
-  .staff-draft-savebar {
-    padding-inline: 14px;
-  }
-  .staff-draft-savebar .ui-button {
-    padding-inline: 18px;
   }
 }

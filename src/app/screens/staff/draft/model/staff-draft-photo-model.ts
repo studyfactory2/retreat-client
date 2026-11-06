@@ -1,11 +1,14 @@
 import { ApiRequestError } from '../../../../core/api/api-error';
 
+import type { StaffPhotoAssignment } from './staff-flow-model';
+
 export const STAFF_PHOTO_QUEUE_LIMIT = 8;
 export const STAFF_PHOTO_UPLOAD_CONCURRENCY = 2;
 
 export type QueuedStaffPhoto = {
   id: number;
   file: File | null;
+  assignment?: StaffPhotoAssignment;
   filename: string;
   sizeBytes: number;
   status: 'invalid' | 'queued' | 'uploading' | 'failed' | 'uncertain';

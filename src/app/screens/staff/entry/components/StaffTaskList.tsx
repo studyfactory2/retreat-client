@@ -5,13 +5,13 @@ import type {
   CleaningTaskDto,
   CleaningTaskListDto,
 } from '../../../../features/cleaning-tasks/cleaning-tasks.types';
-import { taskStatusLabel } from '../../../../features/cleaning-tasks/cleaning-tasks-display';
 import type { StaffQrContextDto } from '../../../../features/staff-entry/staff-entry.types';
 import { useOpenStaffDraft } from '../hooks/use-open-staff-draft';
 import {
   agendaTime,
   groupStaffTasks,
   staffTaskName,
+  staffTaskStatus,
 } from '../model/staff-task-agenda';
 import { loadStaffTaskPage } from '../model/load-staff-task-page';
 import { StaffIcon } from './StaffIcon';
@@ -45,6 +45,10 @@ export function StaffTaskList({
   const [syncDeferred, setSyncDeferred] = useState(false);
   const [loadedFor, setLoadedFor] = useState('');
   const [message, setMessage] = useState('');
+  const [startError, setStartError] = useState<{
+    taskId: string;
+    message: string;
+  } | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
   const [confirmedFor, setConfirmedFor] = useState('');
   const [pending, setPending] = useState<string | null>(null);
@@ -137,7 +141,7 @@ export function StaffTaskList({
     const controller = new AbortController();
     operation.current = controller;
     setPending(task.id);
-    setMessage('');
+    setStartError(null);
     try {
       const result = await startCleaningTask(
         token,
@@ -156,11 +160,13 @@ export function StaffTaskList({
       ) {
         callbacks.current.rejectAccess();
       }
-      setMessage(
-        error instanceof ApiRequestError && error.status && error.status < 500
-          ? error.message
-          : '작성 화면을 열지 못했습니다. 목록을 새로고침한 뒤 같은 작업에서 이어쓰기를 눌러 주세요.',
-      );
+      setStartError({
+        taskId: task.id,
+        message:
+          error instanceof ApiRequestError && error.status && error.status < 500
+            ? error.message
+            : '작업을 열지 못했어요. 목록을 새로고침한 뒤 같은 작업을 다시 선택해 주세요.',
+      });
     } finally {
       if (operation.current === controller) {
         operation.current = null;
@@ -175,6 +181,7 @@ export function StaffTaskList({
     setConfirmedFor('');
     setLoadedFor('');
     setMessage('');
+    setStartError(null);
     onViewChange(next);
   }
 
@@ -186,6 +193,8 @@ export function StaffTaskList({
       wide={wide}
       assignedName={context.assignedStaff?.name ?? ''}
       confirmed={confirmed}
+      startError={startError?.taskId === current.id ? startError.message : null}
+      onRefresh={onRefreshContext}
       pending={pending !== null}
       onConfirm={(value) => setConfirmedFor(value ? confirmationKey : '')}
       onStart={() => void start(current)}
@@ -215,6 +224,11 @@ export function StaffTaskList({
             onClick={() => changeView({ showCompleted: completed, page: 1 })}
           >
             {completed ? '완료' : '할 일'}
+            {showCompleted === completed && !loading && list && (
+              <span className="staff-task-total" aria-label={list.total + '건'}>
+                {list.total}
+              </span>
+            )}
           </button>
         ))}
       </div>
@@ -263,6 +277,7 @@ export function StaffTaskList({
                             if (wide && isSelected) return;
                             setSelected(isSelected ? null : task.id);
                             setConfirmedFor('');
+                            setStartError(null);
                           }}
                         >
                           <time dateTime={task.dueAt}>
@@ -279,10 +294,7 @@ export function StaffTaskList({
                           <span
                             className={`staff-task-badge is-${task.status.toLowerCase()}`}
                           >
-                            {task.status === 'IN_PROGRESS' &&
-                            task.currentSubmissionId
-                              ? '작성 중'
-                              : taskStatusLabel[task.status]}
+                            {staffTaskStatus(task)}
                           </span>
                           <StaffIcon name="chevron" />
                         </button>

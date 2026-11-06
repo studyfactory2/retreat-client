@@ -23,6 +23,8 @@ import {
   type QueuedStaffPhoto,
 } from '../model/staff-draft-photo-model';
 
+import type { StaffPhotoAssignment } from '../model/staff-flow-model';
+
 type PhotoResource =
   | { status: 'loading' }
   | { status: 'ready'; list: StaffDraftPhotoListDto }
@@ -42,6 +44,7 @@ type Options = {
   locked: boolean;
   accessReady: boolean;
   onAccessRejected: () => void;
+  onUploaded: (photoId: string, assignment: StaffPhotoAssignment) => void;
 };
 type Operation = {
   controller: AbortController;
@@ -64,13 +67,14 @@ export function useStaffDraftPhotos({
   locked,
   accessReady,
   onAccessRejected,
+  onUploaded,
 }: Options) {
   const owner = useMemo(
     () => ({ token, draftId, expiresAt }),
     [token, draftId, expiresAt],
   );
   const scope = useRef<typeof owner | null>(owner);
-  const options = useRef({ locked, accessReady, onAccessRejected });
+  const options = useRef({ locked, accessReady, onAccessRejected, onUploaded });
   const operation = useRef<Operation | null>(null);
   const lastList = useRef<StaffDraftPhotoListDto | null>(null);
   const counter = useRef(0);
@@ -93,8 +97,8 @@ export function useStaffDraftPhotos({
     [owner, read],
   );
   useLayoutEffect(() => {
-    options.current = { locked, accessReady, onAccessRejected };
-  }, [locked, accessReady, onAccessRejected]);
+    options.current = { locked, accessReady, onAccessRejected, onUploaded };
+  }, [locked, accessReady, onAccessRejected, onUploaded]);
   useLayoutEffect(() => {
     scope.current = owner;
     lastList.current = null;
@@ -318,6 +322,8 @@ export function useStaffDraftPhotos({
             job.controller.signal,
           );
           if (!active() || !alive()) return;
+          if (entry.assignment)
+            options.current.onUploaded(photo.id, entry.assignment);
           publish((value) => ({
             ...value,
             queue: value.queue.filter((candidate) => candidate.id !== entry.id),
@@ -336,8 +342,7 @@ export function useStaffDraftPhotos({
                     },
                   }
                 : value.resource,
-            notice:
-              '사진을 추가했습니다. 아직 정비 기록을 최종 제출한 것은 아닙니다.',
+            notice: '',
           }));
         } catch (error: unknown) {
           if (!active()) return;
@@ -386,7 +391,7 @@ export function useStaffDraftPhotos({
   }, [alive, owner, publish, read, readList, rejectAccess]);
 
   const uploadFiles = useCallback(
-    (files: FileList | readonly File[]) => {
+    (files: FileList | readonly File[], assignment?: StaffPhotoAssignment) => {
       if (!alive()) return;
       const state = read();
       const list =
@@ -426,6 +431,7 @@ export function useStaffDraftPhotos({
         return {
           id: ++counter.current,
           file: message ? null : file,
+          assignment,
           filename: file.name,
           sizeBytes: file.size,
           status: message ? 'invalid' : 'queued',

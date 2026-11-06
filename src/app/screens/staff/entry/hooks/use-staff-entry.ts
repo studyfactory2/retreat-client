@@ -60,7 +60,7 @@ export function useStaffEntry(token: string | null) {
       resource: {
         status: 'error',
         kind: 'unavailable',
-        message: '이 직원용 QR을 사용할 수 없습니다. 관리자에게 문의해 주세요.',
+        message: '관리자에게 이 휴양소의 직원 QR을 다시 요청해 주세요.',
       },
     });
   }, [owner]);
@@ -92,6 +92,7 @@ export function useStaffEntry(token: string | null) {
         const unavailable =
           failure?.status === 401 ||
           failure?.status === 403 ||
+          failure?.status === 410 ||
           failure?.code === 'INVALID_QR';
         setResult({
           owner,
@@ -100,10 +101,10 @@ export function useStaffEntry(token: string | null) {
             status: 'error',
             kind: unavailable ? 'unavailable' : 'request',
             message: unavailable
-              ? '이 직원용 QR을 사용할 수 없습니다. 안내받은 QR을 다시 확인하거나 관리자에게 문의해 주세요.'
+              ? '관리자에게 이 휴양소의 직원 QR을 다시 요청해 주세요.'
               : failure?.status === 429
                 ? '요청이 많습니다. 잠시 후 다시 시도해 주세요.'
-                : '직원용 안내를 불러오지 못했습니다. 다시 시도해 주세요.',
+                : '연결 상태를 확인한 뒤 다시 시도해 주세요.',
           },
         });
       } finally {

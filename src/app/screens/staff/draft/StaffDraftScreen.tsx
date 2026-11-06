@@ -37,12 +37,16 @@ export function StaffDraftScreen() {
       ) : resource.status === 'loading' ? (
         <section className="staff-draft-card staff-draft-state" role="status">
           <h1>정비 내용을 불러오고 있습니다</h1>
-          <p>잠시만 기다려 주세요.</p>
         </section>
       ) : resource.status === 'submitted' ? (
         <StaffSubmissionReceipt receipt={resource.receipt} token={token} />
       ) : (
-        <StaffDraftForm session={session} resource={resource} token={token} />
+        <StaffDraftForm
+          key={resource.draft.id}
+          session={session}
+          resource={resource}
+          token={token}
+        />
       )}
     </StaffDraftFrame>
   );

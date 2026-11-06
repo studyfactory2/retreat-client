@@ -1,5 +1,4 @@
 import { StaffHeader } from '../../components/StaffHeader';
-import { APP_BRAND } from '../../../../core/config/brand';
 import type { ReactNode, RefObject } from 'react';
 import { StaffIcon } from './StaffIcon';
 
@@ -47,7 +46,6 @@ export function StaffFrame({
       >
         {children}
       </main>
-      <footer className="staff-entry-footer">{APP_BRAND.appName}</footer>
     </div>
   );
 }

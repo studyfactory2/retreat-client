@@ -7,12 +7,14 @@ export function StaffDraftAnswerField({
   item,
   answer,
   disabled,
+  highlightMissing,
   onValue,
   onDetails,
 }: {
   item: ChecklistItem;
   answer?: StaffDraftAnswer;
   disabled: boolean;
+  highlightMissing: boolean;
   onValue: (value: 'NORMAL' | 'ABNORMAL' | null) => void;
   onDetails: (change: {
     description?: string | null;
@@ -21,14 +23,19 @@ export function StaffDraftAnswerField({
     repairNote?: string | null;
   }) => void;
 }) {
+  const missing = highlightMissing && item.required && !answer;
   const descriptionId = `staff-description-${item.id}`;
   return (
-    <fieldset className="staff-draft-item" disabled={disabled}>
+    <fieldset
+      className="staff-draft-item"
+      disabled={disabled}
+      aria-invalid={missing || undefined}
+    >
       <legend>
         {item.label}
-        {item.required && (
-          <span className="staff-draft-required">필수 항목</span>
-        )}
+        <span className="staff-draft-required">
+          {missing ? '선택 필요' : item.required ? '필수' : '선택'}
+        </span>
       </legend>
       <div
         className="staff-draft-choices"
@@ -37,8 +44,9 @@ export function StaffDraftAnswerField({
       >
         <button
           type="button"
+          id={'staff-answer-' + item.id}
           aria-pressed={answer?.value === 'NORMAL'}
-          onClick={() => onValue('NORMAL')}
+          onClick={() => onValue(answer?.value === 'NORMAL' ? null : 'NORMAL')}
         >
           정상
         </button>
@@ -46,19 +54,12 @@ export function StaffDraftAnswerField({
           type="button"
           className="staff-draft-choice-abnormal"
           aria-pressed={answer?.value === 'ABNORMAL'}
-          onClick={() => onValue('ABNORMAL')}
+          onClick={() =>
+            onValue(answer?.value === 'ABNORMAL' ? null : 'ABNORMAL')
+          }
         >
           이상 있음
         </button>
-        {answer && (
-          <button
-            type="button"
-            className="staff-draft-clear"
-            onClick={() => onValue(null)}
-          >
-            선택 해제
-          </button>
-        )}
       </div>
       {answer?.value === 'ABNORMAL' && (
         <div className="staff-draft-abnormal">

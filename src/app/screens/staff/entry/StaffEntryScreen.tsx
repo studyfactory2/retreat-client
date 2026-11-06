@@ -71,41 +71,36 @@ export function StaffEntryScreen() {
       ) : (
         <StaffHome
           context={resource.data}
-          startCard={
-            <>
-              {resource.data.assignedStaff ? (
-                <StaffTaskList
-                  token={access.token}
-                  context={resource.data}
-                  rejectAccess={rejectAccess}
-                  view={
-                    taskView?.scope === taskScope
-                      ? taskView.view
-                      : initialTaskView
-                  }
-                  onViewChange={(view) =>
-                    setTaskView({ scope: taskScope, view })
-                  }
-                  onRefreshContext={refresh}
-                />
-              ) : (
-                <section
-                  className="staff-task-card"
-                  aria-labelledby="unassigned-tasks-title"
-                >
-                  <header className="staff-task-heading">
-                    <h2 id="unassigned-tasks-title">정비 작업</h2>
-                  </header>
-                  <p className="staff-task-empty">
-                    담당 직원 배정 후 작업을 시작할 수 있어요.
-                  </p>
-                </section>
-              )}
-              <details className="staff-entry-secondary">
-                <summary>추가 정비 기록</summary>
-                <StaffStartCard context={resource.data} form={startForm} />
-              </details>
-            </>
+          tasks={
+            resource.data.assignedStaff ? (
+              <StaffTaskList
+                token={access.token}
+                context={resource.data}
+                rejectAccess={rejectAccess}
+                view={
+                  taskView?.scope === taskScope
+                    ? taskView.view
+                    : initialTaskView
+                }
+                onViewChange={(view) => setTaskView({ scope: taskScope, view })}
+                onRefreshContext={refresh}
+              />
+            ) : (
+              <section
+                className="staff-task-card"
+                aria-labelledby="unassigned-tasks-title"
+              >
+                <header className="staff-task-heading">
+                  <h2 id="unassigned-tasks-title">정비 작업</h2>
+                </header>
+                <p className="staff-task-empty">
+                  관리자에게 이 휴양소의 담당 직원 배정을 요청해 주세요.
+                </p>
+              </section>
+            )
+          }
+          standalone={
+            <StaffStartCard context={resource.data} form={startForm} />
           }
         />
       )}

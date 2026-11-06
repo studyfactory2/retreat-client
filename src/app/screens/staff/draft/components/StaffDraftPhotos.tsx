@@ -7,6 +7,10 @@ import {
   STAFF_PHOTO_QUEUE_LIMIT,
   formatStaffPhotoSize,
 } from '../model/staff-draft-photo-model';
+import {
+  propertyPhotoLocation,
+  type StaffPhotoAssignment,
+} from '../model/staff-flow-model';
 import { StaffDraftPhotoCard } from './StaffDraftPhotoCard';
 import { StaffDraftPhotoQueue } from './StaffDraftPhotoQueue';
 import '../styles/staff-draft-photos.css';
@@ -20,6 +24,7 @@ export function StaffDraftPhotos({
   onAccessRejected,
   controller,
   renderAssignment,
+  assignments,
   requiredAfter = false,
 }: {
   token: string;
@@ -30,11 +35,18 @@ export function StaffDraftPhotos({
   onAccessRejected: () => void;
   controller: StaffDraftPhotosController;
   requiredAfter?: boolean;
+  assignments: Record<string, StaffPhotoAssignment>;
   renderAssignment: (photo: StaffDraftPhotoDto, index: number) => ReactNode;
 }) {
   useNavigationGuard(controller.hasPendingWork);
   const inputId = useId();
   const { resource, items, limits, queue, busy, writing, removal } = controller;
+  const afterCount = items.filter((photo) => {
+    const assigned = assignments[photo.id];
+    return (
+      assigned?.purpose === 'MAINTENANCE_AFTER' && Boolean(assigned.location)
+    );
+  }).length;
   const limitNames = limits?.acceptedTypes
     .map((type) =>
       type === 'image/jpeg' ? 'JPEG' : type === 'image/png' ? 'PNG' : 'WebP',
@@ -45,26 +57,47 @@ export function StaffDraftPhotos({
       className="staff-draft-card staff-photos"
       aria-labelledby={`${inputId}-title`}
     >
-      <div className="staff-photos-heading">
-        <div>
-          <h2 id={`${inputId}-title`}>
-            사진 남기기 <span>{requiredAfter ? '완료 사진 필수' : '선택'}</span>
-          </h2>
-        </div>
-        {resource.status === 'ready' && limits && (
-          <span className="staff-photos-count">
-            {items.length} / {limits.maxPhotos}장
+      <header className="staff-photos-heading">
+        <h2 id={`${inputId}-title`}>
+          {requiredAfter ? '정비 후 사진' : '정비 사진'}
+        </h2>
+        {resource.status === 'ready' && (
+          <span
+            className={`staff-photos-count${requiredAfter && afterCount ? ' is-complete' : ''}`}
+            role="status"
+          >
+            {requiredAfter
+              ? afterCount
+                ? `정비 후 ${afterCount}장 ✓`
+                : '1장 이상 필요'
+              : `첨부 ${items.length}장`}
           </span>
         )}
+      </header>
+      {/* Both pickers stay mounted while the native camera or gallery is open. */}
+      <div className="staff-photo-pickers">
+        <PhotoPicker
+          label="정비 후 사진 추가"
+          primary
+          accept={limits?.acceptedTypes.join(',')}
+          disabled={!controller.canSelect}
+          onSelect={(files) =>
+            controller.uploadFiles(files, {
+              purpose: 'MAINTENANCE_AFTER',
+              location: propertyPhotoLocation.value,
+            })
+          }
+        />
+        <PhotoPicker
+          label="다른 사진 추가"
+          accept={limits?.acceptedTypes.join(',')}
+          disabled={!controller.canSelect}
+          onSelect={(files) => controller.uploadFiles(files)}
+        />
       </div>
-      <p className="staff-photos-intro">
-        {requiredAfter
-          ? '정비 후 사진을 1장 이상 남겨 주세요. 사진 종류도 정비 후로 선택해 주세요.'
-          : '정비한 곳이나 발견한 문제를 사진으로 남겨 주세요.'}
-      </p>
       {resource.status === 'loading' ? (
         <p className="staff-photos-status" role="status">
-          저장된 사진과 업로드 제한을 확인하고 있습니다.
+          사진 목록을 확인하고 있어요.
         </p>
       ) : resource.status === 'error' || resource.status === 'unavailable' ? (
         <div className="staff-photos-notice" role="alert">
@@ -79,68 +112,32 @@ export function StaffDraftPhotos({
           </Button>
         </div>
       ) : (
-        <>
-          {items.length ? (
-            <div className="staff-photos-grid">
-              {items.map((photo, index) => (
-                <div className="staff-flow-photo" key={photo.id}>
-                  <StaffDraftPhotoCard
-                    photo={photo}
-                    index={index}
-                    token={token}
-                    draftId={draftId}
-                    draftExpiresAt={expiresAt}
-                    previewEnabled={accessReady}
-                    removeDisabled={!controller.canWrite || queue.length > 0}
-                    onRemove={controller.remove}
-                    onAccessRejected={onAccessRejected}
-                  />
-                  {renderAssignment(photo, index)}
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="staff-photos-empty">
-              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <rect x="3" y="4" width="18" height="16" rx="3" />
-                <circle cx="8" cy="9" r="1.5" />
-                <path d="m4 17 5-5 4 4 3-3 5 5" />
-              </svg>
-              <p>아직 첨부한 사진이 없습니다.</p>
-              <span>
-                {requiredAfter
-                  ? '청소·정비를 마친 모습을 추가해 주세요.'
-                  : '필요한 사진만 자유롭게 추가해 주세요.'}
-              </span>
-            </div>
-          )}
-        </>
+        items.length > 0 && (
+          <div className="staff-photos-grid">
+            {items.map((photo, index) => (
+              <div className="staff-flow-photo" key={photo.id}>
+                <StaffDraftPhotoCard
+                  photo={photo}
+                  index={index}
+                  token={token}
+                  draftId={draftId}
+                  draftExpiresAt={expiresAt}
+                  previewEnabled={accessReady}
+                  removeDisabled={!controller.canWrite || queue.length > 0}
+                  onRemove={controller.remove}
+                  onAccessRejected={onAccessRejected}
+                />
+                {renderAssignment(photo, index)}
+              </div>
+            ))}
+          </div>
+        )
       )}
-      {/* Keep the picker mounted while returning from a native file dialog. */}
-      <label
-        className="staff-photos-picker"
-        htmlFor={inputId}
-        aria-disabled={!controller.canSelect}
-      >
-        <span>＋ 사진 추가</span>
-        <input
-          id={inputId}
-          type="file"
-          accept={limits?.acceptedTypes.join(',')}
-          multiple
-          disabled={!controller.canSelect}
-          onChange={(event) => {
-            if (event.currentTarget.files)
-              controller.uploadFiles(event.currentTarget.files);
-            event.currentTarget.value = '';
-          }}
-        />
-      </label>
       <details className="staff-photos-details">
-        <summary>사진 도움말</summary>
+        <summary>사진 첨부 안내</summary>
         <p className="staff-photos-help">
-          선택한 사진은 바로 업로드됩니다. 사진의 종류와 위치는 최종 제출할 때
-          저장됩니다.
+          사진은 선택하면 업로드됩니다. 용도와 위치는 최종 제출 때 저장되므로,
+          작성 링크를 다시 열면 다시 선택해 주세요.
         </p>
         {limits && (
           <p className="staff-photos-help">
@@ -152,6 +149,18 @@ export function StaffDraftPhotos({
         <p className="staff-photos-help">
           HEIC·HEIF 사진은 JPEG로 변환한 뒤 선택해 주세요.
         </p>
+        {resource.status === 'ready' && !queue.length && !removal && (
+          <button
+            type="button"
+            className="staff-photos-refresh"
+            disabled={busy || !accessReady}
+            onClick={() => {
+              void controller.refresh();
+            }}
+          >
+            사진 목록 새로고침
+          </button>
+        )}
       </details>
       {!accessReady && (
         <p className="staff-photos-status" role="status">
@@ -166,8 +175,7 @@ export function StaffDraftPhotos({
       )}
       {writing && (
         <p className="staff-photos-status" role="status">
-          사진을 처리하고 있습니다. 최대 2장씩 올리며, 각 사진의 결과를 아래에서
-          확인할 수 있습니다.
+          사진을 올리고 있어요.
         </p>
       )}
       {controller.notice && (
@@ -203,18 +211,40 @@ export function StaffDraftPhotos({
           </div>
         </div>
       )}
-      {resource.status === 'ready' && !queue.length && !removal && (
-        <button
-          type="button"
-          className="staff-photos-refresh"
-          disabled={busy || !accessReady}
-          onClick={() => {
-            void controller.refresh();
-          }}
-        >
-          사진 목록 새로고침
-        </button>
-      )}
     </section>
+  );
+}
+
+function PhotoPicker({
+  label,
+  primary = false,
+  accept,
+  disabled,
+  onSelect,
+}: {
+  label: string;
+  primary?: boolean;
+  accept?: string;
+  disabled: boolean;
+  onSelect: (files: FileList) => void;
+}) {
+  return (
+    <label
+      className={`staff-photos-picker${primary ? ' is-primary' : ''}`}
+      aria-disabled={disabled}
+    >
+      <span aria-hidden="true">＋</span> {label}
+      <input
+        aria-label={label}
+        type="file"
+        multiple
+        accept={accept}
+        disabled={disabled}
+        onChange={(event) => {
+          if (event.currentTarget.files) onSelect(event.currentTarget.files);
+          event.currentTarget.value = '';
+        }}
+      />
+    </label>
   );
 }

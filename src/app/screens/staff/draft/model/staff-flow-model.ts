@@ -7,6 +7,7 @@ export type StaffPhotoAssignment = {
   purpose: StaffSubmissionPhotoInput['purpose'];
   location: string;
 };
+export const propertyPhotoLocation = { value: 'property', label: '휴양소' };
 export const staffPhotoPurposes = {
   MAINTENANCE_AFTER: '정비 후 모습',
   MAINTENANCE_BEFORE: '정비 전 모습',
@@ -18,9 +19,9 @@ export function staffPhotoLocations(
   draft: StaffDraftDto,
   purpose: StaffPhotoAssignment['purpose'],
 ) {
-  return draft.template.definition.sections.flatMap((section) => {
-    const general =
-      purpose === 'MAINTENANCE_AFTER' || purpose === 'MAINTENANCE_BEFORE';
+  const general =
+    purpose === 'MAINTENANCE_AFTER' || purpose === 'MAINTENANCE_BEFORE';
+  const locations = draft.template.definition.sections.flatMap((section) => {
     const items = section.items.filter(
       (item) =>
         general ||
@@ -41,6 +42,7 @@ export function staffPhotoLocations(
       })),
     ];
   });
+  return general ? [propertyPhotoLocation, ...locations] : locations;
 }
 
 export function staffPhotoInputs(
@@ -58,14 +60,17 @@ export function staffPhotoInputs(
           (location) => location.value === assignment.location,
         );
       if (!valid)
-        throw new Error(`사진 ${index + 1}의 종류와 위치를 선택해 주세요.`);
+        throw new Error(`사진 ${index + 1}의 용도와 위치를 확인해 주세요.`);
       const [kind, id] = assignment.location.split(':');
       return {
         attachmentId: photo.id,
         purpose: assignment.purpose,
         sectionId: kind === 'section' ? id : null,
         itemId: kind === 'item' ? id : null,
-        areaLabel: null,
+        areaLabel:
+          kind === propertyPhotoLocation.value
+            ? propertyPhotoLocation.label
+            : null,
       };
     }),
   );

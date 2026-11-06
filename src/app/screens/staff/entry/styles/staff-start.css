@@ -1,12 +1,13 @@
 .staff-start > h2 {
   margin-top: 8px;
+  font-size: 15px;
 }
 .staff-start-confirm {
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  margin-top: 22px;
-  padding: 16px;
+  margin-top: 10px;
+  padding: 10px 12px;
   border: 1px solid #d5e2f8;
   border-radius: 12px;
   background: #f4f8ff;
@@ -28,31 +29,17 @@
 }
 .staff-start-submit {
   width: 100%;
-  min-height: 54px;
-  margin-top: 16px;
+  min-height: 44px;
+  margin-top: 10px;
   border-radius: 12px;
   font-size: 15px;
   font-weight: 650;
 }
-.staff-start-details {
-  margin-top: 16px;
+.staff-start-link-note {
+  margin-top: 8px;
   color: var(--color-muted);
   font-size: 12px;
-  line-height: 1.8;
-}
-.staff-start-details > summary {
-  display: list-item;
-  width: fit-content;
-  min-height: 44px;
-  padding-block: 11px;
-  cursor: pointer;
-}
-.staff-start-details ul {
-  margin: 2px 0 0;
-  padding-left: 18px;
-}
-.staff-start-details li + li {
-  margin-top: 6px;
+  line-height: 1.65;
 }
 .staff-start-feedback,
 .staff-start-recovery {

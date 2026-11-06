@@ -1,3 +1,4 @@
+import { taskStatusLabel } from '../../../../features/cleaning-tasks/cleaning-tasks-display';
 import { getSeoulToday } from '../../../../core/dates/seoul-date';
 import type { CleaningTaskDto } from '../../../../features/cleaning-tasks/cleaning-tasks.types';
 
@@ -40,6 +41,12 @@ export function agendaTime(value: string) {
 
 export function staffTaskName(task: CleaningTaskDto) {
   return task.source === 'AUTO' ? '퇴실 후 청소·정비' : '추가 정비';
+}
+
+export function staffTaskStatus(task: CleaningTaskDto) {
+  if (task.status === 'IN_PROGRESS' && task.currentSubmissionId)
+    return '작성 중';
+  return taskStatusLabel[task.status];
 }
 
 export function groupStaffTasks(tasks: CleaningTaskDto[], now = new Date()) {

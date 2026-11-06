@@ -64,6 +64,11 @@ export function useStaffWorkflow({
     step === 2 && session.canEdit && !later,
     session.rejectAccess,
   );
+  const [approval, setApproval] = useState<{
+    review: Review;
+    lockCheck: typeof taskPassword.confirmation;
+  } | null>(null);
+  const [showMissing, setShowMissing] = useState(false);
   const submission = useStaffSubmission({
     token,
     draft,
@@ -78,7 +83,13 @@ export function useStaffWorkflow({
     onDraftRefresh: session.recheck,
   });
   const accessReady = resource.access === 'ready' && !submission.locked;
+  const assignPhoto = useCallback((id: string, value: StaffPhotoAssignment) => {
+    setReview(null);
+    setMessage('');
+    setAssignments((current) => ({ ...current, [id]: value }));
+  }, []);
   const photos = useStaffDraftPhotos({
+    onUploaded: assignPhoto,
     token,
     draftId: draft.id,
     expiresAt: draft.expiresAt,
@@ -134,14 +145,24 @@ export function useStaffWorkflow({
     sameStaffPhotoList(review.photos, photos.items) &&
     photoReady,
   );
-  const titles = [
-    '시설 상태를 확인해 주세요',
-    '정비 사진을 남겨 주세요',
-    '제출 내용을 확인해 주세요',
-  ];
+  const canConfirm = Boolean(
+    step === 2 &&
+    !later &&
+    !disabled &&
+    reviewCurrent &&
+    (!draft.cleaningTask || taskPassword.confirmation),
+  );
+  const confirming = Boolean(
+    canConfirm &&
+    approval &&
+    approval.review === review &&
+    approval.lockCheck === taskPassword.confirmation,
+  );
   const editableDraft = { ...draft, answers };
   const go = (next: number) => {
     setMessage('');
+    setApproval(null);
+    setShowMissing(false);
     setLater(false);
     setStep(next);
   };
@@ -162,9 +183,7 @@ export function useStaffWorkflow({
         draft.cleaningTask &&
         !inputs.some((photo) => photo.purpose === 'MAINTENANCE_AFTER')
       )
-        throw new Error(
-          '정비 완료 사진을 1장 이상 추가하고 사진 종류를 정비 후로 선택해 주세요.',
-        );
+        throw new Error('정비 후 사진을 한 장 이상 추가해 주세요.');
       setReview({ draft: saved, photos: list.items, inputs });
       go(2);
     } catch (error: unknown) {
@@ -199,10 +218,6 @@ export function useStaffWorkflow({
       if (alive.current) setPreparing(false);
     }
   };
-  const assignPhoto = (id: string, value: StaffPhotoAssignment) => {
-    setReview(null);
-    setAssignments((current) => ({ ...current, [id]: value }));
-  };
   const changeAnswerDetails = (
     itemId: string,
     change: Parameters<typeof changeStaffDraftDetails>[2],
@@ -217,17 +232,24 @@ export function useStaffWorkflow({
       try {
         assertStaffChecklistComplete(editableDraft);
         go(1);
-      } catch {
+      } catch (error: unknown) {
         setMessage(
-          '필수 항목의 상태를 모두 선택해 주세요. 일부만 작성했다면 나중에 계속하기로 저장할 수 있어요.',
+          error instanceof Error ? error.message : '점검 내용을 확인해 주세요.',
         );
+        const missing = required.find(
+          (item) => !answers.items.some((answer) => answer.itemId === item.id),
+        );
+        setShowMissing(Boolean(missing));
+        if (missing)
+          document.getElementById('staff-answer-' + missing.id)?.focus();
       }
     } else if (step === 1) void prepareReview();
-    else if (
-      review &&
-      reviewCurrent &&
-      (!draft.cleaningTask || taskPassword.confirmation)
-    ) {
+    else if (review && canConfirm) {
+      if (!confirming) {
+        setApproval({ review, lockCheck: taskPassword.confirmation });
+        return;
+      }
+      setApproval(null);
       void submission.submit(
         review.inputs,
         review.draft.updatedAt,
@@ -255,7 +277,7 @@ export function useStaffWorkflow({
     assignments,
     preparing,
     later,
-    message,
+    message: showMissing && answered === required.length ? '' : message,
     heading,
     submission,
     taskPassword,
@@ -269,7 +291,9 @@ export function useStaffWorkflow({
     photoReady,
     reviewCurrent,
     editableDraft,
-    stepTitle: titles[step],
+    confirming,
+    cancelConfirmation: () => setApproval(null),
+    showMissing,
     saveStateLabel,
     nextDisabled:
       disabled ||
@@ -277,11 +301,12 @@ export function useStaffWorkflow({
       (step === 2 &&
         (!reviewCurrent ||
           Boolean(draft.cleaningTask && !taskPassword.confirmation))),
-    nextLabel:
-      step === 0
-        ? '다음: 사진'
+    nextLabel: confirming
+      ? '확인하고 제출'
+      : step === 0
+        ? '다음 · 사진'
         : step === 1
-          ? '저장하고 내용 확인'
+          ? '저장하고 제출 확인'
           : '정비 완료 제출',
     go,
     advance,

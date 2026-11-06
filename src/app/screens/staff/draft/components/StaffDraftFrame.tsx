@@ -1,5 +1,4 @@
 import { StaffHeader } from '../../components/StaffHeader';
-import { APP_BRAND } from '../../../../core/config/brand';
 import type { ReactNode, RefObject } from 'react';
 
 export function StaffDraftFrame({
@@ -29,7 +28,6 @@ export function StaffDraftFrame({
       >
         {children}
       </main>
-      <footer className="staff-draft-footer">{APP_BRAND.appName}</footer>
     </div>
   );
 }

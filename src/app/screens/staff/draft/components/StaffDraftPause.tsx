@@ -1,11 +1,12 @@
-import { useEffect, useRef, useState, type RefObject } from 'react';
+import { useCallback, useEffect, useState, type RefObject } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useNavigationGuard } from '../../../../core/router/navigation/use-navigation-guard';
 import { taskTime } from '../../../../features/cleaning-tasks/cleaning-tasks-display';
 import type { StaffDraftDto } from '../../../../features/staff-drafts/staff-drafts.types';
 import { staffHomePath } from '../../../../features/staff-entry/staff-home-return';
 import { Button } from '../../../../shared/ui/Button/Button';
 import { useStaffDraftLink } from '../hooks/use-staff-draft-link';
-import { formatStaffDraftTime } from '../model/staff-draft-display';
+import { StaffPrivateLink } from './StaffPrivateLink';
 import '../styles/staff-draft-pause.css';
 
 interface StaffDraftPauseProps {
@@ -29,24 +30,28 @@ export function StaffDraftPause({
 }: StaffDraftPauseProps) {
   const navigate = useNavigate();
   const [returnExpired, setReturnExpired] = useState(false);
-  const [confirmLeaving, setConfirmLeaving] = useState(false);
-  const confirmationHeading = useRef<HTMLHeadingElement>(null);
-  const homeButton = useRef<HTMLButtonElement | null>(null);
-  const { copy, copied, message, busy } = useStaffDraftLink(
-    token,
-    draft.expiresAt,
-    linkDisabled,
-  );
+  const link = useStaffDraftLink(token, draft.expiresAt, linkDisabled);
   const task = draft.cleaningTask;
   const canReturn =
     !returnExpired &&
     Boolean(staffHomePath(draft.id, draft.property.id, token));
   const offerCopy = !task || !canReturn;
-  const needsCopyConfirmation = !task && canReturn && !copied;
-  const showConfirmation = needsCopyConfirmation && confirmLeaving;
+  const protectLink = !task && !link.copied && !linkDisabled;
+  useNavigationGuard(
+    useCallback(
+      () => (protectLink ? 'private-draft-link' : false),
+      [protectLink],
+    ),
+  );
   useEffect(() => {
-    if (showConfirmation) confirmationHeading.current?.focus();
-  }, [showConfirmation]);
+    if (!protectLink) return;
+    const warn = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = '';
+    };
+    window.addEventListener('beforeunload', warn);
+    return () => window.removeEventListener('beforeunload', warn);
+  }, [protectLink]);
 
   function returnToTasks() {
     const path = staffHomePath(draft.id, draft.property.id, token);
@@ -55,134 +60,72 @@ export function StaffDraftPause({
   }
 
   return (
-    <section className="staff-pause" aria-labelledby="staff-pause-title">
-      <header className="staff-pause-property">
-        <div>
-          {draft.property.region && <span>{draft.property.region}</span>}
-          <strong>{draft.property.name}</strong>
-        </div>
-        <span>
-          작성자 <b>{draft.author.name}</b>
+    <section className="staff-outcome" aria-labelledby="staff-pause-title">
+      <header className="staff-outcome-heading">
+        <span className="staff-outcome-icon" aria-hidden="true">
+          Ⅱ
         </span>
-      </header>
-      <div className="staff-pause-receipt">
         <div>
-          <span className="staff-pause-mark" aria-hidden="true">
-            <svg
-              width="22"
-              height="22"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-            >
-              <circle cx="12" cy="12" r="9" />
-              <path d="M10 8v8m4-8v8" />
-            </svg>
-          </span>
+          <p>{draft.property.name}</p>
           <h1 id="staff-pause-title" ref={heading} tabIndex={-1}>
             {saved ? '임시 저장했어요' : '저장 상태를 확인해 주세요'}
           </h1>
-          <p className="staff-pause-summary">
-            {task && canReturn
-              ? '작업 목록에서 다시 이어서 작성할 수 있어요.'
-              : task
-                ? '개인 링크 또는 직원 QR의 작업 목록에서 이어서 작성할 수 있어요. 링크는 나만 보관해 주세요.'
-                : '이 기록은 개인 링크로만 다시 열 수 있어요. 링크를 복사해 나만 보관해 주세요.'}
-          </p>
-          <div className="staff-pause-record">
+        </div>
+      </header>
+      <div className="staff-outcome-layout">
+        <div className="staff-finish-panel">
+          <h2>{task?.title ?? '추가 정비 기록'}</h2>
+          <dl className="staff-finish-fields">
             <div>
-              <strong>{task?.title ?? '추가 정비 기록'}</strong>
-              <time dateTime={task?.dueAt ?? draft.visitDate}>
-                {task
-                  ? taskTime(task.dueAt)
-                  : draft.visitDate.replaceAll('-', '.')}
-              </time>
+              <dt>{task ? '작업 일시' : '정비일'}</dt>
+              <dd>
+                <time dateTime={task?.dueAt ?? draft.visitDate}>
+                  {task
+                    ? taskTime(task.dueAt)
+                    : draft.visitDate.replaceAll('-', '.')}
+                </time>
+              </dd>
             </div>
-            <span className="staff-flow-state">작성 중</span>
-          </div>
+            <div>
+              <dt>작성자</dt>
+              <dd>{draft.author.name}</dd>
+            </div>
+          </dl>
           {hasPhotoSelections && (
-            <p className="staff-pause-note">
-              다시 열면 사진 종류와 위치를 다시 선택해 주세요.
+            <p className="staff-outcome-note">
+              다시 열면 업로드한 사진의 종류와 위치를 다시 선택해 주세요.
             </p>
           )}
         </div>
-        <div className="staff-pause-actions">
+        <div className="staff-finish-panel staff-outcome-actions">
+          <h2>이어서 작성하기</h2>
+          <p>
+            {task
+              ? '이 휴양소의 직원 QR에서 작업을 다시 열 수 있어요.'
+              : '이 기록은 개인 이어쓰기 링크로 다시 열 수 있어요.'}
+          </p>
           {offerCopy && (
-            <>
-              <p className="staff-pause-expiry">
-                <strong>개인 링크 사용 기한</strong>
-                {formatStaffDraftTime(draft.expiresAt)}까지 · 한국 시간
-              </p>
-              <Button
-                loading={busy}
-                disabled={linkDisabled}
-                onClick={() => void copy()}
-              >
-                이어쓰기 링크 복사
-              </Button>
-              <span role="status" className="staff-pause-feedback">
-                {message}
-              </span>
-            </>
+            <StaffPrivateLink
+              link={link}
+              expiresAt={draft.expiresAt}
+              disabled={linkDisabled}
+              label="이어쓰기 링크 복사"
+            />
           )}
-          {canReturn ? (
+          {canReturn && (
             <Button
-              className={offerCopy ? 'staff-pause-secondary' : undefined}
-              aria-expanded={
-                needsCopyConfirmation ? showConfirmation : undefined
-              }
-              aria-controls={
-                showConfirmation ? 'staff-pause-confirmation' : undefined
-              }
-              onClick={(event) => {
-                if (needsCopyConfirmation) {
-                  homeButton.current = event.currentTarget;
-                  setConfirmLeaving(true);
-                  confirmationHeading.current?.focus();
-                } else returnToTasks();
-              }}
+              className={offerCopy ? 'staff-finish-secondary' : undefined}
+              onClick={returnToTasks}
             >
-              작업 목록으로 <span aria-hidden="true">→</span>
+              작업 목록으로
             </Button>
-          ) : (
-            <p className="staff-pause-note">
-              작업 목록을 보려면 이 휴양소의 직원 QR을 다시 스캔해 주세요.
-            </p>
           )}
-          {showConfirmation && (
-            <section
-              className="staff-pause-confirmation"
-              id="staff-pause-confirmation"
-              aria-labelledby="staff-pause-confirm-title"
-            >
-              <h2
-                id="staff-pause-confirm-title"
-                ref={confirmationHeading}
-                tabIndex={-1}
-              >
-                링크를 보관하셨나요?
-              </h2>
-              <p className="staff-pause-note">
-                이 추가 정비 기록은 개인 링크로만 다시 열 수 있어요.
-              </p>
-              <div>
-                <Button
-                  className="staff-pause-secondary"
-                  onClick={() => {
-                    setConfirmLeaving(false);
-                    homeButton.current?.focus();
-                  }}
-                >
-                  머무르기
-                </Button>
-                <Button onClick={returnToTasks}>보관했어요 · 목록으로</Button>
-              </div>
-            </section>
+          {!canReturn && !task && (
+            <p>작업 목록은 이 휴양소의 직원 QR에서 열어 주세요.</p>
           )}
           <button
             type="button"
-            className="staff-pause-resume"
+            className="staff-outcome-resume"
             onClick={onResume}
           >
             계속 작성하기

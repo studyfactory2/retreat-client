@@ -203,18 +203,21 @@ export function useTaskPassword(
       }
     }
   }
-  const confirmation: TaskConfirmation | null =
-    enabled &&
-    context?.canComplete &&
-    status === 'ready' &&
-    guestDeparted &&
-    (!context.requiresChange || passwordChanged)
-      ? {
-          fingerprint: context.fingerprint,
-          guestDeparted: true,
-          passwordChanged: context.requiresChange && passwordChanged,
-        }
-      : null;
+  const confirmation = useMemo<TaskConfirmation | null>(
+    () =>
+      enabled &&
+      context?.canComplete &&
+      status === 'ready' &&
+      guestDeparted &&
+      (!context.requiresChange || passwordChanged)
+        ? {
+            fingerprint: context.fingerprint,
+            guestDeparted: true,
+            passwordChanged: context.requiresChange && passwordChanged,
+          }
+        : null,
+    [enabled, context, status, guestDeparted, passwordChanged],
+  );
   return {
     context,
     status,
