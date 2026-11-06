@@ -49,6 +49,10 @@ invitation or draft tokens into screenshots or bug reports.
 - [ ] Try final submission with a required answer missing; fix the indicated
       item. Review and submit once. Confirm the receipt and matching admin record
       under `제출 기록`, including the photo view.
+- [ ] Repeat check-in through both a shared guest QR and a personal stay link.
+      Answer every item normally, add one photo with `객실 상태 사진 추가`, then
+      submit. Open each record in admin `제출 기록` and verify `사진 1장 · 이상 0건`.
+      Open the photo tab and verify it is labeled `객실 상태 사진`.
 - [ ] Open the submitted checklist's correction view. Change an answer/memo and
       enter a reason. Back → `계속 작성` preserves input. Save the correction and
       verify the new revision while original evidence/history remains available.

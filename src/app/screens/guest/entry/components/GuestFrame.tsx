@@ -4,6 +4,7 @@ import type { ReactNode, RefObject } from 'react';
 import { Link, type To } from 'react-router-dom';
 import type { GuestView } from '../model/guest-entry-model';
 import { isPublicContactTel } from '../../../../features/property-contact/public-contact';
+import { GuestNavigation } from '../../components/GuestNavigation';
 import { GuestIcon } from './GuestIcon';
 import '../styles/guest-home.css';
 import '../../draft/styles/guest-journey-edge.css';
@@ -81,7 +82,7 @@ export function GuestFrame({
             </div>
           )}
           <div className="guest-header__tools">
-            <span>이용객 안내</span>
+            {!journeyPresentation && <span>이용객 안내</span>}
             {onRefresh && (
               <button
                 type="button"
@@ -107,37 +108,7 @@ export function GuestFrame({
       </main>
       <footer className="guest-footer">{APP_BRAND.appName}</footer>
       {ready && (
-        <nav
-          className={`guest-navigation${report ? ' guest-navigation--report' : ''}`}
-          aria-label="이용객 메뉴"
-        >
-          <div>
-            <Link to={home} aria-current={view === 'home' ? 'page' : undefined}>
-              <GuestIcon name="home" />
-              <span>홈</span>
-            </Link>
-            <Link
-              to={guide}
-              aria-current={view === 'guide' ? 'page' : undefined}
-            >
-              <GuestIcon name="guide" />
-              <span>이용 안내</span>
-            </Link>
-            {report && (
-              <Link
-                to={report}
-                reloadDocument={view !== 'report'}
-                onClick={(event) => {
-                  if (view === 'report') event.preventDefault();
-                }}
-                aria-current={view === 'report' ? 'page' : undefined}
-              >
-                <GuestIcon name="notice" />
-                <span>불편 신고</span>
-              </Link>
-            )}
-          </div>
-        </nav>
+        <GuestNavigation home={home} guide={guide} report={report} view={view} />
       )}
     </div>
   );

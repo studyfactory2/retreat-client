@@ -104,18 +104,38 @@ export function readGuestSubmissionDetail(
         const photo = object(value);
         const metadata = readGuestDraftPhoto(value);
         if (
-          photo.purpose !== 'DEFECT' ||
-          !isGuestId(photo.sectionId) ||
-          !isGuestId(photo.itemId) ||
           photo.sortOrder !== index ||
           usedPhotos.has(metadata.id) ||
-          itemSections.get(photo.itemId.toLowerCase()) !==
-            photo.sectionId.toLowerCase() ||
-          byItem.get(photo.itemId.toLowerCase())?.value !== 'ABNORMAL' ||
           metadata.createdAt > (detail.submittedAt as string)
         )
           throw invalidGuestSubmissionDetailResponse();
         usedPhotos.add(metadata.id);
+        if (photo.purpose === 'ROOM_CONDITION') {
+          if (
+            detail.type !== 'CHECK_IN' ||
+            photo.sectionId !== null ||
+            photo.itemId !== null ||
+            photo.areaLabel !== null
+          )
+            throw invalidGuestSubmissionDetailResponse();
+          return {
+            ...metadata,
+            purpose: 'ROOM_CONDITION',
+            sectionId: null,
+            itemId: null,
+            areaLabel: null,
+            sortOrder: index,
+          };
+        }
+        if (
+          photo.purpose !== 'DEFECT' ||
+          !isGuestId(photo.sectionId) ||
+          !isGuestId(photo.itemId) ||
+          itemSections.get(photo.itemId.toLowerCase()) !==
+            photo.sectionId.toLowerCase() ||
+          byItem.get(photo.itemId.toLowerCase())?.value !== 'ABNORMAL'
+        )
+          throw invalidGuestSubmissionDetailResponse();
         return {
           ...metadata,
           purpose: 'DEFECT',

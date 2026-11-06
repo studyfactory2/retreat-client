@@ -179,91 +179,95 @@
   border-color: #bcded0;
   color: #236349;
 }
-.guest-draft-section {
-  margin-bottom: 28px;
+.guest-flow .guest-draft-form .guest-draft-section {
+  margin: 0 0 16px;
 }
-.guest-draft-section > h2 {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 14px;
-  color: var(--color-heading);
-  font-size: 19px;
+.guest-flow .guest-draft-form .guest-draft-section h3 {
+  margin: 0 0 6px;
+  font-size: 13px;
   font-weight: 650;
-}
-.guest-draft-section > h2 span {
-  display: grid;
-  flex: 0 0 32px;
-  place-items: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 10px;
-  background: var(--color-soft);
-  color: var(--color-primary);
-  font-size: 12px;
-}
-.guest-draft-item {
-  min-width: 0;
-  margin: 0 0 14px;
-  padding: 20px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: var(--color-surface);
-}
-.guest-draft-item legend {
-  max-width: 100%;
-  padding: 0 6px;
-  color: var(--color-heading);
-  font-weight: 650;
-  font-size: 16px;
-  line-height: 1.65;
-}
-.guest-draft-required {
-  margin-left: 8px;
-  font-weight: 400;
-  font-size: 11px;
   color: var(--color-muted);
+}
+.guest-check-item {
+  position: relative;
+  min-width: 0;
+  margin: 0;
+  padding: 10px 0 14px;
+  border: 0;
+}
+.guest-check-item + .guest-check-item {
+  border-top: 1px solid var(--color-border);
+}
+.guest-check-item__legend {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
   white-space: nowrap;
 }
-.guest-draft-item--abnormal {
-  border-color: #e5bcc0;
-}
-.guest-draft-choice {
+.guest-check-item__heading {
   display: flex;
-  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.guest-check-item__heading > p {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 650;
+  line-height: 1.6;
+  color: var(--color-heading);
+}
+.guest-draft-required {
+  margin-left: 6px;
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-muted);
+}
+.guest-check-choices {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
 }
-.guest-draft-choice button {
-  min-height: 46px;
-  min-width: 76px;
-  padding: 10px 20px;
-  border: 1px solid #cad8f2;
-  border-radius: 12px;
-  background: #f7faff;
+.guest-check-choices button {
+  min-height: 44px;
+  padding: 8px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: var(--color-surface);
   color: var(--color-heading);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
-  font-size: 15px;
 }
-.guest-draft-choice button[aria-pressed='true'] {
+.guest-check-choices button[aria-pressed='true'] {
   border-color: var(--color-primary);
-  background: var(--color-primary);
-  color: white;
+  background: var(--color-soft);
+  color: var(--color-primary);
 }
-.guest-draft-item--abnormal .guest-draft-choice button[aria-pressed='true'] {
-  background: var(--color-danger);
+.guest-check-choices .guest-check-choices__abnormal[aria-pressed='true'] {
   border-color: var(--color-danger);
+  background: #fff3f3;
+  color: var(--color-danger);
 }
-.guest-draft-choice .guest-draft-choice__clear {
-  margin-left: auto;
-  padding-inline: 10px;
-  min-width: 0;
-  border-color: transparent;
+.guest-check-clear {
+  flex: 0 0 auto;
+  min-height: 44px;
+  margin-block: -4px;
+  padding-inline: 4px;
+  border: 0;
   background: transparent;
   color: var(--color-muted);
+  font: inherit;
   font-size: 12px;
+  cursor: pointer;
 }
-.guest-draft-choice button:disabled {
-  opacity: 0.5;
+.guest-check-item:disabled button {
+  opacity: 0.55;
   cursor: default;
 }
 .guest-draft-item__details {
@@ -417,16 +421,9 @@
   .guest-draft-card {
     padding: 20px;
   }
-  .guest-draft-item {
-    padding: 16px;
-  }
   .guest-draft-person dl > div {
     grid-template-columns: 70px minmax(0, 1fr);
     gap: 12px;
-  }
-  .guest-draft-choice button {
-    min-width: 64px;
-    padding-inline: 14px;
   }
 }
 .guest-submission-next,

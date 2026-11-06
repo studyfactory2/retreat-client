@@ -504,7 +504,7 @@ export function useGuestDraft(token: string | null) {
               mutation: 'error',
               attempt: null,
               message:
-                '사진 목록이 변경되었습니다. 모든 사진의 연결 항목을 다시 확인해 주세요.',
+                '사진 목록이 변경되었습니다. 사진 단계에서 다시 확인해 주세요.',
             });
             return;
           }

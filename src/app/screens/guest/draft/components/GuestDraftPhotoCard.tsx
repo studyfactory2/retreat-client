@@ -148,13 +148,12 @@ export function GuestDraftPhotoCard({
         )}
       </div>
       <div className="guest-photo-card__body">
-        <p className="guest-photo-card__name">
-          <span>사진 {index + 1}</span>
-          {photo.filename}
-        </p>
-        <p className="guest-photo-card__size">
-          {formatGuestPhotoSize(photo.sizeBytes)}
-        </p>
+        <div className="guest-photo-card__file">
+          <p className="guest-photo-card__name">{photo.filename}</p>
+          <span className="guest-photo-card__size">
+            {formatGuestPhotoSize(photo.sizeBytes)}
+          </span>
+        </div>
         {visible.status === 'error' && (
           <p className="guest-photo-card__error" role="status">
             {visible.message}

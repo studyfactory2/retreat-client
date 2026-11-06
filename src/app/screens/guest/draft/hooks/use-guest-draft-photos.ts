@@ -41,6 +41,7 @@ type Options = {
   draftId: string;
   locked: boolean;
   onAccessRejected: () => void;
+  onAssignedUpload: (id: string, assignment: string) => void;
 };
 const initialState = (): PhotoState => ({
   resource: { status: 'loading' },
@@ -56,10 +57,11 @@ export function useGuestDraftPhotos({
   draftId,
   locked,
   onAccessRejected,
+  onAssignedUpload,
 }: Options) {
   const owner = useMemo(() => ({ token, draftId }), [token, draftId]);
   const scope = useRef<typeof owner | null>(owner);
-  const options = useRef({ locked, onAccessRejected });
+  const options = useRef({ locked, onAccessRejected, onAssignedUpload });
   const operation = useRef<AbortController | null>(null);
   const previews = useRef(new Set<AbortController>());
   const deferredRead = useRef(false);
@@ -73,8 +75,8 @@ export function useGuestDraftPhotos({
     state: initialState(),
   }));
   useLayoutEffect(() => {
-    options.current = { locked, onAccessRejected };
-  }, [locked, onAccessRejected]);
+    options.current = { locked, onAccessRejected, onAssignedUpload };
+  }, [locked, onAccessRejected, onAssignedUpload]);
   const read = useCallback(
     () =>
       current.current.owner === owner ? current.current.state : initialState(),
@@ -222,12 +224,14 @@ export function useGuestDraftPhotos({
           ),
         }));
         try {
-          await uploadGuestDraftPhoto(
+          const uploaded = await uploadGuestDraftPhoto(
             entry.file,
             owner.token,
             controller.signal,
           );
           if (!active()) return;
+          if (entry.assignment)
+            options.current.onAssignedUpload(uploaded.id, entry.assignment);
           // A validated success is never retried even if its following list read fails.
           publish((state) => ({
             ...state,
@@ -274,7 +278,7 @@ export function useGuestDraftPhotos({
   }, [owner, publish, read, readList, refresh, rejectAccess]);
 
   const uploadFiles = useCallback(
-    (files: FileList | readonly File[]) => {
+    (files: FileList | readonly File[], assignment?: string) => {
       const state = read();
       if (
         scope.current !== owner ||
@@ -303,6 +307,7 @@ export function useGuestDraftPhotos({
         queue: selected.map((file) => ({
           id: ++counter.current,
           file,
+          assignment,
           status: 'queued',
           message: '',
           checked: false,

@@ -84,6 +84,7 @@ function readPhotos(
       createdAt: readTimestamp(data.createdAt),
       purpose: readEnum(data.purpose, [
         'DEFECT',
+        'ROOM_CONDITION',
         'MAINTENANCE_BEFORE',
         'MAINTENANCE_AFTER',
         'REPAIR',
@@ -101,7 +102,10 @@ function readPhotos(
       (photo.sectionId !== null && !sectionIds.has(photo.sectionId)) ||
       (photo.itemId !== null &&
         itemSections.get(photo.itemId) !== photo.sectionId) ||
-      (record.type !== 'MAINTENANCE' && photo.purpose !== 'DEFECT') ||
+      (photo.purpose === 'ROOM_CONDITION'
+        ? record.type !== 'CHECK_IN' || photo.itemId !== null ||
+          photo.sectionId !== null || photo.areaLabel !== null
+        : record.type !== 'MAINTENANCE' && photo.purpose !== 'DEFECT') ||
       (photo.purpose === 'DEFECT' && answer?.value !== 'ABNORMAL') ||
       (photo.purpose === 'REPAIR' &&
         (answer?.value !== 'ABNORMAL' || !answer.repairReported)) ||

@@ -58,7 +58,9 @@ export function readGuestSubmissionReceipt(
     !count(receipt.photoCount, 40) ||
     !count(receipt.reportedIssueCount, 500) ||
     receipt.reportedIssueCount > receipt.answeredItemCount ||
-    (receipt.reportedIssueCount === 0 && receipt.photoCount > 0)
+    (receipt.type === 'CHECK_OUT' &&
+      receipt.reportedIssueCount === 0 &&
+      receipt.photoCount > 0)
   )
     throw invalidGuestSubmissionResponse();
   return {

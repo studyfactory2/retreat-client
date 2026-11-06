@@ -1213,9 +1213,10 @@ without API credentials/referrers and hidden at expiry. URLs live only in mounte
 state; no local storage, public bucket exposure or photo prefetch is introduced.
 
 Guests save their latest answers before review. Required checklist answers must
-be complete. Every remaining READY photo must be mapped exactly once to an
-ABNORMAL item, using the guest-only DEFECT purpose; photos are optional. Unwanted
-photos can be removed before review. The final payload contains only the saved
+be complete. Photos are optional. On CHECK_IN, each READY photo is either a
+ROOM_CONDITION photo of the arriving guest's room or a DEFECT photo attached to
+an ABNORMAL item. CHECK_OUT accepts only the latter. Guests can remove an
+unwanted photo before review. The final payload contains only the saved
 expectedUpdatedAt and ordered photo mappings; saved answers stay authoritative.
 Editing and photo mutations are locked while reviewing or submitting. A fresh
 photo list check prevents silently dropping another tab's uploads.

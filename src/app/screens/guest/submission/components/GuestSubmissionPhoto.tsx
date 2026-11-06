@@ -139,10 +139,9 @@ export function GuestSubmissionPhoto({
     };
   }, [previewExpiry, owner]);
   return (
-    <div className="guest-submitted-photo">
+    <div className="guest-record-photo">
       <div>
-        <strong>{label} 사진</strong>
-        <p>{photo.filename}</p>
+        <strong>{photo.filename}</strong>
         {photo.areaLabel && <p>{photo.areaLabel}</p>}
       </div>
       {preview.status === 'ready' ? (
@@ -164,6 +163,7 @@ export function GuestSubmissionPhoto({
           />
           <Button
             className="guest-draft-secondary"
+            aria-label={`${photo.filename} 사진 닫기`}
             onClick={() => setResult({ owner, preview: { status: 'idle' } })}
           >
             사진 닫기
@@ -172,6 +172,7 @@ export function GuestSubmissionPhoto({
       ) : (
         <Button
           className="guest-draft-secondary"
+          aria-label={`${photo.filename} ${preview.status === 'error' ? '사진 다시 보기' : '사진 보기'}`}
           disabled={disabled}
           loading={preview.status === 'loading'}
           onClick={() => {

@@ -61,6 +61,7 @@ export function submissionPhotoPurpose(
   purpose: AdminSubmissionPhoto['purpose'],
 ): string {
   return {
+    ROOM_CONDITION: '객실 상태 사진',
     DEFECT: '이상 사진',
     MAINTENANCE_BEFORE: '정비 전',
     MAINTENANCE_AFTER: '정비 후',
@@ -72,6 +73,7 @@ export function submissionPhotoLocation(
   photo: AdminSubmissionPhoto,
   record: AdminSubmissionRecord,
 ): string {
+  if (photo.purpose === 'ROOM_CONDITION') return record.property.name;
   const section = record.template.definition.sections.find(
     (candidate) => candidate.id === photo.sectionId,
   );

@@ -8,9 +8,11 @@ import '../styles/guest-journey-edge.css';
 export function GuestSubmissionReceipt({
   receipt,
   token,
+  showHomeHelp,
 }: {
   receipt: GuestSubmissionReceiptDto;
   token: string;
+  showHomeHelp: boolean;
 }) {
   const navigate = useNavigate();
   const title = receipt.type === 'CHECK_IN' ? '입실 체크' : '퇴실 체크';
@@ -87,6 +89,7 @@ export function GuestSubmissionReceipt({
         expiresAt={receipt.expiresAt}
         disabled={false}
         completed
+        showHomeHelp={showHomeHelp}
         guided
       />
     </div>

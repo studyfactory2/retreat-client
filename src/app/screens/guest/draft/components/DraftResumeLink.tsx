@@ -10,12 +10,14 @@ export function DraftResumeLink({
   disabled,
   completed = false,
   guided = false,
+  showHomeHelp = false,
 }: {
   token: string;
   expiresAt: string;
   disabled: boolean;
   completed?: boolean;
   guided?: boolean;
+  showHomeHelp?: boolean;
 }) {
   const owner = useMemo(() => ({ token }), [token]);
   const scope = useRef<typeof owner | null>(owner);
@@ -74,6 +76,9 @@ export function DraftResumeLink({
             : '이 링크에서 임시 저장한 내용을 다시 열 수 있습니다.'}{' '}
           링크를 가진 사람은 내용을 볼 수 있으니 다른 사람에게 공유하지 마세요.
         </p>
+        {showHomeHelp && (
+          <p>이용 안내 홈은 처음 사용한 이용객 QR이나 개인 이용 링크에서 열어 주세요.</p>
+        )}
         {guided && !completed && (
           <p className="guest-resume-guided-qr">
             공용 QR을 다시 스캔해도 이 작성 내용은 열리지 않아요. 반드시 이 개인

@@ -2,8 +2,9 @@ import type { GuestDraftDto } from '../../../../features/guest-drafts/guest-draf
 import type { GuestDraftPhotoDto } from '../../../../features/guest-draft-photos/guest-draft-photos.types';
 import { prepareGuestSubmissionPhotos } from '../../../../features/guest-submissions/guest-submissions-validation';
 
+export const ROOM_PHOTO = 'ROOM_CONDITION';
+
 export type GuestFlowStep = 0 | 1 | 2;
-export const guestFlowSteps = ['시설 확인', '사진', '제출 확인'] as const;
 
 export function guestPhotoInputs(
   draft: GuestDraftDto,
@@ -12,11 +13,12 @@ export function guestPhotoInputs(
 ) {
   return prepareGuestSubmissionPhotos(
     draft,
-    photos.map((photo) => ({
-      attachmentId: photo.id,
-      purpose: 'DEFECT',
-      itemId: assignments[photo.id] ?? '',
-    })),
+    photos.map((photo) => {
+      const target = assignments[photo.id];
+      return target === ROOM_PHOTO
+        ? { attachmentId: photo.id, purpose: ROOM_PHOTO }
+        : { attachmentId: photo.id, purpose: 'DEFECT', itemId: target ?? '' };
+    }),
   );
 }
 

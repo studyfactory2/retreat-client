@@ -1,0 +1,47 @@
+.guest-checklist-progress > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.guest-checklist-progress h2 {
+  margin: 0;
+  color: var(--color-heading);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -.035em;
+  line-height: 1.5;
+  scroll-margin-block-start: 20px;
+}
+.guest-checklist-progress h2:focus {
+  outline: none;
+}
+.guest-checklist-progress > div > span {
+  font-size: 13px;
+  color: var(--color-muted);
+  font-variant-numeric: tabular-nums;
+}
+.guest-checklist-progress ol {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 5px;
+  margin: 9px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.guest-checklist-progress li {
+  height: 4px;
+  border-radius: 4px;
+  background: var(--color-border);
+}
+.guest-checklist-progress .is-reached {
+  background: var(--color-primary);
+}
+.guest-checklist-progress__sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

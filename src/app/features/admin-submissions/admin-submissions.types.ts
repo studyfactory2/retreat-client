@@ -49,7 +49,12 @@ export interface AdminSubmissionPhoto {
   width: number;
   height: number;
   createdAt: string;
-  purpose: 'DEFECT' | 'MAINTENANCE_BEFORE' | 'MAINTENANCE_AFTER' | 'REPAIR';
+  purpose:
+    | 'DEFECT'
+    | 'ROOM_CONDITION'
+    | 'MAINTENANCE_BEFORE'
+    | 'MAINTENANCE_AFTER'
+    | 'REPAIR';
   sectionId: string | null;
   itemId: string | null;
   areaLabel: string | null;

@@ -71,6 +71,11 @@ export function MaintenanceSubmissionReport({
           <span className="maintenance-report__meta-divider" aria-hidden="true">·</span>
           <span aria-label={`작성자 ${record.author.name}`}>{record.author.name}</span>
         </p>
+        {record.type === 'CHECK_IN' && (
+          <p className="maintenance-report__meta">
+            사진 {revision.photos.length}장 · 이상 {record.answers.items.filter((item) => item.value === 'ABNORMAL').length}건
+          </p>
+        )}
         {detail.status === 'CANCELLED' && (
           <p className="submission-detail-notice maintenance-report__cancelled">
             취소된 기록입니다. 답변과 사진은 보존되어 있습니다.

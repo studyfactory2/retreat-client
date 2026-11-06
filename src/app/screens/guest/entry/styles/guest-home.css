@@ -40,73 +40,83 @@
   overflow-wrap: anywhere;
 }
 .guest-home-header {
+  display: grid;
+  gap: 18px;
   padding: 22px 24px;
-  border: 1px solid #203d68;
   border-radius: 16px;
-  background: #172e53;
-  color: white;
-}
-.guest-home-header__meta {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 8px 14px;
-  color: #c5d5ed;
-  font-size: 12px;
-}
-.guest-home-header__meta > p {
-  min-width: 0;
-}
-.guest-home-header__meta > span {
-  flex-shrink: 0;
-  padding: 3px 8px;
-  border: 1px solid #ffffff30;
-  border-radius: 6px;
-  color: #e0e9f8;
-  font-size: 11px;
+  background: linear-gradient(115deg, #192e4c, #223f60);
+  color: #fff;
 }
 .guest-home-header h1 {
-  margin-top: 9px;
-  color: white;
-  font-size: clamp(24px, 5vw, 28px);
+  color: inherit;
+  font-size: clamp(1.45rem, 5vw, 1.75rem);
   font-weight: 700;
-  letter-spacing: -0.7px;
-  line-height: 1.4;
+  letter-spacing: -0.04em;
+  line-height: 1.3;
 }
-.guest-home-header__greeting {
-  margin-top: 7px;
+.guest-home-header__identity {
+  min-width: 0;
+}
+.guest-home-header__meta {
+  margin-top: 5px;
   color: #d2dff1;
-  font-size: 13px;
-  line-height: 1.7;
+  font-size: 0.875rem;
+  line-height: 1.5;
 }
-.guest-home-schedule {
-  margin-top: 16px;
-  padding-top: 14px;
-  border-top: 1px solid #ffffff29;
+.guest-home-header__meta [aria-hidden] {
+  padding-inline: 0.35em;
 }
 .guest-home-schedule dl {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px 20px;
+  gap: 8px;
   margin: 0;
 }
+.guest-home-schedule dl > div {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: baseline;
+  gap: 12px;
+}
 .guest-home-schedule dt {
-  color: #becfe8;
-  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: #ffffff12;
+  color: #dbe8f9;
+  font-size: 0.8125rem;
+  font-weight: 550;
+  line-height: 1.5;
 }
 .guest-home-schedule dd {
-  margin: 4px 0 0;
-  color: white;
-  font-size: 13px;
-  font-weight: 550;
+  margin: 0;
+  font-size: 0.9375rem;
   font-variant-numeric: tabular-nums;
-  line-height: 1.6;
+}
+.guest-home-schedule time {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 2px 10px;
+}
+.guest-home-schedule strong {
+  font-size: 1rem;
+  font-weight: 650;
 }
 .guest-home-schedule > p {
-  margin-top: 8px;
+  margin-top: 6px;
   color: #becfe8;
-  font-size: 10px;
+  text-align: end;
+  font-size: 0.75rem;
+}
+@media (min-width: 680px) {
+  .guest-home-header {
+    grid-template-columns: minmax(0, 1fr) minmax(17rem, 1fr);
+    align-items: start;
+    column-gap: 28px;
+  }
+  .guest-home-header__identity:only-child {
+    grid-column: 1 / -1;
+  }
 }
 .guest-home-checklists {
   margin-top: 24px;

@@ -1,31 +1,38 @@
 .guest-saved-review {
   min-width: 0;
 }
-.guest-saved-review__intro {
-  margin-top: 8px;
-  color: var(--color-muted);
-  font-size: 13px;
-  line-height: 1.7;
+.guest-flow .guest-draft-card.guest-saved-review {
+  padding: 0;
+  border: 0;
+  box-shadow: none;
 }
 .guest-saved-review__counts {
+  margin: 0 0 12px;
+}
+.guest-saved-review__counts > div {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
-  margin: 16px 0 20px;
-  padding: 14px 8px;
-  border-radius: 10px;
-  background: var(--color-soft);
-  text-align: center;
+  grid-template-columns: 76px minmax(0, 1fr);
+  align-items: baseline;
+  gap: 12px;
+  padding-block: 9px;
+}
+.guest-saved-review__counts > div + div {
+  border-top: 1px solid var(--color-border);
 }
 .guest-saved-review__counts dt {
   color: var(--color-muted);
-  font-size: 12px;
+  font-size: 13px;
 }
 .guest-saved-review__counts dd {
-  margin: 5px 0 0;
+  margin: 0;
   color: var(--color-heading);
-  font-size: 17px;
-  font-weight: 700;
+  font-size: 15px;
+  font-weight: 600;
+  text-align: end;
+}
+.guest-saved-review__answers {
+  border-top: 1px solid var(--color-border);
+  font-size: 14px;
 }
 .guest-saved-review__section + .guest-saved-review__section {
   margin-top: 20px;
@@ -84,7 +91,7 @@
   overflow-wrap: anywhere;
 }
 .guest-saved-review__photos {
-  margin-top: 18px;
+  margin-top: 0;
   border-block: 1px solid var(--color-border);
 }
 .guest-saved-review__photos summary {
@@ -146,13 +153,12 @@
   line-height: 1.7;
 }
 .guest-saved-review__actions {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
   gap: 10px;
-  margin-top: 18px;
+  margin-top: 16px;
 }
 .guest-saved-review__actions .ui-button {
-  flex: 1 1 180px;
   min-height: 48px;
   font-size: 14px;
 }
@@ -160,9 +166,4 @@
 .guest-saved-review input:focus-visible {
   outline: 3px solid #3772e0;
   outline-offset: 3px;
-}
-@media (max-width: 420px) {
-  .guest-saved-review__actions .ui-button {
-    flex-basis: 100%;
-  }
 }

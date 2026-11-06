@@ -1,7 +1,7 @@
 export function GuestIcon({
   name,
 }: {
-  name: 'home' | 'guide' | 'arrow' | 'refresh' | 'notice' | 'enter' | 'leave';
+  name: 'home' | 'guide' | 'arrow' | 'refresh' | 'notice' | 'enter' | 'leave' | 'receipt';
 }) {
   return (
     <svg
@@ -22,6 +22,9 @@ export function GuestIcon({
       {name === 'refresh' && <path d="M20 10a8 8 0 1 0-1 7M20 4v6h-6" />}
       {name === 'enter' && <path d="M13 3h7v18h-7M3 12h12m-5-5 5 5-5 5" />}
       {name === 'leave' && <path d="M10 3H3v18h7m-1-9h12m-5-5 5 5-5 5" />}
+      {name === 'receipt' && (
+        <path d="M5 3h14v18l-3-2-4 2-4-2-3 2V3Zm3 8 3 3 5-6" />
+      )}
       {name === 'notice' && (
         <>
           <circle cx="12" cy="12" r="9" />

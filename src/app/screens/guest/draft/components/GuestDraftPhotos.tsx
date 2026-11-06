@@ -1,4 +1,6 @@
-import { useId, type ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import { GuestPhotoPicker } from './GuestPhotoPicker';
+import { ROOM_PHOTO } from '../model/guest-flow-model';
 import type { GuestDraftPhotoDto } from '../../../../features/guest-draft-photos/guest-draft-photos.types';
 import { Button } from '../../../../shared/ui/Button/Button';
 import type { GuestDraftPhotosController } from '../hooks/use-guest-draft-photos';
@@ -9,11 +11,12 @@ import '../styles/guest-draft-photos.css';
 export function GuestDraftPhotos({
   controller,
   renderAssignment,
+  checkIn,
 }: {
+  checkIn: boolean;
   controller: GuestDraftPhotosController;
   renderAssignment?: (photo: GuestDraftPhotoDto, index: number) => ReactNode;
 }) {
-  const inputId = useId();
   const { resource, queue, items, limits, busy, locked, removal } = controller;
   const disabled = locked || busy || controller.blocked;
   const remaining = Math.max(0, (limits?.maxPhotos ?? 40) - items.length);
@@ -22,23 +25,21 @@ export function GuestDraftPhotos({
   return (
     <section
       className="guest-draft-card guest-photos"
-      aria-labelledby={`${inputId}-title`}
+      aria-label="첨부 사진"
       aria-busy={busy}
     >
       <div className="guest-photos__heading">
-        <h2 id={`${inputId}-title`}>
-          사진 첨부 <span>선택</span>
-        </h2>
+        <p>
+          {checkIn
+            ? '입실 당시 객실 모습을 남길 수 있어요. 사진은 선택입니다.'
+            : '사진은 선택입니다. 첨부하면 이상 항목에 연결해 주세요.'}
+        </p>
         {resource.status === 'ready' && (
           <span className="guest-photos__count">
             {items.length} / {limits?.maxPhotos ?? 40}장
           </span>
         )}
       </div>
-      <p className="guest-photos__intro">
-        사진 없이도 제출할 수 있어요. 사진을 추가했다면 이상 항목을 연결해
-        주세요.
-      </p>
       {resource.status === 'loading' ? (
         <p className="guest-photos__status" role="status">
           첨부 사진을 불러오고 있습니다.
@@ -59,7 +60,7 @@ export function GuestDraftPhotos({
         </div>
       ) : (
         <>
-          {items.length > 0 ? (
+          {items.length > 0 && (
             <div className="guest-photos__grid">
               {items.map((photo, index) => (
                 <GuestDraftPhotoCard
@@ -73,49 +74,35 @@ export function GuestDraftPhotos({
                 />
               ))}
             </div>
-          ) : (
-            <div className="guest-photos__empty">
-              <span aria-hidden="true">+</span>
-              <p>첨부한 사진이 없어요.</p>
-              <small>필요한 경우에만 추가해 주세요.</small>
-            </div>
           )}
-          <label
-            className="guest-photos__picker"
-            htmlFor={inputId}
-            aria-disabled={disabled || remaining === 0}
-          >
-            <span>＋ 사진 추가</span>
-            <input
-              id={inputId}
-              type="file"
-              accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
-              multiple
-              disabled={disabled || remaining === 0}
-              onChange={(event) => {
-                if (event.currentTarget.files)
-                  controller.uploadFiles(event.currentTarget.files);
-                event.currentTarget.value = '';
-              }}
-            />
-          </label>
-          <p className="guest-photos__help">
-            한 장당 최대{' '}
-            {(
-              (limits?.maxBytes ?? 10 * 1024 * 1024) /
-              (1024 * 1024)
-            ).toLocaleString('ko-KR')}
-            MiB · JPEG, PNG, WebP · 최대 {limits?.maxPhotos ?? 40}장
-            <br />
-            HEIC·HEIF 사진은 JPEG로 변환한 뒤 선택해 주세요.
-          </p>
+          <GuestPhotoPicker
+            label={checkIn ? '객실 상태 사진 추가' : '사진 추가'}
+            disabled={disabled || remaining === 0}
+            onPick={(files) =>
+              controller.uploadFiles(files, checkIn ? ROOM_PHOTO : undefined)
+            }
+          />
+          <details className="guest-photos__guide">
+            <summary>사진 첨부 안내</summary>
+            <p>
+              JPEG · PNG · WebP · 한 장당 최대{' '}
+              {(
+                (limits?.maxBytes ?? 10 * 1024 * 1024) /
+                (1024 * 1024)
+              ).toLocaleString('ko-KR')}
+              MiB. HEIC·HEIF는 JPEG로 변환해 주세요.
+            </p>
+            <p>사진은 즉시 업로드됩니다. 사진 용도와 이상 항목 연결은 최종 제출 시 저장됩니다.</p>
+          </details>
+          {items.length > 0 && (
+            <p className="guest-photos__help">
+              {checkIn
+                ? '링크를 다시 열면 사진 용도를 확인해 주세요.'
+                : '링크를 다시 열면 이상 항목을 다시 선택해 주세요.'}
+            </p>
+          )}
         </>
       )}
-      <p className="guest-photos__help">
-        사진은 답변과 별도로 바로 올라갑니다. 항목 연결은 최종 제출할 때
-        저장되며, 이 화면 안에서는 유지되지만 링크를 다시 열면 다시 선택해야
-        해요.
-      </p>
       {controller.notice && (
         <p className="guest-photos__status" role="status">
           {controller.notice}
@@ -252,7 +239,7 @@ export function GuestDraftPhotos({
             void controller.refresh();
           }}
         >
-          첨부 사진 목록 새로고침
+          사진 목록 새로고침
         </button>
       )}
     </section>

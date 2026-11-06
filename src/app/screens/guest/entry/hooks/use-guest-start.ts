@@ -10,6 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import { ApiRequestError } from '../../../../core/api/api-error';
 import { startGuestDraft } from '../../../../features/guest-drafts/guest-drafts-api';
 import type { GuestDraftType } from '../../../../features/guest-drafts/guest-drafts.types';
+import { rememberGuestDraftOrigin } from '../../../../features/guest-entry/guest-draft-origin';
 import { getGuestEntryContext } from '../../../../features/guest-entry/guest-entry-api';
 import type {
   GuestAccessKind,
@@ -260,6 +261,7 @@ export function useGuestStart(
       );
       if (!current()) return;
       // Keep the validated capability if a pending leave dialog retains this form.
+      rememberGuestDraftOrigin(saved, latest.kind, token);
       issued.current = saved.accessToken;
       openIssued();
     } catch (error: unknown) {

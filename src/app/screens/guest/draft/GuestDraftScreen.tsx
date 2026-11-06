@@ -4,6 +4,8 @@ import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useNavigationGuard } from '../../../core/router/navigation/use-navigation-guard';
 import { Button } from '../../../shared/ui/Button/Button';
+import { guestDraftOrigin } from '../../../features/guest-entry/guest-draft-origin';
+import { GuestRecordNavigation } from '../components/GuestRecordNavigation';
 import { readGuestAccess } from '../entry/model/guest-entry-model';
 import { GuestSubmissionScreen } from '../submission';
 import { GuestDraftForm } from './components/GuestDraftForm';
@@ -35,6 +37,11 @@ function GuestDraftSessionScreen() {
     main.current?.focus({ preventScroll: true });
     window.scrollTo(0, 0);
   }, [location.pathname, location.hash, status]);
+  const resource = draft.resource;
+  const draftRecord = resource.status === 'submitted' ? resource.receipt
+    : resource.status === 'ready' && resource.access === 'ready' ? resource.draft
+    : null;
+  const origin = token && draftRecord ? guestDraftOrigin(draftRecord, token) : null;
   return (
     <div className="guest-draft guest-draft--journey">
       <button
@@ -49,9 +56,9 @@ function GuestDraftSessionScreen() {
       <header className="guest-draft-header">
         <div>
           <div className="guest-draft-brand">
-            <BrandLogo /><span>휴양소 이용 안내</span>
+            <BrandLogo />
+            <span>휴양소 이용 안내</span>
           </div>
-          <span>이용객 체크리스트</span>
         </div>
       </header>
       <main
@@ -93,6 +100,7 @@ function GuestDraftSessionScreen() {
           <GuestSubmissionReceipt
             receipt={draft.resource.receipt}
             token={access.token}
+            showHomeHelp={!origin}
           />
         ) : (
           <GuestDraftForm
@@ -103,6 +111,13 @@ function GuestDraftSessionScreen() {
         )}
       </main>
       <footer className="guest-draft-footer">{APP_BRAND.appName}</footer>
+      {token && draftRecord && (
+        <GuestRecordNavigation
+          origin={origin}
+          token={token}
+          page={resource.status === 'submitted' ? 'receipt' : 'draft'}
+        />
+      )}
     </div>
   );
 }

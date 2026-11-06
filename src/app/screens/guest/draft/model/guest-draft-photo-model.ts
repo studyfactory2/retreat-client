@@ -3,6 +3,7 @@ import { ApiRequestError } from '../../../../core/api/api-error';
 export type QueuedGuestPhoto = {
   id: number;
   file: File;
+  assignment?: string;
   status: 'queued' | 'uploading' | 'failed' | 'uncertain';
   message: string;
   checked: boolean;

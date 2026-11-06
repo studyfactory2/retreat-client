@@ -47,6 +47,7 @@ export function GuestSubmissionReview({
     .filter((item) => item.changed);
   const dropped = detail.photos.filter(
     (photo) =>
+      photo.purpose === 'DEFECT' &&
       !answers.items.some(
         (answer) =>
           answer.itemId === photo.itemId && answer.value === 'ABNORMAL',

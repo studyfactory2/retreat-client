@@ -36,7 +36,9 @@ export function prepareGuestSubmissionPhotos(
 ): GuestSubmissionPhotoInput[] {
   function invalidPhotos(): never {
     throw new ApiRequestError(
-      '사진마다 이상 항목을 연결해 주세요. 정상 항목에는 사진을 연결할 수 없습니다.',
+      draft.type === 'CHECK_IN'
+        ? '각 사진의 용도를 확인해 주세요. 이상 사진은 해당 이상 항목을 선택해 주세요.'
+        : '사진마다 이상 항목을 연결해 주세요. 정상 항목에는 사진을 연결할 수 없습니다.',
       400,
       'INVALID_SUBMISSION_PHOTOS',
     );
@@ -54,19 +56,29 @@ export function prepareGuestSubmissionPhotos(
       !photo ||
       typeof photo !== 'object' ||
       Array.isArray(photo) ||
-      !isGuestId(photo.attachmentId) ||
-      !isGuestId(photo.itemId) ||
-      photo.purpose !== 'DEFECT' ||
-      Object.keys(photo).some(
-        (key) => !['attachmentId', 'purpose', 'itemId'].includes(key),
-      )
+      !isGuestId(photo.attachmentId)
     )
       return invalidPhotos();
     const attachmentId = photo.attachmentId.toLowerCase();
-    const itemId = photo.itemId.toLowerCase();
-    if (used.has(attachmentId) || !abnormalIds.has(itemId))
-      return invalidPhotos();
+    if (used.has(attachmentId)) return invalidPhotos();
     used.add(attachmentId);
+    const keys = Object.keys(photo);
+    if (photo.purpose === 'ROOM_CONDITION') {
+      if (
+        draft.type !== 'CHECK_IN' ||
+        keys.some((key) => key !== 'attachmentId' && key !== 'purpose')
+      )
+        return invalidPhotos();
+      return { attachmentId, purpose: 'ROOM_CONDITION' };
+    }
+    if (
+      photo.purpose !== 'DEFECT' ||
+      !isGuestId(photo.itemId) ||
+      keys.some((key) => !['attachmentId', 'purpose', 'itemId'].includes(key))
+    )
+      return invalidPhotos();
+    const itemId = photo.itemId.toLowerCase();
+    if (!abnormalIds.has(itemId)) return invalidPhotos();
     return { attachmentId, purpose: 'DEFECT', itemId };
   });
 }

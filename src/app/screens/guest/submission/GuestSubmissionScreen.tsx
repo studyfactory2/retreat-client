@@ -4,6 +4,8 @@ import { useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useNavigationGuard } from '../../../core/router/navigation/use-navigation-guard';
 import { Button } from '../../../shared/ui/Button/Button';
+import { guestDraftOrigin } from '../../../features/guest-entry/guest-draft-origin';
+import { GuestRecordNavigation } from '../components/GuestRecordNavigation';
 import { readGuestAccess } from '../entry/model/guest-entry-model';
 import { useGuestSubmission } from './hooks/use-guest-submission';
 import { GuestSubmissionWorkspace } from './components/GuestSubmissionWorkspace';
@@ -18,6 +20,9 @@ export function GuestSubmissionScreen() {
   const controller = useGuestSubmission(token);
   useNavigationGuard(controller.hasPendingWork);
   const { resource } = controller;
+  const origin = token && resource.status === 'ready'
+    ? guestDraftOrigin(resource.detail, token)
+    : null;
   const main = useRef<HTMLElement>(null);
   const mode = resource.status === 'ready' ? resource.mode : resource.status;
   useEffect(() => {
@@ -79,8 +84,8 @@ export function GuestSubmissionScreen() {
             controller={controller}
             resource={resource}
             token={access.token}
-            onReceipt={() =>
-              navigate({ pathname: '/draft', hash: location.hash })
+            onReceipt={
+              origin ? () => navigate({ pathname: '/draft', hash: location.hash }) : undefined
             }
           />
         )}
@@ -88,6 +93,9 @@ export function GuestSubmissionScreen() {
       <footer className="guest-draft-footer">
         {APP_BRAND.appName}
       </footer>
+      {token && resource.status === 'ready' && resource.access === 'ready' && (
+        <GuestRecordNavigation origin={origin} token={token} page="submission" />
+      )}
     </div>
   );
 }

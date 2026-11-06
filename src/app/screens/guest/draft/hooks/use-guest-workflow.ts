@@ -33,6 +33,7 @@ export function useGuestWorkflow(
   const [assignments, setAssignments] = useState<Record<string, string>>({});
   const [reconciledPhotoList, setReconciledPhotoList] =
     useState<GuestDraftPhotoListDto | null>(null);
+  const [lastIssuePhotoItem, setLastIssuePhotoItem] = useState('');
   const [review, setReview] = useState<Review | null>(null);
   const [preparing, setPreparing] = useState(false);
   const [later, setLater] = useState(false);
@@ -60,6 +61,9 @@ export function useGuestWorkflow(
     draftId: draft.id,
     locked: disabled || step === 2 || later,
     onAccessRejected: session.recheck,
+    onAssignedUpload: (id, assignment) => {
+      setAssignments((previous) => ({ ...previous, [id]: assignment }));
+    },
   });
   const photoWork =
     photos.busy || photos.queue.length > 0 || photos.removal !== null;
@@ -92,7 +96,7 @@ export function useGuestWorkflow(
   }, [mapped, preparing]);
   useEffect(() => {
     heading.current?.focus({ preventScroll: true });
-    heading.current?.scrollIntoView({ block: 'start' });
+    window.scrollTo(0, 0);
   }, [step, later]);
 
   const editableDraft = { ...draft, answers };
@@ -100,7 +104,7 @@ export function useGuestWorkflow(
     .flatMap((section) => section.items)
     .filter((item) => item.required);
   const answered = required.filter((item) =>
-    answers.items.some((answer) => answer.itemId === item.id),
+    answers.items.some((answer) => answer.itemId.toLowerCase() === item.id.toLowerCase()),
   ).length;
   const photoReady = !photos.busy && !photos.blocked;
   const reviewCurrent =
@@ -193,7 +197,7 @@ export function useGuestWorkflow(
   return {
     step,
     later,
-    message,
+    message: step === 0 && answered === required.length ? '' : message,
     heading,
     photos,
     assignments,
@@ -207,6 +211,15 @@ export function useGuestWorkflow(
     editableDraft,
     advance,
     continueLater,
+    lastIssuePhotoItem,
+    openPhotos: () => {
+      if (!disabled && !operation.current) go(1);
+    },
+    addIssuePhotos: (files: FileList, itemId: string) => {
+      if (disabled || operation.current || !photoReady || !files.length) return;
+      setLastIssuePhotoItem(itemId);
+      photos.uploadFiles(files, itemId);
+    },
     back: () => {
       if (disabled || operation.current || photos.hasPendingWork()) return;
       setReview(null);
@@ -217,6 +230,7 @@ export function useGuestWorkflow(
     },
     assign: (id: string, value: string) => {
       if (disabled || step !== 1 || photos.hasPendingWork()) return;
+      setMessage('');
       setReview(null);
       setAssignments((previous) => ({ ...previous, [id]: value }));
     },

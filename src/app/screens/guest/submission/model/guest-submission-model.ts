@@ -176,7 +176,7 @@ function sameCorrectionPhotos(
       .map((answer) => answer.itemId),
   );
   const retained = attempt.base.photos
-    .filter((photo) => abnormal.has(photo.itemId))
+    .filter((photo) => photo.purpose === 'ROOM_CONDITION' || abnormal.has(photo.itemId))
     .map((photo, sortOrder) => ({ ...photo, sortOrder }));
   return (
     detail.photos.length === retained.length &&

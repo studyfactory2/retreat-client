@@ -1,9 +1,9 @@
 import { useState, type ChangeEvent } from 'react';
 import { Link, type To } from 'react-router-dom';
-import { getSeoulToday } from '../../../../core/dates/seoul-date';
 import type { GuestDraftType } from '../../../../features/guest-drafts/guest-drafts.types';
 import type { GuestEntryContext } from '../../../../features/guest-entry/guest-entry.types';
 import { Button } from '../../../../shared/ui/Button/Button';
+import { GuestChecklistProgress } from '../../components/GuestChecklistProgress';
 import type { useGuestStart } from '../hooks/use-guest-start';
 import {
   guestStartTitle,
@@ -16,6 +16,14 @@ const optionalFields = [
   { name: 'department', label: '부서', autoComplete: 'off' },
   { name: 'phone', label: '연락처', autoComplete: 'tel' },
 ] as const;
+
+const reservationDate = new Intl.DateTimeFormat('ko-KR', {
+  timeZone: 'Asia/Seoul',
+  year: 'numeric',
+  month: 'numeric',
+  day: 'numeric',
+  weekday: 'short',
+});
 
 export function GuestStartForm({
   entry,
@@ -63,22 +71,15 @@ export function GuestStartForm({
 
   return (
     <div className="guest-start">
-      <Link to={home} className="guest-home-link">
-        ‹ 홈으로 돌아가기
-      </Link>
       <header className="guest-start-heading">
-        <span className="guest-eyebrow">{entry.context.property.name}</span>
-        <h1>{title}</h1>
-        <p>이용 정보를 확인한 뒤 시설 상태를 알려 주세요.</p>
+        <Link to={home} className="guest-start-back" aria-label="홈으로 돌아가기">
+          <GuestIcon name="arrow" />
+        </Link>
+        <div>
+          <h1>{title}</h1>
+          <p>{entry.context.property.name}</p>
+        </div>
       </header>
-      <ol className="guest-start-steps" aria-label="체크리스트 작성 단계">
-        {['이용 정보', '시설 확인', '사진', '제출 확인'].map((step, index) => (
-          <li key={step} aria-current={index === 0 ? 'step' : undefined}>
-            <span aria-hidden="true">{index + 1}</span>
-            {step}
-          </li>
-        ))}
-      </ol>
       {!checklist && !opening ? (
         <section className="guest-card guest-empty">
           <h2>체크리스트를 준비하고 있습니다</h2>
@@ -94,23 +95,18 @@ export function GuestStartForm({
             else void form.start();
           }}
         >
-          <div className="guest-card__heading">
-            <h2>이용 정보</h2>
-            <span className="guest-badge">
-              {entry.kind === 'stay' ? '등록된 일정' : '직접 입력'}
-            </span>
-          </div>
+          <GuestChecklistProgress step={1} />
           {entry.kind === 'stay' ? (
             <>
-              <dl className="guest-start-summary">
+              <dl className="guest-start-summary" aria-label="예약 정보 · 한국 시간">
                 <div>
                   <dt>이용객</dt>
                   <dd>{entry.context.guestName}</dd>
                 </div>
                 <div>
-                  <dt>{type === 'CHECK_IN' ? '입실일' : '퇴실일'}</dt>
+                  <dt>{type === 'CHECK_IN' ? '입실 예정일' : '퇴실 예정일'}</dt>
                   <dd>
-                    {getSeoulToday(
+                    {reservationDate.format(
                       new Date(
                         type === 'CHECK_IN'
                           ? entry.context.checkInAt
@@ -121,8 +117,7 @@ export function GuestStartForm({
                 </div>
               </dl>
               <p className="guest-hint">
-                등록된 이름과 예정일로 작성합니다. 변경이 필요하면 관리자에게
-                문의해 주세요.
+                예약 정보 변경은 관리자에게 문의해 주세요.
               </p>
             </>
           ) : (
@@ -143,7 +138,8 @@ export function GuestStartForm({
               </div>
               <div className="guest-start-field">
                 <label htmlFor="guest-start-visitDate">
-                  {type === 'CHECK_IN' ? '입실일' : '퇴실일'} <span>필수</span>
+                  {type === 'CHECK_IN' ? '입실일' : '퇴실일'}{' '}
+                  <span>필수 · 한국 시간</span>
                 </label>
                 <input
                   {...inputProps('visitDate')}
@@ -153,9 +149,6 @@ export function GuestStartForm({
                   required
                 />
                 {error('visitDate')}
-                <p className="guest-hint">
-                  한국 시간 기준으로 실제 이용일을 선택해 주세요.
-                </p>
               </div>
               <details
                 className="guest-start-optional-fields"
@@ -163,14 +156,13 @@ export function GuestStartForm({
                 onToggle={(event) => setOptionalOpen(event.currentTarget.open)}
               >
                 <summary>
-                  추가 정보 <span>선택 · 회사, 부서, 연락처</span>
+                  회사 · 부서 · 연락처 <span>선택</span>
                 </summary>
                 <div>
                   {optionalFields.map((field) => (
                     <div className="guest-start-field" key={field.name}>
                       <label htmlFor={`guest-start-${field.name}`}>
-                        {field.label}{' '}
-                        <span className="guest-start-optional">선택</span>
+                        {field.label}
                       </label>
                       <input
                         {...inputProps(field.name)}
@@ -184,13 +176,6 @@ export function GuestStartForm({
               </details>
             </fieldset>
           )}
-          <div className="guest-start-notice">
-            <GuestIcon name="notice" />
-            <p>
-              작성 중에 저장하고 나중에 이어갈 수 있습니다. 마지막 확인 단계에서
-              제출해 주세요.
-            </p>
-          </div>
           {state.message && (
             <div
               className={`guest-start-feedback${state.status === 'uncertain' ? ' guest-start-feedback--uncertain' : ''}`}
@@ -228,7 +213,7 @@ export function GuestStartForm({
                 ? '이용 정보 확인 중'
                 : state.status === 'starting'
                   ? '체크리스트 시작 중'
-                  : '다음: 시설 확인'}
+                  : '다음 · 시설 확인'}
           </Button>
         </form>
       )}

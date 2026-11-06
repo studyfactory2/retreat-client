@@ -1,5 +1,21 @@
-.guest-photos {
-  margin-block: 0;
+.guest-flow .guest-draft-card.guest-photos {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  box-shadow: none;
+}
+.guest-photos__guide {
+  margin-top: 8px;
+  color: var(--color-muted);
+  font-size: 12px;
+  line-height: 1.75;
+}
+.guest-photos__guide > summary {
+  width: fit-content;
+  font-size: 13px;
+}
+.guest-photos__guide p + p {
+  margin-top: 5px;
 }
 .guest-photos__heading {
   display: flex;
@@ -7,11 +23,10 @@
   justify-content: space-between;
   gap: 12px;
 }
-.guest-photos__heading h2 span {
-  margin-left: 6px;
+.guest-photos__heading p {
   color: var(--color-muted);
-  font-size: 12px;
-  font-weight: 400;
+  font-size: 13px;
+  line-height: 1.65;
 }
 .guest-photos__count {
   flex-shrink: 0;
@@ -22,42 +37,20 @@
   font-size: 12px;
   font-weight: 650;
 }
-.guest-photos__intro {
-  margin-top: 12px;
-  font-size: 13px;
-  color: var(--color-muted);
-  line-height: 1.8;
-}
 .guest-photos__grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: 12px;
   margin-block: 16px;
 }
-.guest-photos__empty {
-  min-height: 96px;
-  margin-block: 16px;
-  border: 1px dashed #c5d3ed;
-  border-radius: 14px;
-  background: #f8faff;
-  display: grid;
-  place-content: center;
-  justify-items: center;
-  gap: 8px;
-  color: var(--color-muted);
-  font-size: 12px;
-}
-.guest-photos__empty > span {
-  font-size: 28px;
-  color: #7d96c4;
-}
 .guest-photos__picker {
   position: relative;
   display: grid;
   place-items: center;
   min-height: 48px;
-  border: 1px solid var(--color-primary);
-  border-radius: 12px;
+  margin-top: 14px;
+  border: 1px dashed #9eb9ed;
+  border-radius: 10px;
   color: var(--color-primary);
   font-size: 15px;
   font-weight: 650;
@@ -83,6 +76,28 @@
 }
 .guest-photos__picker[aria-disabled='true'] input {
   cursor: default;
+}
+.guest-issue-photo-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--color-muted);
+  font-size: 13px;
+}
+.guest-issue-photo-status button {
+  flex-shrink: 0;
+  min-height: 44px;
+  padding-inline: 8px;
+  border: 0;
+  background: transparent;
+  color: var(--color-primary);
+  font: inherit;
+  cursor: pointer;
+}
+.guest-issue-photo-status button:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 .guest-photos__help {
   margin-top: 12px;
@@ -185,23 +200,21 @@
   background: #fff;
 }
 .guest-photo-card__preview {
-  aspect-ratio: 16 / 9;
   overflow: hidden;
   background: #f1f5fc;
 }
 .guest-photo-card__preview > img {
   display: block;
   width: 100%;
-  height: 100%;
+  aspect-ratio: 16 / 9;
   object-fit: contain;
 }
 .guest-photo-card__placeholder {
-  display: grid;
-  place-content: center;
-  justify-items: center;
-  height: 100%;
-  padding: 12px;
-  gap: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  gap: 8px;
 }
 .guest-photo-card__placeholder svg {
   width: 26px;
@@ -218,17 +231,21 @@
 .guest-photo-card__body {
   padding: 12px;
 }
+.guest-photo-card__file {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+.guest-photo-card__file .guest-photo-card__size {
+  flex: 0 0 auto;
+  margin: 0;
+}
 .guest-photo-card__name {
   color: var(--color-heading);
   font-size: 12px;
   line-height: 1.6;
   overflow-wrap: anywhere;
-}
-.guest-photo-card__name > span {
-  display: inline-block;
-  margin-right: 5px;
-  color: var(--color-primary);
-  font-weight: 700;
 }
 .guest-photo-card__size,
 .guest-photo-card__hint {
@@ -278,9 +295,6 @@
 }
 .guest-photo-card__confirm .guest-photo-delete {
   background: var(--color-danger);
-}
-.guest-photos__empty small {
-  font-size: 12px;
 }
 .guest-photo-assignment {
   display: grid;

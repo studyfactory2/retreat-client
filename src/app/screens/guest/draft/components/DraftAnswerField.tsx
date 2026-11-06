@@ -1,4 +1,5 @@
 import type { GuestDraftAnswer } from '../../../../features/guest-drafts/guest-drafts.types';
+import { GuestPhotoPicker } from './GuestPhotoPicker';
 
 export function DraftAnswerField({
   item,
@@ -6,7 +7,11 @@ export function DraftAnswerField({
   disabled,
   onValue,
   onDetails,
+  onIssuePhotos,
+  photoPickerDisabled = false,
 }: {
+  onIssuePhotos?: (files: FileList, itemId: string) => void;
+  photoPickerDisabled?: boolean;
   item: { id: string; label: string; required: boolean };
   answer: GuestDraftAnswer | undefined;
   disabled: boolean;
@@ -18,16 +23,26 @@ export function DraftAnswerField({
 }) {
   return (
     <fieldset
-      className={`guest-draft-item${answer?.value === 'ABNORMAL' ? ' guest-draft-item--abnormal' : ''}`}
+      className="guest-check-item"
       disabled={disabled}
     >
-      <legend>
-        {item.label}
-        {item.required && (
-          <span className="guest-draft-required">필수 항목</span>
+      <legend className="guest-check-item__legend">{item.label}</legend>
+      <div className="guest-check-item__heading">
+        <p>
+          {item.label}
+          {item.required && <span className="guest-draft-required">필수</span>}
+        </p>
+        {answer && (
+          <button
+            type="button"
+            className="guest-check-clear"
+            onClick={() => onValue(null)}
+          >
+            선택 해제
+          </button>
         )}
-      </legend>
-      <div className="guest-draft-choice" aria-label={`${item.label} 상태`}>
+      </div>
+      <div className="guest-check-choices" role="group" aria-label={`${item.label} 상태`}>
         <button
           type="button"
           aria-pressed={answer?.value === 'NORMAL'}
@@ -37,18 +52,11 @@ export function DraftAnswerField({
         </button>
         <button
           type="button"
+          className="guest-check-choices__abnormal"
           aria-pressed={answer?.value === 'ABNORMAL'}
           onClick={() => onValue('ABNORMAL')}
         >
-          이상
-        </button>
-        <button
-          type="button"
-          className="guest-draft-choice__clear"
-          disabled={!answer}
-          onClick={() => onValue(null)}
-        >
-          선택 해제
+          이상 있음
         </button>
       </div>
       {answer?.value === 'ABNORMAL' && (
@@ -74,6 +82,13 @@ export function DraftAnswerField({
             />
             <span>긴급한 문제예요</span>
           </label>
+          {onIssuePhotos && (
+            <GuestPhotoPicker
+              label="이 항목의 이상 사진 추가"
+              disabled={disabled || photoPickerDisabled}
+              onPick={(files) => onIssuePhotos(files, item.id)}
+            />
+          )}
         </div>
       )}
     </fieldset>
