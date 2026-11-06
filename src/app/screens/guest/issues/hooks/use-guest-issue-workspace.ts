@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { guestLandingState } from '../../../../features/guest-entry/guest-landing-return';
 import { appRoutes } from '../../../../core/router/routes';
 import { buildGuestViewLocation } from '../../entry/model/guest-entry-model';
 import type { GuestIssueReportController } from './use-guest-issue-report';
@@ -87,7 +88,9 @@ export function useGuestIssueWorkspace({
     discardAndLeave: () => {
       if (!visibleLeave?.href || navigationLocked) return;
       photos.clear();
-      void navigate(visibleLeave.href);
+      void navigate(visibleLeave.href, {
+        state: visibleLeave.href === appRoutes.home ? guestLandingState(home) : null,
+      });
     },
   };
 }

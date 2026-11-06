@@ -54,7 +54,9 @@ function GuestDraftSessionScreen() {
       >
         본문으로 바로가기
       </button>
-      <GuestPageHeader />
+      <GuestPageHeader
+        returnTo={home ?? (token && draftRecord ? { pathname: '/draft', hash: location.hash } : undefined)}
+      />
       <main
         ref={main}
         tabIndex={-1}

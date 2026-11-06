@@ -1,5 +1,6 @@
 import type { ReactNode, RefObject } from 'react';
 import type { To } from 'react-router-dom';
+import type { GuestReturnTarget } from '../../../../features/guest-entry/guest-landing-return';
 import type { GuestView } from '../model/guest-entry-model';
 import { isPublicContactTel } from '../../../../features/property-contact/public-contact';
 import { GuestNavigation } from '../../components/GuestNavigation';
@@ -22,7 +23,7 @@ export function GuestFrame({
   children: ReactNode;
   mainRef: RefObject<HTMLElement | null>;
   view: GuestView;
-  home: To;
+  home: GuestReturnTarget;
   guide: To;
   report?: To;
   ready: boolean;

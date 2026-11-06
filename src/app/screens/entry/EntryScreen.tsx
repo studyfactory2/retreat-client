@@ -1,3 +1,6 @@
+import { useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { readGuestLandingReturn } from '../../features/guest-entry/guest-landing-return';
 import { InstallApp } from '../../shared/pwa/InstallApp';
 import { RetreatScene } from './components/RetreatScene';
 import { EntryIcon } from './components/EntryIcon';
@@ -37,6 +40,14 @@ const questions = [
 ];
 
 export function EntryScreen() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  // Native guide/help anchors create a new history entry within the same visit.
+  const [arrivalState] = useState<unknown>(() => location.state);
+  const state = location.hash === '#how-to-use' || location.hash === '#entry-help'
+    ? location.state ?? arrivalState
+    : location.state;
+  const guestReturn = readGuestLandingReturn(state);
   return (
     <div className="entry-screen">
       <section className="entry-hero" aria-labelledby="entry-title">
@@ -46,7 +57,16 @@ export function EntryScreen() {
             이용 안내부터 입실·퇴실 체크까지, 한곳에서.
           </p>
           <div className="entry-hero__actions">
-            <a className="entry-primary-link" href="#how-to-use">
+            {guestReturn && (
+              <button
+                type="button"
+                className="entry-primary-link"
+                onClick={() => void navigate(guestReturn, { replace: true })}
+              >
+                이용객 화면으로 돌아가기
+              </button>
+            )}
+            <a className={guestReturn ? 'entry-help-link' : 'entry-primary-link'} href="#how-to-use">
               이용 방법 <EntryIcon name="down" />
             </a>
             <a className="entry-help-link" href="#entry-help">도움말 <EntryIcon name="up-right" /></a>

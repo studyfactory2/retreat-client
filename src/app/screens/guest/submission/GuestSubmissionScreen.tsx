@@ -5,7 +5,7 @@ import { useNavigationGuard } from '../../../core/router/navigation/use-navigati
 import { Button } from '../../../shared/ui/Button/Button';
 import { guestDraftOrigin } from '../../../features/guest-entry/guest-draft-origin';
 import { GuestRecordNavigation } from '../components/GuestRecordNavigation';
-import { readGuestAccess } from '../entry/model/guest-entry-model';
+import { buildGuestViewLocation, readGuestAccess } from '../entry/model/guest-entry-model';
 import { useGuestSubmission } from './hooks/use-guest-submission';
 import { GuestSubmissionWorkspace } from './components/GuestSubmissionWorkspace';
 import '../draft/styles/guest-draft.css';
@@ -23,6 +23,11 @@ export function GuestSubmissionScreen() {
     token && resource.status === 'ready'
       ? guestDraftOrigin(resource.detail, token)
       : null;
+  const returnTo = resource.status === 'ready' && resource.access === 'ready'
+    ? origin
+      ? buildGuestViewLocation(origin.kind, origin.hash, 'home')
+      : { pathname: '/draft', search: '?view=submission', hash: location.hash }
+    : undefined;
   const main = useRef<HTMLElement>(null);
   const mode = resource.status === 'ready' ? resource.mode : resource.status;
   useEffect(() => {
@@ -37,7 +42,7 @@ export function GuestSubmissionScreen() {
       >
         본문으로 바로가기
       </button>
-      <GuestPageHeader />
+      <GuestPageHeader returnTo={returnTo} />
       <main
         ref={main}
         tabIndex={-1}
