@@ -6,7 +6,7 @@ import {
   type StaffWorkflowOptions,
 } from '../hooks/use-staff-workflow';
 import { StaffDraftAnswerField } from './StaffDraftAnswerField';
-import { StaffDraftLink } from './StaffDraftLink';
+import { StaffDraftPause } from './StaffDraftPause';
 import { StaffDraftPhotos } from './StaffDraftPhotos';
 import { StaffPhotoAssignmentFields } from './StaffPhotoAssignment';
 import { StaffSubmissionReview } from './StaffSubmissionReview';
@@ -53,34 +53,38 @@ export function StaffDraftForm({
   } = useStaffWorkflow({ session, resource, token });
   return (
     <>
-      <div className="staff-flow-heading">
-        <p>{draft.property.name}</p>
-        <div>
-          <h1>청소·정비</h1>
-          <span className="staff-flow-state">작성 중</span>
-        </div>
-        <span>
-          {draft.author.name} <span aria-hidden="true">·</span>{' '}
-          {draft.visitDate}
-        </span>
-      </div>
-      {draft.cleaningTask && (
-        <p className="staff-task-subtitle">
-          {draft.cleaningTask.title} · {taskTime(draft.cleaningTask.dueAt)}
-        </p>
+      {!later && (
+        <>
+          <div className="staff-flow-heading">
+            <p>{draft.property.name}</p>
+            <div>
+              <h1>청소·정비</h1>
+              <span className="staff-flow-state">작성 중</span>
+            </div>
+            <span>
+              {draft.author.name} <span aria-hidden="true">·</span>{' '}
+              {draft.visitDate}
+            </span>
+          </div>
+          {draft.cleaningTask && (
+            <p className="staff-task-subtitle">
+              {draft.cleaningTask.title} · {taskTime(draft.cleaningTask.dueAt)}
+            </p>
+          )}
+          <ol className="staff-flow-steps" aria-label="정비 작성 단계">
+            {['점검', '사진', '확인·제출'].map((label, index) => (
+              <li
+                key={label}
+                aria-current={step === index ? 'step' : undefined}
+                className={step > index ? 'is-complete' : ''}
+              >
+                <span>{step > index ? '✓' : index + 1}</span>
+                {label}
+              </li>
+            ))}
+          </ol>
+        </>
       )}
-      <ol className="staff-flow-steps" aria-label="정비 작성 단계">
-        {['점검', '사진', '확인·제출'].map((label, index) => (
-          <li
-            key={label}
-            aria-current={step === index ? 'step' : undefined}
-            className={step > index ? 'is-complete' : ''}
-          >
-            <span>{step > index ? '✓' : index + 1}</span>
-            {label}
-          </li>
-        ))}
-      </ol>
       {(resource.message || resource.access !== 'ready' || unresolved) &&
         !submission.locked && (
           <section className="staff-flow-notice" role="status">
@@ -114,9 +118,11 @@ export function StaffDraftForm({
         <StaffSubmissionUncertain submission={submission} />
       ) : (
         <>
-          <h2 ref={heading} tabIndex={-1} className="staff-flow-step-title">
-            {stepTitle}
-          </h2>
+          {!later && (
+            <h2 ref={heading} tabIndex={-1} className="staff-flow-step-title">
+              {stepTitle}
+            </h2>
+          )}
           <div hidden={step !== 0 || later}>
             <section className="staff-draft-card staff-flow-checklist">
               <div className="staff-flow-section-heading">
@@ -254,35 +260,17 @@ export function StaffDraftForm({
         </p>
       )}
       {later && !submission.locked && (
-        <div className="staff-flow-later">
-          <p className="staff-flow-saved">
-            {session.dirty || unresolved
-              ? '저장 상태를 다시 확인해 주세요'
-              : '✓ 점검 내용이 저장되었어요'}
-          </p>
-          {draft.cleaningTask && (
-            <p className="staff-draft-hint">
-              직원 QR의 작업 목록에서 같은 작업을 이어 쓸 수 있어요.
-            </p>
+        <StaffDraftPause
+          heading={heading}
+          draft={draft}
+          token={token}
+          saved={!session.dirty && !unresolved}
+          linkDisabled={!accessReady || session.dirty || unresolved}
+          hasPhotoSelections={photos.items.some((photo) =>
+            Boolean(assignments[photo.id]),
           )}
-          <StaffDraftLink
-            token={token}
-            expiresAt={draft.expiresAt}
-            disabled={!accessReady || session.dirty}
-          />
-          {Object.keys(assignments).length > 0 && (
-            <p className="staff-draft-hint">
-              사진의 종류와 위치는 다시 열면 선택해 주세요.
-            </p>
-          )}
-          <button
-            className="staff-flow-text-button"
-            type="button"
-            onClick={resume}
-          >
-            계속 작성하기
-          </button>
-        </div>
+          onResume={resume}
+        />
       )}
       {!later && !submission.locked && (
         <div className="staff-flow-bottom">

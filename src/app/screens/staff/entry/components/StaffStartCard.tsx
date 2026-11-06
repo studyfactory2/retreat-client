@@ -20,11 +20,7 @@ export function StaffStartCard({
       aria-labelledby="staff-start-title"
       aria-busy={pending}
     >
-      <span className="staff-entry-eyebrow">시작 전 확인</span>
       <h2 id="staff-start-title">담당 직원을 확인해 주세요</h2>
-      <p className="staff-entry-hint staff-start-description">
-        확인 후 정비 항목을 작성할 수 있습니다.
-      </p>
       {!configured && (
         <p className="staff-entry-empty">
           담당 직원과 정비 항목이 준비되면 시작할 수 있습니다. 관리자에게 문의해
@@ -94,8 +90,8 @@ export function StaffStartCard({
           <li>시작하면 임시 기록이 만들어집니다. 정비 완료는 아닙니다.</li>
           <li>담당 직원 배정 확인이며, 작업자 본인 인증은 아닙니다.</li>
           <li>
-            작성 화면의 이어쓰기 링크를 보관해 주세요. 이 QR에서는 이전 기록을
-            찾을 수 없습니다.
+            작성 화면의 이어쓰기 링크를 보관해 주세요. 공용 QR에서는 이 추가
+            기록을 찾을 수 없습니다.
           </li>
         </ul>
       </details>

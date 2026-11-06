@@ -1,4 +1,4 @@
-import { BrandLogo } from '../../../../shared/ui/BrandLogo/BrandLogo';
+import { StaffHeader } from '../../components/StaffHeader';
 import { APP_BRAND } from '../../../../core/config/brand';
 import type { ReactNode, RefObject } from 'react';
 
@@ -20,14 +20,7 @@ export function StaffDraftFrame({
       >
         본문으로 바로가기
       </button>
-      <header className="staff-draft-header">
-        <div>
-          <strong className="staff-draft-brand">
-            <BrandLogo /><span>휴양소 정비 안내</span>
-          </strong>
-          <span>직원</span>
-        </div>
-      </header>
+      <StaffHeader />
       <main
         className="staff-draft-main"
         ref={mainRef}
@@ -36,9 +29,7 @@ export function StaffDraftFrame({
       >
         {children}
       </main>
-      <footer className="staff-draft-footer">
-        {APP_BRAND.appName}
-      </footer>
+      <footer className="staff-draft-footer">{APP_BRAND.appName}</footer>
     </div>
   );
 }

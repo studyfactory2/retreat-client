@@ -1,9 +1,6 @@
 .staff-start > h2 {
   margin-top: 8px;
 }
-.staff-start-description {
-  margin-top: 8px;
-}
 .staff-start-confirm {
   display: flex;
   align-items: flex-start;

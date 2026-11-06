@@ -12,6 +12,10 @@ export function useStaffDraftLink(
   );
   const scope = useRef<typeof owner | null>(owner);
   const pending = useRef(false);
+  const [copiedLink, setCopiedLink] = useState<{
+    token: string;
+    expiresAt: string;
+  } | null>(null);
   const [result, setResult] = useState<{
     owner: typeof owner;
     message: string;
@@ -38,12 +42,14 @@ export function useStaffDraftLink(
       await navigator.clipboard.writeText(
         `${appConfig.frontendOrigin}/draft#token=${owner.token}`,
       );
-      if (scope.current === owner)
+      if (scope.current === owner) {
+        setCopiedLink({ token: owner.token, expiresAt: owner.expiresAt });
         setResult({
           owner,
           busy: false,
           message: '링크를 복사했어요. 나만 볼 수 있는 곳에 보관해 주세요.',
         });
+      }
     } catch {
       if (scope.current === owner)
         setResult({
@@ -58,6 +64,7 @@ export function useStaffDraftLink(
   }, [owner]);
   return {
     copy,
+    copied: copiedLink?.token === token && copiedLink.expiresAt === expiresAt,
     message: result?.owner === owner ? result.message : '',
     busy: result?.owner === owner && result.busy,
   };

@@ -1,15 +1,17 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { StaffAccessState } from './components/StaffAccessState';
 import { StaffFrame } from './components/StaffFrame';
 import { StaffHome } from './components/StaffHome';
-import { StaffTaskList } from './components/StaffTaskList';
+import { StaffTaskList, type StaffTaskView } from './components/StaffTaskList';
 import { StaffStartCard } from './components/StaffStartCard';
 import { useStaffEntry } from './hooks/use-staff-entry';
 import { useStaffStart } from './hooks/use-staff-start';
 import { readStaffAccess } from './model/staff-entry-model';
 import './styles/staff-entry.css';
 import './styles/staff-start.css';
+
+const initialTaskView: StaffTaskView = { showCompleted: false, page: 1 };
 
 export function StaffEntryScreen() {
   const location = useLocation();
@@ -30,6 +32,14 @@ export function StaffEntryScreen() {
     refresh,
     rejectAccess,
   );
+  const [taskView, setTaskView] = useState<{
+    scope: string;
+    view: StaffTaskView;
+  }>();
+  const taskScope =
+    resource.status === 'ready' && resource.data.assignedStaff
+      ? `${location.key}:${resource.data.property.id}:${resource.data.assignedStaff.id}`
+      : '';
   const main = useRef<HTMLElement>(null);
   const status = access.status === 'ready' ? resource.status : access.status;
   const loading = access.status === 'ready' && resource.status === 'loading';
@@ -42,7 +52,11 @@ export function StaffEntryScreen() {
     <StaffFrame
       mainRef={main}
       loading={loading || startForm.pending}
-      onRefresh={access.status === 'ready' ? refresh : undefined}
+      onRefresh={
+        resource.status === 'ready' && !resource.data.assignedStaff
+          ? refresh
+          : undefined
+      }
     >
       {access.status !== 'ready' ? (
         <StaffAccessState state={access.status} />
@@ -64,6 +78,15 @@ export function StaffEntryScreen() {
                   token={access.token}
                   context={resource.data}
                   rejectAccess={rejectAccess}
+                  view={
+                    taskView?.scope === taskScope
+                      ? taskView.view
+                      : initialTaskView
+                  }
+                  onViewChange={(view) =>
+                    setTaskView({ scope: taskScope, view })
+                  }
+                  onRefreshContext={refresh}
                 />
               ) : (
                 <section

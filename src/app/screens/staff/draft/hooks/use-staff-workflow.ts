@@ -269,7 +269,7 @@ export function useStaffWorkflow({
     photoReady,
     reviewCurrent,
     editableDraft,
-    stepTitle: later ? '이어쓰기 링크를 보관해 주세요' : titles[step],
+    stepTitle: titles[step],
     saveStateLabel,
     nextDisabled:
       disabled ||
