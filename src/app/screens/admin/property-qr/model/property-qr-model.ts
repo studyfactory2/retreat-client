@@ -17,7 +17,7 @@ export function qrFlowKey(flow: QrFlow): 'guest' | 'staff' {
 }
 
 export function qrStateLabel(state: QrState): string {
-  if (!state.issued) return '미발급';
+  if (!state.issued) return state.rotatedAt ? '발급 필요' : '미발급';
   return state.enabled ? '사용 중' : '접근 중지';
 }
 

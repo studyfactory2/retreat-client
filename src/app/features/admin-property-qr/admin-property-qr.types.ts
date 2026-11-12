@@ -4,6 +4,7 @@ export interface QrState {
   issued: boolean;
   enabled: boolean;
   canReopen: boolean;
+  /** Latest issuance or revocation revision; preserve for expectedRotatedAt. */
   rotatedAt: string | null;
 }
 

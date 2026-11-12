@@ -62,6 +62,12 @@ invitation or draft tokens into screenshots or bug reports.
 
 ## 4. Staff maintenance
 
+- [ ] On a test property, keep its guest and staff QR links, then assign a
+      different active staff member. Reopen `QR 관리`: guest QR remains usable;
+      staff QR shows `발급 필요` and `최근 변경`. The old staff link is rejected.
+      Issue a new staff QR with the confirmation: it opens the new assignee,
+      and the original guest QR still works. Saving the same staff assignment
+      again must preserve the newly issued staff QR.
 - [ ] Start from the staff QR. Confirm property and assigned staff, save partial
       answers and reopen the private continuation link.
 - [ ] Add photos and select their intended associations. Incomplete required

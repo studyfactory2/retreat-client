@@ -44,7 +44,7 @@ export function QrFlowRow({
           </span>
         </span>
         <span className="property-qr-row__date">
-          <span>최근 발급</span>
+          <span>{!state.issued && state.rotatedAt ? '최근 변경' : '최근 발급'}</span>
           {state.rotatedAt ? (
             <time dateTime={state.rotatedAt}>
               {dateFormat.format(new Date(state.rotatedAt))}

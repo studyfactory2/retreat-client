@@ -161,7 +161,7 @@ function PropertyQrWorkspace({
       {confirmation && resource.status === 'ready' && (
         <QrConfirmation
           flow={confirmation.flow}
-          replacing={confirmation.expectedRotatedAt !== null}
+          replacing={resource.data.qr[qrFlowKey(confirmation.flow)].issued}
           propertyName={resource.data.property.name}
           onCancel={cancelConfirmation}
           onConfirm={() => {

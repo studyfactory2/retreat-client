@@ -22,7 +22,9 @@ function readQrState(value: unknown, propertyIsActive: boolean): QrState {
     (value.canReopen !== undefined && typeof value.canReopen !== 'boolean') ||
     (value.canReopen === true && !value.issued) ||
     (value.rotatedAt !== null && !isQrTimestamp(value.rotatedAt)) ||
-    value.issued !== (value.rotatedAt !== null) ||
+    // Staff reassignment revokes the QR but retains its revision timestamp.
+    // Keep that timestamp for the next issuance's stale-write check.
+    (value.issued && value.rotatedAt === null) ||
     value.enabled !== (propertyIsActive && value.issued)
   )
     throw invalidQrResponse();

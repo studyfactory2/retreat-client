@@ -52,7 +52,7 @@ export function QrDetailPanel({
       </div>
       {state.rotatedAt && (
         <p className="property-qr-panel__date">
-          최근 발급{' '}
+          {!state.issued && state.rotatedAt ? '최근 변경' : '최근 발급'}{' '}
           <time dateTime={state.rotatedAt}>
             {formatQrTimestamp(state.rotatedAt)}
           </time>
@@ -87,7 +87,9 @@ export function QrDetailPanel({
               : opening || issuing
                 ? '잠시만 기다려 주세요.'
                 : !state.issued
-                  ? '발급 후 링크 복사와 이미지 저장이 가능합니다.'
+                  ? flow === 'STAFF' && state.rotatedAt
+                    ? '새 QR을 발급해 담당 직원에게 전달해 주세요.'
+                    : '발급 후 링크 복사와 이미지 저장이 가능합니다.'
                   : !state.enabled
                     ? '휴양소를 다시 활성화한 뒤 확인해 주세요.'
                     : state.canReopen
