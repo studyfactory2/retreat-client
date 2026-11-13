@@ -1,4 +1,9 @@
-import { apiRequest } from '../../core/api/api-client';
+import {
+  GUIDE_PDF_MAX_BYTES,
+  requireGuidePdfVersion,
+  validateGuidePdfBlob,
+} from '../property-guide/guide-pdf';
+import { apiDownloadWithHeaders, apiRequest } from '../../core/api/api-client';
 import type {
   GuestAccessKind,
   GuestEntryContext,
@@ -40,6 +45,24 @@ export async function getGuestPropertyGuide(
 ): Promise<GuestPropertyGuideDto> {
   requireGuestAccessInput(kind, token);
   return readGuestPropertyGuide(
-    await apiRequest<unknown>(`/guest/property-guides/${kind}`, { token, signal }),
+    await apiRequest<unknown>(`/guest/property-guides/${kind}`, {
+      token,
+      signal,
+    }),
   );
+}
+
+export async function getGuestPropertyGuidePdf(
+  kind: GuestAccessKind,
+  token: string,
+  version: number,
+  signal?: AbortSignal,
+): Promise<Blob> {
+  requireGuestAccessInput(kind, token);
+  const { blob } = await apiDownloadWithHeaders(
+    `/guest/property-guides/${kind}/pdf?version=${requireGuidePdfVersion(version)}`,
+    { token, signal, timeoutMs: 90_000 },
+    GUIDE_PDF_MAX_BYTES,
+  );
+  return validateGuidePdfBlob(blob);
 }

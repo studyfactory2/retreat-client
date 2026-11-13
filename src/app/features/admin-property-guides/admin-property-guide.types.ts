@@ -1,3 +1,5 @@
+import type { GuidePdfMetadata } from '../property-guide/guide-pdf';
+
 export interface AdminPropertyGuideDto {
   property: {
     id: string;
@@ -8,6 +10,8 @@ export interface AdminPropertyGuideDto {
   guide: {
     title: string;
     content: string;
+    type: 'TEXT' | 'PDF';
+    pdf: GuidePdfMetadata | null;
     isPublished: boolean;
     version: number;
     updatedByUserId: string;
@@ -21,4 +25,12 @@ export interface SaveAdminPropertyGuideInput {
   title: string;
   content: string;
   isPublished: boolean;
+}
+
+export interface SaveAdminPropertyGuidePdfInput {
+  expectedVersion: number;
+  title: string;
+  content: string;
+  isPublished: boolean;
+  file?: File;
 }

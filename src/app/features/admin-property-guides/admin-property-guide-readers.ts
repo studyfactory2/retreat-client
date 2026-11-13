@@ -1,3 +1,4 @@
+import { readGuidePdfMetadata } from '../property-guide/guide-pdf';
 import type {
   AdminPropertyGuideDto,
   SaveAdminPropertyGuideInput,
@@ -27,18 +28,25 @@ function isText(value: unknown, maximum: number): value is string {
 function isTimestamp(value: unknown): value is string {
   if (typeof value !== 'string') return false;
   const timestamp = Date.parse(value);
-  return Number.isFinite(timestamp) && new Date(timestamp).toISOString() === value;
+  return (
+    Number.isFinite(timestamp) && new Date(timestamp).toISOString() === value
+  );
 }
 
 function readGuide(value: unknown): AdminPropertyGuideDto['guide'] {
   if (value === null) return null;
+  if (!isRecord(value)) throw invalidGuideResponse();
+  const type = value.type === undefined ? 'TEXT' : value.type;
   if (
-    !isRecord(value) ||
+    (type !== 'TEXT' && type !== 'PDF') ||
     !isText(value.title, GUIDE_LIMITS.title) ||
     normalizeGuideTitle(value.title) !== value.title ||
     /[\r\n]/.test(value.title) ||
     value.title.includes('\u0000') ||
-    !isText(value.content, GUIDE_LIMITS.content) ||
+    typeof value.content !== 'string' ||
+    [...value.content].length > GUIDE_LIMITS.content ||
+    (type === 'TEXT' && !value.content) ||
+    (type === 'TEXT' && value.pdf != null) ||
     normalizeGuideContent(value.content) !== value.content ||
     value.content.includes('\u0000') ||
     typeof value.isPublished !== 'boolean' ||
@@ -55,6 +63,11 @@ function readGuide(value: unknown): AdminPropertyGuideDto['guide'] {
   return {
     title: value.title,
     content: value.content,
+    type,
+    pdf:
+      type === 'PDF'
+        ? readGuidePdfMetadata(value.pdf, invalidGuideResponse)
+        : null,
     isPublished: value.isPublished,
     version: value.version,
     updatedByUserId: value.updatedByUserId.toLowerCase(),
@@ -95,6 +108,7 @@ export function verifySavedPropertyGuide(
 ): void {
   if (
     !response.guide ||
+    response.guide.type !== 'TEXT' ||
     response.guide.version !== input.expectedVersion + 1 ||
     response.guide.title !== input.title ||
     response.guide.content !== input.content ||

@@ -138,6 +138,8 @@ function GuestEntrySessionScreen({ kind }: { kind: GuestAccessKind }) {
         resource.data.guide ? (
           <GuestGuide
             data={resource.data.guide}
+            token={access.token}
+            onAccessDenied={rejectAccess}
             entry={resource.data.entry}
             home={home}
             onRefresh={refresh}

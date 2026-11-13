@@ -1,3 +1,5 @@
+import { GuidePdfDocument } from '../../../../features/property-guide/components/GuidePdfDocument';
+import type { GuidePdfMetadata } from '../../../../features/property-guide/guide-pdf';
 import { useId } from 'react';
 import {
   normalizeGuideContent,
@@ -9,6 +11,11 @@ import '../styles/property-guide.css';
 export function PropertyGuidePreview({
   title,
   content,
+  type,
+  pdf,
+  pdfDocumentKey,
+  loadPdf,
+  onAccessDenied,
   isPublished,
   propertyActive,
   propertyName,
@@ -16,6 +23,11 @@ export function PropertyGuidePreview({
 }: {
   title: string;
   content: string;
+  type: 'TEXT' | 'PDF';
+  pdf: GuidePdfMetadata | null;
+  pdfDocumentKey: string;
+  loadPdf: (signal: AbortSignal) => Promise<Blob>;
+  onAccessDenied: () => void;
   isPublished: boolean;
   propertyActive: boolean;
   propertyName?: string;
@@ -67,10 +79,25 @@ export function PropertyGuidePreview({
           >
             {previewTitle || '안내 제목'}
           </h3>
-          <PropertyGuideContent
-            content={previewContent}
-            emptyText="안내 내용을 입력해 주세요."
-          />
+          {type === 'PDF' ? (
+            pdf ? (
+              <GuidePdfDocument
+                documentKey={pdfDocumentKey}
+                pdf={pdf}
+                load={loadPdf}
+                onAccessDenied={onAccessDenied}
+              />
+            ) : (
+              <p className="property-guide-preview__placeholder">
+                PDF 파일을 선택해 주세요.
+              </p>
+            )
+          ) : (
+            <PropertyGuideContent
+              content={previewContent}
+              emptyText="안내 내용을 입력해 주세요."
+            />
+          )}
         </article>
       </div>
       <div className="property-guide-preview__notice">

@@ -3,6 +3,8 @@ import { Button } from '../../../../shared/ui/Button/Button';
 import '../styles/property-guide.css';
 
 export function PropertyGuideReview({
+  type,
+  replacingPdf,
   isPublished,
   wasPublished,
   propertyActive,
@@ -11,6 +13,8 @@ export function PropertyGuideReview({
   busy,
   disabled = false,
 }: {
+  type: 'TEXT' | 'PDF';
+  replacingPdf: boolean;
   isPublished: boolean;
   wasPublished: boolean;
   propertyActive: boolean;
@@ -25,11 +29,12 @@ export function PropertyGuideReview({
   useEffect(() => {
     panel.current?.focus();
   }, []);
+  const contentLabel = type === 'PDF' ? '제목과 PDF 파일' : '제목과 내용';
   const impact = isPublished
     ? propertyActive
       ? wasPublished
-        ? '저장하면 공개 중인 안내가 즉시 지금 작성한 제목과 내용으로 바뀝니다.'
-        : '저장하면 지금 작성한 제목과 내용이 이용객에게 공개됩니다.'
+        ? `저장하면 공개 중인 안내에 지금 선택한 ${contentLabel}이 바로 반영됩니다.`
+        : `저장하면 지금 선택한 ${contentLabel}이 이용객에게 공개됩니다.`
       : '공개 상태로 저장되지만, 휴양소가 비활성인 동안 이용객은 이 안내에 접근할 수 없습니다.'
     : wasPublished
       ? '저장하면 현재 공개된 안내가 비공개로 전환되어 이용객에게 표시되지 않습니다. 작성한 내용은 관리자에게 저장됩니다.'
@@ -61,6 +66,13 @@ export function PropertyGuideReview({
       </h2>
       <p id={descriptionId}>{impact}</p>
       <div className="property-guide-review__facts">
+        <p>안내 방식: {type === 'PDF' ? 'PDF 파일' : '텍스트'}</p>
+        {replacingPdf && (
+          <p>
+            기존 PDF는 새 안내로 교체됩니다. 이미 다운로드한 파일은 회수할 수
+            없습니다.
+          </p>
+        )}
         <p>
           안내는 휴양소당 하나만 저장되며 별도의 공개본·초안이나 이전 내용
           보관함은 없습니다.

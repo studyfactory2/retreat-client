@@ -1,3 +1,5 @@
+import { getGuestPropertyGuidePdf } from '../../../../features/guest-entry/guest-entry-api';
+import { GuidePdfDocument } from '../../../../features/property-guide/components/GuidePdfDocument';
 import { Link, type To } from 'react-router-dom';
 import type {
   GuestEntryContext,
@@ -42,11 +44,15 @@ export function GuestGuide({
   entry,
   home,
   onRefresh,
+  token,
+  onAccessDenied,
 }: {
   data: GuestPropertyGuideDto;
   entry: GuestEntryContext;
   home: To;
   onRefresh: () => void;
+  token: string;
+  onAccessDenied: () => void;
 }) {
   return (
     <div className="guest-guide-page">
@@ -79,10 +85,26 @@ export function GuestGuide({
           </section>
         ) : (
           <article className="guest-guide-sheet" aria-label="이용 안내 내용">
-            <PropertyGuideContent
-              key={`${data.property.id}:${data.guide.version}`}
-              content={data.guide.content}
-            />
+            {data.guide.type === 'PDF' && data.guide.pdf ? (
+              <GuidePdfDocument
+                documentKey={`${entry.kind}:${data.property.id}:${data.guide.version}`}
+                pdf={data.guide.pdf}
+                load={(signal) =>
+                  getGuestPropertyGuidePdf(
+                    entry.kind,
+                    token,
+                    data.guide!.version,
+                    signal,
+                  )
+                }
+                onAccessDenied={onAccessDenied}
+              />
+            ) : (
+              <PropertyGuideContent
+                key={`${data.property.id}:${data.guide.version}`}
+                content={data.guide.content}
+              />
+            )}
           </article>
         )}
         <div className="guest-guide-context">

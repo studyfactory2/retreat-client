@@ -1,3 +1,4 @@
+import { readGuidePdfMetadata } from '../property-guide/guide-pdf';
 import { readPublicContactPhone } from '../property-contact/public-contact';
 import type {
   GuestPropertyDto,
@@ -88,10 +89,16 @@ export function readGuestPropertyGuide(value: unknown): GuestPropertyGuideDto {
   const property = readGuestProperty(response.property);
   if (response.guide === null) return { property, guide: null };
   const guide = readGuestObject(response.guide);
+  const type = guide.type === undefined ? 'TEXT' : guide.type;
   if (
+    (type !== 'TEXT' && type !== 'PDF') ||
     !isGuestText(guide.title, 100) ||
     /[\r\n\0]/.test(guide.title) ||
-    !isGuestText(guide.content, 20_000) ||
+    typeof guide.content !== 'string' ||
+    [...guide.content].length > 20_000 ||
+    guide.content.trim() !== guide.content ||
+    (type === 'TEXT' && !isGuestText(guide.content, 20_000)) ||
+    (type === 'TEXT' && guide.pdf != null) ||
     /[\r\0]/.test(guide.content) ||
     !isGuestVersion(guide.version) ||
     !isGuestTimestamp(guide.updatedAt)
@@ -102,6 +109,11 @@ export function readGuestPropertyGuide(value: unknown): GuestPropertyGuideDto {
     guide: {
       title: guide.title,
       content: guide.content,
+      type,
+      pdf:
+        type === 'PDF'
+          ? readGuidePdfMetadata(guide.pdf, invalidGuestEntryResponse)
+          : null,
       version: guide.version,
       updatedAt: guide.updatedAt,
     },

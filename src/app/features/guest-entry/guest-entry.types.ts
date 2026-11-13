@@ -1,3 +1,5 @@
+import type { GuidePdfMetadata } from '../property-guide/guide-pdf';
+
 export type GuestAccessKind = 'qr' | 'stay';
 
 export interface GuestPropertyDto {
@@ -57,6 +59,8 @@ export interface GuestPropertyGuideDto {
   guide: {
     title: string;
     content: string;
+    type: 'TEXT' | 'PDF';
+    pdf: GuidePdfMetadata | null;
     version: number;
     updatedAt: string;
   } | null;

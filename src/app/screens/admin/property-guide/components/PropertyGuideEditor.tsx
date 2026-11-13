@@ -2,7 +2,11 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ApiRequestError } from '../../../../core/api/api-error';
 import { appRoutes } from '../../../../core/router/routes';
-import { saveAdminPropertyGuide } from '../../../../features/admin-property-guides/admin-property-guide-api';
+import {
+  getAdminPropertyGuidePdf,
+  saveAdminPropertyGuide,
+  saveAdminPropertyGuidePdf,
+} from '../../../../features/admin-property-guides/admin-property-guide-api';
 import type { AdminPropertyGuideDto } from '../../../../features/admin-property-guides/admin-property-guide.types';
 import { MAX_WRITABLE_GUIDE_VERSION } from '../../../../features/admin-property-guides/admin-property-guide-validation';
 import { Button } from '../../../../shared/ui/Button/Button';
@@ -45,6 +49,7 @@ export function PropertyGuideEditor({
   const [initial] = useState(() => createGuideValues(data));
   const [values, setValues] = useState(initial);
   const currentValues = useRef(initial);
+  const [pdfRevision, setPdfRevision] = useState(0);
   const [errors, setErrors] = useState<GuideFormErrors>({});
   const [reviewing, setReviewing] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -53,6 +58,9 @@ export function PropertyGuideEditor({
   const dirty =
     values.title !== initial.title ||
     values.content !== initial.content ||
+    values.type !== initial.type ||
+    values.pdf !== initial.pdf ||
+    values.file !== initial.file ||
     values.isPublished !== initial.isPublished;
   const navigation = useGuideNavigation(
     dirty,
@@ -60,6 +68,9 @@ export function PropertyGuideEditor({
     () =>
       currentValues.current.title !== initial.title ||
       currentValues.current.content !== initial.content ||
+      currentValues.current.type !== initial.type ||
+      currentValues.current.pdf !== initial.pdf ||
+      currentValues.current.file !== initial.file ||
       currentValues.current.isPublished !== initial.isPublished ||
       mutation.hasPendingWork() ||
       mutation.state.busy ||
@@ -78,6 +89,8 @@ export function PropertyGuideEditor({
     if (blocked || reviewing || versionLimit) return;
     onEditing();
     mutation.clearError();
+    if (currentValues.current.file !== next.file)
+      setPdfRevision((version) => version + 1);
     currentValues.current = next;
     setValues(next);
     setErrors({});
@@ -90,7 +103,13 @@ export function PropertyGuideEditor({
     if (Object.keys(validation).length) {
       requestAnimationFrame(() =>
         document
-          .getElementById(validation.title ? 'guide-title' : 'guide-content')
+          .getElementById(
+            validation.title
+              ? 'guide-title'
+              : validation.pdf || values.type === 'PDF'
+                ? 'guide-pdf-file-button'
+                : 'guide-content',
+          )
           ?.focus(),
       );
       return;
@@ -112,12 +131,20 @@ export function PropertyGuideEditor({
     const input = buildGuideInput(data, values);
     if (!input) return;
     void mutation.save(async (signal) => {
-      const saved = await saveAdminPropertyGuide(
-        data.property.id,
-        input,
-        token,
-        signal,
-      );
+      const saved =
+        input.type === 'PDF'
+          ? await saveAdminPropertyGuidePdf(
+              data.property.id,
+              input.input,
+              token,
+              signal,
+            )
+          : await saveAdminPropertyGuide(
+              data.property.id,
+              input.input,
+              token,
+              signal,
+            );
       if (
         !saved.guide ||
         saved.guide.updatedByUserId !== actorId ||
@@ -141,6 +168,17 @@ export function PropertyGuideEditor({
       document.getElementById('guide-review-button')?.focus(),
     );
   }
+
+  const pdfDocumentKey = `${data.property.id}:${data.guide?.version ?? 0}:${pdfRevision}:${values.file?.name ?? ''}:${values.file?.size ?? ''}:${values.file?.lastModified ?? ''}`;
+  const loadPdf = (signal: AbortSignal) =>
+    values.file
+      ? Promise.resolve(values.file)
+      : getAdminPropertyGuidePdf(
+          data.property.id,
+          data.guide?.version ?? 0,
+          token,
+          signal,
+        );
 
   function openPreview() {
     setPreviewOpen(true);
@@ -287,6 +325,9 @@ export function PropertyGuideEditor({
               errors={errors}
               disabled={blocked || reviewing || versionLimit}
               propertyActive={data.property.isActive}
+              pdfDocumentKey={pdfDocumentKey}
+              loadPdf={loadPdf}
+              onAccessDenied={() => rejectSession(token)}
             />
             {!reviewing && !versionLimit && (
               <div className="property-guide-actions property-guide-save-actions">
@@ -302,6 +343,11 @@ export function PropertyGuideEditor({
           </form>
           {reviewing && (
             <PropertyGuideReview
+              type={values.type}
+              replacingPdf={
+                data.guide?.type === 'PDF' &&
+                (values.type === 'TEXT' || !!values.file)
+              }
               isPublished={values.isPublished}
               wasPublished={data.guide?.isPublished ?? false}
               propertyActive={data.property.isActive}
@@ -320,6 +366,9 @@ export function PropertyGuideEditor({
         >
           <PropertyGuidePreview
             {...preview}
+            pdfDocumentKey={pdfDocumentKey}
+            loadPdf={loadPdf}
+            onAccessDenied={() => rejectSession(token)}
             propertyName={data.property.name}
             propertyActive={data.property.isActive}
             onClose={closePreview}

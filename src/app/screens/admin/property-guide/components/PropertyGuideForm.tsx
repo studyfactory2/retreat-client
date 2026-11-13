@@ -1,3 +1,4 @@
+import { PropertyGuidePdfField } from './PropertyGuidePdfField';
 import { useState } from 'react';
 import {
   GUIDE_LIMITS,
@@ -23,12 +24,18 @@ export function PropertyGuideForm({
   errors,
   disabled,
   propertyActive,
+  pdfDocumentKey,
+  loadPdf,
+  onAccessDenied,
 }: {
   values: GuideFormValues;
   onChange: (values: GuideFormValues) => void;
   errors: GuideFormErrors;
   disabled: boolean;
   propertyActive: boolean;
+  pdfDocumentKey: string;
+  loadPdf: (signal: AbortSignal) => Promise<Blob>;
+  onAccessDenied: () => void;
 }) {
   const [formatNotice, setFormatNotice] = useState<string | null>(null);
   const titleCount = [...normalizeGuideTitle(values.title)].length;
@@ -54,6 +61,22 @@ export function PropertyGuideForm({
         이용 안내 내용과 공개 설정
       </legend>
       <section className="property-guide-form__content" aria-label="안내 작성">
+        <div
+          className="property-guide-type"
+          role="group"
+          aria-label="안내 방식"
+        >
+          {(['TEXT', 'PDF'] as const).map((type) => (
+            <button
+              key={type}
+              type="button"
+              aria-pressed={values.type === type}
+              onClick={() => onChange({ ...values, type })}
+            >
+              {type === 'TEXT' ? '텍스트 작성' : 'PDF 업로드'}
+            </button>
+          ))}
+        </div>
         <div className="property-guide-field">
           <label htmlFor="guide-title">
             제목 <span aria-hidden="true">*</span>
@@ -92,156 +115,175 @@ export function PropertyGuideForm({
             </p>
           )}
         </div>
-        <div className="property-guide-field">
-          <div className="property-guide-format">
-            <div>
-              <p
-                id="guide-content-label"
-                className="property-guide-field__label"
-              >
-                내용 <span aria-hidden="true">*</span>
-                <span className="property-guide-visually-hidden">필수</span>
-              </p>
-            </div>
-            <Button
-              type="button"
-              className="admin-button-secondary property-guide-format__button"
-              disabled={templateTooLong}
-              aria-describedby={
-                templateTooLong ? 'guide-template-limit' : undefined
-              }
-              onClick={() => {
-                if (sections) changeFormat(guideSectionsToPlainText(sections));
-                else if (templateContent !== null && !templateTooLong)
-                  changeFormat(
-                    templateContent,
-                    values.content.trim()
-                      ? '기존 글을 ‘기타 안내’에 담았습니다.'
-                      : null,
-                  );
-              }}
-            >
-              {sections ? '한 편으로 작성' : '구분해서 작성'}
-            </Button>
-          </div>
-          {formatNotice && sections && (
-            <p className="property-guide-format__notice" role="status">
-              {formatNotice}
-            </p>
-          )}
-          {templateTooLong && (
-            <p
-              id="guide-template-limit"
-              className="property-guide-field__error"
-            >
-              구분 제목을 넣을 공간이 부족합니다. 내용을 조금 줄인 뒤
-              사용하세요.
-            </p>
-          )}
-          {sections ? (
-            <div
-              id="guide-content"
-              className="property-guide-sections"
-              role="group"
-              tabIndex={-1}
-              aria-labelledby="guide-content-label"
-              aria-invalid={!!errors.content}
-              aria-describedby={`guide-content-count${errors.content ? ' guide-content-error' : ''}`}
-            >
-              {sections.map((section) => (
-                <details
-                  key={section.id}
-                  className="property-guide-section"
-                  open={section.id === 'essentials'}
-                >
-                  <summary>
-                    <span className="property-guide-section__name">
-                      <strong>{section.title}</strong>
-                      {section.id === 'essentials' && (
-                        <small>항상 펼쳐서 표시</small>
-                      )}
-                    </span>
-                    <span
-                      className={`property-guide-section__state${section.content.trim() ? ' property-guide-section__state--written' : ''}`}
-                    >
-                      {section.content.trim() ? '작성됨' : '비어 있음'}
-                    </span>
-                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                      <path d="m7 10 5 5 5-5" />
-                    </svg>
-                  </summary>
-                  <div className="property-guide-section__body">
-                    <label
-                      className="property-guide-visually-hidden"
-                      htmlFor={`guide-section-${section.id}`}
-                    >
-                      {section.title} 내용
-                    </label>
-                    <textarea
-                      id={`guide-section-${section.id}`}
-                      rows={4}
-                      value={section.content}
-                      placeholder={
-                        section.id === 'essentials'
-                          ? '이용객이 꼭 알아야 할 내용을 짧게 적어 주세요.'
-                          : '안내할 내용이 있을 때 작성하세요.'
-                      }
-                      onChange={(event) => {
-                        setFormatNotice(null);
-                        onChange({
-                          ...values,
-                          content: serializeGuideSections(
-                            sections.map((item) =>
-                              item.id === section.id
-                                ? { ...item, content: event.target.value }
-                                : item,
-                            ),
-                          ),
-                        });
-                      }}
-                    />
-                  </div>
-                </details>
-              ))}
-            </div>
-          ) : (
-            <textarea
-              id="guide-content"
-              rows={7}
-              value={values.content}
-              aria-labelledby="guide-content-label"
-              aria-required="true"
-              aria-invalid={!!errors.content}
-              aria-describedby={`guide-content-count${errors.content ? ' guide-content-error' : ''}`}
-              placeholder="안내 내용을 입력하세요."
-              onChange={(event) =>
-                onChange({ ...values, content: event.target.value })
-              }
+        {values.type === 'PDF' ? (
+          <div>
+            <PropertyGuidePdfField
+              values={values}
+              onChange={onChange}
+              error={errors.pdf}
+              documentKey={pdfDocumentKey}
+              load={loadPdf}
+              onAccessDenied={onAccessDenied}
             />
-          )}
-          <div className="property-guide-field__meta">
-            <span
-              id="guide-content-count"
-              className={
-                contentCount > GUIDE_LIMITS.content
-                  ? 'property-guide-field__count--over'
-                  : ''
-              }
-            >
-              {contentCount.toLocaleString('ko-KR')} /{' '}
-              {GUIDE_LIMITS.content.toLocaleString('ko-KR')}자
-            </span>
+            {errors.content && (
+              <p className="property-guide-field__error" role="alert">
+                텍스트 작성에서 확인해 주세요. {errors.content}
+              </p>
+            )}
           </div>
-          {errors.content && (
-            <p
-              className="property-guide-field__error"
-              id="guide-content-error"
-              role="alert"
-            >
-              {errors.content}
-            </p>
-          )}
-        </div>
+        ) : (
+          <div className="property-guide-field">
+            <div className="property-guide-format">
+              <div>
+                <p
+                  id="guide-content-label"
+                  className="property-guide-field__label"
+                >
+                  내용 <span aria-hidden="true">*</span>
+                  <span className="property-guide-visually-hidden">필수</span>
+                </p>
+              </div>
+              <Button
+                type="button"
+                className="admin-button-secondary property-guide-format__button"
+                disabled={templateTooLong}
+                aria-describedby={
+                  templateTooLong ? 'guide-template-limit' : undefined
+                }
+                onClick={() => {
+                  if (sections)
+                    changeFormat(guideSectionsToPlainText(sections));
+                  else if (templateContent !== null && !templateTooLong)
+                    changeFormat(
+                      templateContent,
+                      values.content.trim()
+                        ? '기존 글을 ‘기타 안내’에 담았습니다.'
+                        : null,
+                    );
+                }}
+              >
+                {sections ? '한 편으로 작성' : '구분해서 작성'}
+              </Button>
+            </div>
+            {formatNotice && sections && (
+              <p className="property-guide-format__notice" role="status">
+                {formatNotice}
+              </p>
+            )}
+            {templateTooLong && (
+              <p
+                id="guide-template-limit"
+                className="property-guide-field__error"
+              >
+                구분 제목을 넣을 공간이 부족합니다. 내용을 조금 줄인 뒤
+                사용하세요.
+              </p>
+            )}
+            {sections ? (
+              <div
+                id="guide-content"
+                className="property-guide-sections"
+                role="group"
+                tabIndex={-1}
+                aria-labelledby="guide-content-label"
+                aria-invalid={!!errors.content}
+                aria-describedby={`guide-content-count${errors.content ? ' guide-content-error' : ''}`}
+              >
+                {sections.map((section) => (
+                  <details
+                    key={section.id}
+                    className="property-guide-section"
+                    open={section.id === 'essentials'}
+                  >
+                    <summary>
+                      <span className="property-guide-section__name">
+                        <strong>{section.title}</strong>
+                        {section.id === 'essentials' && (
+                          <small>항상 펼쳐서 표시</small>
+                        )}
+                      </span>
+                      <span
+                        className={`property-guide-section__state${section.content.trim() ? ' property-guide-section__state--written' : ''}`}
+                      >
+                        {section.content.trim() ? '작성됨' : '비어 있음'}
+                      </span>
+                      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="m7 10 5 5 5-5" />
+                      </svg>
+                    </summary>
+                    <div className="property-guide-section__body">
+                      <label
+                        className="property-guide-visually-hidden"
+                        htmlFor={`guide-section-${section.id}`}
+                      >
+                        {section.title} 내용
+                      </label>
+                      <textarea
+                        id={`guide-section-${section.id}`}
+                        rows={4}
+                        value={section.content}
+                        placeholder={
+                          section.id === 'essentials'
+                            ? '이용객이 꼭 알아야 할 내용을 짧게 적어 주세요.'
+                            : '안내할 내용이 있을 때 작성하세요.'
+                        }
+                        onChange={(event) => {
+                          setFormatNotice(null);
+                          onChange({
+                            ...values,
+                            content: serializeGuideSections(
+                              sections.map((item) =>
+                                item.id === section.id
+                                  ? { ...item, content: event.target.value }
+                                  : item,
+                              ),
+                            ),
+                          });
+                        }}
+                      />
+                    </div>
+                  </details>
+                ))}
+              </div>
+            ) : (
+              <textarea
+                id="guide-content"
+                rows={7}
+                value={values.content}
+                aria-labelledby="guide-content-label"
+                aria-required="true"
+                aria-invalid={!!errors.content}
+                aria-describedby={`guide-content-count${errors.content ? ' guide-content-error' : ''}`}
+                placeholder="안내 내용을 입력하세요."
+                onChange={(event) =>
+                  onChange({ ...values, content: event.target.value })
+                }
+              />
+            )}
+            <div className="property-guide-field__meta">
+              <span
+                id="guide-content-count"
+                className={
+                  contentCount > GUIDE_LIMITS.content
+                    ? 'property-guide-field__count--over'
+                    : ''
+                }
+              >
+                {contentCount.toLocaleString('ko-KR')} /{' '}
+                {GUIDE_LIMITS.content.toLocaleString('ko-KR')}자
+              </span>
+            </div>
+            {errors.content && (
+              <p
+                className="property-guide-field__error"
+                id="guide-content-error"
+                role="alert"
+              >
+                {errors.content}
+              </p>
+            )}
+          </div>
+        )}
       </section>
       <section
         className="property-guide-publish property-guide-publish--compact"

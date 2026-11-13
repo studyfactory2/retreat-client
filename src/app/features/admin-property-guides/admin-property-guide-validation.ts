@@ -1,6 +1,9 @@
 import { ApiRequestError } from '../../core/api/api-error';
 import { hasGuideContent } from '../property-guide/guide-sections';
-import type { SaveAdminPropertyGuideInput } from './admin-property-guide.types';
+import type {
+  SaveAdminPropertyGuideInput,
+  SaveAdminPropertyGuidePdfInput,
+} from './admin-property-guide.types';
 
 export const GUIDE_LIMITS = { title: 100, content: 20_000 } as const;
 export const MAX_GUIDE_VERSION = 2_147_483_647;
@@ -49,8 +52,9 @@ export function invalidGuideResponse(): ApiRequestError {
   );
 }
 
-export function prepareSaveAdminPropertyGuide(
+function prepareGuideFields(
   input: SaveAdminPropertyGuideInput,
+  requireContent: boolean,
 ): SaveAdminPropertyGuideInput {
   if (typeof input !== 'object' || input === null || Array.isArray(input))
     invalidInput('guide', '안내문 입력 형식을 확인해 주세요.');
@@ -75,7 +79,7 @@ export function prepareSaveAdminPropertyGuide(
     invalidInput('title', '안내문 제목에는 줄바꿈을 사용할 수 없습니다.');
   if (title.includes('\u0000'))
     invalidInput('title', '안내문 제목에는 널 문자를 사용할 수 없습니다.');
-  if (!hasGuideContent(content))
+  if (requireContent && !hasGuideContent(content))
     invalidInput('content', '안내문 내용을 입력해 주세요.');
   if ([...content].length > GUIDE_LIMITS.content)
     invalidInput('content', '안내문 내용은 20,000자 이하여야 합니다.');
@@ -86,5 +90,20 @@ export function prepareSaveAdminPropertyGuide(
     title,
     content,
     isPublished: input.isPublished,
+  };
+}
+
+export function prepareSaveAdminPropertyGuide(
+  input: SaveAdminPropertyGuideInput,
+): SaveAdminPropertyGuideInput {
+  return prepareGuideFields(input, true);
+}
+
+export function prepareSaveAdminPropertyGuidePdf(
+  input: SaveAdminPropertyGuidePdfInput,
+): SaveAdminPropertyGuidePdfInput {
+  return {
+    ...prepareGuideFields(input, false),
+    ...(input.file ? { file: input.file } : {}),
   };
 }
